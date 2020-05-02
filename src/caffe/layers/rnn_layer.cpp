@@ -231,6 +231,7 @@ void RNNLayer<Dtype>::FillUnrolledNet(NetParameter *net_param) const {
 }
 
 INSTANTIATE_CLASS(RNNLayer);
+
 REGISTER_LAYER_CLASS(RNN);
 
 }  // namespace caffe

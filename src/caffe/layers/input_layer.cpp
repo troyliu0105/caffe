@@ -22,6 +22,7 @@ void InputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 }
 
 INSTANTIATE_CLASS(InputLayer);
+
 REGISTER_LAYER_CLASS(Input);
 
 }  // namespace caffe

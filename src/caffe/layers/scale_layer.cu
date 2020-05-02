@@ -31,6 +31,7 @@ __global__ void ScaleBiasForward(const int n, const Dtype *in,
 template<typename Dtype>
 void ScaleLayer<Dtype>::Forward_gpu(
     const vector<Blob < Dtype> *
+
 >& bottom, const vector<Blob < Dtype>*>& top) {
 const int count = top[0]->count();
 const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -41,12 +42,18 @@ if (bottom[0] == top[0]) {
 // we'll need to do Backward at the time of the Forward call.
 caffe_copy(bottom[0]
 ->
+
 count(), bottom[0]
+
 ->
+
 gpu_data(),
     temp_
+
 .
+
 mutable_gpu_data()
+
 );
 }
 const Dtype *scale_data =
@@ -71,12 +78,15 @@ count, bottom_data, scale_data, scale_dim_, inner_dim_, top_data);
 
 template<typename Dtype>
 void ScaleLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
 if (bias_layer_ &&
 this->param_propagate_down_[this->param_propagate_down_.
+
 size()
+
 - 1]) {
 bias_layer_->
 Backward(top, bias_propagate_down_, bias_bottom_vec_
@@ -101,14 +111,18 @@ Dtype *product = (is_eltwise ? scale->mutable_gpu_diff() :
                   (in_place ? temp_.mutable_gpu_data() : bottom[0]->mutable_gpu_diff()));
 caffe_gpu_mul(top[0]
 ->
+
 count(), top_diff, bottom_data, product
+
 );
 if (!is_eltwise) {
 Dtype *sum_result = NULL;
 if (inner_dim_ == 1) {
 sum_result = product;
 } else if (sum_result_.
+
 count()
+
 == 1) {
 const Dtype *sum_mult = sum_multiplier_.gpu_data();
 Dtype *scale_diff = scale->mutable_cpu_diff();
@@ -128,8 +142,10 @@ sum_result = (outer_dim_ == 1) ?
              scale->mutable_gpu_diff() : sum_result_.mutable_gpu_data();
 caffe_gpu_gemv(CblasNoTrans, sum_result_
 .
+
 count(), inner_dim_,
     Dtype(1), product, sum_mult, Dtype(0), sum_result
+
 );
 }
 if (outer_dim_ != 1) {

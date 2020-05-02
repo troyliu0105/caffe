@@ -65,6 +65,7 @@ void RMSPropSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
 }
 
 INSTANTIATE_CLASS(RMSPropSolver);
+
 REGISTER_SOLVER_CLASS(RMSProp);
 
 }  // namespace caffe

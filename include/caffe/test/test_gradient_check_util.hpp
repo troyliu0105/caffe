@@ -172,11 +172,11 @@ void GradientChecker<Dtype>::CheckGradientSingle(Layer<Dtype> *layer,
             std::max(fabs(computed_gradient), fabs(estimated_gradient)),
             Dtype(1.));
         EXPECT_NEAR(computed_gradient, estimated_gradient, threshold_ * scale)
-                << "debug: (top_id, top_data_id, blob_id, feat_id)="
-                << top_id << "," << top_data_id << "," << blob_id << "," << feat_id
-                << "; feat = " << feature
-                << "; objective+ = " << positive_objective
-                << "; objective- = " << negative_objective;
+            << "debug: (top_id, top_data_id, blob_id, feat_id)="
+            << top_id << "," << top_data_id << "," << blob_id << "," << feat_id
+            << "; feat = " << feature
+            << "; objective+ = " << positive_objective
+            << "; objective- = " << negative_objective;
       }
       // LOG(ERROR) << "Feature: " << current_blob->cpu_data()[feat_id];
       // LOG(ERROR) << "computed gradient: " << computed_gradient

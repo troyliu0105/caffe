@@ -8,11 +8,14 @@ namespace caffe {
 template<typename Dtype>
 void ReductionLayer<Dtype>::Forward_gpu(
     const vector<Blob < Dtype> *
+
 >& bottom, const vector<Blob < Dtype>*>& top) {
 const Dtype *bottom_data = bottom[0]->gpu_data();
 const Dtype *mult_data = NULL;
 if (sum_multiplier_.
+
 count()
+
 > 0) {
 mult_data = sum_multiplier_.gpu_data();
 }
@@ -56,6 +59,7 @@ caffe_gpu_scal(num_, coeff_, top_data
 
 template<typename Dtype>
 void ReductionLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {

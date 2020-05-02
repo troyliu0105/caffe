@@ -110,10 +110,12 @@ void EmbedLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
+
 STUB_GPU(EmbedLayer);
 #endif
 
 INSTANTIATE_CLASS(EmbedLayer);
+
 REGISTER_LAYER_CLASS(Embed);
 
 }  // namespace caffe

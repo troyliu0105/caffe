@@ -55,6 +55,7 @@ __global__ void LSTMUnitForward(const int nthreads, const int dim,
 
 template<typename Dtype>
 void LSTMUnitLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 const int count = top[1]->count();
@@ -129,6 +130,7 @@ __global__ void LSTMActsBackward(const int nthreads, const int dim,
 
 template<typename Dtype>
 void LSTMUnitLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {

@@ -14,6 +14,7 @@ __global__ void AdaDeltaUpdate(int N, Dtype *g, Dtype *h, Dtype *h2,
     g[i] = local_rate * gi;
   }
 }
+
 template<typename Dtype>
 void adadelta_update_gpu(int N, Dtype *g, Dtype *h, Dtype *h2, Dtype momentum,
                          Dtype delta, Dtype local_rate) {
@@ -22,8 +23,10 @@ void adadelta_update_gpu(int N, Dtype *g, Dtype *h, Dtype *h2, Dtype momentum,
       N, g, h, h2, momentum, delta, local_rate);
   CUDA_POST_KERNEL_CHECK;
 }
+
 template void adadelta_update_gpu<float>(int, float *, float *, float *,
                                          float, float, float);
+
 template void adadelta_update_gpu<double>(int, double *, double *, double *,
                                           double, double, double);
 

@@ -7,6 +7,7 @@ namespace caffe {
 
 template<typename Dtype>
 void PowerLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 Dtype *top_data = top[0]->mutable_gpu_data();
@@ -37,6 +38,7 @@ caffe_gpu_powx(count, top_data, power_, top_data
 
 template<typename Dtype>
 void PowerLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {

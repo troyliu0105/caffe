@@ -1,5 +1,7 @@
 #ifdef USE_OPENCV
+
 #include <opencv2/core/core.hpp>
+
 #endif  // USE_OPENCV
 
 #include <vector>
@@ -54,6 +56,7 @@ void MemoryDataLayer<Dtype>::AddDatumVector(const vector<Datum> &datum_vector) {
 }
 
 #ifdef USE_OPENCV
+
 template<typename Dtype>
 void MemoryDataLayer<Dtype>::AddMatVector(const vector<cv::Mat> &mat_vector,
                                           const vector<int> &labels) {
@@ -77,6 +80,7 @@ void MemoryDataLayer<Dtype>::AddMatVector(const vector<cv::Mat> &mat_vector,
   Reset(top_data, top_label, num);
   has_new_data_ = true;
 }
+
 #endif  // USE_OPENCV
 
 template<typename Dtype>
@@ -118,6 +122,7 @@ void MemoryDataLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 }
 
 INSTANTIATE_CLASS(MemoryDataLayer);
+
 REGISTER_LAYER_CLASS(MemoryData);
 
 }  // namespace caffe

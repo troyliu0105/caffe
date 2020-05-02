@@ -16,6 +16,11 @@ __global__ void EmbedForward(const int nthreads, const Dtype *bottom_data,
     const int n = top_index / N;
     const int d = top_index % N;
     const int index = static_cast<int>(bottom_data[n]);
+#ifdef DEBUG
+    assert(index >= 0);
+    assert(index < K);
+    assert(static_cast<Dtype>(index) == bottom_data[n]);
+#endif
     const int weight_index = index * N + d;
     top_data[top_index] = weight[weight_index];
   }
@@ -42,6 +47,7 @@ __global__ void EmbedBackward(const int nthreads, const Dtype *bottom_data,
 
 template<typename Dtype>
 void EmbedLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -56,15 +62,20 @@ if (bias_term_) {
 caffe_gpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, M_, N_,
 1, Dtype(1),
 bias_multiplier_.
+
 gpu_data(),
+
 this->blobs_[1]->
+
 gpu_data(), Dtype(1), top_data
+
 );
 }
 }
 
 template<typename Dtype>
 void EmbedLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
@@ -86,7 +97,9 @@ Dtype *bias_diff = this->blobs_[1]->mutable_gpu_diff();
 caffe_gpu_gemv<Dtype>(CblasTrans, M_, N_, Dtype(1), top_diff,
     bias_multiplier_
 .
+
 gpu_data(), Dtype(1), bias_diff
+
 );
 }
 }

@@ -41,7 +41,8 @@ void DeconvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
 template<typename Dtype>
 void DeconvolutionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                             const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                             const vector<bool> &propagate_down,
+                                             const vector<Blob<Dtype> *> &bottom) {
   const Dtype *weight = this->blobs_[0]->cpu_data();
   Dtype *weight_diff = this->blobs_[0]->mutable_cpu_diff();
   for (int i = 0; i < top.size(); ++i) {
@@ -75,10 +76,10 @@ void DeconvolutionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
+
 STUB_GPU(DeconvolutionLayer);
 #endif
 
 INSTANTIATE_CLASS(DeconvolutionLayer);
-REGISTER_LAYER_CLASS(Deconvolution);
 
 }  // namespace caffe

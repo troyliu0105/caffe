@@ -25,7 +25,7 @@ Caffe &Caffe::Get() {
 }
 
 // random seeding
-int64_t cluster_seedgen(void) {
+int64_t cluster_seedgen() {
   int64_t s, seed, pid;
   FILE *f = fopen("/dev/urandom", "rb");
   if (f && fread(&seed, 1, sizeof(seed), f) == sizeof(seed)) {
@@ -91,8 +91,11 @@ int Caffe::FindDevice(const int start_id) {
 class Caffe::RNG::Generator {
 public:
   Generator() : rng_(new caffe::rng_t(cluster_seedgen())) {}
+
   explicit Generator(unsigned int seed) : rng_(new caffe::rng_t(seed)) {}
+
   caffe::rng_t *rng() { return rng_.get(); }
+
 private:
   shared_ptr<caffe::rng_t> rng_;
 };

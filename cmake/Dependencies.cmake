@@ -109,7 +109,7 @@ endif()
 
 # ---[ OpenCV
 if(USE_OPENCV)
-  find_package(OpenCV QUIET COMPONENTS core highgui imgproc imgcodecs)
+  find_package(OpenCV QUIET COMPONENTS core highgui imgproc imgcodecs videoio video)
   if(NOT OpenCV_FOUND) # if not OpenCV 3.x, then imgcodecs are not found
     find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc)
   endif()
@@ -188,7 +188,6 @@ if(BUILD_python)
     find_package(NumPy 1.7.1)
     find_package(Boost 1.46 COMPONENTS python)
   endif()
-  message(========> ${PYTHON_LIBRARIES})
   if(PYTHONLIBS_FOUND AND NUMPY_FOUND AND Boost_PYTHON_FOUND)
     set(HAVE_PYTHON TRUE)
     if(Boost_USE_STATIC_LIBS AND MSVC)

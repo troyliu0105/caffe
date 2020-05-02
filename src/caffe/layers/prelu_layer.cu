@@ -48,6 +48,7 @@ __global__ void PReLUParamBackward(const int n,
 
 template<typename Dtype>
 void PReLULayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -62,7 +63,9 @@ const int div_factor = channel_shared_ ? channels : 1;
 if (top[0] == bottom[0]) {
 caffe_copy(count, bottom_data, bottom_memory_
 .
+
 mutable_gpu_data()
+
 );
 }
 
@@ -76,6 +79,7 @@ CUDA_POST_KERNEL_CHECK;
 
 template<typename Dtype>
 void PReLULayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
@@ -105,32 +109,46 @@ CAFFE_GET_BLOCKS(cdim),
     CAFFE_CUDA_NUM_THREADS
 >>>(
 cdim, bottom[0]->
+
 num(), top[0]
+
 ->offset(1), top_diff ,
 bottom_data ,
 backward_buff_.
+
 mutable_gpu_diff()
+
 );
 CUDA_POST_KERNEL_CHECK;
 if (channel_shared_) {
 Dtype dsum;
 caffe_gpu_dot<Dtype>(channels
 * dim, backward_buff_.
+
 gpu_diff(),
     multiplier_
+
 .
+
 gpu_data(), &dsum
+
 );
 caffe_gpu_add_scalar(this->blobs_[0]->
+
 count(), Dtype(dsum), slope_diff
+
 );
 } else {
 caffe_gpu_gemv<Dtype>(CblasNoTrans, channels, dim,
 1.,
 backward_buff_.
+
 gpu_diff(), multiplier_
+
 .
+
 gpu_data(),
+
 1.,
 slope_diff);
 }

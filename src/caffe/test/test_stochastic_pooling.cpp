@@ -23,6 +23,7 @@ protected:
   StochasticPoolingLayerTest()
       : blob_bottom_(new Blob<Dtype>()),
         blob_top_(new Blob<Dtype>()) {}
+
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
     blob_bottom_->Reshape(2, 3, 6, 5);
@@ -52,19 +53,45 @@ class CPUStochasticPoolingLayerTest
     : public StochasticPoolingLayerTest<CPUDevice<Dtype> > {
 };
 
-TYPED_TEST_CASE(CPUStochasticPoolingLayerTest, TestDtypes);
+TYPED_TEST_CASE(CPUStochasticPoolingLayerTest, TestDtypes
+);
 
-TYPED_TEST(CPUStochasticPoolingLayerTest, TestSetup) {
-  LayerParameter layer_param;
-  PoolingParameter *pooling_param = layer_param.mutable_pooling_param();
-  pooling_param->set_kernel_size(3);
-  pooling_param->set_stride(2);
-  PoolingLayer<TypeParam> layer(layer_param);
-  layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
-  EXPECT_EQ(this->blob_top_->num(), this->blob_bottom_->num());
-  EXPECT_EQ(this->blob_top_->channels(), this->blob_bottom_->channels());
-  EXPECT_EQ(this->blob_top_->height(), 3);
-  EXPECT_EQ(this->blob_top_->width(), 2);
+TYPED_TEST(CPUStochasticPoolingLayerTest, TestSetup
+) {
+LayerParameter layer_param;
+PoolingParameter *pooling_param = layer_param.mutable_pooling_param();
+pooling_param->set_kernel_size(3);
+pooling_param->set_stride(2);
+PoolingLayer<TypeParam> layer(layer_param);
+layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
+EXPECT_EQ(this->blob_top_->
+
+num(),
+
+this->blob_bottom_->
+
+num()
+
+);
+EXPECT_EQ(this->blob_top_->
+
+channels(),
+
+this->blob_bottom_->
+
+channels()
+
+);
+EXPECT_EQ(this->blob_top_->
+
+height(),
+
+3);
+EXPECT_EQ(this->blob_top_->
+
+width(),
+
+2);
 }
 
 #ifndef CPU_ONLY

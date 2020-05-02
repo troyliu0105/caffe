@@ -1,4 +1,5 @@
 #ifdef USE_LMDB
+
 #include "caffe/util/db_lmdb.hpp"
 
 #if defined(_MSC_VER)

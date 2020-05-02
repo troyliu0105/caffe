@@ -35,10 +35,12 @@ void AbsValLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
+
 STUB_GPU(AbsValLayer);
 #endif
 
 INSTANTIATE_CLASS(AbsValLayer);
+
 REGISTER_LAYER_CLASS(AbsVal);
 
 }  // namespace caffe

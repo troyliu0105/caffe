@@ -11,15 +11,33 @@
 
 namespace caffe {
 
-class SyncedMemoryTest : public ::testing::Test {};
+class SyncedMemoryTest : public ::testing::Test {
+};
 
-TEST_F(SyncedMemoryTest, TestInitialization) {
-  SyncedMemory mem(10);
-  EXPECT_EQ(mem.head(), SyncedMemory::UNINITIALIZED);
-  EXPECT_EQ(mem.size(), 10);
-  SyncedMemory *p_mem = new SyncedMemory(10 * sizeof(float));
-  EXPECT_EQ(p_mem->size(), 10 * sizeof(float));
-  delete p_mem;
+TEST_F(SyncedMemoryTest, TestInitialization
+) {
+SyncedMemory mem(10);
+EXPECT_EQ(mem
+.
+
+head(), SyncedMemory::UNINITIALIZED
+
+);
+EXPECT_EQ(mem
+.
+
+size(),
+
+10);
+SyncedMemory *p_mem = new SyncedMemory(10 * sizeof(float));
+EXPECT_EQ(p_mem
+->
+
+size(),
+
+10 * sizeof(float));
+delete
+p_mem;
 }
 
 #ifndef CPU_ONLY  // GPU test
@@ -34,10 +52,21 @@ TEST_F(SyncedMemoryTest, TestAllocationCPUGPU) {
 
 #endif
 
-TEST_F(SyncedMemoryTest, TestAllocationCPU) {
-  SyncedMemory mem(10);
-  EXPECT_TRUE(mem.cpu_data());
-  EXPECT_TRUE(mem.mutable_cpu_data());
+TEST_F(SyncedMemoryTest, TestAllocationCPU
+) {
+SyncedMemory mem(10);
+EXPECT_TRUE(mem
+.
+
+cpu_data()
+
+);
+EXPECT_TRUE(mem
+.
+
+mutable_cpu_data()
+
+);
 }
 
 #ifndef CPU_ONLY  // GPU test
@@ -50,21 +79,58 @@ TEST_F(SyncedMemoryTest, TestAllocationGPU) {
 
 #endif
 
-TEST_F(SyncedMemoryTest, TestCPUWrite) {
-  SyncedMemory mem(10);
-  void *cpu_data = mem.mutable_cpu_data();
-  EXPECT_EQ(mem.head(), SyncedMemory::HEAD_AT_CPU);
-  caffe_memset(mem.size(), 1, cpu_data);
-  for (int i = 0; i < mem.size(); ++i) {
-    EXPECT_EQ((static_cast<char *>(cpu_data))[i], 1);
-  }
-  // do another round
-  cpu_data = mem.mutable_cpu_data();
-  EXPECT_EQ(mem.head(), SyncedMemory::HEAD_AT_CPU);
-  caffe_memset(mem.size(), 2, cpu_data);
-  for (int i = 0; i < mem.size(); ++i) {
-    EXPECT_EQ((static_cast<char *>(cpu_data))[i], 2);
-  }
+TEST_F(SyncedMemoryTest, TestCPUWrite
+) {
+SyncedMemory mem(10);
+void *cpu_data = mem.mutable_cpu_data();
+EXPECT_EQ(mem
+.
+
+head(), SyncedMemory::HEAD_AT_CPU
+
+);
+caffe_memset(mem
+.
+
+size(),
+
+1, cpu_data);
+for (
+int i = 0;
+i<mem.
+
+size();
+
+++i) {
+EXPECT_EQ((static_cast
+<char *>(cpu_data)
+)[i], 1);
+}
+// do another round
+cpu_data = mem.mutable_cpu_data();
+EXPECT_EQ(mem
+.
+
+head(), SyncedMemory::HEAD_AT_CPU
+
+);
+caffe_memset(mem
+.
+
+size(),
+
+2, cpu_data);
+for (
+int i = 0;
+i<mem.
+
+size();
+
+++i) {
+EXPECT_EQ((static_cast
+<char *>(cpu_data)
+)[i], 2);
+}
 }
 
 #ifndef CPU_ONLY  // GPU test
@@ -80,7 +146,7 @@ TEST_F(SyncedMemoryTest, TestGPURead) {
   char* recovered_value = new char[10];
   caffe_gpu_memcpy(10, gpu_data, recovered_value);
   for (int i = 0; i < mem.size(); ++i) {
-    EXPECT_EQ((static_cast<char*>(recovered_value))[i], 1);
+    EXPECT_EQ(recovered_value[i], 1);
   }
   // do another round
   cpu_data = mem.mutable_cpu_data();
@@ -94,7 +160,7 @@ TEST_F(SyncedMemoryTest, TestGPURead) {
   // check if values are the same
   caffe_gpu_memcpy(10, gpu_data, recovered_value);
   for (int i = 0; i < mem.size(); ++i) {
-    EXPECT_EQ((static_cast<char*>(recovered_value))[i], 2);
+    EXPECT_EQ(recovered_value[i], 2);
   }
   delete[] recovered_value;
 }

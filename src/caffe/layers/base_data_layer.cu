@@ -7,6 +7,7 @@ namespace caffe {
 template<typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::Forward_gpu(
     const vector<Blob < Dtype> *
+
 >& bottom, const vector<Blob < Dtype>*>& top) {
 if (prefetch_current_) {
 prefetch_free_.
@@ -20,7 +21,9 @@ ReshapeLike(prefetch_current_
 top[0]->
 set_gpu_data(prefetch_current_
 ->data_.
+
 mutable_gpu_data()
+
 );
 if (this->output_labels_) {
 // Reshape to loaded labels.
@@ -30,8 +33,22 @@ ReshapeLike(prefetch_current_
 top[1]->
 set_gpu_data(prefetch_current_
 ->label_.
+
 mutable_gpu_data()
+
 );
+if (this->output_seg_labels_) {
+top[2]->
+ReshapeLike(prefetch_current_
+->seg_label_);
+top[2]->
+set_gpu_data(prefetch_current_
+->seg_label_.
+
+mutable_gpu_data()
+
+);
+}
 }
 }
 

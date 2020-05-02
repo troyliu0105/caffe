@@ -24,7 +24,13 @@ void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
     output_labels_ = false;
   } else {
     output_labels_ = true;
+    if (top.size() == 2) {
+      output_seg_labels_ = false;
+    } else {
+      output_seg_labels_ = true;
+    }
   }
+
   data_transformer_.reset(
       new DataTransformer<Dtype>(transform_param_, this->phase_));
   data_transformer_->InitRand();
@@ -57,6 +63,9 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
     prefetch_[i]->data_.mutable_cpu_data();
     if (this->output_labels_) {
       prefetch_[i]->label_.mutable_cpu_data();
+      if (this->output_seg_labels_) {
+        prefetch_[i]->seg_label_.mutable_cpu_data();
+      }
     }
   }
 #ifndef CPU_ONLY
@@ -65,6 +74,9 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
       prefetch_[i]->data_.mutable_gpu_data();
       if (this->output_labels_) {
         prefetch_[i]->label_.mutable_gpu_data();
+    if (this->output_seg_labels_) {
+      prefetch_[i]->seg_label_.mutable_gpu_data();
+    }
       }
     }
   }
@@ -93,6 +105,9 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
         batch->data_.data().get()->async_gpu_push(stream);
         if (this->output_labels_) {
           batch->label_.data().get()->async_gpu_push(stream);
+      if (this->output_seg_labels_) {
+        batch->seg_label_.data().get()->async_gpu_push(stream);
+      }
         }
         CUDA_CHECK(cudaStreamSynchronize(stream));
       }
@@ -123,14 +138,20 @@ void BasePrefetchingDataLayer<Dtype>::Forward_cpu(
     // Reshape to loaded labels.
     top[1]->ReshapeLike(prefetch_current_->label_);
     top[1]->set_cpu_data(prefetch_current_->label_.mutable_cpu_data());
+    if (this->output_seg_labels_) {
+      top[2]->ReshapeLike(prefetch_current_->seg_label_);
+      top[2]->set_cpu_data(prefetch_current_->seg_label_.mutable_cpu_data());
+    }
   }
 }
 
 #ifdef CPU_ONLY
+
 STUB_GPU_FORWARD(BasePrefetchingDataLayer, Forward);
 #endif
 
 INSTANTIATE_CLASS(BaseDataLayer);
+
 INSTANTIATE_CLASS(BasePrefetchingDataLayer);
 
 }  // namespace caffe

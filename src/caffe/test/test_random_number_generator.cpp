@@ -204,185 +204,276 @@ protected:
   shared_ptr<SyncedMemory> int_data_2_;
 };
 
-TYPED_TEST_CASE(RandomNumberGeneratorTest, TestDtypes);
+TYPED_TEST_CASE(RandomNumberGeneratorTest, TestDtypes
+);
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussian) {
-  const TypeParam mu = 0;
-  const TypeParam sigma = 1;
-  void *gaussian_data = this->data_->mutable_cpu_data();
-  this->RngGaussianFill(mu, sigma, gaussian_data);
-  this->RngGaussianChecks(mu, sigma, gaussian_data);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussian
+) {
+const TypeParam mu = 0;
+const TypeParam sigma = 1;
+void *gaussian_data = this->data_->mutable_cpu_data();
+this->
+RngGaussianFill(mu, sigma, gaussian_data
+);
+this->
+RngGaussianChecks(mu, sigma, gaussian_data
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussian2) {
-  const TypeParam mu = -2;
-  const TypeParam sigma = 3;
-  void *gaussian_data = this->data_->mutable_cpu_data();
-  this->RngGaussianFill(mu, sigma, gaussian_data);
-  this->RngGaussianChecks(mu, sigma, gaussian_data);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussian2
+) {
+const TypeParam mu = -2;
+const TypeParam sigma = 3;
+void *gaussian_data = this->data_->mutable_cpu_data();
+this->
+RngGaussianFill(mu, sigma, gaussian_data
+);
+this->
+RngGaussianChecks(mu, sigma, gaussian_data
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngUniform) {
-  const TypeParam lower = 0;
-  const TypeParam upper = 1;
-  void *uniform_data = this->data_->mutable_cpu_data();
-  this->RngUniformFill(lower, upper, uniform_data);
-  this->RngUniformChecks(lower, upper, uniform_data);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngUniform
+) {
+const TypeParam lower = 0;
+const TypeParam upper = 1;
+void *uniform_data = this->data_->mutable_cpu_data();
+this->
+RngUniformFill(lower, upper, uniform_data
+);
+this->
+RngUniformChecks(lower, upper, uniform_data
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngUniform2) {
-  const TypeParam lower = -7.3;
-  const TypeParam upper = -2.3;
-  void *uniform_data = this->data_->mutable_cpu_data();
-  this->RngUniformFill(lower, upper, uniform_data);
-  this->RngUniformChecks(lower, upper, uniform_data);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngUniform2
+) {
+const TypeParam lower = -7.3;
+const TypeParam upper = -2.3;
+void *uniform_data = this->data_->mutable_cpu_data();
+this->
+RngUniformFill(lower, upper, uniform_data
+);
+this->
+RngUniformChecks(lower, upper, uniform_data
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngBernoulli) {
-  const TypeParam p = 0.3;
-  void *bernoulli_data = this->int_data_->mutable_cpu_data();
-  this->RngBernoulliFill(p, bernoulli_data);
-  this->RngBernoulliChecks(p, bernoulli_data);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngBernoulli
+) {
+const TypeParam p = 0.3;
+void *bernoulli_data = this->int_data_->mutable_cpu_data();
+this->
+RngBernoulliFill(p, bernoulli_data
+);
+this->
+RngBernoulliChecks(p, bernoulli_data
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngBernoulli2) {
-  const TypeParam p = 0.9;
-  void *bernoulli_data = this->int_data_->mutable_cpu_data();
-  this->RngBernoulliFill(p, bernoulli_data);
-  this->RngBernoulliChecks(p, bernoulli_data);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngBernoulli2
+) {
+const TypeParam p = 0.9;
+void *bernoulli_data = this->int_data_->mutable_cpu_data();
+this->
+RngBernoulliFill(p, bernoulli_data
+);
+this->
+RngBernoulliChecks(p, bernoulli_data
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussianTimesGaussian) {
-  const TypeParam mu = 0;
-  const TypeParam sigma = 1;
+TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussianTimesGaussian
+) {
+const TypeParam mu = 0;
+const TypeParam sigma = 1;
 
-  // Sample from 0 mean Gaussian.
-  TypeParam *gaussian_data_1 =
-      static_cast<TypeParam *>(this->data_->mutable_cpu_data());
-  this->RngGaussianFill(mu, sigma, gaussian_data_1);
+// Sample from 0 mean Gaussian.
+TypeParam *gaussian_data_1 =
+    static_cast<TypeParam *>(this->data_->mutable_cpu_data());
+this->
+RngGaussianFill(mu, sigma, gaussian_data_1
+);
 
-  // Sample from 0 mean Gaussian again.
-  TypeParam *gaussian_data_2 =
-      static_cast<TypeParam *>(this->data_2_->mutable_cpu_data());
-  this->RngGaussianFill(mu, sigma, gaussian_data_2);
+// Sample from 0 mean Gaussian again.
+TypeParam *gaussian_data_2 =
+    static_cast<TypeParam *>(this->data_2_->mutable_cpu_data());
+this->
+RngGaussianFill(mu, sigma, gaussian_data_2
+);
 
-  // Multiply Gaussians.
-  for (int i = 0; i < this->sample_size_; ++i) {
-    gaussian_data_1[i] *= gaussian_data_2[i];
-  }
-
-  // Check that result has mean 0.
-  TypeParam mu_product = pow(mu, 2);
-  TypeParam sigma_product = sqrt(pow(sigma, 2) / 2);
-  this->RngGaussianChecks(mu_product, sigma_product, gaussian_data_1);
+// Multiply Gaussians.
+for (
+int i = 0;
+i < this->
+sample_size_;
+++i) {
+gaussian_data_1[i] *= gaussian_data_2[i];
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngUniformTimesUniform) {
-  // Sample from Uniform on [-2, 2].
-  const TypeParam lower_1 = -2;
-  const TypeParam upper_1 = -lower_1;
-  TypeParam *uniform_data_1 =
-      static_cast<TypeParam *>(this->data_->mutable_cpu_data());
-  this->RngUniformFill(lower_1, upper_1, uniform_data_1);
-
-  // Sample from Uniform on [-3, 3].
-  const TypeParam lower_2 = -3;
-  const TypeParam upper_2 = -lower_2;
-  TypeParam *uniform_data_2 =
-      static_cast<TypeParam *>(this->data_2_->mutable_cpu_data());
-  this->RngUniformFill(lower_2, upper_2, uniform_data_2);
-
-  // Multiply Uniforms.
-  for (int i = 0; i < this->sample_size_; ++i) {
-    uniform_data_1[i] *= uniform_data_2[i];
-  }
-
-  // Check that result does not violate checked properties of Uniform on [-6, 6]
-  // (though it is not actually uniformly distributed).
-  const TypeParam lower_prod = lower_1 * upper_2;
-  const TypeParam upper_prod = -lower_prod;
-  this->RngUniformChecks(lower_prod, upper_prod, uniform_data_1);
+// Check that result has mean 0.
+TypeParam mu_product = pow(mu, 2);
+TypeParam sigma_product = sqrt(pow(sigma, 2) / 2);
+this->
+RngGaussianChecks(mu_product, sigma_product, gaussian_data_1
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussianTimesBernoulli) {
-  // Sample from 0 mean Gaussian.
-  const TypeParam mu = 0;
-  const TypeParam sigma = 1;
-  TypeParam *gaussian_data =
-      static_cast<TypeParam *>(this->data_->mutable_cpu_data());
-  this->RngGaussianFill(mu, sigma, gaussian_data);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngUniformTimesUniform
+) {
+// Sample from Uniform on [-2, 2].
+const TypeParam lower_1 = -2;
+const TypeParam upper_1 = -lower_1;
+TypeParam *uniform_data_1 =
+    static_cast<TypeParam *>(this->data_->mutable_cpu_data());
+this->
+RngUniformFill(lower_1, upper_1, uniform_data_1
+);
 
-  // Sample from Bernoulli with p = 0.3.
-  const TypeParam bernoulli_p = 0.3;
-  int *bernoulli_data =
-      static_cast<int *>(this->int_data_->mutable_cpu_data());
-  this->RngBernoulliFill(bernoulli_p, bernoulli_data);
+// Sample from Uniform on [-3, 3].
+const TypeParam lower_2 = -3;
+const TypeParam upper_2 = -lower_2;
+TypeParam *uniform_data_2 =
+    static_cast<TypeParam *>(this->data_2_->mutable_cpu_data());
+this->
+RngUniformFill(lower_2, upper_2, uniform_data_2
+);
 
-  // Multiply Gaussian by Bernoulli.
-  for (int i = 0; i < this->sample_size_; ++i) {
-    gaussian_data[i] *= bernoulli_data[i];
-  }
-
-  // Check that result does not violate checked properties of sparsified
-  // Gaussian (though it is not actually a Gaussian).
-  this->RngGaussianChecks(mu, sigma, gaussian_data, 1 - bernoulli_p);
+// Multiply Uniforms.
+for (
+int i = 0;
+i < this->
+sample_size_;
+++i) {
+uniform_data_1[i] *= uniform_data_2[i];
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngUniformTimesBernoulli) {
-  // Sample from Uniform on [-1, 1].
-  const TypeParam lower = -1;
-  const TypeParam upper = 1;
-  TypeParam *uniform_data =
-      static_cast<TypeParam *>(this->data_->mutable_cpu_data());
-  this->RngUniformFill(lower, upper, uniform_data);
-
-  // Sample from Bernoulli with p = 0.3.
-  const TypeParam bernoulli_p = 0.3;
-  int *bernoulli_data =
-      static_cast<int *>(this->int_data_->mutable_cpu_data());
-  this->RngBernoulliFill(bernoulli_p, bernoulli_data);
-
-  // Multiply Uniform by Bernoulli.
-  for (int i = 0; i < this->sample_size_; ++i) {
-    uniform_data[i] *= bernoulli_data[i];
-  }
-
-  // Check that result does not violate checked properties of sparsified
-  // Uniform on [-1, 1] (though it is not actually uniformly distributed).
-  this->RngUniformChecks(lower, upper, uniform_data, 1 - bernoulli_p);
+// Check that result does not violate checked properties of Uniform on [-6, 6]
+// (though it is not actually uniformly distributed).
+const TypeParam lower_prod = lower_1 * upper_2;
+const TypeParam upper_prod = -lower_prod;
+this->
+RngUniformChecks(lower_prod, upper_prod, uniform_data_1
+);
 }
 
-TYPED_TEST(RandomNumberGeneratorTest, TestRngBernoulliTimesBernoulli) {
-  // Sample from Bernoulli with p = 0.5.
-  const TypeParam p_a = 0.5;
-  int *bernoulli_data_a =
-      static_cast<int *>(this->int_data_->mutable_cpu_data());
-  this->RngBernoulliFill(p_a, bernoulli_data_a);
+TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussianTimesBernoulli
+) {
+// Sample from 0 mean Gaussian.
+const TypeParam mu = 0;
+const TypeParam sigma = 1;
+TypeParam *gaussian_data =
+    static_cast<TypeParam *>(this->data_->mutable_cpu_data());
+this->
+RngGaussianFill(mu, sigma, gaussian_data
+);
 
-  // Sample from Bernoulli with p = 0.3.
-  const TypeParam p_b = 0.3;
-  int *bernoulli_data_b =
-      static_cast<int *>(this->int_data_2_->mutable_cpu_data());
-  this->RngBernoulliFill(p_b, bernoulli_data_b);
+// Sample from Bernoulli with p = 0.3.
+const TypeParam bernoulli_p = 0.3;
+int *bernoulli_data =
+    static_cast<int *>(this->int_data_->mutable_cpu_data());
+this->
+RngBernoulliFill(bernoulli_p, bernoulli_data
+);
 
-  // Multiply Bernoullis.
-  for (int i = 0; i < this->sample_size_; ++i) {
-    bernoulli_data_a[i] *= bernoulli_data_b[i];
-  }
-  int num_ones = 0;
-  for (int i = 0; i < this->sample_size_; ++i) {
-    if (bernoulli_data_a[i] != TypeParam(0)) {
-      EXPECT_EQ(TypeParam(1), bernoulli_data_a[i]);
-      ++num_ones;
-    }
-  }
+// Multiply Gaussian by Bernoulli.
+for (
+int i = 0;
+i < this->
+sample_size_;
+++i) {
+gaussian_data[i] *= bernoulli_data[i];
+}
 
-  // Check that resulting product has roughly p_a * p_b ones.
-  const TypeParam sample_p = this->sample_mean(bernoulli_data_a);
-  const TypeParam true_mean = p_a * p_b;
-  const TypeParam true_std = sqrt(true_mean * (1 - true_mean));
-  const TypeParam bound = this->mean_bound(true_std);
-  EXPECT_NEAR(true_mean, sample_p, bound);
+// Check that result does not violate checked properties of sparsified
+// Gaussian (though it is not actually a Gaussian).
+this->
+RngGaussianChecks(mu, sigma, gaussian_data,
+1 - bernoulli_p);
+}
+
+TYPED_TEST(RandomNumberGeneratorTest, TestRngUniformTimesBernoulli
+) {
+// Sample from Uniform on [-1, 1].
+const TypeParam lower = -1;
+const TypeParam upper = 1;
+TypeParam *uniform_data =
+    static_cast<TypeParam *>(this->data_->mutable_cpu_data());
+this->
+RngUniformFill(lower, upper, uniform_data
+);
+
+// Sample from Bernoulli with p = 0.3.
+const TypeParam bernoulli_p = 0.3;
+int *bernoulli_data =
+    static_cast<int *>(this->int_data_->mutable_cpu_data());
+this->
+RngBernoulliFill(bernoulli_p, bernoulli_data
+);
+
+// Multiply Uniform by Bernoulli.
+for (
+int i = 0;
+i < this->
+sample_size_;
+++i) {
+uniform_data[i] *= bernoulli_data[i];
+}
+
+// Check that result does not violate checked properties of sparsified
+// Uniform on [-1, 1] (though it is not actually uniformly distributed).
+this->
+RngUniformChecks(lower, upper, uniform_data,
+1 - bernoulli_p);
+}
+
+TYPED_TEST(RandomNumberGeneratorTest, TestRngBernoulliTimesBernoulli
+) {
+// Sample from Bernoulli with p = 0.5.
+const TypeParam p_a = 0.5;
+int *bernoulli_data_a =
+    static_cast<int *>(this->int_data_->mutable_cpu_data());
+this->
+RngBernoulliFill(p_a, bernoulli_data_a
+);
+
+// Sample from Bernoulli with p = 0.3.
+const TypeParam p_b = 0.3;
+int *bernoulli_data_b =
+    static_cast<int *>(this->int_data_2_->mutable_cpu_data());
+this->
+RngBernoulliFill(p_b, bernoulli_data_b
+);
+
+// Multiply Bernoullis.
+for (
+int i = 0;
+i < this->
+sample_size_;
+++i) {
+bernoulli_data_a[i] *= bernoulli_data_b[i];
+}
+int num_ones = 0;
+for (
+int i = 0;
+i < this->
+sample_size_;
+++i) {
+if (bernoulli_data_a[i] != TypeParam(0)) {
+EXPECT_EQ(TypeParam(1), bernoulli_data_a[i]
+);
+++
+num_ones;
+}
+}
+
+// Check that resulting product has roughly p_a * p_b ones.
+const TypeParam sample_p = this->sample_mean(bernoulli_data_a);
+const TypeParam true_mean = p_a * p_b;
+const TypeParam true_std = sqrt(true_mean * (1 - true_mean));
+const TypeParam bound = this->mean_bound(true_std);
+EXPECT_NEAR(true_mean, sample_p, bound
+);
 }
 
 #ifndef CPU_ONLY

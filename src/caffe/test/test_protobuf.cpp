@@ -11,19 +11,30 @@
 
 namespace caffe {
 
-class ProtoTest : public ::testing::Test {};
+class ProtoTest : public ::testing::Test {
+};
 
-TEST_F(ProtoTest, TestSerialization) {
-  LayerParameter param;
-  param.set_name("test");
-  param.set_type("Test");
-  std::cout << "Printing in binary format." << std::endl;
-  std::cout << param.SerializeAsString() << std::endl;
-  std::cout << "Printing in text format." << std::endl;
-  std::string str;
-  google::protobuf::TextFormat::PrintToString(param, &str);
-  std::cout << str << std::endl;
-  EXPECT_TRUE(true);
+TEST_F(ProtoTest, TestSerialization
+) {
+LayerParameter param;
+param.set_name("test");
+param.set_type("Test");
+std::cout << "Printing in binary format." <<
+std::endl;
+std::cout << param.
+
+SerializeAsString()
+
+<<
+std::endl;
+std::cout << "Printing in text format." <<
+std::endl;
+std::string str;
+google::protobuf::TextFormat::PrintToString(param, &str
+);
+std::cout << str <<
+std::endl;
+EXPECT_TRUE(true);
 }
 
 }  // namespace caffe

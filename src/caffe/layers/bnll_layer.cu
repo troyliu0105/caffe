@@ -43,6 +43,7 @@ __global__ void BNLLBackward(const int n, const Dtype *in_diff,
 
 template<typename Dtype>
 void BNLLLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {

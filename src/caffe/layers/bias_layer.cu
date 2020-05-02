@@ -19,6 +19,7 @@ __global__ void BiasForward(const int n, const Dtype *in,
 
 template<typename Dtype>
 void BiasLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 const int count = top[0]->count();
@@ -34,6 +35,7 @@ BiasForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
 
 template<typename Dtype>
 void BiasLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
@@ -42,7 +44,9 @@ const Dtype *top_diff = top[0]->gpu_diff();
 Dtype *bottom_diff = bottom[0]->mutable_gpu_diff();
 caffe_copy(bottom[0]
 ->
+
 count(), top_diff, bottom_diff
+
 );
 }
 // in-place, we don't need to do anything with the data diff
@@ -62,7 +66,9 @@ n<outer_dim_;
 caffe_gpu_gemv(CblasNoTrans, bias_dim_, inner_dim_, Dtype(1),
     top_diff, bias_multiplier_
 .
+
 gpu_data(), Dtype(accum), bias_diff
+
 );
 top_diff +=
 dim_;

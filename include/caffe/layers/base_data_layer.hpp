@@ -26,6 +26,8 @@ public:
   // This method may not be overridden except by the BasePrefetchingDataLayer.
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
+  // Data layers should be shared by multiple solvers in parallel
+  virtual inline bool ShareInParallel() const { return true; }
   virtual void DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
                               const vector<Blob<Dtype> *> &top) {}
   // Data layers have no bottoms, so reshaping is trivial.
@@ -41,12 +43,13 @@ protected:
   TransformationParameter transform_param_;
   shared_ptr<DataTransformer<Dtype> > data_transformer_;
   bool output_labels_;
+  bool output_seg_labels_;
 };
 
 template<typename Dtype>
 class Batch {
 public:
-  Blob<Dtype> data_, label_;
+  Blob<Dtype> data_, label_, seg_label_;
 };
 
 template<typename Dtype>
@@ -75,6 +78,7 @@ protected:
   Batch<Dtype> *prefetch_current_;
 
   Blob<Dtype> transformed_data_;
+  Blob<Dtype> transformed_label_;
 };
 
 }  // namespace caffe

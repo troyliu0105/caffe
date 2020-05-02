@@ -69,7 +69,7 @@ if DEFINED APPVEYOR (
 ) else (
     :: Change the settings here to match your setup
     :: Change MSVC_VERSION to 12 to use VS 2013
-    if NOT DEFINED MSVC_VERSION set MSVC_VERSION=14
+    if NOT DEFINED MSVC_VERSION set MSVC_VERSION=16
     :: Change to 1 to use Ninja generator (builds much faster)
     if NOT DEFINED WITH_NINJA set WITH_NINJA=1
     :: Change to 1 to build caffe without CUDA support
@@ -84,7 +84,7 @@ if DEFINED APPVEYOR (
     :: Change to 1 to build a caffe.dll
     if NOT DEFINED CMAKE_BUILD_SHARED_LIBS set CMAKE_BUILD_SHARED_LIBS=0
     :: Change to 3 if using python 3.5 (only 2.7 and 3.5 are supported)
-    if NOT DEFINED PYTHON_VERSION set PYTHON_VERSION=2
+    if NOT DEFINED PYTHON_VERSION set PYTHON_VERSION=3
     :: Change these options for your needs.
     if NOT DEFINED BUILD_PYTHON set BUILD_PYTHON=1
     if NOT DEFINED BUILD_PYTHON_LAYER set BUILD_PYTHON_LAYER=1
@@ -103,6 +103,9 @@ if DEFINED APPVEYOR (
 :: Use the exclamation mark ! below to delay the
 :: expansion of CMAKE_GENERATOR
 if %WITH_NINJA% EQU 0 (
+    if "%MSVC_VERSION%"=="16" (
+        set CMAKE_GENERATOR=Visual Studio 16 2019
+    )
     if "%MSVC_VERSION%"=="14" (
         set CMAKE_GENERATOR=Visual Studio 14 2015 Win64
     )
@@ -151,7 +154,8 @@ if NOT EXIST build mkdir build
 pushd build
 
 :: Setup the environement for VS x64
-set batch_file=!VS%MSVC_VERSION%0COMNTOOLS!..\..\VC\vcvarsall.bat
+::set batch_file=!VS%MSVC_VERSION%0COMNTOOLS!..\..\VC\vcvarsall.bat
+set batch_file=D:\Softwares\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat
 call "%batch_file%" amd64
 
 :: Configure using cmake and using the caffe-builder dependencies

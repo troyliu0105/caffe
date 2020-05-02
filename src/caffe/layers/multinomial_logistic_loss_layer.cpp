@@ -59,6 +59,7 @@ void MultinomialLogisticLossLayer<Dtype>::Backward_cpu(
 }
 
 INSTANTIATE_CLASS(MultinomialLogisticLossLayer);
+
 REGISTER_LAYER_CLASS(MultinomialLogisticLoss);
 
 }  // namespace caffe

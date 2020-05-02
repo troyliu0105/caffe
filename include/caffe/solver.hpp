@@ -55,7 +55,7 @@ public:
   // The main entry of the solver function. In default, iter will be zero. Pass
   // in a non-zero iter number to resume training for a pre-trained net.
   virtual void Solve(const char *resume_file = NULL);
-  inline void Solve(const string resume_file) { Solve(resume_file.c_str()); }
+  inline void Solve(const string &resume_file) { Solve(resume_file.c_str()); }
   void Step(int iters);
   // The Restore method simply dispatches to one of the
   // RestoreSolverStateFrom___ protected methods. You should implement these
@@ -94,20 +94,25 @@ public:
    */
   virtual inline const char *type() const { return ""; }
 
-protected:
   // Make and apply the update value for the current iteration.
   virtual void ApplyUpdate() = 0;
-  string SnapshotFilename(const string extension);
+
+protected:
+  string SnapshotFilename(const string &extension);
   string SnapshotToBinaryProto();
   string SnapshotToHDF5();
   // The test routine
   void TestAll();
-  void Test(const int test_net_id = 0);
+  void TestClassification(const int test_net_id = 0);
+  void TestDetection(const int test_net_id = 0);
+  void TestDetectionSeg(const int test_net_id = 0);
   virtual void SnapshotSolverState(const string &model_filename) = 0;
   virtual void RestoreSolverStateFromHDF5(const string &state_file) = 0;
   virtual void RestoreSolverStateFromBinaryProto(const string &state_file) = 0;
   void DisplayOutputBlobs(const int net_id);
   void UpdateSmoothedLoss(Dtype loss, int start_iter, int average_loss);
+  /// Harmonize solver class type with configured proto type.
+  void CheckType(SolverParameter *param);
 
   SolverParameter param_;
   int iter_;

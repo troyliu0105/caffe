@@ -86,7 +86,8 @@ void ConcatLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
       Dtype *bottom_diff = bottom[i]->mutable_cpu_diff();
       for (int n = 0; n < num_concats_; ++n) {
         caffe_copy(bottom_concat_axis * concat_input_size_, top_diff +
-                       (n * top_concat_axis + offset_concat_axis) * concat_input_size_,
+                       (n * top_concat_axis + offset_concat_axis) *
+                           concat_input_size_,
                    bottom_diff + n * bottom_concat_axis * concat_input_size_);
       }
     }
@@ -95,10 +96,12 @@ void ConcatLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
+
 STUB_GPU(ConcatLayer);
 #endif
 
 INSTANTIATE_CLASS(ConcatLayer);
+
 REGISTER_LAYER_CLASS(Concat);
 
 }  // namespace caffe

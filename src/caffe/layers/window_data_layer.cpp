@@ -1,4 +1,5 @@
 #ifdef USE_OPENCV
+
 #include <opencv2/highgui/highgui_c.h>
 #include <stdint.h>
 
@@ -471,6 +472,7 @@ void WindowDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
 }
 
 INSTANTIATE_CLASS(WindowDataLayer);
+
 REGISTER_LAYER_CLASS(WindowData);
 
 }  // namespace caffe

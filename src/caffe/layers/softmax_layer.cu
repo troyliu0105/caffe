@@ -90,6 +90,7 @@ __global__ void kernel_channel_dot(const int num, const int channels,
 
 template<typename Dtype>
 void SoftmaxLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -134,6 +135,7 @@ CAFFE_CUDA_NUM_THREADS>>>(count, outer_num_, channels, inner_num_,
 
 template<typename Dtype>
 void SoftmaxLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
@@ -161,7 +163,9 @@ scale_data, bottom_diff);
 // elementwise multiplication
 caffe_gpu_mul<Dtype>(top[0]
 ->
+
 count(), bottom_diff, top_data, bottom_diff
+
 );
 }
 

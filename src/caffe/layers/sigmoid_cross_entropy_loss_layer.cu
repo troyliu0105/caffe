@@ -40,6 +40,7 @@ __global__ void SigmoidCrossEntropyLossIgnoreDiffGPU(const int count,
 template<typename Dtype>
 void SigmoidCrossEntropyLossLayer<Dtype>::Forward_gpu(
     const vector<Blob < Dtype> *
+
 >& bottom, const vector<Blob < Dtype>*>& top) {
 // The forward pass computes the sigmoid outputs.
 sigmoid_bottom_vec_[0] = bottom[0];
@@ -51,9 +52,8 @@ const int count = bottom[0]->count();
 // Stable version of loss computation from input data
 const Dtype *input_data = bottom[0]->gpu_data();
 const Dtype *target = bottom[1]->gpu_data();
-// Since this memory is not used for anything until it is overwritten
-// on the backward pass, we use it here to avoid having to allocate new GPU
-// memory to accumulate intermediate results in the kernel.
+// Since this memory is not used for anything, we use it here to avoid having
+// to allocate new GPU memory to accumulate intermediate results.
 Dtype *loss_data = bottom[0]->mutable_gpu_diff();
 Dtype *count_data = bottom[1]->mutable_gpu_diff();
 Dtype valid_count;
@@ -78,19 +78,45 @@ caffe_gpu_asum(count, loss_data, &loss
 );
 normalizer_ = get_normalizer(normalization_, valid_count);
 top[0]->
+
 mutable_cpu_data()[0] = loss / normalizer_;
+
+// Clear scratch memory to prevent interfering with backward (see #6202).
+caffe_gpu_set(bottom[0]
+->
+
+count(), Dtype(0), bottom[0]
+
+->
+
+mutable_gpu_diff()
+
+);
+caffe_gpu_set(bottom[1]
+->
+
+count(), Dtype(0), bottom[1]
+
+->
+
+mutable_gpu_diff()
+
+);
 }
 
 template<typename Dtype>
 void SigmoidCrossEntropyLossLayer<Dtype>::Backward_gpu(
     const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
 if (propagate_down[1]) {
 LOG(FATAL)
 << this->
+
 type()
+
 << " Layer cannot backpropagate to label inputs.";
 }
 if (propagate_down[0]) {

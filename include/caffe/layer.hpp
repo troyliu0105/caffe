@@ -290,6 +290,12 @@ public:
     }
     param_propagate_down_[param_id] = value;
   }
+  /**
+  */
+  virtual void set_iter(int iter, int max_iter) {
+    iter_ = iter;
+    max_iter_ = max_iter;
+  }
 
 protected:
   /** The protobuf that stores the layer parameters */
@@ -304,7 +310,7 @@ protected:
   /** The vector that indicates whether each top blob has a non-zero weight in
    *  the objective function. */
   vector<Dtype> loss_;
-
+  int iter_, max_iter_;
   /** @brief Using the CPU device, compute the layer output. */
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top) = 0;

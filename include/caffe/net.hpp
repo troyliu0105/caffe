@@ -122,9 +122,9 @@ public:
    *        another Net.
    */
   void CopyTrainedLayersFrom(const NetParameter &param);
-  void CopyTrainedLayersFrom(const string trained_filename);
-  void CopyTrainedLayersFromBinaryProto(const string trained_filename);
-  void CopyTrainedLayersFromHDF5(const string trained_filename);
+  void CopyTrainedLayersFrom(const string &trained_filename);
+  void CopyTrainedLayersFromBinaryProto(const string &trained_filename);
+  void CopyTrainedLayersFromHDF5(const string &trained_filename);
   /// @brief Writes the net to a proto.
   void ToProto(NetParameter *param, bool write_diff = false) const;
   /// @brief Writes the net to an HDF5 file.
@@ -270,7 +270,10 @@ public:
   void add_after_backward(Callback *value) {
     after_backward_.push_back(value);
   }
-
+  void set_iter(int iter, int max_iter) {
+    iter_ = iter;
+    max_iter_ = max_iter;
+  }
 protected:
   // Helpers for Init.
   /// @brief Append a new top blob to the net.
@@ -362,6 +365,8 @@ protected:
   vector<Callback *> after_forward_;
   vector<Callback *> before_backward_;
   vector<Callback *> after_backward_;
+  int iter_;
+  int max_iter_;
 
 DISABLE_COPY_AND_ASSIGN(Net);
 };

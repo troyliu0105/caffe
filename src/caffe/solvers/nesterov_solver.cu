@@ -12,6 +12,7 @@ __global__ void NesterovUpdate(int N, Dtype *g, Dtype *h,
     g[i] = (1 + momentum) * hi_new - momentum * hi;
   }
 }
+
 template<typename Dtype>
 void nesterov_update_gpu(int N, Dtype *g, Dtype *h, Dtype momentum,
                          Dtype local_rate) {
@@ -20,7 +21,9 @@ void nesterov_update_gpu(int N, Dtype *g, Dtype *h, Dtype momentum,
       N, g, h, momentum, local_rate);
   CUDA_POST_KERNEL_CHECK;
 }
+
 template void nesterov_update_gpu<float>(int, float *, float *, float, float);
+
 template void nesterov_update_gpu<double>(int, double *, double *, double,
                                           double);
 

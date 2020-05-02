@@ -31,6 +31,7 @@ protected:
     blob_bottom_vec_.push_back(blob_bottom_label_);
     blob_top_vec_.push_back(blob_top_loss_);
   }
+
   virtual ~EuclideanLossLayerTest() {
     delete blob_bottom_data_;
     delete blob_bottom_label_;
@@ -68,22 +69,30 @@ protected:
   vector<Blob<Dtype> *> blob_top_vec_;
 };
 
-TYPED_TEST_CASE(EuclideanLossLayerTest, TestDtypesAndDevices);
+TYPED_TEST_CASE(EuclideanLossLayerTest, TestDtypesAndDevices
+);
 
-TYPED_TEST(EuclideanLossLayerTest, TestForward) {
-  this->TestForward();
+TYPED_TEST(EuclideanLossLayerTest, TestForward
+) {
+this->
+
+TestForward();
 }
 
-TYPED_TEST(EuclideanLossLayerTest, TestGradient) {
-  typedef typename TypeParam::Dtype Dtype;
-  LayerParameter layer_param;
-  const Dtype kLossWeight = 3.7;
-  layer_param.add_loss_weight(kLossWeight);
-  EuclideanLossLayer<Dtype> layer(layer_param);
-  layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
-  GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
-  checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-                                  this->blob_top_vec_);
+TYPED_TEST(EuclideanLossLayerTest, TestGradient
+) {
+typedef typename TypeParam::Dtype Dtype;
+LayerParameter layer_param;
+const Dtype kLossWeight = 3.7;
+layer_param.
+add_loss_weight(kLossWeight);
+EuclideanLossLayer <Dtype> layer(layer_param);
+layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
+GradientChecker <Dtype> checker(1e-2, 1e-2, 1701);
+checker.
+CheckGradientExhaustive(&layer,
+this->blob_bottom_vec_,
+this->blob_top_vec_);
 }
 
 }  // namespace caffe

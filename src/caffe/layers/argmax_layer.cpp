@@ -96,6 +96,7 @@ void ArgMaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 }
 
 INSTANTIATE_CLASS(ArgMaxLayer);
+
 REGISTER_LAYER_CLASS(ArgMax);
 
 }  // namespace caffe

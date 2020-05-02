@@ -32,6 +32,7 @@ __global__ void SoftmaxLossForwardGPU(const int nthreads,
 template<typename Dtype>
 void SoftmaxWithLossLayer<Dtype>::Forward_gpu(
     const vector<Blob < Dtype> *
+
 >& bottom, const vector<Blob < Dtype>*>& top) {
 softmax_layer_->
 Forward(softmax_bottom_vec_, softmax_top_vec_
@@ -40,9 +41,8 @@ const Dtype *prob_data = prob_.gpu_data();
 const Dtype *label = bottom[1]->gpu_data();
 const int dim = prob_.count() / outer_num_;
 const int nthreads = outer_num_ * inner_num_;
-// Since this memory is not used for anything until it is overwritten
-// on the backward pass, we use it here to avoid having to allocate new GPU
-// memory to accumulate intermediate results in the kernel.
+// Since this memory is not used for anything, we use it here to avoid having
+// to allocate new GPU memory to accumulate intermediate results.
 Dtype *loss_data = bottom[0]->mutable_gpu_diff();
 // Similarly, this memory is never used elsewhere, and thus we can use it
 // to avoid having to allocate additional GPU memory.
@@ -66,14 +66,30 @@ caffe_gpu_asum(nthreads, counts, &valid_count
 );
 }
 top[0]->
+
 mutable_cpu_data()[0] = loss / get_normalizer(normalization_,
                                               valid_count);
+
 if (top.
+
 size()
+
 == 2) {
 top[1]->
 ShareData(prob_);
 }
+
+// Clear scratch memory to prevent interfering with backward (see #6202).
+caffe_gpu_set(bottom[0]
+->
+
+count(), Dtype(0), bottom[0]
+
+->
+
+mutable_gpu_diff()
+
+);
 }
 
 template<typename Dtype>
@@ -103,13 +119,16 @@ __global__ void SoftmaxLossBackwardGPU(const int nthreads, const Dtype *top,
 
 template<typename Dtype>
 void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
 if (propagate_down[1]) {
 LOG(FATAL)
 << this->
+
 type()
+
 << " Layer cannot backpropagate to label inputs.";
 }
 if (propagate_down[0]) {
@@ -118,7 +137,9 @@ const Dtype *prob_data = prob_.gpu_data();
 const Dtype *top_data = top[0]->gpu_data();
 caffe_gpu_memcpy(prob_
 .
+
 count()
+
 * sizeof(Dtype), prob_data, bottom_diff);
 const Dtype *label = bottom[1]->gpu_data();
 const int dim = prob_.count() / outer_num_;
@@ -146,7 +167,9 @@ const Dtype loss_weight = top[0]->cpu_diff()[0] /
     get_normalizer(normalization_, valid_count);
 caffe_gpu_scal(prob_
 .
+
 count(), loss_weight, bottom_diff
+
 );
 }
 }

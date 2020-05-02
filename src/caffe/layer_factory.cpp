@@ -1,14 +1,18 @@
 // Make sure we include Python.h before any system header
 // to avoid _POSIX_C_SOURCE redefinition
 #ifdef WITH_PYTHON_LAYER
+
 #include <boost/python.hpp>
+
 #endif
+
 #include <string>
 #include <vector>
 
 #include "caffe/layer.hpp"
 #include "caffe/layer_factory.hpp"
 #include "caffe/layers/conv_layer.hpp"
+#include "caffe/layers/deconv_layer.hpp"
 #include "caffe/layers/lrn_layer.hpp"
 #include "caffe/layers/pooling_layer.hpp"
 #include "caffe/layers/relu_layer.hpp"
@@ -19,6 +23,7 @@
 
 #ifdef USE_CUDNN
 #include "caffe/layers/cudnn_conv_layer.hpp"
+#include "caffe/layers/cudnn_deconv_layer.hpp"
 #include "caffe/layers/cudnn_lcn_layer.hpp"
 #include "caffe/layers/cudnn_lrn_layer.hpp"
 #include "caffe/layers/cudnn_pooling_layer.hpp"
@@ -29,82 +34,14 @@
 #endif
 
 #ifdef WITH_PYTHON_LAYER
+
 #include "caffe/layers/python_layer.hpp"
+
 #endif
 
 namespace caffe {
 
-template<typename Dtype>
-typename LayerRegistry<Dtype>::CreatorRegistry &
-LayerRegistry<Dtype>::Registry() {
-  static CreatorRegistry *g_registry_ = new CreatorRegistry();
-  return *g_registry_;
-}
 
-// Adds a creator.
-template<typename Dtype>
-void LayerRegistry<Dtype>::AddCreator(const string &type, Creator creator) {
-  CreatorRegistry &registry = Registry();
-  CHECK_EQ(registry.count(type), 0) << "Layer type " << type
-                                    << " already registered.";
-  registry[type] = creator;
-}
-
-// Get a layer using a LayerParameter.
-template<typename Dtype>
-shared_ptr<Layer<Dtype> > LayerRegistry<Dtype>::CreateLayer(
-    const LayerParameter &param) {
-  if (Caffe::root_solver()) {
-    LOG(INFO) << "Creating layer " << param.name();
-  }
-  const string &type = param.type();
-  CreatorRegistry &registry = Registry();
-  CHECK_EQ(registry.count(type), 1)
-    << "Unknown layer type: " << type
-    << " (known types: " << LayerTypeListString() << ")";
-  return registry[type](param);
-}
-
-template<typename Dtype>
-vector<string> LayerRegistry<Dtype>::LayerTypeList() {
-  CreatorRegistry &registry = Registry();
-  vector<string> layer_types;
-  for (typename CreatorRegistry::iterator iter = registry.begin();
-       iter != registry.end(); ++iter) {
-    layer_types.push_back(iter->first);
-  }
-  return layer_types;
-}
-
-// Layer registry should never be instantiated - everything is done with its
-// static variables.
-template<typename Dtype>
-LayerRegistry<Dtype>::LayerRegistry() {}
-
-template<typename Dtype>
-string LayerRegistry<Dtype>::LayerTypeListString() {
-  vector<string> layer_types = LayerTypeList();
-  string layer_types_str;
-  for (vector<string>::iterator iter = layer_types.begin();
-       iter != layer_types.end(); ++iter) {
-    if (iter != layer_types.begin()) {
-      layer_types_str += ", ";
-    }
-    layer_types_str += *iter;
-  }
-  return layer_types_str;
-}
-
-template<typename Dtype>
-LayerRegisterer<Dtype>::LayerRegisterer(
-    const string &type,
-    shared_ptr<Layer<Dtype> > (*creator)(const LayerParameter &)) {
-  // LOG(INFO) << "Registering layer type: " << type;
-  LayerRegistry<Dtype>::AddCreator(type, creator);
-}
-
-INSTANTIATE_CLASS(LayerRegistry);
-INSTANTIATE_CLASS(LayerRegisterer);
 
 // Get convolution layer according to engine.
 template<typename Dtype>
@@ -145,6 +82,45 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
 }
 
 REGISTER_LAYER_CREATOR(Convolution, GetConvolutionLayer);
+
+// Get deconvolution layer according to engine.
+template<typename Dtype>
+shared_ptr<Layer<Dtype> > GetDeconvolutionLayer(const LayerParameter &param) {
+  ConvolutionParameter conv_param = param.convolution_param();
+  ConvolutionParameter_Engine engine = conv_param.engine();
+#ifdef USE_CUDNN
+  bool use_dilation = false;
+  for (int i = 0; i < conv_param.dilation_size(); ++i) {
+    if (conv_param.dilation(i) > 1) {
+      use_dilation = true;
+    }
+  }
+#endif
+  if (engine == ConvolutionParameter_Engine_DEFAULT) {
+    engine = ConvolutionParameter_Engine_CAFFE;
+#ifdef USE_CUDNN
+    if (!use_dilation) {
+      engine = ConvolutionParameter_Engine_CUDNN;
+    }
+#endif
+  }
+  if (engine == ConvolutionParameter_Engine_CAFFE) {
+    return shared_ptr<Layer<Dtype> >(new DeconvolutionLayer<Dtype>(param));
+#ifdef USE_CUDNN
+    } else if (engine == ConvolutionParameter_Engine_CUDNN) {
+      if (use_dilation) {
+        LOG(FATAL) << "CuDNN doesn't support the dilated deconvolution at Layer "
+                   << param.name();
+      }
+      return shared_ptr<Layer<Dtype> >(new CuDNNDeconvolutionLayer<Dtype>(param));
+#endif
+  } else {
+    LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";
+    throw;  // Avoids missing return warning
+  }
+}
+
+REGISTER_LAYER_CREATOR(Deconvolution, GetDeconvolutionLayer);
 
 // Get pooling layer according to engine.
 template<typename Dtype>
@@ -319,6 +295,7 @@ shared_ptr<Layer<Dtype> > GetTanHLayer(const LayerParameter &param) {
 REGISTER_LAYER_CREATOR(TanH, GetTanHLayer);
 
 #ifdef WITH_PYTHON_LAYER
+
 template<typename Dtype>
 shared_ptr<Layer<Dtype> > GetPythonLayer(const LayerParameter &param) {
   Py_Initialize();

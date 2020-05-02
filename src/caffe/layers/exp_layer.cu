@@ -7,6 +7,7 @@ namespace caffe {
 
 template<typename Dtype>
 void ExpLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 const int count = bottom[0]->count();
@@ -30,6 +31,7 @@ caffe_gpu_scal(count, outer_scale_, top_data
 
 template<typename Dtype>
 void ExpLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {

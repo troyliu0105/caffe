@@ -17,6 +17,7 @@ __global__ void DropoutForward(const int n, const Dtype *in,
 
 template<typename Dtype>
 void DropoutLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+
 >& bottom,
 const vector<Blob < Dtype>*>& top) {
 const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -52,6 +53,7 @@ __global__ void DropoutBackward(const int n, const Dtype *in_diff,
 
 template<typename Dtype>
 void DropoutLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+
 >& top,
 const vector<bool> &propagate_down,
 const vector<Blob < Dtype>*>& bottom) {
@@ -71,7 +73,9 @@ CUDA_POST_KERNEL_CHECK;
 } else {
 caffe_copy(top[0]
 ->
+
 count(), top_diff, bottom_diff
+
 );
 }
 }
