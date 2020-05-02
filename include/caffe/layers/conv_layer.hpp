@@ -27,9 +27,9 @@ namespace caffe {
  *   be filtered. col2im restores the output spatial structure by rolling up
  *   the output channel N' columns of the output matrix.
  */
-template <typename Dtype>
+template<typename Dtype>
 class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
- public:
+public:
   /**
    * @param param provides ConvolutionParameter convolution_param,
    *    with ConvolutionLayer options:
@@ -61,20 +61,20 @@ class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
    *  - engine: convolution has CAFFE (matrix multiplication) and CUDNN (library
    *    kernels + stream parallelism) engines.
    */
-  explicit ConvolutionLayer(const LayerParameter& param)
+  explicit ConvolutionLayer(const LayerParameter &param)
       : BaseConvolutionLayer<Dtype>(param) {}
 
-  virtual inline const char* type() const { return "Convolution"; }
+  virtual inline const char *type() const { return "Convolution"; }
 
- protected:
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
   virtual inline bool reverse_dimensions() { return false; }
   virtual void compute_output_shape();
 };

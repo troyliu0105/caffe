@@ -3,7 +3,7 @@
 
 namespace caffe {
 #ifndef CPU_ONLY
-  cudaDeviceProp CAFFE_TEST_CUDA_PROP;
+cudaDeviceProp CAFFE_TEST_CUDA_PROP;
 #endif
 }
 
@@ -11,7 +11,7 @@ namespace caffe {
 using caffe::CAFFE_TEST_CUDA_PROP;
 #endif
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   caffe::GlobalInit(&argc, &argv);
 #ifndef CPU_ONLY

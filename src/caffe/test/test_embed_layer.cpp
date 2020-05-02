@@ -12,10 +12,10 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class EmbedLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
- protected:
+protected:
   EmbedLayerTest()
       : blob_bottom_(new Blob<Dtype>(4, 1, 1, 1)),
         blob_top_(new Blob<Dtype>()) {
@@ -26,11 +26,14 @@ class EmbedLayerTest : public MultiDeviceTest<TypeParam> {
     blob_bottom_vec_.push_back(blob_bottom_);
     blob_top_vec_.push_back(blob_top_);
   }
-  virtual ~EmbedLayerTest() { delete blob_bottom_; delete blob_top_; }
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  virtual ~EmbedLayerTest() {
+    delete blob_bottom_;
+    delete blob_top_;
+  }
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(EmbedLayerTest, TestDtypesAndDevices);
@@ -38,7 +41,7 @@ TYPED_TEST_CASE(EmbedLayerTest, TestDtypesAndDevices);
 TYPED_TEST(EmbedLayerTest, TestSetUp) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  EmbedParameter* embed_param = layer_param.mutable_embed_param();
+  EmbedParameter *embed_param = layer_param.mutable_embed_param();
   embed_param->set_num_output(10);
   embed_param->set_input_dim(5);
   shared_ptr<EmbedLayer<Dtype> > layer(new EmbedLayer<Dtype>(layer_param));
@@ -54,7 +57,7 @@ TYPED_TEST(EmbedLayerTest, TestSetUp) {
 TYPED_TEST(EmbedLayerTest, TestForward) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  EmbedParameter* embed_param = layer_param.mutable_embed_param();
+  EmbedParameter *embed_param = layer_param.mutable_embed_param();
   const int kNumOutput = 10;
   const int kInputDim = 5;
   embed_param->set_num_output(kNumOutput);
@@ -93,7 +96,7 @@ TYPED_TEST(EmbedLayerTest, TestForward) {
 TYPED_TEST(EmbedLayerTest, TestForwardWithBias) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  EmbedParameter* embed_param = layer_param.mutable_embed_param();
+  EmbedParameter *embed_param = layer_param.mutable_embed_param();
   const int kNumOutput = 10;
   const int kInputDim = 5;
   embed_param->set_num_output(kNumOutput);
@@ -125,8 +128,8 @@ TYPED_TEST(EmbedLayerTest, TestForwardWithBias) {
     bias_offset[0] = 0;
     for (int j = 0; j < kNumOutput; ++j) {
       EXPECT_FLOAT_EQ(layer->blobs()[0]->data_at(weight_offset) +
-                layer->blobs()[1]->data_at(bias_offset),
-                this->blob_top_->data_at(top_offset));
+          layer->blobs()[1]->data_at(bias_offset),
+                      this->blob_top_->data_at(top_offset));
       ++top_offset[4];
       ++weight_offset[1];
       ++bias_offset[0];
@@ -137,7 +140,7 @@ TYPED_TEST(EmbedLayerTest, TestForwardWithBias) {
 TYPED_TEST(EmbedLayerTest, TestGradient) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  EmbedParameter* embed_param = layer_param.mutable_embed_param();
+  EmbedParameter *embed_param = layer_param.mutable_embed_param();
   embed_param->set_num_output(10);
   embed_param->set_input_dim(5);
   embed_param->set_bias_term(false);
@@ -151,13 +154,13 @@ TYPED_TEST(EmbedLayerTest, TestGradient) {
   this->blob_bottom_->mutable_cpu_data()[2] = 2;
   this->blob_bottom_->mutable_cpu_data()[3] = 3;
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, -2);
+                                  this->blob_top_vec_, -2);
 }
 
 TYPED_TEST(EmbedLayerTest, TestGradientWithBias) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  EmbedParameter* embed_param = layer_param.mutable_embed_param();
+  EmbedParameter *embed_param = layer_param.mutable_embed_param();
   embed_param->set_num_output(10);
   embed_param->set_input_dim(5);
   embed_param->set_bias_term(true);
@@ -172,7 +175,7 @@ TYPED_TEST(EmbedLayerTest, TestGradientWithBias) {
   this->blob_bottom_->mutable_cpu_data()[2] = 2;
   this->blob_bottom_->mutable_cpu_data()[3] = 3;
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, -2);
+                                  this->blob_top_vec_, -2);
 }
 
 }  // namespace caffe

@@ -14,7 +14,7 @@
 
 namespace caffe {
 
-template <typename Dtype> class RecurrentLayer;
+template<typename Dtype> class RecurrentLayer;
 
 /**
  * @brief An abstract class for implementing recurrent behavior inside of an
@@ -22,18 +22,18 @@ template <typename Dtype> class RecurrentLayer;
  *        you should use one of its implementations which defines the recurrent
  *        architecture, such as RNNLayer or LSTMLayer.
  */
-template <typename Dtype>
+template<typename Dtype>
 class RecurrentLayer : public Layer<Dtype> {
- public:
-  explicit RecurrentLayer(const LayerParameter& param)
+public:
+  explicit RecurrentLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
   virtual void Reset();
 
-  virtual inline const char* type() const { return "Recurrent"; }
+  virtual inline const char *type() const { return "Recurrent"; }
   virtual inline int MinBottomBlobs() const {
     int min_bottoms = 2;
     if (this->layer_param_.recurrent_param().expose_hidden()) {
@@ -59,33 +59,33 @@ class RecurrentLayer : public Layer<Dtype> {
     return bottom_index != 1;
   }
 
- protected:
+protected:
   /**
    * @brief Fills net_param with the recurrent network architecture.  Subclasses
    *        should define this -- see RNNLayer and LSTMLayer for examples.
    */
-  virtual void FillUnrolledNet(NetParameter* net_param) const = 0;
+  virtual void FillUnrolledNet(NetParameter *net_param) const = 0;
 
   /**
    * @brief Fills names with the names of the 0th timestep recurrent input
    *        Blob&s.  Subclasses should define this -- see RNNLayer and LSTMLayer
    *        for examples.
    */
-  virtual void RecurrentInputBlobNames(vector<string>* names) const = 0;
+  virtual void RecurrentInputBlobNames(vector<string> *names) const = 0;
 
   /**
    * @brief Fills shapes with the shapes of the recurrent input Blob&s.
    *        Subclasses should define this -- see RNNLayer and LSTMLayer
    *        for examples.
    */
-  virtual void RecurrentInputShapes(vector<BlobShape>* shapes) const = 0;
+  virtual void RecurrentInputShapes(vector<BlobShape> *shapes) const = 0;
 
   /**
    * @brief Fills names with the names of the Tth timestep recurrent output
    *        Blob&s.  Subclasses should define this -- see RNNLayer and LSTMLayer
    *        for examples.
    */
-  virtual void RecurrentOutputBlobNames(vector<string>* names) const = 0;
+  virtual void RecurrentOutputBlobNames(vector<string> *names) const = 0;
 
   /**
    * @brief Fills names with the names of the output blobs, concatenated across
@@ -93,7 +93,7 @@ class RecurrentLayer : public Layer<Dtype> {
    *        Subclasses should define this -- see RNNLayer and LSTMLayer for
    *        examples.
    */
-  virtual void OutputBlobNames(vector<string>* names) const = 0;
+  virtual void OutputBlobNames(vector<string> *names) const = 0;
 
   /**
    * @param bottom input Blob vector (length 2-3)
@@ -140,12 +140,12 @@ class RecurrentLayer : public Layer<Dtype> {
    *      Refer to documentation for particular RecurrentLayer implementations
    *      (such as RNNLayer and LSTMLayer) for the definition of @f$ y @f$.
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 
   /// @brief A Net to implement the Recurrent functionality.
   shared_ptr<Net<Dtype> > unrolled_net_;
@@ -174,12 +174,12 @@ class RecurrentLayer : public Layer<Dtype> {
    */
   bool expose_hidden_;
 
-  vector<Blob<Dtype>* > recur_input_blobs_;
-  vector<Blob<Dtype>* > recur_output_blobs_;
-  vector<Blob<Dtype>* > output_blobs_;
-  Blob<Dtype>* x_input_blob_;
-  Blob<Dtype>* x_static_input_blob_;
-  Blob<Dtype>* cont_input_blob_;
+  vector<Blob<Dtype> *> recur_input_blobs_;
+  vector<Blob<Dtype> *> recur_output_blobs_;
+  vector<Blob<Dtype> *> output_blobs_;
+  Blob<Dtype> *x_input_blob_;
+  Blob<Dtype> *x_static_input_blob_;
+  Blob<Dtype> *cont_input_blob_;
 };
 
 }  // namespace caffe

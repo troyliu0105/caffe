@@ -16,7 +16,7 @@ const float kMillisecondsThreshold = 50;
 const float kMillisecondsThreshold = 30;
 #endif
 
-template <typename TypeParam>
+template<typename TypeParam>
 class BenchmarkTest : public MultiDeviceTest<TypeParam> {};
 
 TYPED_TEST_CASE(BenchmarkTest, TestDtypesAndDevices);

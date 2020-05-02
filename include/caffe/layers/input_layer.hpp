@@ -15,26 +15,26 @@ namespace caffe {
  * This data layer is a container that merely holds the data assigned to it;
  * forward, backward, and reshape are all no-ops.
  */
-template <typename Dtype>
+template<typename Dtype>
 class InputLayer : public Layer<Dtype> {
- public:
-  explicit InputLayer(const LayerParameter& param)
+public:
+  explicit InputLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
   // Data layers have no bottoms, so reshaping is trivial.
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top) {}
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top) {}
 
-  virtual inline const char* type() const { return "Input"; }
+  virtual inline const char *type() const { return "Input"; }
   virtual inline int ExactNumBottomBlobs() const { return 0; }
   virtual inline int MinTopBlobs() const { return 1; }
 
- protected:
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top) {}
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {}
+protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top) {}
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
 };
 
 }  // namespace caffe

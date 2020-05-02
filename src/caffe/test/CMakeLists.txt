@@ -18,12 +18,12 @@ caffe_leave_only_selected_tests(test_cuda ${BUILD_only_tests})
 set(the_target test.testbin)
 set(test_args --gtest_shuffle)
 
-if(HAVE_CUDA)
-  caffe_cuda_compile(test_cuda_objs ${test_cuda})
-  list(APPEND test_srcs ${test_cuda_objs} ${test_cuda})
-else()
-  list(APPEND test_args --gtest_filter="-*GPU*")
-endif()
+if (HAVE_CUDA)
+    caffe_cuda_compile(test_cuda_objs ${test_cuda})
+    list(APPEND test_srcs ${test_cuda_objs} ${test_cuda})
+else ()
+    list(APPEND test_args --gtest_filter="-*GPU*")
+endif ()
 
 # ---[ Adding test target
 add_executable(${the_target} EXCLUDE_FROM_ALL ${test_srcs})
@@ -31,10 +31,10 @@ target_link_libraries(${the_target} gtest ${Caffe_LINK})
 caffe_default_properties(${the_target})
 caffe_set_runtime_directory(${the_target} "${PROJECT_BINARY_DIR}/test")
 
-if(MSVC AND COPY_PREREQUISITES)
-  caffe_copy_prerequisites(${the_target} USE_HARD_LINKS)
-endif()
+if (MSVC AND COPY_PREREQUISITES)
+    caffe_copy_prerequisites(${the_target} USE_HARD_LINKS)
+endif ()
 
 # ---[ Adding runtest
 add_custom_target(runtest COMMAND ${the_target} ${test_args}
-                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

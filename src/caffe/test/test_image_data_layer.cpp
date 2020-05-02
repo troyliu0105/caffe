@@ -16,11 +16,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class ImageDataLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   ImageDataLayerTest()
       : seed_(1701),
         blob_top_data_(new Blob<Dtype>()),
@@ -63,10 +63,10 @@ class ImageDataLayerTest : public MultiDeviceTest<TypeParam> {
   string filename_;
   string filename_reshape_;
   string filename_space_;
-  Blob<Dtype>* const blob_top_data_;
-  Blob<Dtype>* const blob_top_label_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_top_data_;
+  Blob<Dtype> *const blob_top_label_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(ImageDataLayerTest, TestDtypesAndDevices);
@@ -74,7 +74,7 @@ TYPED_TEST_CASE(ImageDataLayerTest, TestDtypesAndDevices);
 TYPED_TEST(ImageDataLayerTest, TestRead) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter param;
-  ImageDataParameter* image_data_param = param.mutable_image_data_param();
+  ImageDataParameter *image_data_param = param.mutable_image_data_param();
   image_data_param->set_batch_size(5);
   image_data_param->set_source(this->filename_.c_str());
   image_data_param->set_shuffle(false);
@@ -100,7 +100,7 @@ TYPED_TEST(ImageDataLayerTest, TestRead) {
 TYPED_TEST(ImageDataLayerTest, TestResize) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter param;
-  ImageDataParameter* image_data_param = param.mutable_image_data_param();
+  ImageDataParameter *image_data_param = param.mutable_image_data_param();
   image_data_param->set_batch_size(5);
   image_data_param->set_source(this->filename_.c_str());
   image_data_param->set_new_height(256);
@@ -128,7 +128,7 @@ TYPED_TEST(ImageDataLayerTest, TestResize) {
 TYPED_TEST(ImageDataLayerTest, TestReshape) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter param;
-  ImageDataParameter* image_data_param = param.mutable_image_data_param();
+  ImageDataParameter *image_data_param = param.mutable_image_data_param();
   image_data_param->set_batch_size(1);
   image_data_param->set_source(this->filename_reshape_.c_str());
   image_data_param->set_shuffle(false);
@@ -155,7 +155,7 @@ TYPED_TEST(ImageDataLayerTest, TestReshape) {
 TYPED_TEST(ImageDataLayerTest, TestShuffle) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter param;
-  ImageDataParameter* image_data_param = param.mutable_image_data_param();
+  ImageDataParameter *image_data_param = param.mutable_image_data_param();
   image_data_param->set_batch_size(5);
   image_data_param->set_source(this->filename_.c_str());
   image_data_param->set_shuffle(true);
@@ -189,7 +189,7 @@ TYPED_TEST(ImageDataLayerTest, TestShuffle) {
 TYPED_TEST(ImageDataLayerTest, TestSpace) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter param;
-  ImageDataParameter* image_data_param = param.mutable_image_data_param();
+  ImageDataParameter *image_data_param = param.mutable_image_data_param();
   image_data_param->set_batch_size(1);
   image_data_param->set_source(this->filename_space_.c_str());
   image_data_param->set_shuffle(false);

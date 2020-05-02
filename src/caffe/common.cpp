@@ -17,7 +17,7 @@ namespace caffe {
 // Make sure each thread can have different values.
 static boost::thread_specific_ptr<Caffe> thread_instance_;
 
-Caffe& Caffe::Get() {
+Caffe &Caffe::Get() {
   if (!thread_instance_.get()) {
     thread_instance_.reset(new Caffe());
   }
@@ -27,14 +27,14 @@ Caffe& Caffe::Get() {
 // random seeding
 int64_t cluster_seedgen(void) {
   int64_t s, seed, pid;
-  FILE* f = fopen("/dev/urandom", "rb");
+  FILE *f = fopen("/dev/urandom", "rb");
   if (f && fread(&seed, 1, sizeof(seed), f) == sizeof(seed)) {
     fclose(f);
     return seed;
   }
 
   LOG(INFO) << "System entropy source not available, "
-              "using fallback algorithm to generate seed instead.";
+               "using fallback algorithm to generate seed instead.";
   if (f)
     fclose(f);
 
@@ -44,8 +44,7 @@ int64_t cluster_seedgen(void) {
   return seed;
 }
 
-
-void GlobalInit(int* pargc, char*** pargv) {
+void GlobalInit(int *pargc, char ***pargv) {
   // Google flags.
   ::gflags::ParseCommandLineFlags(pargc, pargv, true);
   // Google logging.
@@ -62,9 +61,9 @@ void GlobalInit(int* pargc, char*** pargv) {
 
 Caffe::Caffe()
     : random_generator_(), mode_(Caffe::CPU),
-      solver_count_(1), solver_rank_(0), multiprocess_(false) { }
+      solver_count_(1), solver_rank_(0), multiprocess_(false) {}
 
-Caffe::~Caffe() { }
+Caffe::~Caffe() {}
 
 void Caffe::set_random_seed(const unsigned int seed) {
   // RNG seed
@@ -90,25 +89,25 @@ int Caffe::FindDevice(const int start_id) {
 }
 
 class Caffe::RNG::Generator {
- public:
+public:
   Generator() : rng_(new caffe::rng_t(cluster_seedgen())) {}
   explicit Generator(unsigned int seed) : rng_(new caffe::rng_t(seed)) {}
-  caffe::rng_t* rng() { return rng_.get(); }
- private:
+  caffe::rng_t *rng() { return rng_.get(); }
+private:
   shared_ptr<caffe::rng_t> rng_;
 };
 
-Caffe::RNG::RNG() : generator_(new Generator()) { }
+Caffe::RNG::RNG() : generator_(new Generator()) {}
 
-Caffe::RNG::RNG(unsigned int seed) : generator_(new Generator(seed)) { }
+Caffe::RNG::RNG(unsigned int seed) : generator_(new Generator(seed)) {}
 
-Caffe::RNG& Caffe::RNG::operator=(const RNG& other) {
+Caffe::RNG &Caffe::RNG::operator=(const RNG &other) {
   generator_ = other.generator_;
   return *this;
 }
 
-void* Caffe::RNG::generator() {
-  return static_cast<void*>(generator_->rng());
+void *Caffe::RNG::generator() {
+  return static_cast<void *>(generator_->rng());
 }
 
 #else  // Normal GPU + CPU Caffe.

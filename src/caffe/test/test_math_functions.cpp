@@ -13,11 +13,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class MathFunctionsTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   MathFunctionsTest()
       : blob_bottom_(new Blob<Dtype>()),
         blob_top_(new Blob<Dtype>()) {
@@ -39,13 +39,13 @@ class MathFunctionsTest : public MultiDeviceTest<TypeParam> {
     delete blob_top_;
   }
 
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
 };
 
-template <typename Dtype>
+template<typename Dtype>
 class CPUMathFunctionsTest
-  : public MathFunctionsTest<CPUDevice<Dtype> > {
+    : public MathFunctionsTest<CPUDevice<Dtype> > {
 };
 
 TYPED_TEST_CASE(CPUMathFunctionsTest, TestDtypes);
@@ -57,7 +57,7 @@ TYPED_TEST(CPUMathFunctionsTest, TestNothing) {
 
 TYPED_TEST(CPUMathFunctionsTest, TestAsum) {
   int n = this->blob_bottom_->count();
-  const TypeParam* x = this->blob_bottom_->cpu_data();
+  const TypeParam *x = this->blob_bottom_->cpu_data();
   TypeParam std_asum = 0;
   for (int i = 0; i < n; ++i) {
     std_asum += std::fabs(x[i]);
@@ -68,9 +68,9 @@ TYPED_TEST(CPUMathFunctionsTest, TestAsum) {
 
 TYPED_TEST(CPUMathFunctionsTest, TestSign) {
   int n = this->blob_bottom_->count();
-  const TypeParam* x = this->blob_bottom_->cpu_data();
+  const TypeParam *x = this->blob_bottom_->cpu_data();
   caffe_cpu_sign<TypeParam>(n, x, this->blob_bottom_->mutable_cpu_diff());
-  const TypeParam* signs = this->blob_bottom_->cpu_diff();
+  const TypeParam *signs = this->blob_bottom_->cpu_diff();
   for (int i = 0; i < n; ++i) {
     EXPECT_EQ(signs[i], x[i] > 0 ? 1 : (x[i] < 0 ? -1 : 0));
   }
@@ -78,9 +78,9 @@ TYPED_TEST(CPUMathFunctionsTest, TestSign) {
 
 TYPED_TEST(CPUMathFunctionsTest, TestSgnbit) {
   int n = this->blob_bottom_->count();
-  const TypeParam* x = this->blob_bottom_->cpu_data();
+  const TypeParam *x = this->blob_bottom_->cpu_data();
   caffe_cpu_sgnbit<TypeParam>(n, x, this->blob_bottom_->mutable_cpu_diff());
-  const TypeParam* signbits = this->blob_bottom_->cpu_diff();
+  const TypeParam *signbits = this->blob_bottom_->cpu_diff();
   for (int i = 0; i < n; ++i) {
     EXPECT_EQ(signbits[i], x[i] < 0 ? 1 : 0);
   }
@@ -88,9 +88,9 @@ TYPED_TEST(CPUMathFunctionsTest, TestSgnbit) {
 
 TYPED_TEST(CPUMathFunctionsTest, TestFabs) {
   int n = this->blob_bottom_->count();
-  const TypeParam* x = this->blob_bottom_->cpu_data();
+  const TypeParam *x = this->blob_bottom_->cpu_data();
   caffe_abs<TypeParam>(n, x, this->blob_bottom_->mutable_cpu_diff());
-  const TypeParam* abs_val = this->blob_bottom_->cpu_diff();
+  const TypeParam *abs_val = this->blob_bottom_->cpu_diff();
   for (int i = 0; i < n; ++i) {
     EXPECT_EQ(abs_val[i], x[i] > 0 ? x[i] : -x[i]);
   }
@@ -99,11 +99,11 @@ TYPED_TEST(CPUMathFunctionsTest, TestFabs) {
 TYPED_TEST(CPUMathFunctionsTest, TestScale) {
   int n = this->blob_bottom_->count();
   TypeParam alpha = this->blob_bottom_->cpu_diff()[caffe_rng_rand() %
-                                                   this->blob_bottom_->count()];
+      this->blob_bottom_->count()];
   caffe_cpu_scale<TypeParam>(n, alpha, this->blob_bottom_->cpu_data(),
                              this->blob_bottom_->mutable_cpu_diff());
-  const TypeParam* scaled = this->blob_bottom_->cpu_diff();
-  const TypeParam* x = this->blob_bottom_->cpu_data();
+  const TypeParam *scaled = this->blob_bottom_->cpu_diff();
+  const TypeParam *x = this->blob_bottom_->cpu_data();
   for (int i = 0; i < n; ++i) {
     EXPECT_EQ(scaled[i], x[i] * alpha);
   }
@@ -111,8 +111,8 @@ TYPED_TEST(CPUMathFunctionsTest, TestScale) {
 
 TYPED_TEST(CPUMathFunctionsTest, TestCopy) {
   const int n = this->blob_bottom_->count();
-  const TypeParam* bottom_data = this->blob_bottom_->cpu_data();
-  TypeParam* top_data = this->blob_top_->mutable_cpu_data();
+  const TypeParam *bottom_data = this->blob_bottom_->cpu_data();
+  TypeParam *top_data = this->blob_top_->mutable_cpu_data();
   caffe_copy(n, bottom_data, top_data);
   for (int i = 0; i < n; ++i) {
     EXPECT_EQ(bottom_data[i], top_data[i]);
@@ -198,6 +198,5 @@ TYPED_TEST(GPUMathFunctionsTest, TestCopy) {
 }
 
 #endif
-
 
 }  // namespace caffe

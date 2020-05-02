@@ -9,7 +9,7 @@ namespace caffe {
 
 template<typename T>
 class BlockingQueue<T>::sync {
- public:
+public:
   mutable boost::mutex mutex_;
   boost::condition_variable condition_;
 };
@@ -20,7 +20,7 @@ BlockingQueue<T>::BlockingQueue()
 }
 
 template<typename T>
-void BlockingQueue<T>::push(const T& t) {
+void BlockingQueue<T>::push(const T &t) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
   queue_.push(t);
   lock.unlock();
@@ -28,7 +28,7 @@ void BlockingQueue<T>::push(const T& t) {
 }
 
 template<typename T>
-bool BlockingQueue<T>::try_pop(T* t) {
+bool BlockingQueue<T>::try_pop(T *t) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
 
   if (queue_.empty()) {
@@ -41,12 +41,12 @@ bool BlockingQueue<T>::try_pop(T* t) {
 }
 
 template<typename T>
-T BlockingQueue<T>::pop(const string& log_on_wait) {
+T BlockingQueue<T>::pop(const string &log_on_wait) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
 
   while (queue_.empty()) {
     if (!log_on_wait.empty()) {
-      LOG_EVERY_N(INFO, 1000)<< log_on_wait;
+      LOG_EVERY_N(INFO, 1000) << log_on_wait;
     }
     sync_->condition_.wait(lock);
   }
@@ -57,7 +57,7 @@ T BlockingQueue<T>::pop(const string& log_on_wait) {
 }
 
 template<typename T>
-bool BlockingQueue<T>::try_peek(T* t) {
+bool BlockingQueue<T>::try_peek(T *t) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
 
   if (queue_.empty()) {
@@ -85,7 +85,7 @@ size_t BlockingQueue<T>::size() const {
   return queue_.size();
 }
 
-template class BlockingQueue<Batch<float>*>;
-template class BlockingQueue<Batch<double>*>;
+template class BlockingQueue<Batch<float> *>;
+template class BlockingQueue<Batch<double> *>;
 
 }  // namespace caffe

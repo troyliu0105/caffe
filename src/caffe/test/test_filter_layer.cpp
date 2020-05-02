@@ -12,11 +12,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class FilterLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   FilterLayerTest()
       : blob_bottom_data_(new Blob<Dtype>(4, 3, 6, 4)),
         blob_bottom_labels_(new Blob<Dtype>(4, 1, 1, 1)),
@@ -29,7 +29,7 @@ class FilterLayerTest : public MultiDeviceTest<TypeParam> {
     FillerParameter filler_param;
     GaussianFiller<Dtype> filler(filler_param);
     // fill the selector blob
-    Dtype* bottom_data_selector_ = blob_bottom_selector_->mutable_cpu_data();
+    Dtype *bottom_data_selector_ = blob_bottom_selector_->mutable_cpu_data();
     bottom_data_selector_[0] = 0;
     bottom_data_selector_[1] = 1;
     bottom_data_selector_[2] = 1;
@@ -52,14 +52,14 @@ class FilterLayerTest : public MultiDeviceTest<TypeParam> {
     delete blob_top_data_;
     delete blob_top_labels_;
   }
-  Blob<Dtype>* const blob_bottom_data_;
-  Blob<Dtype>* const blob_bottom_labels_;
-  Blob<Dtype>* const blob_bottom_selector_;
+  Blob<Dtype> *const blob_bottom_data_;
+  Blob<Dtype> *const blob_bottom_labels_;
+  Blob<Dtype> *const blob_bottom_selector_;
   // blobs for the top of FilterLayer
-  Blob<Dtype>* const blob_top_data_;
-  Blob<Dtype>* const blob_top_labels_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_top_data_;
+  Blob<Dtype> *const blob_top_labels_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(FilterLayerTest, TestDtypesAndDevices);
@@ -75,12 +75,12 @@ TYPED_TEST(FilterLayerTest, TestReshape) {
   EXPECT_EQ(this->blob_top_data_->shape(0), 2);
   EXPECT_EQ(this->blob_top_labels_->shape(0), 2);
   EXPECT_GT(this->blob_bottom_data_->shape(0),
-      this->blob_top_data_->shape(0));
+            this->blob_top_data_->shape(0));
   EXPECT_GT(this->blob_bottom_labels_->shape(0),
-      this->blob_top_labels_->shape(0));
+            this->blob_top_labels_->shape(0));
   for (int i = 1; i < this->blob_bottom_labels_->num_axes(); i++) {
     EXPECT_EQ(this->blob_bottom_labels_->shape(i),
-        this->blob_top_labels_->shape(i));
+              this->blob_top_labels_->shape(i));
   }
 }
 
@@ -92,14 +92,14 @@ TYPED_TEST(FilterLayerTest, TestForward) {
   layer.Reshape(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_labels_->data_at(0, 0, 0, 0),
-      this->blob_bottom_labels_->data_at(1, 0, 0, 0));
+            this->blob_bottom_labels_->data_at(1, 0, 0, 0));
   EXPECT_EQ(this->blob_top_labels_->data_at(1, 0, 0, 0),
-      this->blob_bottom_labels_->data_at(2, 0, 0, 0));
+            this->blob_bottom_labels_->data_at(2, 0, 0, 0));
 
   int dim = this->blob_top_data_->count() /
       this->blob_top_data_->shape(0);
-  const Dtype* top_data = this->blob_top_data_->cpu_data();
-  const Dtype* bottom_data = this->blob_bottom_data_->cpu_data();
+  const Dtype *top_data = this->blob_top_data_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_data_->cpu_data();
   // selector is 0 1 1 0, so we need to compare bottom(1,c,h,w)
   // with top(0,c,h,w) and bottom(2,c,h,w) with top(1,c,h,w)
   bottom_data += dim;  // bottom(1,c,h,w)
@@ -120,7 +120,7 @@ TYPED_TEST(FilterLayerTest, TestGradient) {
   // check only input 0 (data) because labels and selector
   // don't need backpropagation
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 }  // namespace caffe

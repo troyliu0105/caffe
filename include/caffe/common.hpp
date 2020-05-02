@@ -17,7 +17,7 @@
 #include <vector>
 
 #ifdef CMAKE_WINDOWS_BUILD
-  #include "caffe/export.hpp"
+#include "caffe/export.hpp"
 #endif
 #include "caffe/util/device_alternate.hpp"
 
@@ -72,6 +72,11 @@ private:\
 // is executed we will see a fatal log.
 #define NOT_IMPLEMENTED LOG(FATAL) << "Not Implemented Yet"
 
+#if (CV_MAJOR_VERSION == 4)
+#define CV_LOAD_IMAGE_COLOR cv::IMREAD_COLOR
+#define CV_LOAD_IMAGE_GRAYSCALE cv::IMREAD_GRAYSCALE
+#endif
+
 // See PR #1236
 namespace cv { class Mat; }
 
@@ -98,37 +103,37 @@ using std::vector;
 
 // A global initialization function that you should call in your main function.
 // Currently it initializes google flags and google logging.
-void GlobalInit(int* pargc, char*** pargv);
+void GlobalInit(int *pargc, char ***pargv);
 
 // A singleton class to hold common caffe stuff, such as the handler that
 // caffe is going to use for cublas, curand, etc.
 class Caffe {
- public:
+public:
   ~Caffe();
 
   // Thread local context for Caffe. Moved to common.cpp instead of
   // including boost/thread.hpp to avoid a boost/NVCC issues (#1009, #1010)
   // on OSX. Also fails on Linux with CUDA 7.0.18.
-  static Caffe& Get();
+  static Caffe &Get();
 
   enum Brew { CPU, GPU };
 
   // This random number generator facade hides boost and CUDA rng
   // implementation from one another (for cross-platform compatibility).
   class RNG {
-   public:
+  public:
     RNG();
     explicit RNG(unsigned int seed);
-    explicit RNG(const RNG&);
-    RNG& operator=(const RNG&);
-    void* generator();
-   private:
+    explicit RNG(const RNG &);
+    RNG &operator=(const RNG &);
+    void *generator();
+  private:
     class Generator;
     shared_ptr<Generator> generator_;
   };
 
   // Getters for boost rng, curand, and cublas handles
-  inline static RNG& rng_stream() {
+  inline static RNG &rng_stream() {
     if (!Get().random_generator_) {
       Get().random_generator_.reset(new RNG());
     }
@@ -170,7 +175,7 @@ class Caffe {
   inline static void set_multiprocess(bool val) { Get().multiprocess_ = val; }
   inline static bool root_solver() { return Get().solver_rank_ == 0; }
 
- protected:
+protected:
 #ifndef CPU_ONLY
   cublasHandle_t cublas_handle_;
   curandGenerator_t curand_generator_;
@@ -184,11 +189,11 @@ class Caffe {
   int solver_rank_;
   bool multiprocess_;
 
- private:
+private:
   // The private constructor to avoid duplicate instantiation.
   Caffe();
 
-  DISABLE_COPY_AND_ASSIGN(Caffe);
+DISABLE_COPY_AND_ASSIGN(Caffe);
 };
 
 }  // namespace caffe

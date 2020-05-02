@@ -10,15 +10,18 @@
 
 namespace caffe {
 
-template <typename Dtype>
+template<typename Dtype>
 class BlobSimpleTest : public ::testing::Test {
- protected:
+protected:
   BlobSimpleTest()
       : blob_(new Blob<Dtype>()),
         blob_preshaped_(new Blob<Dtype>(2, 3, 4, 5)) {}
-  virtual ~BlobSimpleTest() { delete blob_; delete blob_preshaped_; }
-  Blob<Dtype>* const blob_;
-  Blob<Dtype>* const blob_preshaped_;
+  virtual ~BlobSimpleTest() {
+    delete blob_;
+    delete blob_preshaped_;
+  }
+  Blob<Dtype> *const blob_;
+  Blob<Dtype> *const blob_preshaped_;
 };
 
 TYPED_TEST_CASE(BlobSimpleTest, TestDtypes);
@@ -114,16 +117,16 @@ TYPED_TEST(BlobSimpleTest, TestLegacyBlobProtoShapeEquals) {
   EXPECT_FALSE(this->blob_->ShapeEquals(blob_proto));
 }
 
-template <typename TypeParam>
+template<typename TypeParam>
 class BlobMathTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
- protected:
+protected:
   BlobMathTest()
       : blob_(new Blob<Dtype>(2, 3, 4, 5)),
         epsilon_(1e-6) {}
 
   virtual ~BlobMathTest() { delete blob_; }
-  Blob<Dtype>* const blob_;
+  Blob<Dtype> *const blob_;
   Dtype epsilon_;
 };
 
@@ -141,7 +144,7 @@ TYPED_TEST(BlobMathTest, TestSumOfSquares) {
   UniformFiller<Dtype> filler(filler_param);
   filler.Fill(this->blob_);
   Dtype expected_sumsq = 0;
-  const Dtype* data = this->blob_->cpu_data();
+  const Dtype *data = this->blob_->cpu_data();
   for (int i = 0; i < this->blob_->count(); ++i) {
     expected_sumsq += data[i] * data[i];
   }
@@ -196,7 +199,7 @@ TYPED_TEST(BlobMathTest, TestAsum) {
   UniformFiller<Dtype> filler(filler_param);
   filler.Fill(this->blob_);
   Dtype expected_asum = 0;
-  const Dtype* data = this->blob_->cpu_data();
+  const Dtype *data = this->blob_->cpu_data();
   for (int i = 0; i < this->blob_->count(); ++i) {
     expected_asum += std::fabs(data[i]);
   }
@@ -270,7 +273,7 @@ TYPED_TEST(BlobMathTest, TestScaleData) {
 
   // Check scale_diff too.
   const Dtype kDataToDiffScaleFactor = 7;
-  const Dtype* data = this->blob_->cpu_data();
+  const Dtype *data = this->blob_->cpu_data();
   caffe_cpu_scale(this->blob_->count(), kDataToDiffScaleFactor, data,
                   this->blob_->mutable_cpu_diff());
   const Dtype expected_asum_before_scale = asum_before_scale * kDataScaleFactor;

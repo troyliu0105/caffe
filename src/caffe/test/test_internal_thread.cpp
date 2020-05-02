@@ -8,7 +8,6 @@
 
 namespace caffe {
 
-
 class InternalThreadTest : public ::testing::Test {};
 
 TEST_F(InternalThreadTest, TestStartAndExit) {

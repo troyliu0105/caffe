@@ -17,22 +17,22 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class NetTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   NetTest() : seed_(1701) {}
 
-  virtual void InitNetFromProtoString(const string& proto) {
+  virtual void InitNetFromProtoString(const string &proto) {
     NetParameter param;
     CHECK(google::protobuf::TextFormat::ParseFromString(proto, &param));
     net_.reset(new Net<Dtype>(param));
   }
 
-  virtual void InitNetFromProtoFileWithState(const string& proto,
-      Phase phase = caffe::TRAIN, const int level = 0,
-      const vector<string>* stages = NULL) {
+  virtual void InitNetFromProtoFileWithState(const string &proto,
+                                             Phase phase = caffe::TRAIN, const int level = 0,
+                                             const vector<string> *stages = NULL) {
     NetParameter param;
     CHECK(google::protobuf::TextFormat::ParseFromString(proto, &param));
     string param_file;
@@ -42,9 +42,9 @@ class NetTest : public MultiDeviceTest<TypeParam> {
   }
 
   virtual void CopyNetBlobs(const bool copy_diff,
-      vector<shared_ptr<Blob<Dtype> > >* blobs_copy) {
+                            vector<shared_ptr<Blob<Dtype> > > *blobs_copy) {
     CHECK(net_);
-    const vector<shared_ptr<Blob<Dtype> > >& net_blobs = net_->blobs();
+    const vector<shared_ptr<Blob<Dtype> > > &net_blobs = net_->blobs();
     blobs_copy->clear();
     blobs_copy->resize(net_blobs.size());
     const bool kReshape = true;
@@ -55,9 +55,9 @@ class NetTest : public MultiDeviceTest<TypeParam> {
   }
 
   virtual void CopyNetParams(const bool copy_diff,
-      vector<shared_ptr<Blob<Dtype> > >* params_copy) {
+                             vector<shared_ptr<Blob<Dtype> > > *params_copy) {
     CHECK(net_);
-    const vector<shared_ptr<Blob<Dtype> > >& net_params = net_->params();
+    const vector<shared_ptr<Blob<Dtype> > > &net_params = net_->params();
     params_copy->clear();
     params_copy->resize(net_params.size());
     const bool kReshape = true;
@@ -204,12 +204,12 @@ class NetTest : public MultiDeviceTest<TypeParam> {
     InitNetFromProtoString(proto);
   }
 
-  virtual void InitTrickyNet(Dtype* loss_weight = NULL) {
+  virtual void InitTrickyNet(Dtype *loss_weight = NULL) {
     ostringstream loss_weight_stream;
     if (loss_weight) {
       loss_weight_stream << "  loss_weight: " << *loss_weight << " ";
     }
-    const string& proto =
+    const string &proto =
         "name: 'TrickyTestNetwork' "
         "layer { "
         "  name: 'data' "
@@ -284,10 +284,10 @@ class NetTest : public MultiDeviceTest<TypeParam> {
         "layer { "
         "  name: 'loss' "
         "  type: 'SoftmaxWithLoss' " +
-        loss_weight_stream.str() +
-        "  bottom: 'transformed_data' "
-        "  bottom: 'transformed_label' "
-        "} ";
+            loss_weight_stream.str() +
+            "  bottom: 'transformed_data' "
+            "  bottom: 'transformed_label' "
+            "} ";
     InitNetFromProtoString(proto);
   }
 
@@ -295,96 +295,96 @@ class NetTest : public MultiDeviceTest<TypeParam> {
   // midnet_loss_weight is the loss weight for the first 'InnerProduct' layer
   // output.  Should both default to 0.0 if unspecified (i.e., if NULL is
   // passed to this function).
-  virtual void InitUnsharedWeightsNet(const Dtype* loss_weight = NULL,
-      const Dtype* midnet_loss_weight = NULL,
-      const bool force_backward = false, const bool bias_term = false,
-      const Dtype blobs_lr_w1 = 1, const Dtype blobs_lr_b1 = 2,
-      const Dtype blobs_lr_w2 = 1, const Dtype blobs_lr_b2 = 2) {
-    string bias_str = bias_term ? "true ":"false ";
+  virtual void InitUnsharedWeightsNet(const Dtype *loss_weight = NULL,
+                                      const Dtype *midnet_loss_weight = NULL,
+                                      const bool force_backward = false, const bool bias_term = false,
+                                      const Dtype blobs_lr_w1 = 1, const Dtype blobs_lr_b1 = 2,
+                                      const Dtype blobs_lr_w2 = 1, const Dtype blobs_lr_b2 = 2) {
+    string bias_str = bias_term ? "true " : "false ";
     ostringstream proto;
     proto << "name: 'UnsharedWeightsNetwork' ";
     if (force_backward) {
       proto << "force_backward: true ";
     }
     proto <<
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    num: 5 "
-        "    channels: 2 "
-        "    height: 3 "
-        "    width: 4 "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "  } "
-        "  top: 'data' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct1' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: " << bias_str <<
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 10 "
-        "    } "
-        "  } "
-        "  param { "
-        "    name: 'unsharedweights1' "
-        "    lr_mult: " << blobs_lr_w1 <<
-        "  } ";
+          "layer { "
+          "  name: 'data' "
+          "  type: 'DummyData' "
+          "  dummy_data_param { "
+          "    num: 5 "
+          "    channels: 2 "
+          "    height: 3 "
+          "    width: 4 "
+          "    data_filler { "
+          "      type: 'gaussian' "
+          "      std: 0.01 "
+          "    } "
+          "  } "
+          "  top: 'data' "
+          "} "
+          "layer { "
+          "  name: 'innerproduct1' "
+          "  type: 'InnerProduct' "
+          "  inner_product_param { "
+          "    num_output: 10 "
+          "    bias_term: " << bias_str <<
+          "    weight_filler { "
+          "      type: 'gaussian' "
+          "      std: 10 "
+          "    } "
+          "  } "
+          "  param { "
+          "    name: 'unsharedweights1' "
+          "    lr_mult: " << blobs_lr_w1 <<
+          "  } ";
     if (bias_term) {
       proto << "  param { lr_mult: " << blobs_lr_b1 << " } ";
     }
     proto <<
-        "  bottom: 'data' "
-        "  top: 'innerproduct1' ";
+          "  bottom: 'data' "
+          "  top: 'innerproduct1' ";
     if (midnet_loss_weight) {
       proto << "  loss_weight: " << *midnet_loss_weight << " ";
     }
     proto <<
-        "} "
-        "layer { "
-        "  name: 'innerproduct2' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: " << bias_str <<
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 10 "
-        "    } "
-        "  } "
-        "  param { "
-        "    name: 'unsharedweights2' "
-        "    lr_mult: " << blobs_lr_w2 <<
-        "  } ";
+          "} "
+          "layer { "
+          "  name: 'innerproduct2' "
+          "  type: 'InnerProduct' "
+          "  inner_product_param { "
+          "    num_output: 10 "
+          "    bias_term: " << bias_str <<
+          "    weight_filler { "
+          "      type: 'gaussian' "
+          "      std: 10 "
+          "    } "
+          "  } "
+          "  param { "
+          "    name: 'unsharedweights2' "
+          "    lr_mult: " << blobs_lr_w2 <<
+          "  } ";
     if (bias_term) {
       proto << "  param { lr_mult: " << blobs_lr_b2 << " } ";
     }
     proto <<
-        "  bottom: 'data' "
-        "  top: 'innerproduct2' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'EuclideanLoss' ";
+          "  bottom: 'data' "
+          "  top: 'innerproduct2' "
+          "} "
+          "layer { "
+          "  name: 'loss' "
+          "  type: 'EuclideanLoss' ";
     if (loss_weight) {
       proto << "  loss_weight: " << *loss_weight << " ";
     }
     proto <<
-        "  bottom: 'innerproduct1' "
-        "  bottom: 'innerproduct2' "
-        "} ";
+          "  bottom: 'innerproduct1' "
+          "  bottom: 'innerproduct2' "
+          "} ";
     InitNetFromProtoString(proto.str());
   }
 
   virtual void InitSharedWeightsNet() {
-    const string& proto =
+    const string &proto =
         "name: 'SharedWeightsNetwork' "
         "layer { "
         "  name: 'data' "
@@ -441,7 +441,7 @@ class NetTest : public MultiDeviceTest<TypeParam> {
   }
 
   virtual void InitDiffDataUnsharedWeightsNet() {
-    const string& proto =
+    const string &proto =
         "name: 'DiffDataUnsharedWeightsNetwork' "
         "layer { "
         "  name: 'data' "
@@ -503,7 +503,7 @@ class NetTest : public MultiDeviceTest<TypeParam> {
   }
 
   virtual void InitDiffDataSharedWeightsNet() {
-    const string& proto =
+    const string &proto =
         "name: 'DiffDataSharedWeightsNetwork' "
         "layer { "
         "  name: 'data' "
@@ -565,7 +565,7 @@ class NetTest : public MultiDeviceTest<TypeParam> {
   }
 
   virtual void InitReshapableNet() {
-    const string& proto =
+    const string &proto =
         "name: 'ReshapableNetwork' "
         "layer { "
         "  name: 'data' "
@@ -631,89 +631,89 @@ class NetTest : public MultiDeviceTest<TypeParam> {
 
   virtual void InitSkipPropNet(bool test_skip_true) {
     string proto =
-      "name: 'SkipPropTestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'DummyData' "
-      "  dummy_data_param { "
-      "    shape { "
-      "      dim: 5 "
-      "      dim: 2 "
-      "      dim: 3 "
-      "      dim: 4 "
-      "    } "
-      "    data_filler { "
-      "      type: 'gaussian' "
-      "      std: 0.01 "
-      "    } "
-      "    shape { "
-      "      dim: 5 "
-      "    } "
-      "    data_filler { "
-      "      type: 'constant' "
-      "      value: 0 "
-      "    } "
-      "  } "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'silence' "
-      "  bottom: 'label' "
-      "  type: 'Silence' "
-      "} "
-      "layer { "
-      "  name: 'innerproduct' "
-      "  type: 'InnerProduct' "
-      "  inner_product_param { "
-      "    num_output: 1 "
-      "    weight_filler { "
-      "      type: 'gaussian' "
-      "      std: 0.01 "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "      value: 0 "
-      "    } "
-      "  } "
-      "  param { "
-      "    lr_mult: 1 "
-      "    decay_mult: 1 "
-      "  } "
-      "  param { "
-      "    lr_mult: 2 "
-      "    decay_mult: 0 "
-      "  } "
-      "  bottom: 'data' "
-      "  top: 'innerproduct' "
-      "} "
-      "layer { "
-      "  name: 'ip_fake_labels' "
-      "  type: 'InnerProduct' "
-      "  inner_product_param { "
-      "    num_output: 1 "
-      "    weight_filler { "
-      "      type: 'gaussian' "
-      "      std: 0.01 "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "      value: 0 "
-      "    } "
-      "  } "
-      "  bottom: 'data' "
-      "  top: 'fake_labels' "
-      "} "
-      "layer { "
-      "  name: 'argmax' "
-      "  bottom: 'fake_labels' "
-      "  top: 'label_argmax' "
-      "  type: 'ArgMax' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  bottom: 'innerproduct' "
-      "  bottom: 'label_argmax' ";
+        "name: 'SkipPropTestNetwork' "
+        "layer { "
+        "  name: 'data' "
+        "  type: 'DummyData' "
+        "  dummy_data_param { "
+        "    shape { "
+        "      dim: 5 "
+        "      dim: 2 "
+        "      dim: 3 "
+        "      dim: 4 "
+        "    } "
+        "    data_filler { "
+        "      type: 'gaussian' "
+        "      std: 0.01 "
+        "    } "
+        "    shape { "
+        "      dim: 5 "
+        "    } "
+        "    data_filler { "
+        "      type: 'constant' "
+        "      value: 0 "
+        "    } "
+        "  } "
+        "  top: 'data' "
+        "  top: 'label' "
+        "} "
+        "layer { "
+        "  name: 'silence' "
+        "  bottom: 'label' "
+        "  type: 'Silence' "
+        "} "
+        "layer { "
+        "  name: 'innerproduct' "
+        "  type: 'InnerProduct' "
+        "  inner_product_param { "
+        "    num_output: 1 "
+        "    weight_filler { "
+        "      type: 'gaussian' "
+        "      std: 0.01 "
+        "    } "
+        "    bias_filler { "
+        "      type: 'constant' "
+        "      value: 0 "
+        "    } "
+        "  } "
+        "  param { "
+        "    lr_mult: 1 "
+        "    decay_mult: 1 "
+        "  } "
+        "  param { "
+        "    lr_mult: 2 "
+        "    decay_mult: 0 "
+        "  } "
+        "  bottom: 'data' "
+        "  top: 'innerproduct' "
+        "} "
+        "layer { "
+        "  name: 'ip_fake_labels' "
+        "  type: 'InnerProduct' "
+        "  inner_product_param { "
+        "    num_output: 1 "
+        "    weight_filler { "
+        "      type: 'gaussian' "
+        "      std: 0.01 "
+        "    } "
+        "    bias_filler { "
+        "      type: 'constant' "
+        "      value: 0 "
+        "    } "
+        "  } "
+        "  bottom: 'data' "
+        "  top: 'fake_labels' "
+        "} "
+        "layer { "
+        "  name: 'argmax' "
+        "  bottom: 'fake_labels' "
+        "  top: 'label_argmax' "
+        "  type: 'ArgMax' "
+        "} "
+        "layer { "
+        "  name: 'loss' "
+        "  bottom: 'innerproduct' "
+        "  bottom: 'label_argmax' ";
     if (test_skip_true)
       proto += "  propagate_down: true "
                "  propagate_down: false ";
@@ -721,121 +721,121 @@ class NetTest : public MultiDeviceTest<TypeParam> {
       proto += "  propagate_down: true "
                "  propagate_down: true ";
     proto +=
-      "  top: 'cross_entropy_loss' "
-      "  type: 'SigmoidCrossEntropyLoss' "
-      "  loss_weight: 0.1 "
-      "} ";
+        "  top: 'cross_entropy_loss' "
+        "  type: 'SigmoidCrossEntropyLoss' "
+        "  loss_weight: 0.1 "
+        "} ";
     InitNetFromProtoString(proto);
   }
 
   virtual void InitForcePropNet(bool test_force_true) {
     string proto =
-      "name: 'ForcePropTestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'DummyData' "
-      "  dummy_data_param { "
-      "    shape { "
-      "      dim: 5 "
-      "      dim: 2 "
-      "      dim: 3 "
-      "      dim: 4 "
-      "    } "
-      "    data_filler { "
-      "      type: 'gaussian' "
-      "      std: 0.01 "
-      "    } "
-      "    shape { "
-      "      dim: 5 "
-      "    } "
-      "    data_filler { "
-      "      type: 'constant' "
-      "      value: 0 "
-      "    } "
-      "  } "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerproduct' "
-      "  type: 'InnerProduct' "
-      "  inner_product_param { "
-      "    num_output: 1 "
-      "    weight_filler { "
-      "      type: 'gaussian' "
-      "      std: 0.01 "
-      "    } "
-      "  } "
-      "  bottom: 'data' "
-      "  top: 'innerproduct' ";
+        "name: 'ForcePropTestNetwork' "
+        "layer { "
+        "  name: 'data' "
+        "  type: 'DummyData' "
+        "  dummy_data_param { "
+        "    shape { "
+        "      dim: 5 "
+        "      dim: 2 "
+        "      dim: 3 "
+        "      dim: 4 "
+        "    } "
+        "    data_filler { "
+        "      type: 'gaussian' "
+        "      std: 0.01 "
+        "    } "
+        "    shape { "
+        "      dim: 5 "
+        "    } "
+        "    data_filler { "
+        "      type: 'constant' "
+        "      value: 0 "
+        "    } "
+        "  } "
+        "  top: 'data' "
+        "  top: 'label' "
+        "} "
+        "layer { "
+        "  name: 'innerproduct' "
+        "  type: 'InnerProduct' "
+        "  inner_product_param { "
+        "    num_output: 1 "
+        "    weight_filler { "
+        "      type: 'gaussian' "
+        "      std: 0.01 "
+        "    } "
+        "  } "
+        "  bottom: 'data' "
+        "  top: 'innerproduct' ";
     if (test_force_true) {
       proto += "  propagate_down: true ";
     }
     proto +=
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  bottom: 'innerproduct' "
-      "  bottom: 'label' "
-      "  top: 'cross_entropy_loss' "
-      "  type: 'SigmoidCrossEntropyLoss' "
-      "} ";
+        "} "
+        "layer { "
+        "  name: 'loss' "
+        "  bottom: 'innerproduct' "
+        "  bottom: 'label' "
+        "  top: 'cross_entropy_loss' "
+        "  type: 'SigmoidCrossEntropyLoss' "
+        "} ";
     InitNetFromProtoString(proto);
   }
 
   virtual void InitAllInOneNet(Phase phase = caffe::TRAIN,
-      const int level = 0, const vector<string>* stages = NULL) {
+                               const int level = 0, const vector<string> *stages = NULL) {
     string proto =
-      "name: 'All-in-one Network'"
-      "layer { "
-      "  name: 'train-data' "
-      "  type: 'DummyData' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "  dummy_data_param { "
-      "    shape { dim: 1 dim: 10 } "
-      "    shape { dim: 1 dim: 1 } "
-      "  } "
-      "  include { phase: TRAIN stage: 'train' } "
-      "} "
-      "layer { "
-      "  name: 'val-data' "
-      "  type: 'DummyData' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "  dummy_data_param { "
-      "    shape { dim: 1 dim: 10 } "
-      "    shape { dim: 1 dim: 1 } "
-      "  } "
-      "  include { phase: TEST stage: 'val' } "
-      "} "
-      "layer { "
-      "  name: 'deploy-data' "
-      "  type: 'Input' "
-      "  top: 'data' "
-      "  input_param { "
-      "    shape { dim: 1 dim: 10 } "
-      "  } "
-      "  include { phase: TEST stage: 'deploy' } "
-      "} "
-      "layer { "
-      "  name: 'ip' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'ip' "
-      "  inner_product_param { "
-      "    num_output: 2 "
-      "  } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'ip' "
-      "  bottom: 'label' "
-      "  top: 'loss' "
-      "  include { phase: TRAIN stage: 'train' } "
-      "  include { phase: TEST stage: 'val' } "
-      "} ";
+        "name: 'All-in-one Network'"
+        "layer { "
+        "  name: 'train-data' "
+        "  type: 'DummyData' "
+        "  top: 'data' "
+        "  top: 'label' "
+        "  dummy_data_param { "
+        "    shape { dim: 1 dim: 10 } "
+        "    shape { dim: 1 dim: 1 } "
+        "  } "
+        "  include { phase: TRAIN stage: 'train' } "
+        "} "
+        "layer { "
+        "  name: 'val-data' "
+        "  type: 'DummyData' "
+        "  top: 'data' "
+        "  top: 'label' "
+        "  dummy_data_param { "
+        "    shape { dim: 1 dim: 10 } "
+        "    shape { dim: 1 dim: 1 } "
+        "  } "
+        "  include { phase: TEST stage: 'val' } "
+        "} "
+        "layer { "
+        "  name: 'deploy-data' "
+        "  type: 'Input' "
+        "  top: 'data' "
+        "  input_param { "
+        "    shape { dim: 1 dim: 10 } "
+        "  } "
+        "  include { phase: TEST stage: 'deploy' } "
+        "} "
+        "layer { "
+        "  name: 'ip' "
+        "  type: 'InnerProduct' "
+        "  bottom: 'data' "
+        "  top: 'ip' "
+        "  inner_product_param { "
+        "    num_output: 2 "
+        "  } "
+        "} "
+        "layer { "
+        "  name: 'loss' "
+        "  type: 'SoftmaxWithLoss' "
+        "  bottom: 'ip' "
+        "  bottom: 'label' "
+        "  top: 'loss' "
+        "  include { phase: TRAIN stage: 'train' } "
+        "  include { phase: TEST stage: 'val' } "
+        "} ";
     InitNetFromProtoFileWithState(proto, phase, level, stages);
   }
 
@@ -881,7 +881,7 @@ TYPED_TEST(NetTest, TestGetLayerByName) {
 
 TYPED_TEST(NetTest, TestBottomNeedBackward) {
   this->InitTinyNet();
-  const vector<vector<bool> >& bottom_need_backward =
+  const vector<vector<bool> > &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(3, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -895,7 +895,7 @@ TYPED_TEST(NetTest, TestBottomNeedBackward) {
 TYPED_TEST(NetTest, TestBottomNeedBackwardForce) {
   const bool force_backward = true;
   this->InitTinyNet(force_backward);
-  const vector<vector<bool> >& bottom_need_backward =
+  const vector<vector<bool> > &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(3, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -909,7 +909,7 @@ TYPED_TEST(NetTest, TestBottomNeedBackwardForce) {
 TYPED_TEST(NetTest, TestBottomNeedBackwardEuclideanForce) {
   const bool force_backward = true;
   this->InitTinyNetEuclidean(force_backward);
-  const vector<vector<bool> >& bottom_need_backward =
+  const vector<vector<bool> > &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(3, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -922,7 +922,7 @@ TYPED_TEST(NetTest, TestBottomNeedBackwardEuclideanForce) {
 
 TYPED_TEST(NetTest, TestBottomNeedBackwardTricky) {
   this->InitTrickyNet();
-  const vector<vector<bool> >& bottom_need_backward =
+  const vector<vector<bool> > &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(4, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -943,7 +943,7 @@ TYPED_TEST(NetTest, TestLossWeight) {
   // First, compute the loss and gradients with no loss_weight specified.
   // In this case, the loss weight for the 'EuclideanLoss' layer should default
   // to 1.
-  vector<Blob<Dtype>*> bottom;
+  vector<Blob<Dtype> *> bottom;
   Caffe::set_random_seed(this->seed_);
   const bool kForceBackward = true;
   this->InitUnsharedWeightsNet(NULL, NULL, kForceBackward);
@@ -965,8 +965,8 @@ TYPED_TEST(NetTest, TestLossWeight) {
     const Dtype weighted_loss = this->net_->ForwardBackward();
     const Dtype error_margin = kErrorMargin * fabs(kLossWeights[i]);
     EXPECT_NEAR(loss * kLossWeights[i], weighted_loss, error_margin)
-        << "loss weight = " << kLossWeights[i];
-    const vector<shared_ptr<Blob<Dtype> > >& weighted_blobs =
+            << "loss weight = " << kLossWeights[i];
+    const vector<shared_ptr<Blob<Dtype> > > &weighted_blobs =
         this->net_->blobs();
     ASSERT_EQ(blob_grads.size(), weighted_blobs.size());
     for (int j = 0; j < blob_grads.size(); ++j) {
@@ -976,7 +976,7 @@ TYPED_TEST(NetTest, TestLossWeight) {
                     weighted_blobs[j]->cpu_diff()[k], error_margin);
       }
     }
-    const vector<shared_ptr<Blob<Dtype> > >& weighted_params =
+    const vector<shared_ptr<Blob<Dtype> > > &weighted_params =
         this->net_->params();
     ASSERT_EQ(param_grads.size(), weighted_params.size());
     for (int j = 0; j < param_grads.size(); ++j) {
@@ -1015,8 +1015,8 @@ TYPED_TEST(NetTest, TestLossWeightMidNet) {
     const Dtype weighted_loss = this->net_->ForwardBackward();
     const Dtype error_margin = kErrorMargin * fabs(kLossWeights[i]);
     EXPECT_NEAR(loss * kLossWeights[i], weighted_loss, error_margin)
-        << "loss weight = " << kLossWeights[i];
-    const shared_ptr<Blob<Dtype> >& weighted_blob =
+            << "loss weight = " << kLossWeights[i];
+    const shared_ptr<Blob<Dtype> > &weighted_blob =
         this->net_->blob_by_name("data");
     ASSERT_EQ(data_grad.count(), weighted_blob->count());
     for (int j = 0; j < data_grad.count(); ++j) {
@@ -1064,12 +1064,12 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
   this->InitUnsharedWeightsNet(&loss_weight, &midnet_loss_weight,
                                kForceBackward);
   const Dtype loss_main_3 = this->net_->ForwardBackward();
-  const vector<shared_ptr<Blob<Dtype> > >& blob_grads_loss_3 =
+  const vector<shared_ptr<Blob<Dtype> > > &blob_grads_loss_3 =
       this->net_->blobs();
   ASSERT_EQ(blob_grads.size(), blob_grads_loss_3.size());
   ASSERT_EQ(blob_grads_loss_2.size(), blob_grads_loss_3.size());
   for (int j = 0; j < blob_grads.size(); ++j) {
-    const string& blob_name = this->net_->blob_names()[j];
+    const string &blob_name = this->net_->blob_names()[j];
     bool grad_should_change = true;
     if (blob_name == "innerproduct1_innerproduct1_0_split_0") {
       grad_should_change = false;
@@ -1078,9 +1078,9 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
     ASSERT_EQ(blob_grads_loss_2[j]->count(), blob_grads_loss_3[j]->count());
     for (int k = 0; k < blob_grads[j]->count(); ++k) {
       const Dtype grad_diff_2 = blob_grads_loss_2[j]->cpu_diff()[k] -
-                                    blob_grads[j]->cpu_diff()[k];
+          blob_grads[j]->cpu_diff()[k];
       const Dtype grad_diff_3 = blob_grads_loss_3[j]->cpu_diff()[k] -
-                                    blob_grads[j]->cpu_diff()[k];
+          blob_grads[j]->cpu_diff()[k];
       if (grad_should_change) {
         // Test non-triviality.
         const Dtype kMinGradDiffAbsValue = 1e-4;
@@ -1108,13 +1108,13 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
   this->InitUnsharedWeightsNet(&loss_weight, &midnet_loss_weight,
                                kForceBackward);
   const Dtype loss_midnet_3 = this->net_->ForwardBackward();
-  const vector<shared_ptr<Blob<Dtype> > >& blob_grads_midnet_loss_3 =
+  const vector<shared_ptr<Blob<Dtype> > > &blob_grads_midnet_loss_3 =
       this->net_->blobs();
   ASSERT_EQ(blob_grads.size(), blob_grads_midnet_loss_3.size());
   ASSERT_EQ(blob_grads_loss_2.size(), blob_grads_midnet_loss_3.size());
-  const vector<string>& blob_names = this->net_->blob_names();
+  const vector<string> &blob_names = this->net_->blob_names();
   for (int j = 0; j < blob_grads.size(); ++j) {
-    const string& blob_name = blob_names[j];
+    const string &blob_name = blob_names[j];
     bool grad_should_change = false;
     if (blob_name == "innerproduct1" ||
         blob_name == "innerproduct1_innerproduct1_0_split_0" ||
@@ -1125,9 +1125,9 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
     ASSERT_EQ(blob_grads[j]->count(), blob_grads_loss_2[j]->count());
     for (int k = 0; k < blob_grads[j]->count(); ++k) {
       const Dtype grad_diff_2 = blob_grads_loss_2[j]->cpu_diff()[k] -
-                                    blob_grads[j]->cpu_diff()[k];
+          blob_grads[j]->cpu_diff()[k];
       const Dtype grad_diff_3 = blob_grads_midnet_loss_3[j]->cpu_diff()[k] -
-                                    blob_grads[j]->cpu_diff()[k];
+          blob_grads[j]->cpu_diff()[k];
       if (grad_should_change) {
         // Test non-triviality.
         const Dtype kMinGradDiffAbsValue = 1e-4;
@@ -1183,14 +1183,14 @@ TYPED_TEST(NetTest, TestSharedWeightsDataNet) {
 TYPED_TEST(NetTest, TestUnsharedWeightsDiffNet) {
   typedef typename TypeParam::Dtype Dtype;
   this->InitUnsharedWeightsNet();
-  Net<Dtype>* net = this->net_.get();
+  Net<Dtype> *net = this->net_.get();
   net->Forward();
   net->Backward();
-  Layer<Dtype>* ip1_layer = net->layer_by_name("innerproduct1").get();
-  Layer<Dtype>* ip2_layer = net->layer_by_name("innerproduct2").get();
+  Layer<Dtype> *ip1_layer = net->layer_by_name("innerproduct1").get();
+  Layer<Dtype> *ip2_layer = net->layer_by_name("innerproduct2").get();
   const int count = ip1_layer->blobs()[0]->count();
-  const Dtype* grad1 = ip1_layer->blobs()[0]->cpu_diff();
-  const Dtype* grad2 = ip2_layer->blobs()[0]->cpu_diff();
+  const Dtype *grad1 = ip1_layer->blobs()[0]->cpu_diff();
+  const Dtype *grad2 = ip2_layer->blobs()[0]->cpu_diff();
   for (int i = 0; i < count; ++i) {
     EXPECT_GT(fabs(grad1[i]), 0);
     EXPECT_FLOAT_EQ(-1 * grad1[i], grad2[i]);
@@ -1200,16 +1200,16 @@ TYPED_TEST(NetTest, TestUnsharedWeightsDiffNet) {
 TYPED_TEST(NetTest, TestSharedWeightsDiffNet) {
   typedef typename TypeParam::Dtype Dtype;
   this->InitSharedWeightsNet();
-  Net<Dtype>* net = this->net_.get();
+  Net<Dtype> *net = this->net_.get();
   Dtype loss;
   net->Forward(&loss);
   net->Backward();
   EXPECT_FLOAT_EQ(loss, 0);
-  Layer<Dtype>* ip1_layer = net->layer_by_name("innerproduct1").get();
-  Layer<Dtype>* ip2_layer = net->layer_by_name("innerproduct2").get();
+  Layer<Dtype> *ip1_layer = net->layer_by_name("innerproduct1").get();
+  Layer<Dtype> *ip2_layer = net->layer_by_name("innerproduct2").get();
   const int count = ip1_layer->blobs()[0]->count();
-  const Dtype* grad1 = ip1_layer->blobs()[0]->cpu_diff();
-  const Dtype* grad2 = ip2_layer->blobs()[0]->cpu_diff();
+  const Dtype *grad1 = ip1_layer->blobs()[0]->cpu_diff();
+  const Dtype *grad2 = ip2_layer->blobs()[0]->cpu_diff();
   for (int i = 0; i < count; ++i) {
     EXPECT_FLOAT_EQ(0, grad1[i]);
     EXPECT_FLOAT_EQ(0, grad2[i]);
@@ -1222,8 +1222,8 @@ TYPED_TEST(NetTest, TestSharedWeightsUpdate) {
   this->InitDiffDataSharedWeightsNet();
   EXPECT_EQ(this->net_->layer_names()[1], "innerproduct1");
   EXPECT_EQ(this->net_->layer_names()[2], "innerproduct2");
-  Blob<Dtype>* ip1_weights = this->net_->layers()[1]->blobs()[0].get();
-  Blob<Dtype>* ip2_weights = this->net_->layers()[2]->blobs()[0].get();
+  Blob<Dtype> *ip1_weights = this->net_->layers()[1]->blobs()[0].get();
+  Blob<Dtype> *ip2_weights = this->net_->layers()[2]->blobs()[0].get();
   // Check that data and diff blobs of shared weights share the same memory
   // locations.
   EXPECT_EQ(ip1_weights->cpu_data(), ip2_weights->cpu_data());
@@ -1243,9 +1243,9 @@ TYPED_TEST(NetTest, TestSharedWeightsUpdate) {
   }
   caffe_axpy(count, Dtype(-1), shared_params.cpu_diff(),
              shared_params.mutable_cpu_data());
-  const Dtype* expected_updated_params = shared_params.cpu_data();
+  const Dtype *expected_updated_params = shared_params.cpu_data();
   this->net_->Update();
-  const Dtype* actual_updated_params = ip1_weights->cpu_data();
+  const Dtype *actual_updated_params = ip1_weights->cpu_data();
   for (int i = 0; i < count; ++i) {
     EXPECT_EQ(expected_updated_params[i], actual_updated_params[i]);
   }
@@ -1284,11 +1284,11 @@ TYPED_TEST(NetTest, TestSharedWeightsUpdate) {
              unshared_params1.mutable_cpu_data());
   caffe_axpy(count, Dtype(-1), ip2_weights->cpu_diff(),
              unshared_params2.mutable_cpu_data());
-  const Dtype* expected_updated_params1 = unshared_params1.cpu_data();
-  const Dtype* expected_updated_params2 = unshared_params2.cpu_data();
+  const Dtype *expected_updated_params1 = unshared_params1.cpu_data();
+  const Dtype *expected_updated_params2 = unshared_params2.cpu_data();
   this->net_->Update();
-  const Dtype* actual_updated_params1 = ip1_weights->cpu_data();
-  const Dtype* actual_updated_params2 = ip2_weights->cpu_data();
+  const Dtype *actual_updated_params1 = ip1_weights->cpu_data();
+  const Dtype *actual_updated_params2 = ip2_weights->cpu_data();
   for (int i = 0; i < count; ++i) {
     EXPECT_EQ(expected_updated_params1[i], actual_updated_params1[i]);
     EXPECT_EQ(expected_updated_params2[i], actual_updated_params2[i]);
@@ -1305,8 +1305,8 @@ TYPED_TEST(NetTest, TestSharedWeightsResume) {
   this->InitDiffDataSharedWeightsNet();
   EXPECT_EQ(this->net_->layer_names()[1], "innerproduct1");
   EXPECT_EQ(this->net_->layer_names()[2], "innerproduct2");
-  Blob<Dtype>* ip1_weights = this->net_->layers()[1]->blobs()[0].get();
-  Blob<Dtype>* ip2_weights = this->net_->layers()[2]->blobs()[0].get();
+  Blob<Dtype> *ip1_weights = this->net_->layers()[1]->blobs()[0].get();
+  Blob<Dtype> *ip2_weights = this->net_->layers()[2]->blobs()[0].get();
   // Check that data and diff blobs of shared weights share the same memory
   // locations.
   EXPECT_EQ(ip1_weights->cpu_data(), ip2_weights->cpu_data());
@@ -1345,24 +1345,24 @@ TYPED_TEST(NetTest, TestSharedWeightsResume) {
 TYPED_TEST(NetTest, TestParamPropagateDown) {
   typedef typename TypeParam::Dtype Dtype;
   const bool kBiasTerm = true, kForceBackward = false;
-  const Dtype* kLossWeight1 = NULL;
-  const Dtype* kLossWeight2 = NULL;
+  const Dtype *kLossWeight1 = NULL;
+  const Dtype *kLossWeight2 = NULL;
 
   // Run the net with all params learned; check that gradients are non-zero.
   Caffe::set_random_seed(this->seed_);
   Dtype blobs_lr_w1 = 1, blobs_lr_w2 = 1, blobs_lr_b1 = 2, blobs_lr_b2 = 2;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-      kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > >& params = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype> > > &params = this->net_->params();
   const int num_params = params.size();
   ASSERT_EQ(4, num_params);
   const Dtype kNonZeroTestMin = 1e-3;
   vector<Dtype> param_asums(params.size());
   for (int i = 0; i < num_params; ++i) {
     const Dtype param_asum =
-       caffe_cpu_asum(params[i]->count(), params[i]->cpu_diff());
+        caffe_cpu_asum(params[i]->count(), params[i]->cpu_diff());
     param_asums[i] = param_asum;
     EXPECT_GT(param_asum, kNonZeroTestMin);
   }
@@ -1372,14 +1372,14 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
   Caffe::set_random_seed(this->seed_);
   blobs_lr_w1 *= 2, blobs_lr_w2 *= 2, blobs_lr_b1 *= 2, blobs_lr_b2 *= 2;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-      kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > >& params2 = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype> > > &params2 = this->net_->params();
   ASSERT_EQ(num_params, params2.size());
   for (int i = 0; i < num_params; ++i) {
     const Dtype param_asum =
-       caffe_cpu_asum(params2[i]->count(), params2[i]->cpu_diff());
+        caffe_cpu_asum(params2[i]->count(), params2[i]->cpu_diff());
     EXPECT_FLOAT_EQ(param_asum, param_asums[i]);
   }
 
@@ -1388,14 +1388,14 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
   Caffe::set_random_seed(this->seed_);
   blobs_lr_w1 = 1, blobs_lr_w2 = 0, blobs_lr_b1 = 0, blobs_lr_b2 = 1;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-      kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > >& params3 = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype> > > &params3 = this->net_->params();
   ASSERT_EQ(num_params, params3.size());
   for (int i = 0; i < num_params; ++i) {
     const Dtype param_asum =
-       caffe_cpu_asum(params3[i]->count(), params3[i]->cpu_diff());
+        caffe_cpu_asum(params3[i]->count(), params3[i]->cpu_diff());
     if (i == 1 || i == 2) {
       EXPECT_FLOAT_EQ(0, param_asum);
     } else {
@@ -1407,14 +1407,14 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
   Caffe::set_random_seed(this->seed_);
   blobs_lr_w1 = 0, blobs_lr_w2 = 1, blobs_lr_b1 = 1, blobs_lr_b2 = 0;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-      kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > >& params4 = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype> > > &params4 = this->net_->params();
   ASSERT_EQ(num_params, params4.size());
   for (int i = 0; i < num_params; ++i) {
     const Dtype param_asum =
-       caffe_cpu_asum(params4[i]->count(), params4[i]->cpu_diff());
+        caffe_cpu_asum(params4[i]->count(), params4[i]->cpu_diff());
     if (i == 0 || i == 3) {
       EXPECT_FLOAT_EQ(0, param_asum);
     } else {
@@ -1452,15 +1452,15 @@ TYPED_TEST(NetTest, TestFromTo) {
     this->net_->BackwardFrom(i - 1);
     for (int j = 0; j < data.count(); ++j) {
       EXPECT_EQ(data.cpu_diff()[j],
-          this->net_->blob_by_name("data")->cpu_diff()[j]);
+                this->net_->blob_by_name("data")->cpu_diff()[j]);
     }
   }
 }
 
 class FilterNetTest : public ::testing::Test {
- protected:
+protected:
   void RunFilterNetTest(
-      const string& input_param_string, const string& filtered_param_string) {
+      const string &input_param_string, const string &filtered_param_string) {
     NetParameter input_param;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         input_param_string, &input_param));
@@ -1470,17 +1470,17 @@ class FilterNetTest : public ::testing::Test {
     NetParameter actual_filtered_param;
     Net<float>::FilterNet(input_param, &actual_filtered_param);
     EXPECT_EQ(expected_filtered_param.DebugString(),
-        actual_filtered_param.DebugString());
+              actual_filtered_param.DebugString());
     // Also test idempotence.
     NetParameter double_filtered_param;
     Net<float>::FilterNet(actual_filtered_param, &double_filtered_param);
     EXPECT_EQ(actual_filtered_param.DebugString(),
-       double_filtered_param.DebugString());
+              double_filtered_param.DebugString());
   }
 };
 
 TEST_F(FilterNetTest, TestNoFilter) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -1504,7 +1504,7 @@ TEST_F(FilterNetTest, TestNoFilter) {
 }
 
 TEST_F(FilterNetTest, TestFilterLeNetTrainTest) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'LeNet' "
       "layer { "
       "  name: 'mnist' "
@@ -1662,7 +1662,7 @@ TEST_F(FilterNetTest, TestFilterLeNetTrainTest) {
       "  bottom: 'label' "
       "  top: 'loss' "
       "} ";
-  const string& output_proto_test =
+  const string &output_proto_test =
       "name: 'LeNet' "
       "layer { "
       "  name: 'mnist' "
@@ -1746,7 +1746,7 @@ TEST_F(FilterNetTest, TestFilterLeNetTrainTest) {
 }
 
 TEST_F(FilterNetTest, TestFilterOutByStage) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -1767,7 +1767,7 @@ TEST_F(FilterNetTest, TestFilterOutByStage) {
       "  bottom: 'innerprod' "
       "  bottom: 'label' "
       "} ";
-  const string& output_proto =
+  const string &output_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'innerprod' "
@@ -1785,7 +1785,7 @@ TEST_F(FilterNetTest, TestFilterOutByStage) {
 }
 
 TEST_F(FilterNetTest, TestFilterOutByStage2) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -1806,7 +1806,7 @@ TEST_F(FilterNetTest, TestFilterOutByStage2) {
       "  bottom: 'innerprod' "
       "  bottom: 'label' "
       "} ";
-  const string& output_proto =
+  const string &output_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -1824,7 +1824,7 @@ TEST_F(FilterNetTest, TestFilterOutByStage2) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByStage) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { stage: 'mystage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -1850,7 +1850,7 @@ TEST_F(FilterNetTest, TestFilterInByStage) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByStage2) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -1875,7 +1875,7 @@ TEST_F(FilterNetTest, TestFilterInByStage2) {
 }
 
 TEST_F(FilterNetTest, TestFilterOutByMultipleStage) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { stage: 'mystage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -1898,7 +1898,7 @@ TEST_F(FilterNetTest, TestFilterOutByMultipleStage) {
       "  bottom: 'label' "
       "  include: { stage: 'mystage' } "
       "} ";
-  const string& output_proto =
+  const string &output_proto =
       "state: { stage: 'mystage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -1918,7 +1918,7 @@ TEST_F(FilterNetTest, TestFilterOutByMultipleStage) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByMultipleStage) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { stage: 'mystage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -1946,7 +1946,7 @@ TEST_F(FilterNetTest, TestFilterInByMultipleStage) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByMultipleStage2) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { stage: 'mystage' stage: 'myotherstage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -1973,7 +1973,7 @@ TEST_F(FilterNetTest, TestFilterInByMultipleStage2) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByNotStage) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { stage: 'mystage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2000,7 +2000,7 @@ TEST_F(FilterNetTest, TestFilterInByNotStage) {
 }
 
 TEST_F(FilterNetTest, TestFilterOutByNotStage) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { stage: 'mystage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2023,7 +2023,7 @@ TEST_F(FilterNetTest, TestFilterOutByNotStage) {
       "  bottom: 'label' "
       "  include: { not_stage: 'mystage' } "
       "} ";
-  const string& output_proto =
+  const string &output_proto =
       "state: { stage: 'mystage' } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2036,7 +2036,7 @@ TEST_F(FilterNetTest, TestFilterOutByNotStage) {
 }
 
 TEST_F(FilterNetTest, TestFilterOutByMinLevel) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2057,7 +2057,7 @@ TEST_F(FilterNetTest, TestFilterOutByMinLevel) {
       "  bottom: 'innerprod' "
       "  bottom: 'label' "
       "} ";
-  const string& output_proto =
+  const string &output_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2075,7 +2075,7 @@ TEST_F(FilterNetTest, TestFilterOutByMinLevel) {
 }
 
 TEST_F(FilterNetTest, TestFilterOutByMaxLevel) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2096,7 +2096,7 @@ TEST_F(FilterNetTest, TestFilterOutByMaxLevel) {
       "  bottom: 'innerprod' "
       "  bottom: 'label' "
       "} ";
-  const string& output_proto =
+  const string &output_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2114,7 +2114,7 @@ TEST_F(FilterNetTest, TestFilterOutByMaxLevel) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByMinLevel) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2139,7 +2139,7 @@ TEST_F(FilterNetTest, TestFilterInByMinLevel) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByMinLevel2) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { level: 7 } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2165,7 +2165,7 @@ TEST_F(FilterNetTest, TestFilterInByMinLevel2) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByMaxLevel) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2190,7 +2190,7 @@ TEST_F(FilterNetTest, TestFilterInByMaxLevel) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByMaxLevel2) {
-  const string& input_proto =
+  const string &input_proto =
       "state: { level: -7 } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2216,7 +2216,7 @@ TEST_F(FilterNetTest, TestFilterInByMaxLevel2) {
 }
 
 TEST_F(FilterNetTest, TestFilterInOutByIncludeMultiRule) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2238,11 +2238,11 @@ TEST_F(FilterNetTest, TestFilterInOutByIncludeMultiRule) {
       "  bottom: 'label' "
       "  include: { min_level: 2  phase: TEST } "
       "} ";
-  const string& input_proto_train =
+  const string &input_proto_train =
       "state: { level: 4  phase: TRAIN } " + input_proto;
-  const string& input_proto_test =
+  const string &input_proto_test =
       "state: { level: 4  phase: TEST } " + input_proto;
-  const string& output_proto_train =
+  const string &output_proto_train =
       "state: { level: 4  phase: TRAIN } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2258,7 +2258,7 @@ TEST_F(FilterNetTest, TestFilterInOutByIncludeMultiRule) {
       "  top: 'innerprod' "
       "  include: { min_level: 2  phase: TRAIN } "
       "} ";
-  const string& output_proto_test =
+  const string &output_proto_test =
       "state: { level: 4  phase: TEST } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2279,7 +2279,7 @@ TEST_F(FilterNetTest, TestFilterInOutByIncludeMultiRule) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByIncludeMultiRule) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2303,16 +2303,16 @@ TEST_F(FilterNetTest, TestFilterInByIncludeMultiRule) {
       "  include: { min_level: 2  phase: TEST } "
       "  include: { phase: TRAIN } "
       "} ";
-  const string& input_proto_train =
+  const string &input_proto_train =
       "state: { level: 2  phase: TRAIN } " + input_proto;
-  const string& input_proto_test =
+  const string &input_proto_test =
       "state: { level: 2  phase: TEST } " + input_proto;
   this->RunFilterNetTest(input_proto_train, input_proto_train);
   this->RunFilterNetTest(input_proto_test, input_proto_test);
 }
 
 TEST_F(FilterNetTest, TestFilterInOutByExcludeMultiRule) {
-  const string& input_proto =
+  const string &input_proto =
       "name: 'TestNetwork' "
       "layer { "
       "  name: 'data' "
@@ -2334,11 +2334,11 @@ TEST_F(FilterNetTest, TestFilterInOutByExcludeMultiRule) {
       "  bottom: 'label' "
       "  exclude: { min_level: 2  phase: TEST } "
       "} ";
-  const string& input_proto_train =
+  const string &input_proto_train =
       "state: { level: 4  phase: TRAIN } " + input_proto;
-  const string& input_proto_test =
+  const string &input_proto_test =
       "state: { level: 4  phase: TEST } " + input_proto;
-  const string& output_proto_train =
+  const string &output_proto_train =
       "state: { level: 4  phase: TRAIN } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2354,7 +2354,7 @@ TEST_F(FilterNetTest, TestFilterInOutByExcludeMultiRule) {
       "  bottom: 'label' "
       "  exclude: { min_level: 2  phase: TEST } "
       "} ";
-  const string& output_proto_test =
+  const string &output_proto_test =
       "state: { level: 4  phase: TEST } "
       "name: 'TestNetwork' "
       "layer { "
@@ -2393,30 +2393,30 @@ TYPED_TEST(NetTest, TestReshape) {
 
   this->InitReshapableNet();
   shared_ptr<Blob<Dtype> > input_blob = this->net_->blob_by_name("data");
-  Blob<Dtype>* output_blob = this->net_->output_blobs()[0];
+  Blob<Dtype> *output_blob = this->net_->output_blobs()[0];
   input_blob->Reshape(blob1.num(), blob1.channels(), blob1.height(),
-      blob1.width());
+                      blob1.width());
   caffe_copy(blob1.count(), blob1.cpu_data(), input_blob->mutable_cpu_data());
   this->net_->Forward();
   // call backward just to make sure it runs
   this->net_->Backward();
   Blob<Dtype> output1(output_blob->num(), output_blob->channels(),
-      output_blob->height(), output_blob->width());
+                      output_blob->height(), output_blob->width());
   caffe_copy(output1.count(), output_blob->cpu_data(),
-      output1.mutable_cpu_data());
+             output1.mutable_cpu_data());
 
   input_blob->Reshape(blob2.num(), blob2.channels(), blob2.height(),
-      blob2.width());
+                      blob2.width());
   caffe_copy(blob2.count(), blob2.cpu_data(), input_blob->mutable_cpu_data());
   this->net_->Forward();
   this->net_->Backward();
   Blob<Dtype> output2(output_blob->num(), output_blob->channels(),
-      output_blob->height(), output_blob->width());
+                      output_blob->height(), output_blob->width());
   caffe_copy(output2.count(), output_blob->cpu_data(),
-      output2.mutable_cpu_data());
+             output2.mutable_cpu_data());
 
   input_blob->Reshape(blob1.num(), blob1.channels(), blob1.height(),
-      blob1.width());
+                      blob1.width());
   caffe_copy(blob1.count(), blob1.cpu_data(), input_blob->mutable_cpu_data());
   this->net_->Forward();
   this->net_->Backward();
@@ -2425,7 +2425,7 @@ TYPED_TEST(NetTest, TestReshape) {
   }
 
   input_blob->Reshape(blob2.num(), blob2.channels(), blob2.height(),
-      blob2.width());
+                      blob2.width());
   caffe_copy(blob2.count(), blob2.cpu_data(), input_blob->mutable_cpu_data());
   this->net_->Forward();
   this->net_->Backward();
@@ -2461,12 +2461,12 @@ TYPED_TEST(NetTest, TestSkipPropagateDown) {
     }
     // layer_need_backward should be True except for data and silence layers
     if (layer_name.find("data") != std::string::npos ||
-          layer_name == "silence") {
+        layer_name == "silence") {
       EXPECT_FALSE(vec_layer_need_backward[layer_id])
-          << "layer_need_backward for " << layer_name << " should be False";
+              << "layer_need_backward for " << layer_name << " should be False";
     } else {
       EXPECT_TRUE(vec_layer_need_backward[layer_id])
-          << "layer_need_backward for " << layer_name << " should be True";
+              << "layer_need_backward for " << layer_name << " should be True";
     }
   }
   // check bottom_need_backward if propagat_down is false
@@ -2486,10 +2486,10 @@ TYPED_TEST(NetTest, TestSkipPropagateDown) {
     // loss layers
     if (layer_name == "innerproduct" || layer_name == "loss") {
       EXPECT_TRUE(vec_layer_need_backward[layer_id])
-          << "layer_need_backward for " << layer_name << " should be True";
+              << "layer_need_backward for " << layer_name << " should be True";
     } else {
       EXPECT_FALSE(vec_layer_need_backward[layer_id])
-          << "layer_need_backward for " << layer_name << " should be False";
+              << "layer_need_backward for " << layer_name << " should be False";
     }
   }
 }
@@ -2498,7 +2498,7 @@ TYPED_TEST(NetTest, TestForcePropagateDown) {
   this->InitForcePropNet(false);
   vector<bool> layer_need_backward = this->net_->layer_need_backward();
   for (int layer_id = 0; layer_id < this->net_->layers().size(); ++layer_id) {
-    const string& layer_name = this->net_->layer_names()[layer_id];
+    const string &layer_name = this->net_->layer_names()[layer_id];
     const vector<bool> need_backward =
         this->net_->bottom_need_backward()[layer_id];
     if (layer_name == "data") {
@@ -2520,7 +2520,7 @@ TYPED_TEST(NetTest, TestForcePropagateDown) {
   this->InitForcePropNet(true);
   layer_need_backward = this->net_->layer_need_backward();
   for (int layer_id = 0; layer_id < this->net_->layers().size(); ++layer_id) {
-    const string& layer_name = this->net_->layer_names()[layer_id];
+    const string &layer_name = this->net_->layer_names()[layer_id];
     const vector<bool> need_backward =
         this->net_->bottom_need_backward()[layer_id];
     if (layer_name == "data") {
@@ -2548,7 +2548,7 @@ TYPED_TEST(NetTest, TestAllInOneNetTrain) {
   bool found_data = false;
   bool found_loss = false;
   for (int i = 0; i < this->net_->layers().size(); ++i) {
-    const string& layer_name = this->net_->layer_names()[i];
+    const string &layer_name = this->net_->layer_names()[i];
     if (layer_name == "train-data") {
       found_data = true;
     } else if (layer_name == "loss") {
@@ -2569,7 +2569,7 @@ TYPED_TEST(NetTest, TestAllInOneNetVal) {
   bool found_data = false;
   bool found_loss = false;
   for (int i = 0; i < this->net_->layers().size(); ++i) {
-    const string& layer_name = this->net_->layer_names()[i];
+    const string &layer_name = this->net_->layer_names()[i];
     if (layer_name == "val-data") {
       found_data = true;
     } else if (layer_name == "loss") {
@@ -2589,7 +2589,7 @@ TYPED_TEST(NetTest, TestAllInOneNetDeploy) {
   this->InitAllInOneNet(caffe::TEST, 0, &stages);
   bool found_data = false;
   for (int i = 0; i < this->net_->layers().size(); ++i) {
-    const string& layer_name = this->net_->layer_names()[i];
+    const string &layer_name = this->net_->layer_names()[i];
     if (layer_name == "deploy-data") {
       found_data = true;
     } else {

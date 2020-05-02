@@ -13,11 +13,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class SigmoidCrossEntropyLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   SigmoidCrossEntropyLossLayerTest()
       : blob_bottom_data_(new Blob<Dtype>(10, 5, 1, 1)),
         blob_bottom_targets_(new Blob<Dtype>(10, 5, 1, 1)),
@@ -44,8 +44,8 @@ class SigmoidCrossEntropyLossLayerTest : public MultiDeviceTest<TypeParam> {
   }
 
   Dtype SigmoidCrossEntropyLossReference(const int count, const int num,
-                                         const Dtype* input,
-                                         const Dtype* target) {
+                                         const Dtype *input,
+                                         const Dtype *target) {
     Dtype loss = 0;
     for (int i = 0; i < count; ++i) {
       const Dtype prediction = 1 / (1 + exp(-input[i]));
@@ -82,8 +82,8 @@ class SigmoidCrossEntropyLossLayerTest : public MultiDeviceTest<TypeParam> {
           layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
       const int count = this->blob_bottom_data_->count();
       const int num = this->blob_bottom_data_->num();
-      const Dtype* blob_bottom_data = this->blob_bottom_data_->cpu_data();
-      const Dtype* blob_bottom_targets =
+      const Dtype *blob_bottom_data = this->blob_bottom_data_->cpu_data();
+      const Dtype *blob_bottom_targets =
           this->blob_bottom_targets_->cpu_data();
       Dtype reference_loss = kLossWeight * SigmoidCrossEntropyLossReference(
           count, num, blob_bottom_data, blob_bottom_targets);
@@ -91,11 +91,11 @@ class SigmoidCrossEntropyLossLayerTest : public MultiDeviceTest<TypeParam> {
     }
   }
 
-  Blob<Dtype>* const blob_bottom_data_;
-  Blob<Dtype>* const blob_bottom_targets_;
-  Blob<Dtype>* const blob_top_loss_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_data_;
+  Blob<Dtype> *const blob_bottom_targets_;
+  Blob<Dtype> *const blob_top_loss_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(SigmoidCrossEntropyLossLayerTest, TestDtypesAndDevices);
@@ -113,7 +113,7 @@ TYPED_TEST(SigmoidCrossEntropyLossLayerTest, TestGradient) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(SigmoidCrossEntropyLossLayerTest, TestIgnoreGradient) {
@@ -123,9 +123,9 @@ TYPED_TEST(SigmoidCrossEntropyLossLayerTest, TestIgnoreGradient) {
   GaussianFiller<Dtype> data_filler(data_filler_param);
   data_filler.Fill(this->blob_bottom_data_);
   LayerParameter layer_param;
-  LossParameter* loss_param = layer_param.mutable_loss_param();
+  LossParameter *loss_param = layer_param.mutable_loss_param();
   loss_param->set_ignore_label(-1);
-  Dtype* target = this->blob_bottom_targets_->mutable_cpu_data();
+  Dtype *target = this->blob_bottom_targets_->mutable_cpu_data();
   const int count = this->blob_bottom_targets_->count();
   // Ignore half of targets, then check that diff of this half is zero,
   // while the other half is nonzero.
@@ -137,12 +137,11 @@ TYPED_TEST(SigmoidCrossEntropyLossLayerTest, TestIgnoreGradient) {
   propagate_down[0] = true;
   propagate_down[1] = false;
   layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
-  const Dtype* diff = this->blob_bottom_data_->cpu_diff();
+  const Dtype *diff = this->blob_bottom_data_->cpu_diff();
   for (int i = 0; i < count / 2; ++i) {
     EXPECT_FLOAT_EQ(diff[i], 0.);
     EXPECT_NE(diff[i + count / 2], 0.);
   }
 }
-
 
 }  // namespace caffe

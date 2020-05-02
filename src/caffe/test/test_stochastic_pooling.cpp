@@ -15,11 +15,11 @@ using std::min;
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class StochasticPoolingLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   StochasticPoolingLayerTest()
       : blob_bottom_(new Blob<Dtype>()),
         blob_top_(new Blob<Dtype>()) {}
@@ -37,25 +37,26 @@ class StochasticPoolingLayerTest : public MultiDeviceTest<TypeParam> {
   }
 
   virtual ~StochasticPoolingLayerTest() {
-    delete blob_bottom_; delete blob_top_;
+    delete blob_bottom_;
+    delete blob_top_;
   }
 
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
-template <typename Dtype>
+template<typename Dtype>
 class CPUStochasticPoolingLayerTest
-  : public StochasticPoolingLayerTest<CPUDevice<Dtype> > {
+    : public StochasticPoolingLayerTest<CPUDevice<Dtype> > {
 };
 
 TYPED_TEST_CASE(CPUStochasticPoolingLayerTest, TestDtypes);
 
 TYPED_TEST(CPUStochasticPoolingLayerTest, TestSetup) {
   LayerParameter layer_param;
-  PoolingParameter* pooling_param = layer_param.mutable_pooling_param();
+  PoolingParameter *pooling_param = layer_param.mutable_pooling_param();
   pooling_param->set_kernel_size(3);
   pooling_param->set_stride(2);
   PoolingLayer<TypeParam> layer(layer_param);

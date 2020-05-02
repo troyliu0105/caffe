@@ -33,11 +33,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   NeuronLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 4, 5)),
         blob_top_(new Blob<Dtype>()) {
@@ -49,11 +49,14 @@ class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
     blob_bottom_vec_.push_back(blob_bottom_);
     blob_top_vec_.push_back(blob_top_);
   }
-  virtual ~NeuronLayerTest() { delete blob_bottom_; delete blob_top_; }
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  virtual ~NeuronLayerTest() {
+    delete blob_bottom_;
+    delete blob_top_;
+  }
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 
   void TestDropoutForward(const float dropout_ratio) {
     LayerParameter layer_param;
@@ -67,8 +70,8 @@ class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
     layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
     // Now, check values
-    const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-    const Dtype* top_data = this->blob_top_->cpu_data();
+    const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+    const Dtype *top_data = this->blob_top_->cpu_data();
     float scale = 1. / (1. - layer_param.dropout_param().dropout_ratio());
     const int count = this->blob_bottom_->count();
     // Initialize num_kept to count the number of inputs NOT dropped out.
@@ -96,8 +99,8 @@ class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
     layer.SetUp(blob_bottom_vec_, blob_top_vec_);
     layer.Forward(blob_bottom_vec_, blob_top_vec_);
     const Dtype kDelta = 2e-4;
-    const Dtype* bottom_data = blob_bottom_->cpu_data();
-    const Dtype* top_data = blob_top_->cpu_data();
+    const Dtype *bottom_data = blob_bottom_->cpu_data();
+    const Dtype *top_data = blob_top_->cpu_data();
     for (int i = 0; i < blob_bottom_->count(); ++i) {
       const Dtype bottom_val = bottom_data[i];
       const Dtype top_val = top_data[i];
@@ -121,18 +124,18 @@ class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
 
   void TestPReLU(PReLULayer<Dtype> *layer) {
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  // Now, check values
-    const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-    const Dtype* top_data = this->blob_top_->cpu_data();
-    const Dtype* slope_data = layer->blobs()[0]->cpu_data();
+    // Now, check values
+    const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+    const Dtype *top_data = this->blob_top_->cpu_data();
+    const Dtype *slope_data = layer->blobs()[0]->cpu_data();
     int hw = this->blob_bottom_->height() * this->blob_bottom_->width();
     int channels = this->blob_bottom_->channels();
     bool channel_shared = layer->layer_param().prelu_param().channel_shared();
     for (int i = 0; i < this->blob_bottom_->count(); ++i) {
       int c = channel_shared ? 0 : (i / hw) % channels;
       EXPECT_EQ(top_data[i],
-          std::max(bottom_data[i], (Dtype)(0))
-          + slope_data[c] * std::min(bottom_data[i], (Dtype)(0)));
+                std::max(bottom_data[i], (Dtype) (0))
+                    + slope_data[c] * std::min(bottom_data[i], (Dtype) (0)));
     }
   }
 
@@ -140,7 +143,7 @@ class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
     FillerParameter filler_param;
     GaussianFiller<Dtype> filler(filler_param);
     filler.Fill(this->blob_bottom_);
-    Dtype* bottom_data = this->blob_bottom_->mutable_cpu_data();
+    Dtype *bottom_data = this->blob_bottom_->mutable_cpu_data();
     caffe_exp(this->blob_bottom_->count(), bottom_data, bottom_data);
   }
 
@@ -154,8 +157,8 @@ class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
     layer.SetUp(blob_bottom_vec_, blob_top_vec_);
     layer.Forward(blob_bottom_vec_, blob_top_vec_);
     const Dtype kDelta = 2e-4;
-    const Dtype* bottom_data = blob_bottom_->cpu_data();
-    const Dtype* top_data = blob_top_->cpu_data();
+    const Dtype *bottom_data = blob_bottom_->cpu_data();
+    const Dtype *top_data = blob_top_->cpu_data();
     for (int i = 0; i < blob_bottom_->count(); ++i) {
       const Dtype bottom_val = bottom_data[i];
       const Dtype top_val = top_data[i];
@@ -188,8 +191,8 @@ TYPED_TEST(NeuronLayerTest, TestAbsVal) {
   AbsValLayer<Dtype> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data    = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   const int count = this->blob_bottom_->count();
   for (int i = 0; i < count; ++i) {
     EXPECT_EQ(top_data[i], fabs(bottom_data[i]));
@@ -202,7 +205,7 @@ TYPED_TEST(NeuronLayerTest, TestAbsGradient) {
   AbsValLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestReLU) {
@@ -212,8 +215,8 @@ TYPED_TEST(NeuronLayerTest, TestReLU) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   // Now, check values
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_GE(top_data[i], 0.);
     EXPECT_TRUE(top_data[i] == 0 || top_data[i] == bottom_data[i]);
@@ -226,7 +229,7 @@ TYPED_TEST(NeuronLayerTest, TestReLUGradient) {
   ReLULayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestReLUWithNegativeSlope) {
@@ -238,8 +241,8 @@ TYPED_TEST(NeuronLayerTest, TestReLUWithNegativeSlope) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   // Now, check values
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     if (top_data[i] >= 0) {
       EXPECT_FLOAT_EQ(top_data[i], bottom_data[i]);
@@ -257,7 +260,7 @@ TYPED_TEST(NeuronLayerTest, TestReLUGradientWithNegativeSlope) {
   ReLULayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestELU) {
@@ -270,8 +273,8 @@ TYPED_TEST(NeuronLayerTest, TestELU) {
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   const Dtype kDelta = 2e-4;
   // Now, check values
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     if (bottom_data[i] > 0) {
       EXPECT_FLOAT_EQ(top_data[i], bottom_data[i]);
@@ -290,8 +293,8 @@ TYPED_TEST(NeuronLayerTest, TestELUasReLU) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   // Now, check values
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_GE(top_data[i], 0.);
     EXPECT_TRUE(top_data[i] == 0 || top_data[i] == bottom_data[i]);
@@ -304,7 +307,7 @@ TYPED_TEST(NeuronLayerTest, TestELUGradient) {
   ELULayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestELUasReLUGradient) {
@@ -315,7 +318,7 @@ TYPED_TEST(NeuronLayerTest, TestELUasReLUGradient) {
   ELULayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestSigmoid) {
@@ -325,8 +328,8 @@ TYPED_TEST(NeuronLayerTest, TestSigmoid) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   // Now, check values
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_FLOAT_EQ(top_data[i], 1. / (1 + exp(-bottom_data[i])));
     // check that we squashed the value between 0 and 1
@@ -341,7 +344,7 @@ TYPED_TEST(NeuronLayerTest, TestSigmoidGradient) {
   SigmoidLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestTanH) {
@@ -356,11 +359,11 @@ TYPED_TEST(NeuronLayerTest, TestTanH) {
       for (int k = 0; k < this->blob_bottom_->height(); ++k) {
         for (int l = 0; l < this->blob_bottom_->width(); ++l) {
           EXPECT_GE(this->blob_top_->data_at(i, j, k, l) + 1e-4,
-             (exp(2*this->blob_bottom_->data_at(i, j, k, l)) - 1) /
-             (exp(2*this->blob_bottom_->data_at(i, j, k, l)) + 1));
+                    (exp(2 * this->blob_bottom_->data_at(i, j, k, l)) - 1) /
+                        (exp(2 * this->blob_bottom_->data_at(i, j, k, l)) + 1));
           EXPECT_LE(this->blob_top_->data_at(i, j, k, l) - 1e-4,
-             (exp(2*this->blob_bottom_->data_at(i, j, k, l)) - 1) /
-             (exp(2*this->blob_bottom_->data_at(i, j, k, l)) + 1));
+                    (exp(2 * this->blob_bottom_->data_at(i, j, k, l)) - 1) /
+                        (exp(2 * this->blob_bottom_->data_at(i, j, k, l)) + 1));
         }
       }
     }
@@ -373,7 +376,7 @@ TYPED_TEST(NeuronLayerTest, TestTanHGradient) {
   TanHLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestExpLayer) {
@@ -578,8 +581,8 @@ TYPED_TEST(NeuronLayerTest, TestDropoutTestPhase) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   // Now, check values
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     if (top_data[i] != 0) {
       EXPECT_EQ(top_data[i], bottom_data[i]);
@@ -594,7 +597,7 @@ TYPED_TEST(NeuronLayerTest, TestDropoutGradient) {
   DropoutLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestDropoutGradientTest) {
@@ -604,7 +607,7 @@ TYPED_TEST(NeuronLayerTest, TestDropoutGradientTest) {
   DropoutLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestBNLL) {
@@ -614,8 +617,8 @@ TYPED_TEST(NeuronLayerTest, TestBNLL) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   // Now, check values
-  const Dtype* bottom_data = this->blob_bottom_->cpu_data();
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *bottom_data = this->blob_bottom_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_GE(top_data[i], 0.);
     EXPECT_GE(top_data[i], bottom_data[i]);
@@ -628,7 +631,7 @@ TYPED_TEST(NeuronLayerTest, TestBNLLGradient) {
   BNLLLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestPReLUParam) {
@@ -636,7 +639,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUParam) {
   LayerParameter layer_param;
   PReLULayer<Dtype> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* slopes = layer.blobs()[0]->cpu_data();
+  const Dtype *slopes = layer.blobs()[0]->cpu_data();
   int count = layer.blobs()[0]->count();
   for (int i = 0; i < count; ++i, ++slopes) {
     EXPECT_EQ(*slopes, 0.25);
@@ -673,7 +676,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUGradient) {
   filler.Fill(layer.blobs()[0].get());
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestPReLUGradientChannelShared) {
@@ -684,7 +687,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUGradientChannelShared) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(NeuronLayerTest, TestPReLUConsistencyReLU) {
@@ -695,8 +698,8 @@ TYPED_TEST(NeuronLayerTest, TestPReLUConsistencyReLU) {
   PReLULayer<Dtype> prelu(prelu_layer_param);
   ReLULayer<Dtype> relu(relu_layer_param);
   // Set up blobs
-  vector<Blob<Dtype>*> blob_bottom_vec_2;
-  vector<Blob<Dtype>*> blob_top_vec_2;
+  vector<Blob<Dtype> *> blob_bottom_vec_2;
+  vector<Blob<Dtype> *> blob_top_vec_2;
   shared_ptr<Blob<Dtype> > blob_bottom_2(new Blob<Dtype>());
   shared_ptr<Blob<Dtype> > blob_top_2(new Blob<Dtype>());
   blob_bottom_vec_2.push_back(blob_bottom_2.get());
@@ -718,9 +721,9 @@ TYPED_TEST(NeuronLayerTest, TestPReLUConsistencyReLU) {
   GaussianFiller<Dtype> filler(filler_param);
   filler.Fill(tmp_blob.get());
   caffe_copy(blob_top_2->count(), tmp_blob->cpu_data(),
-      this->blob_top_->mutable_cpu_diff());
+             this->blob_top_->mutable_cpu_diff());
   caffe_copy(blob_top_2->count(), tmp_blob->cpu_data(),
-      blob_top_2->mutable_cpu_diff());
+             blob_top_2->mutable_cpu_diff());
   vector<bool> propagate_down;
   propagate_down.push_back(true);
   prelu.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
@@ -744,9 +747,9 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
   InnerProductLayer<Dtype> ip2(ip_layer_param);
   PReLULayer<Dtype> prelu2(prelu_layer_param);
   // Set up blobs
-  vector<Blob<Dtype>*> blob_bottom_vec_2;
-  vector<Blob<Dtype>*> blob_middle_vec_2;
-  vector<Blob<Dtype>*> blob_top_vec_2;
+  vector<Blob<Dtype> *> blob_bottom_vec_2;
+  vector<Blob<Dtype> *> blob_middle_vec_2;
+  vector<Blob<Dtype> *> blob_top_vec_2;
   shared_ptr<Blob<Dtype> > blob_bottom_2(new Blob<Dtype>());
   shared_ptr<Blob<Dtype> > blob_middle_2(new Blob<Dtype>());
   shared_ptr<Blob<Dtype> > blob_top_2(new Blob<Dtype>());
@@ -760,7 +763,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
   ip2.SetUp(blob_bottom_vec_2, blob_middle_vec_2);
   prelu2.SetUp(blob_middle_vec_2, blob_top_vec_2);
   caffe_copy(ip2.blobs()[0]->count(), ip.blobs()[0]->cpu_data(),
-      ip2.blobs()[0]->mutable_cpu_data());
+             ip2.blobs()[0]->mutable_cpu_data());
   // Forward in-place
   ip.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   prelu.Forward(this->blob_top_vec_, this->blob_top_vec_);
@@ -778,9 +781,9 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
   GaussianFiller<Dtype> filler(filler_param);
   filler.Fill(tmp_blob.get());
   caffe_copy(blob_top_2->count(), tmp_blob->cpu_data(),
-      this->blob_top_->mutable_cpu_diff());
+             this->blob_top_->mutable_cpu_diff());
   caffe_copy(blob_top_2->count(), tmp_blob->cpu_data(),
-      blob_top_2->mutable_cpu_diff());
+             blob_top_2->mutable_cpu_diff());
   // Backward in-place
   vector<bool> propagate_down;
   propagate_down.push_back(true);
@@ -792,19 +795,19 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
   // Check numbers
   for (int s = 0; s < blob_bottom_2->count(); ++s) {
     EXPECT_FLOAT_EQ(this->blob_bottom_->cpu_diff()[s],
-        blob_bottom_2->cpu_diff()[s]);
+                    blob_bottom_2->cpu_diff()[s]);
   }
   for (int s = 0; s < ip.blobs()[0]->count(); ++s) {
     EXPECT_FLOAT_EQ(ip.blobs()[0]->cpu_diff()[s],
-        ip2.blobs()[0]->cpu_diff()[s]);
+                    ip2.blobs()[0]->cpu_diff()[s]);
   }
   for (int s = 0; s < ip.blobs()[1]->count(); ++s) {
     EXPECT_FLOAT_EQ(ip.blobs()[1]->cpu_diff()[s],
-        ip2.blobs()[1]->cpu_diff()[s]);
+                    ip2.blobs()[1]->cpu_diff()[s]);
   }
   for (int s = 0; s < prelu.blobs()[0]->count(); ++s) {
     EXPECT_FLOAT_EQ(prelu.blobs()[0]->cpu_diff()[s],
-        prelu2.blobs()[0]->cpu_diff()[s]);
+                    prelu2.blobs()[0]->cpu_diff()[s]);
   }
 }
 

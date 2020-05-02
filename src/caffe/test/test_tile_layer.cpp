@@ -12,11 +12,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class TileLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   TileLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 4, 5)),
         blob_top_(new Blob<Dtype>()) {}
@@ -35,10 +35,10 @@ class TileLayerTest : public MultiDeviceTest<TypeParam> {
     delete blob_top_;
   }
 
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(TileLayerTest, TestDtypesAndDevices);
@@ -89,13 +89,13 @@ TYPED_TEST(TileLayerTest, TestForwardNum) {
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   for (int n = 0; n < this->blob_top_->num(); ++n) {
     for (int c = 0; c < this->blob_top_->channels(); ++c) {
-       for (int h = 0; h < this->blob_top_->height(); ++h) {
-         for (int w = 0; w < this->blob_top_->width(); ++w) {
-           const int bottom_n = n % this->blob_bottom_->num();
-           EXPECT_EQ(this->blob_bottom_->data_at(bottom_n, c, h, w),
-                     this->blob_top_->data_at(n, c, h, w));
-         }
-       }
+      for (int h = 0; h < this->blob_top_->height(); ++h) {
+        for (int w = 0; w < this->blob_top_->width(); ++w) {
+          const int bottom_n = n % this->blob_bottom_->num();
+          EXPECT_EQ(this->blob_bottom_->data_at(bottom_n, c, h, w),
+                    this->blob_top_->data_at(n, c, h, w));
+        }
+      }
     }
   }
 }
@@ -110,13 +110,13 @@ TYPED_TEST(TileLayerTest, TestForwardChannels) {
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   for (int n = 0; n < this->blob_top_->num(); ++n) {
     for (int c = 0; c < this->blob_top_->channels(); ++c) {
-       for (int h = 0; h < this->blob_top_->height(); ++h) {
-         for (int w = 0; w < this->blob_top_->width(); ++w) {
-           const int bottom_c = c % this->blob_bottom_->channels();
-           EXPECT_EQ(this->blob_bottom_->data_at(n, bottom_c, h, w),
-                     this->blob_top_->data_at(n, c, h, w));
-         }
-       }
+      for (int h = 0; h < this->blob_top_->height(); ++h) {
+        for (int w = 0; w < this->blob_top_->width(); ++w) {
+          const int bottom_c = c % this->blob_bottom_->channels();
+          EXPECT_EQ(this->blob_bottom_->data_at(n, bottom_c, h, w),
+                    this->blob_top_->data_at(n, c, h, w));
+        }
+      }
     }
   }
 }
@@ -129,7 +129,7 @@ TYPED_TEST(TileLayerTest, TestTrivialGradient) {
   TileLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(TileLayerTest, TestGradientNum) {
@@ -142,7 +142,7 @@ TYPED_TEST(TileLayerTest, TestGradientNum) {
   TileLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(TileLayerTest, TestGradientChannels) {
@@ -155,7 +155,7 @@ TYPED_TEST(TileLayerTest, TestGradientChannels) {
   TileLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 }  // namespace caffe

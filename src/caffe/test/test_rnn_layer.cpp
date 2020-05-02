@@ -13,11 +13,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class RNNLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   RNNLayerTest() : num_output_(7) {
     blob_bottom_vec_.push_back(&blob_bottom_);
     blob_bottom_vec_.push_back(&blob_bottom_cont_);
@@ -26,11 +26,11 @@ class RNNLayerTest : public MultiDeviceTest<TypeParam> {
     ReshapeBlobs(1, 3);
 
     layer_param_.mutable_recurrent_param()->set_num_output(num_output_);
-    FillerParameter* weight_filler =
+    FillerParameter *weight_filler =
         layer_param_.mutable_recurrent_param()->mutable_weight_filler();
     weight_filler->set_type("gaussian");
     weight_filler->set_std(0.2);
-    FillerParameter* bias_filler =
+    FillerParameter *bias_filler =
         layer_param_.mutable_recurrent_param()->mutable_bias_filler();
     bias_filler->set_type("gaussian");
     bias_filler->set_std(0.1);
@@ -59,8 +59,8 @@ class RNNLayerTest : public MultiDeviceTest<TypeParam> {
   Blob<Dtype> blob_bottom_cont_;
   Blob<Dtype> blob_bottom_static_;
   Blob<Dtype> blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(RNNLayerTest, TestDtypesAndDevices);
@@ -129,7 +129,7 @@ TYPED_TEST(RNNLayerTest, TestForward) {
       ASSERT_LT(t * top_count + i, top_copy.count());
       EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i], kEpsilon)
-         << "t = " << t << "; i = " << i;
+              << "t = " << t << "; i = " << i;
     }
   }
 
@@ -150,11 +150,11 @@ TYPED_TEST(RNNLayerTest, TestForward) {
       if (t == 0) {
         EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                     top_copy.cpu_data()[t * top_count + i], kEpsilon)
-           << "t = " << t << "; i = " << i;
+                << "t = " << t << "; i = " << i;
       } else {
         EXPECT_NE(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i])
-           << "t = " << t << "; i = " << i;
+                << "t = " << t << "; i = " << i;
       }
     }
   }
@@ -165,7 +165,7 @@ TYPED_TEST(RNNLayerTest, TestGradient) {
   RNNLayer<Dtype> layer(this->layer_param_);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(RNNLayerTest, TestGradientNonZeroCont) {
@@ -176,7 +176,7 @@ TYPED_TEST(RNNLayerTest, TestGradientNonZeroCont) {
     this->blob_bottom_cont_.mutable_cpu_data()[i] = i > 2;
   }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(RNNLayerTest, TestGradientNonZeroContBufferSize2) {
@@ -192,7 +192,7 @@ TYPED_TEST(RNNLayerTest, TestGradientNonZeroContBufferSize2) {
     this->blob_bottom_cont_.mutable_cpu_data()[i] = i > 2;
   }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(RNNLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
@@ -209,9 +209,9 @@ TYPED_TEST(RNNLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
     this->blob_bottom_cont_.mutable_cpu_data()[i] = i > 2;
   }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 2);
+                                  this->blob_top_vec_, 2);
 }
 
 }  // namespace caffe

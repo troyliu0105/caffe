@@ -18,14 +18,14 @@ namespace caffe {
   * mechanism is used to allow the snapshot to be saved when stopping
   * execution with a SIGINT (Ctrl-C).
   */
-  namespace SolverAction {
-    enum Enum {
-      NONE = 0,  // Take no special action.
-      STOP = 1,  // Stop training. snapshot_after_train controls whether a
-                 // snapshot is created.
-      SNAPSHOT = 2  // Take a snapshot, and keep training.
-    };
-  }
+namespace SolverAction {
+enum Enum {
+  NONE = 0,  // Take no special action.
+  STOP = 1,  // Stop training. snapshot_after_train controls whether a
+  // snapshot is created.
+  SNAPSHOT = 2  // Take a snapshot, and keep training.
+};
+}
 
 /**
  * @brief Type of a function that returns a Solver Action enumeration.
@@ -38,12 +38,12 @@ typedef boost::function<SolverAction::Enum()> ActionCallback;
  * Requires implementation of ApplyUpdate to compute a parameter update
  * given the current state of the Net parameters.
  */
-template <typename Dtype>
+template<typename Dtype>
 class Solver {
- public:
-  explicit Solver(const SolverParameter& param);
-  explicit Solver(const string& param_file);
-  void Init(const SolverParameter& param);
+public:
+  explicit Solver(const SolverParameter &param);
+  explicit Solver(const string &param_file);
+  void Init(const SolverParameter &param);
   void InitTrainNet();
   void InitTestNets();
 
@@ -54,37 +54,37 @@ class Solver {
   SolverAction::Enum GetRequestedAction();
   // The main entry of the solver function. In default, iter will be zero. Pass
   // in a non-zero iter number to resume training for a pre-trained net.
-  virtual void Solve(const char* resume_file = NULL);
+  virtual void Solve(const char *resume_file = NULL);
   inline void Solve(const string resume_file) { Solve(resume_file.c_str()); }
   void Step(int iters);
   // The Restore method simply dispatches to one of the
   // RestoreSolverStateFrom___ protected methods. You should implement these
   // methods to restore the state from the appropriate snapshot type.
-  void Restore(const char* resume_file);
+  void Restore(const char *resume_file);
   // The Solver::Snapshot function implements the basic snapshotting utility
   // that stores the learned net. You should implement the SnapshotSolverState()
   // function that produces a SolverState protocol buffer that needs to be
   // written to disk together with the learned net.
   void Snapshot();
   virtual ~Solver() {}
-  inline const SolverParameter& param() const { return param_; }
+  inline const SolverParameter &param() const { return param_; }
   inline shared_ptr<Net<Dtype> > net() { return net_; }
-  inline const vector<shared_ptr<Net<Dtype> > >& test_nets() {
+  inline const vector<shared_ptr<Net<Dtype> > > &test_nets() {
     return test_nets_;
   }
   int iter() const { return iter_; }
 
   // Invoked at specific points during an iteration
   class Callback {
-   protected:
+  protected:
     virtual void on_start() = 0;
     virtual void on_gradients_ready() = 0;
 
-    template <typename T>
+    template<typename T>
     friend class Solver;
   };
-  const vector<Callback*>& callbacks() const { return callbacks_; }
-  void add_callback(Callback* value) {
+  const vector<Callback *> &callbacks() const { return callbacks_; }
+  void add_callback(Callback *value) {
     callbacks_.push_back(value);
   }
 
@@ -92,9 +92,9 @@ class Solver {
   /**
    * @brief Returns the solver type.
    */
-  virtual inline const char* type() const { return ""; }
+  virtual inline const char *type() const { return ""; }
 
- protected:
+protected:
   // Make and apply the update value for the current iteration.
   virtual void ApplyUpdate() = 0;
   string SnapshotFilename(const string extension);
@@ -103,9 +103,9 @@ class Solver {
   // The test routine
   void TestAll();
   void Test(const int test_net_id = 0);
-  virtual void SnapshotSolverState(const string& model_filename) = 0;
-  virtual void RestoreSolverStateFromHDF5(const string& state_file) = 0;
-  virtual void RestoreSolverStateFromBinaryProto(const string& state_file) = 0;
+  virtual void SnapshotSolverState(const string &model_filename) = 0;
+  virtual void RestoreSolverStateFromHDF5(const string &state_file) = 0;
+  virtual void RestoreSolverStateFromBinaryProto(const string &state_file) = 0;
   void DisplayOutputBlobs(const int net_id);
   void UpdateSmoothedLoss(Dtype loss, int start_iter, int average_loss);
 
@@ -114,7 +114,7 @@ class Solver {
   int current_step_;
   shared_ptr<Net<Dtype> > net_;
   vector<shared_ptr<Net<Dtype> > > test_nets_;
-  vector<Callback*> callbacks_;
+  vector<Callback *> callbacks_;
   vector<Dtype> losses_;
   Dtype smoothed_loss_;
 
@@ -129,7 +129,7 @@ class Solver {
   Timer iteration_timer_;
   float iterations_last_;
 
-  DISABLE_COPY_AND_ASSIGN(Solver);
+DISABLE_COPY_AND_ASSIGN(Solver);
 };
 
 }  // namespace caffe

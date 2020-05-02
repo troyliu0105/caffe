@@ -11,15 +11,15 @@
 
 namespace caffe {
 
-template <typename Dtype>
-BaseDataLayer<Dtype>::BaseDataLayer(const LayerParameter& param)
+template<typename Dtype>
+BaseDataLayer<Dtype>::BaseDataLayer(const LayerParameter &param)
     : Layer<Dtype>(param),
       transform_param_(param.transform_param()) {
 }
 
-template <typename Dtype>
-void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top) {
+template<typename Dtype>
+void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                                      const vector<Blob<Dtype> *> &top) {
   if (top.size() == 1) {
     output_labels_ = false;
   } else {
@@ -32,9 +32,9 @@ void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   DataLayerSetUp(bottom, top);
 }
 
-template <typename Dtype>
+template<typename Dtype>
 BasePrefetchingDataLayer<Dtype>::BasePrefetchingDataLayer(
-    const LayerParameter& param)
+    const LayerParameter &param)
     : BaseDataLayer<Dtype>(param),
       prefetch_(param.data_param().prefetch()),
       prefetch_free_(), prefetch_full_(), prefetch_current_() {
@@ -44,9 +44,9 @@ BasePrefetchingDataLayer<Dtype>::BasePrefetchingDataLayer(
   }
 }
 
-template <typename Dtype>
+template<typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
-    const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   BaseDataLayer<Dtype>::LayerSetUp(bottom, top);
 
   // Before starting the prefetch thread, we make cpu_data and gpu_data
@@ -75,7 +75,7 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
   DLOG(INFO) << "Prefetch initialized.";
 }
 
-template <typename Dtype>
+template<typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
 #ifndef CPU_ONLY
   cudaStream_t stream;
@@ -86,7 +86,7 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
 
   try {
     while (!must_stop()) {
-      Batch<Dtype>* batch = prefetch_free_.pop();
+      Batch<Dtype> *batch = prefetch_free_.pop();
       load_batch(batch);
 #ifndef CPU_ONLY
       if (Caffe::mode() == Caffe::GPU) {
@@ -99,7 +99,7 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
 #endif
       prefetch_full_.push(batch);
     }
-  } catch (boost::thread_interrupted&) {
+  } catch (boost::thread_interrupted &) {
     // Interrupted exception is expected on shutdown
   }
 #ifndef CPU_ONLY
@@ -109,9 +109,9 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
 #endif
 }
 
-template <typename Dtype>
+template<typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::Forward_cpu(
-    const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   if (prefetch_current_) {
     prefetch_free_.push(prefetch_current_);
   }

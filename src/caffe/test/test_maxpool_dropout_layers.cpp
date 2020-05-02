@@ -13,10 +13,10 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class MaxPoolingDropoutTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
- protected:
+protected:
   MaxPoolingDropoutTest()
       : blob_bottom_(new Blob<Dtype>()),
         blob_top_(new Blob<Dtype>()) {}
@@ -31,11 +31,14 @@ class MaxPoolingDropoutTest : public MultiDeviceTest<TypeParam> {
     blob_bottom_vec_.push_back(blob_bottom_);
     blob_top_vec_.push_back(blob_top_);
   }
-  virtual ~MaxPoolingDropoutTest() { delete blob_bottom_; delete blob_top_; }
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  virtual ~MaxPoolingDropoutTest() {
+    delete blob_bottom_;
+    delete blob_top_;
+  }
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(MaxPoolingDropoutTest, TestDtypesAndDevices);
@@ -43,7 +46,7 @@ TYPED_TEST_CASE(MaxPoolingDropoutTest, TestDtypesAndDevices);
 TYPED_TEST(MaxPoolingDropoutTest, TestSetup) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  PoolingParameter* pooling_param = layer_param.mutable_pooling_param();
+  PoolingParameter *pooling_param = layer_param.mutable_pooling_param();
   pooling_param->set_kernel_size(3);
   pooling_param->set_stride(2);
   PoolingLayer<Dtype> max_layer(layer_param);
@@ -56,17 +59,16 @@ TYPED_TEST(MaxPoolingDropoutTest, TestSetup) {
   EXPECT_EQ(this->blob_top_->width(), 2);
 }
 
-
 TYPED_TEST(MaxPoolingDropoutTest, TestForward) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  PoolingParameter* pooling_param = layer_param.mutable_pooling_param();
+  PoolingParameter *pooling_param = layer_param.mutable_pooling_param();
   pooling_param->set_kernel_size(3);
   pooling_param->set_stride(2);
   PoolingLayer<Dtype> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* top_data = this->blob_top_->cpu_data();
+  const Dtype *top_data = this->blob_top_->cpu_data();
   Dtype sum = 0.;
   for (int i = 0; i < this->blob_top_->count(); ++i) {
     sum += top_data[i];
@@ -83,14 +85,14 @@ TYPED_TEST(MaxPoolingDropoutTest, TestForward) {
     sum += top_data[i];
   }
   EXPECT_GE(sum, 0);
-  EXPECT_LE(sum, this->blob_top_->count()*scale);
+  EXPECT_LE(sum, this->blob_top_->count() * scale);
 }
 
 TYPED_TEST(MaxPoolingDropoutTest, TestBackward) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   layer_param.set_phase(TRAIN);
-  PoolingParameter* pooling_param = layer_param.mutable_pooling_param();
+  PoolingParameter *pooling_param = layer_param.mutable_pooling_param();
   pooling_param->set_kernel_size(3);
   pooling_param->set_stride(2);
   PoolingLayer<Dtype> layer(layer_param);
@@ -102,7 +104,7 @@ TYPED_TEST(MaxPoolingDropoutTest, TestBackward) {
   vector<bool> propagate_down(this->blob_bottom_vec_.size(), true);
   layer.Backward(this->blob_top_vec_, propagate_down,
                  this->blob_bottom_vec_);
-  const Dtype* bottom_diff = this->blob_bottom_->cpu_diff();
+  const Dtype *bottom_diff = this->blob_bottom_->cpu_diff();
   Dtype sum = 0.;
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     sum += bottom_diff[i];

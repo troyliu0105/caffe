@@ -16,9 +16,9 @@ namespace caffe {
  *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
  *        and power @f$ \gamma @f$.
  */
-template <typename Dtype>
+template<typename Dtype>
 class PowerLayer : public NeuronLayer<Dtype> {
- public:
+public:
   /**
    * @param param provides PowerParameter power_param,
    *     with PowerLayer options:
@@ -26,14 +26,14 @@ class PowerLayer : public NeuronLayer<Dtype> {
    *   - shift (\b optional, default 0) the shift @f$ \beta @f$
    *   - power (\b optional, default 1) the power @f$ \gamma @f$
    */
-  explicit PowerLayer(const LayerParameter& param)
+  explicit PowerLayer(const LayerParameter &param)
       : NeuronLayer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "Power"; }
+  virtual inline const char *type() const { return "Power"; }
 
- protected:
+protected:
   /**
    * @param bottom input Blob vector (length 1)
    *   -# @f$ (N \times C \times H \times W) @f$
@@ -44,10 +44,10 @@ class PowerLayer : public NeuronLayer<Dtype> {
    *        y = (\alpha x + \beta) ^ \gamma
    *      @f$
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the error gradient w.r.t. the power inputs.
@@ -69,10 +69,10 @@ class PowerLayer : public NeuronLayer<Dtype> {
    *            \frac{\alpha \gamma y}{\alpha x + \beta}
    *      @f$ if propagate_down[0]
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 
   /// @brief @f$ \gamma @f$ from layer_param_.power_param()
   Dtype power_;

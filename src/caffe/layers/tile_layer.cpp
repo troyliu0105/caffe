@@ -5,10 +5,10 @@
 
 namespace caffe {
 
-template <typename Dtype>
+template<typename Dtype>
 void TileLayer<Dtype>::Reshape(
-    const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
-  const TileParameter& tile_param = this->layer_param_.tile_param();
+    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+  const TileParameter &tile_param = this->layer_param_.tile_param();
   axis_ = bottom[0]->CanonicalAxisIndex(tile_param.axis());
   CHECK(tile_param.has_tiles()) << "Number of tiles must be specified";
   tiles_ = tile_param.tiles();
@@ -20,11 +20,11 @@ void TileLayer<Dtype>::Reshape(
   inner_dim_ = bottom[0]->count(axis_);
 }
 
-template <typename Dtype>
+template<typename Dtype>
 void TileLayer<Dtype>::Forward_cpu(
-    const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
-  const Dtype* bottom_data = bottom[0]->cpu_data();
-  Dtype* top_data = top[0]->mutable_cpu_data();
+    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+  const Dtype *bottom_data = bottom[0]->cpu_data();
+  Dtype *top_data = top[0]->mutable_cpu_data();
   for (int i = 0; i < outer_dim_; ++i) {
     for (int t = 0; t < tiles_; ++t) {
       caffe_copy(inner_dim_, bottom_data, top_data);
@@ -34,12 +34,12 @@ void TileLayer<Dtype>::Forward_cpu(
   }
 }
 
-template <typename Dtype>
-void TileLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
-    const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+template<typename Dtype>
+void TileLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
+                                    const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
   if (!propagate_down[0]) { return; }
-  const Dtype* top_diff = top[0]->cpu_diff();
-  Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();
+  const Dtype *top_diff = top[0]->cpu_diff();
+  Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
   for (int i = 0; i < outer_dim_; ++i) {
     caffe_copy(inner_dim_, top_diff, bottom_diff);
     top_diff += inner_dim_;

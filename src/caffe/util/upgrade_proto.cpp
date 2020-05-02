@@ -12,13 +12,13 @@
 
 namespace caffe {
 
-bool NetNeedsUpgrade(const NetParameter& net_param) {
+bool NetNeedsUpgrade(const NetParameter &net_param) {
   return NetNeedsV0ToV1Upgrade(net_param) || NetNeedsV1ToV2Upgrade(net_param)
       || NetNeedsDataUpgrade(net_param) || NetNeedsInputUpgrade(net_param)
       || NetNeedsBatchNormUpgrade(net_param);
 }
 
-bool UpgradeNetAsNeeded(const string& param_file, NetParameter* param) {
+bool UpgradeNetAsNeeded(const string &param_file, NetParameter *param) {
   bool success = true;
   if (NetNeedsV0ToV1Upgrade(*param)) {
     // NetParameter was specified using the old style (V0LayerParameter); try to
@@ -29,15 +29,15 @@ bool UpgradeNetAsNeeded(const string& param_file, NetParameter* param) {
     if (!UpgradeV0Net(original_param, param)) {
       success = false;
       LOG(ERROR) << "Warning: had one or more problems upgrading "
-          << "V0NetParameter to NetParameter (see above); continuing anyway.";
+                 << "V0NetParameter to NetParameter (see above); continuing anyway.";
     } else {
       LOG(INFO) << "Successfully upgraded file specified using deprecated "
                 << "V0LayerParameter";
     }
     LOG(WARNING) << "Note that future Caffe releases will not support "
-        << "V0NetParameter; use ./build/tools/upgrade_net_proto_text for "
-        << "prototxt and ./build/tools/upgrade_net_proto_binary for model "
-        << "weights upgrade this and any other net protos to the new format.";
+                 << "V0NetParameter; use ./build/tools/upgrade_net_proto_text for "
+                 << "prototxt and ./build/tools/upgrade_net_proto_binary for model "
+                 << "weights upgrade this and any other net protos to the new format.";
   }
   // NetParameter uses old style data transformation fields; try to upgrade it.
   if (NetNeedsDataUpgrade(*param)) {
@@ -83,21 +83,21 @@ bool UpgradeNetAsNeeded(const string& param_file, NetParameter* param) {
   return success;
 }
 
-void ReadNetParamsFromTextFileOrDie(const string& param_file,
-                                    NetParameter* param) {
+void ReadNetParamsFromTextFileOrDie(const string &param_file,
+                                    NetParameter *param) {
   CHECK(ReadProtoFromTextFile(param_file, param))
-      << "Failed to parse NetParameter file: " << param_file;
+          << "Failed to parse NetParameter file: " << param_file;
   UpgradeNetAsNeeded(param_file, param);
 }
 
-void ReadNetParamsFromBinaryFileOrDie(const string& param_file,
-                                      NetParameter* param) {
+void ReadNetParamsFromBinaryFileOrDie(const string &param_file,
+                                      NetParameter *param) {
   CHECK(ReadProtoFromBinaryFile(param_file, param))
-      << "Failed to parse NetParameter file: " << param_file;
+          << "Failed to parse NetParameter file: " << param_file;
   UpgradeNetAsNeeded(param_file, param);
 }
 
-bool NetNeedsV0ToV1Upgrade(const NetParameter& net_param) {
+bool NetNeedsV0ToV1Upgrade(const NetParameter &net_param) {
   for (int i = 0; i < net_param.layers_size(); ++i) {
     if (net_param.layers(i).has_layer()) {
       return true;
@@ -106,12 +106,12 @@ bool NetNeedsV0ToV1Upgrade(const NetParameter& net_param) {
   return false;
 }
 
-bool NetNeedsV1ToV2Upgrade(const NetParameter& net_param) {
+bool NetNeedsV1ToV2Upgrade(const NetParameter &net_param) {
   return net_param.layers_size() > 0;
 }
 
-bool UpgradeV0Net(const NetParameter& v0_net_param_padding_layers,
-                  NetParameter* net_param) {
+bool UpgradeV0Net(const NetParameter &v0_net_param_padding_layers,
+                  NetParameter *net_param) {
   // First upgrade padding layers to padded conv layers.
   NetParameter v0_net_param;
   UpgradeV0PaddingLayers(v0_net_param_padding_layers, &v0_net_param);
@@ -137,8 +137,8 @@ bool UpgradeV0Net(const NetParameter& v0_net_param_padding_layers,
   return is_fully_compatible;
 }
 
-void UpgradeV0PaddingLayers(const NetParameter& param,
-                            NetParameter* param_upgraded_pad) {
+void UpgradeV0PaddingLayers(const NetParameter &param,
+                            NetParameter *param_upgraded_pad) {
   // Copy everything other than the layers from the original param.
   param_upgraded_pad->Clear();
   param_upgraded_pad->CopyFrom(param);
@@ -146,18 +146,18 @@ void UpgradeV0PaddingLayers(const NetParameter& param,
   // Figure out which layer each bottom blob comes from.
   map<string, int> blob_name_to_last_top_idx;
   for (int i = 0; i < param.input_size(); ++i) {
-    const string& blob_name = param.input(i);
+    const string &blob_name = param.input(i);
     blob_name_to_last_top_idx[blob_name] = -1;
   }
   for (int i = 0; i < param.layers_size(); ++i) {
-    const V1LayerParameter& layer_connection = param.layers(i);
-    const V0LayerParameter& layer_param = layer_connection.layer();
+    const V1LayerParameter &layer_connection = param.layers(i);
+    const V0LayerParameter &layer_param = layer_connection.layer();
     // Add the layer to the new net, unless it's a padding layer.
     if (layer_param.type() != "padding") {
       param_upgraded_pad->add_layers()->CopyFrom(layer_connection);
     }
     for (int j = 0; j < layer_connection.bottom_size(); ++j) {
-      const string& blob_name = layer_connection.bottom(j);
+      const string &blob_name = layer_connection.bottom(j);
       if (blob_name_to_last_top_idx.find(blob_name) ==
           blob_name_to_last_top_idx.end()) {
         LOG(FATAL) << "Unknown blob input " << blob_name << " to layer " << j;
@@ -166,22 +166,22 @@ void UpgradeV0PaddingLayers(const NetParameter& param,
       if (top_idx == -1) {
         continue;
       }
-      const V1LayerParameter& source_layer = param.layers(top_idx);
+      const V1LayerParameter &source_layer = param.layers(top_idx);
       if (source_layer.layer().type() == "padding") {
         // This layer has a padding layer as input -- check that it is a conv
         // layer or a pooling layer and takes only one input.  Also check that
         // the padding layer input has only one input and one output.  Other
         // cases have undefined behavior in Caffe.
         CHECK((layer_param.type() == "conv") || (layer_param.type() == "pool"))
-            << "Padding layer input to "
-            "non-convolutional / non-pooling layer type "
-            << layer_param.type();
+                << "Padding layer input to "
+                   "non-convolutional / non-pooling layer type "
+                << layer_param.type();
         CHECK_EQ(layer_connection.bottom_size(), 1)
-            << "Conv Layer takes a single blob as input.";
+          << "Conv Layer takes a single blob as input.";
         CHECK_EQ(source_layer.bottom_size(), 1)
-            << "Padding Layer takes a single blob as input.";
+          << "Padding Layer takes a single blob as input.";
         CHECK_EQ(source_layer.top_size(), 1)
-            << "Padding Layer produces a single blob as output.";
+          << "Padding Layer produces a single blob as output.";
         int layer_index = param_upgraded_pad->layers_size() - 1;
         param_upgraded_pad->mutable_layers(layer_index)->mutable_layer()
             ->set_pad(source_layer.layer().pad());
@@ -190,14 +190,14 @@ void UpgradeV0PaddingLayers(const NetParameter& param,
       }
     }
     for (int j = 0; j < layer_connection.top_size(); ++j) {
-      const string& blob_name = layer_connection.top(j);
+      const string &blob_name = layer_connection.top(j);
       blob_name_to_last_top_idx[blob_name] = i;
     }
   }
 }
 
-bool UpgradeV0LayerParameter(const V1LayerParameter& v0_layer_connection,
-                             V1LayerParameter* layer_param) {
+bool UpgradeV0LayerParameter(const V1LayerParameter &v0_layer_connection,
+                             V1LayerParameter *layer_param) {
   bool is_fully_compatible = true;
   layer_param->Clear();
   for (int i = 0; i < v0_layer_connection.bottom_size(); ++i) {
@@ -207,11 +207,11 @@ bool UpgradeV0LayerParameter(const V1LayerParameter& v0_layer_connection,
     layer_param->add_top(v0_layer_connection.top(i));
   }
   if (v0_layer_connection.has_layer()) {
-    const V0LayerParameter& v0_layer_param = v0_layer_connection.layer();
+    const V0LayerParameter &v0_layer_param = v0_layer_connection.layer();
     if (v0_layer_param.has_name()) {
       layer_param->set_name(v0_layer_param.name());
     }
-    const string& type = v0_layer_param.type();
+    const string &type = v0_layer_param.type();
     if (v0_layer_param.has_type()) {
       layer_param->set_type(UpgradeV0LayerType(type));
     }
@@ -548,7 +548,7 @@ bool UpgradeV0LayerParameter(const V1LayerParameter& v0_layer_connection,
   return is_fully_compatible;
 }
 
-V1LayerParameter_LayerType UpgradeV0LayerType(const string& type) {
+V1LayerParameter_LayerType UpgradeV0LayerType(const string &type) {
   if (type == "accuracy") {
     return V1LayerParameter_LayerType_ACCURACY;
   } else if (type == "bnll") {
@@ -603,7 +603,7 @@ V1LayerParameter_LayerType UpgradeV0LayerType(const string& type) {
   }
 }
 
-bool NetNeedsDataUpgrade(const NetParameter& net_param) {
+bool NetNeedsDataUpgrade(const NetParameter &net_param) {
   for (int i = 0; i < net_param.layers_size(); ++i) {
     if (net_param.layers(i).type() == V1LayerParameter_LayerType_DATA) {
       DataParameter layer_param = net_param.layers(i).data_param();
@@ -656,7 +656,7 @@ bool NetNeedsDataUpgrade(const NetParameter& net_param) {
     } \
   } while (0)
 
-void UpgradeNetDataTransformation(NetParameter* net_param) {
+void UpgradeNetDataTransformation(NetParameter *net_param) {
   for (int i = 0; i < net_param->layers_size(); ++i) {
     CONVERT_LAYER_TRANSFORM_PARAM(DATA, Data, data);
     CONVERT_LAYER_TRANSFORM_PARAM(IMAGE_DATA, ImageData, image_data);
@@ -664,13 +664,13 @@ void UpgradeNetDataTransformation(NetParameter* net_param) {
   }
 }
 
-bool UpgradeV1Net(const NetParameter& v1_net_param, NetParameter* net_param) {
+bool UpgradeV1Net(const NetParameter &v1_net_param, NetParameter *net_param) {
   if (v1_net_param.layer_size() > 0) {
     LOG(FATAL) << "Refusing to upgrade inconsistent NetParameter input; "
-        << "the definition includes both 'layer' and 'layers' fields. "
-        << "The current format defines 'layer' fields with string type like "
-        << "layer { type: 'Layer' ... } and not layers { type: LAYER ... }. "
-        << "Manually switch the definition to 'layer' format to continue.";
+               << "the definition includes both 'layer' and 'layers' fields. "
+               << "The current format defines 'layer' fields with string type like "
+               << "layer { type: 'Layer' ... } and not layers { type: LAYER ... }. "
+               << "Manually switch the definition to 'layer' format to continue.";
   }
   bool is_fully_compatible = true;
   net_param->CopyFrom(v1_net_param);
@@ -686,8 +686,8 @@ bool UpgradeV1Net(const NetParameter& v1_net_param, NetParameter* net_param) {
   return is_fully_compatible;
 }
 
-bool UpgradeV1LayerParameter(const V1LayerParameter& v1_layer_param,
-                             LayerParameter* layer_param) {
+bool UpgradeV1LayerParameter(const V1LayerParameter &v1_layer_param,
+                             LayerParameter *layer_param) {
   layer_param->Clear();
   bool is_fully_compatible = true;
   for (int i = 0; i < v1_layer_param.bottom_size(); ++i) {
@@ -871,7 +871,7 @@ bool UpgradeV1LayerParameter(const V1LayerParameter& v1_layer_param,
   return is_fully_compatible;
 }
 
-const char* UpgradeV1LayerType(const V1LayerParameter_LayerType type) {
+const char *UpgradeV1LayerType(const V1LayerParameter_LayerType type) {
   switch (type) {
   case V1LayerParameter_LayerType_NONE:
     return "";
@@ -959,21 +959,21 @@ const char* UpgradeV1LayerType(const V1LayerParameter_LayerType type) {
   }
 }
 
-bool NetNeedsInputUpgrade(const NetParameter& net_param) {
+bool NetNeedsInputUpgrade(const NetParameter &net_param) {
   return net_param.input_size() > 0;
 }
 
-void UpgradeNetInput(NetParameter* net_param) {
+void UpgradeNetInput(NetParameter *net_param) {
   // Collect inputs and convert to Input layer definitions.
   // If the NetParameter holds an input alone, without shape/dim, then
   // it's a legacy caffemodel and simply stripping the input field is enough.
   bool has_shape = net_param->input_shape_size() > 0;
   bool has_dim = net_param->input_dim_size() > 0;
   if (has_shape || has_dim) {
-    LayerParameter* layer_param = net_param->add_layer();
+    LayerParameter *layer_param = net_param->add_layer();
     layer_param->set_name("input");
     layer_param->set_type("Input");
-    InputParameter* input_param = layer_param->mutable_input_param();
+    InputParameter *input_param = layer_param->mutable_input_param();
     // Convert input fields into a layer.
     for (int i = 0; i < net_param->input_size(); ++i) {
       layer_param->add_top(net_param->input(i));
@@ -981,8 +981,8 @@ void UpgradeNetInput(NetParameter* net_param) {
         input_param->add_shape()->CopyFrom(net_param->input_shape(i));
       } else {
         // Turn legacy input dimensions into shape.
-        BlobShape* shape = input_param->add_shape();
-        int first_dim = i*4;
+        BlobShape *shape = input_param->add_shape();
+        int first_dim = i * 4;
         int last_dim = first_dim + 4;
         for (int j = first_dim; j < last_dim; j++) {
           shape->add_dim(net_param->input_dim(j));
@@ -991,7 +991,7 @@ void UpgradeNetInput(NetParameter* net_param) {
     }
     // Swap input layer to beginning of net to satisfy layer dependencies.
     for (int i = net_param->layer_size() - 1; i > 0; --i) {
-      net_param->mutable_layer(i-1)->Swap(net_param->mutable_layer(i));
+      net_param->mutable_layer(i - 1)->Swap(net_param->mutable_layer(i));
     }
   }
   // Clear inputs.
@@ -1000,7 +1000,7 @@ void UpgradeNetInput(NetParameter* net_param) {
   net_param->clear_input_dim();
 }
 
-bool NetNeedsBatchNormUpgrade(const NetParameter& net_param) {
+bool NetNeedsBatchNormUpgrade(const NetParameter &net_param) {
   for (int i = 0; i < net_param.layer_size(); ++i) {
     // Check if BatchNorm layers declare three parameters, as required by
     // the previous BatchNorm layer definition.
@@ -1012,7 +1012,7 @@ bool NetNeedsBatchNormUpgrade(const NetParameter& net_param) {
   return false;
 }
 
-void UpgradeNetBatchNorm(NetParameter* net_param) {
+void UpgradeNetBatchNorm(NetParameter *net_param) {
   for (int i = 0; i < net_param->layer_size(); ++i) {
     // Check if BatchNorm layers declare three parameters, as required by
     // the previous BatchNorm layer definition.
@@ -1020,8 +1020,8 @@ void UpgradeNetBatchNorm(NetParameter* net_param) {
         && net_param->layer(i).param_size() == 3) {
       // set lr_mult and decay_mult to zero. leave all other param intact.
       for (int ip = 0; ip < net_param->layer(i).param_size(); ip++) {
-        ParamSpec* fixed_param_spec =
-          net_param->mutable_layer(i)->mutable_param(ip);
+        ParamSpec *fixed_param_spec =
+            net_param->mutable_layer(i)->mutable_param(ip);
         fixed_param_spec->set_lr_mult(0.f);
         fixed_param_spec->set_decay_mult(0.f);
       }
@@ -1030,17 +1030,17 @@ void UpgradeNetBatchNorm(NetParameter* net_param) {
 }
 
 // Return true iff the solver contains any old solver_type specified as enums
-bool SolverNeedsTypeUpgrade(const SolverParameter& solver_param) {
+bool SolverNeedsTypeUpgrade(const SolverParameter &solver_param) {
   if (solver_param.has_solver_type()) {
     return true;
   }
   return false;
 }
 
-bool UpgradeSolverType(SolverParameter* solver_param) {
+bool UpgradeSolverType(SolverParameter *solver_param) {
   CHECK(!solver_param->has_solver_type() || !solver_param->has_type())
-      << "Failed to upgrade solver: old solver_type field (enum) and new type "
-      << "field (string) cannot be both specified in solver proto text.";
+          << "Failed to upgrade solver: old solver_type field (enum) and new type "
+          << "field (string) cannot be both specified in solver proto text.";
   if (solver_param->has_solver_type()) {
     string type;
     switch (solver_param->solver_type()) {
@@ -1075,7 +1075,7 @@ bool UpgradeSolverType(SolverParameter* solver_param) {
 }
 
 // Check for deprecations and upgrade the SolverParameter as needed.
-bool UpgradeSolverAsNeeded(const string& param_file, SolverParameter* param) {
+bool UpgradeSolverAsNeeded(const string &param_file, SolverParameter *param) {
   bool success = true;
   // Try to upgrade old style solver_type enum fields into new string type
   if (SolverNeedsTypeUpgrade(*param)) {
@@ -1096,10 +1096,10 @@ bool UpgradeSolverAsNeeded(const string& param_file, SolverParameter* param) {
 }
 
 // Read parameters from a file into a SolverParameter proto message.
-void ReadSolverParamsFromTextFileOrDie(const string& param_file,
-                                       SolverParameter* param) {
+void ReadSolverParamsFromTextFileOrDie(const string &param_file,
+                                       SolverParameter *param) {
   CHECK(ReadProtoFromTextFile(param_file, param))
-      << "Failed to parse SolverParameter file: " << param_file;
+          << "Failed to parse SolverParameter file: " << param_file;
   UpgradeSolverAsNeeded(param_file, param);
 }
 

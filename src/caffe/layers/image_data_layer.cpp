@@ -17,24 +17,24 @@
 
 namespace caffe {
 
-template <typename Dtype>
+template<typename Dtype>
 ImageDataLayer<Dtype>::~ImageDataLayer<Dtype>() {
   this->StopInternalThread();
 }
 
-template <typename Dtype>
-void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top) {
+template<typename Dtype>
+void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                                           const vector<Blob<Dtype> *> &top) {
   const int new_height = this->layer_param_.image_data_param().new_height();
-  const int new_width  = this->layer_param_.image_data_param().new_width();
-  const bool is_color  = this->layer_param_.image_data_param().is_color();
+  const int new_width = this->layer_param_.image_data_param().new_width();
+  const bool is_color = this->layer_param_.image_data_param().is_color();
   string root_folder = this->layer_param_.image_data_param().root_folder();
 
   CHECK((new_height == 0 && new_width == 0) ||
       (new_height > 0 && new_width > 0)) << "Current implementation requires "
-      "new_height and new_width to be set at the same time.";
+                                            "new_height and new_width to be set at the same time.";
   // Read the file with filenames and labels
-  const string& source = this->layer_param_.image_data_param().source();
+  const string &source = this->layer_param_.image_data_param().source();
   LOG(INFO) << "Opening file " << source;
   std::ifstream infile(source.c_str());
   string line;
@@ -88,8 +88,8 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
   top[0]->Reshape(top_shape);
 
   LOG(INFO) << "output data size: " << top[0]->num() << ","
-      << top[0]->channels() << "," << top[0]->height() << ","
-      << top[0]->width();
+            << top[0]->channels() << "," << top[0]->height() << ","
+            << top[0]->width();
   // label
   vector<int> label_shape(1, batch_size);
   top[1]->Reshape(label_shape);
@@ -98,16 +98,16 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
   }
 }
 
-template <typename Dtype>
+template<typename Dtype>
 void ImageDataLayer<Dtype>::ShuffleImages() {
-  caffe::rng_t* prefetch_rng =
-      static_cast<caffe::rng_t*>(prefetch_rng_->generator());
+  caffe::rng_t *prefetch_rng =
+      static_cast<caffe::rng_t *>(prefetch_rng_->generator());
   shuffle(lines_.begin(), lines_.end(), prefetch_rng);
 }
 
 // This function is called on prefetch thread
-template <typename Dtype>
-void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
+template<typename Dtype>
+void ImageDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   CPUTimer batch_timer;
   batch_timer.Start();
   double read_time = 0;
@@ -125,7 +125,7 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
   // Reshape according to the first image of each batch
   // on single input batches allows for inputs of varying dimension.
   cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].first,
-      new_height, new_width, is_color);
+                                    new_height, new_width, is_color);
   CHECK(cv_img.data) << "Could not load " << lines_[lines_id_].first;
   // Use data_transformer to infer the expected blob shape from a cv_img.
   vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_img);
@@ -134,8 +134,8 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
   top_shape[0] = batch_size;
   batch->data_.Reshape(top_shape);
 
-  Dtype* prefetch_data = batch->data_.mutable_cpu_data();
-  Dtype* prefetch_label = batch->label_.mutable_cpu_data();
+  Dtype *prefetch_data = batch->data_.mutable_cpu_data();
+  Dtype *prefetch_label = batch->label_.mutable_cpu_data();
 
   // datum scales
   const int lines_size = lines_.size();
@@ -144,7 +144,7 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
     timer.Start();
     CHECK_GT(lines_size, lines_id_);
     cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].first,
-        new_height, new_width, is_color);
+                                      new_height, new_width, is_color);
     CHECK(cv_img.data) << "Could not load " << lines_[lines_id_].first;
     read_time += timer.MicroSeconds();
     timer.Start();

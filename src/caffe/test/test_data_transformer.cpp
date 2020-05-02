@@ -16,28 +16,28 @@
 namespace caffe {
 
 void FillDatum(const int label, const int channels, const int height,
-  const int width, const bool unique_pixels, Datum * datum) {
+               const int width, const bool unique_pixels, Datum *datum) {
   datum->set_label(label);
   datum->set_channels(channels);
   datum->set_height(height);
   datum->set_width(width);
   int size = channels * height * width;
-  std::string* data = datum->mutable_data();
+  std::string *data = datum->mutable_data();
   for (int j = 0; j < size; ++j) {
     int datum = unique_pixels ? j : label;
     data->push_back(static_cast<uint8_t>(datum));
   }
 }
 
-template <typename Dtype>
+template<typename Dtype>
 class DataTransformTest : public ::testing::Test {
- protected:
+protected:
   DataTransformTest()
       : seed_(1701),
-      num_iter_(10) {}
+        num_iter_(10) {}
 
   int NumSequenceMatches(const TransformationParameter transform_param,
-      const Datum& datum, Phase phase) {
+                         const Datum &datum, Phase phase) {
     // Get crop sequence with Caffe seed 1701.
     DataTransformer<Dtype> transformer(transform_param, phase);
     const int crop_size = transform_param.crop_size();
@@ -257,7 +257,6 @@ TYPED_TEST(DataTransformTest, TestCropMirrorTest) {
   EXPECT_LT(num_matches_crop_mirror, num_matches_crop);
 }
 
-
 TYPED_TEST(DataTransformTest, TestMeanValue) {
   TransformationParameter transform_param;
   const bool unique_pixels = false;  // pixels are equal to label
@@ -322,7 +321,7 @@ TYPED_TEST(DataTransformTest, TestMeanFile) {
   blob_mean.set_width(width);
 
   for (int j = 0; j < size; ++j) {
-      blob_mean.add_data(j);
+    blob_mean.add_data(j);
   }
 
   LOG(INFO) << "Using temporary mean_file " << mean_file;

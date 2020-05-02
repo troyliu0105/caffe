@@ -17,7 +17,7 @@ TEST_F(SyncedMemoryTest, TestInitialization) {
   SyncedMemory mem(10);
   EXPECT_EQ(mem.head(), SyncedMemory::UNINITIALIZED);
   EXPECT_EQ(mem.size(), 10);
-  SyncedMemory* p_mem = new SyncedMemory(10 * sizeof(float));
+  SyncedMemory *p_mem = new SyncedMemory(10 * sizeof(float));
   EXPECT_EQ(p_mem->size(), 10 * sizeof(float));
   delete p_mem;
 }
@@ -52,18 +52,18 @@ TEST_F(SyncedMemoryTest, TestAllocationGPU) {
 
 TEST_F(SyncedMemoryTest, TestCPUWrite) {
   SyncedMemory mem(10);
-  void* cpu_data = mem.mutable_cpu_data();
+  void *cpu_data = mem.mutable_cpu_data();
   EXPECT_EQ(mem.head(), SyncedMemory::HEAD_AT_CPU);
   caffe_memset(mem.size(), 1, cpu_data);
   for (int i = 0; i < mem.size(); ++i) {
-    EXPECT_EQ((static_cast<char*>(cpu_data))[i], 1);
+    EXPECT_EQ((static_cast<char *>(cpu_data))[i], 1);
   }
   // do another round
   cpu_data = mem.mutable_cpu_data();
   EXPECT_EQ(mem.head(), SyncedMemory::HEAD_AT_CPU);
   caffe_memset(mem.size(), 2, cpu_data);
   for (int i = 0; i < mem.size(); ++i) {
-    EXPECT_EQ((static_cast<char*>(cpu_data))[i], 2);
+    EXPECT_EQ((static_cast<char *>(cpu_data))[i], 2);
   }
 }
 

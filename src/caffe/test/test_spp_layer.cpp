@@ -11,17 +11,16 @@
 #include "caffe/layers/split_layer.hpp"
 #include "caffe/layers/spp_layer.hpp"
 
-
 #include "caffe/test/test_caffe_main.hpp"
 #include "caffe/test/test_gradient_check_util.hpp"
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class SPPLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   SPPLayerTest()
       : blob_bottom_(new Blob<Dtype>()),
         blob_bottom_2_(new Blob<Dtype>()),
@@ -41,16 +40,19 @@ class SPPLayerTest : public MultiDeviceTest<TypeParam> {
     blob_bottom_vec_3_.push_back(blob_bottom_3_);
     blob_top_vec_.push_back(blob_top_);
   }
-  virtual ~SPPLayerTest() { delete blob_bottom_; delete blob_top_; }
+  virtual ~SPPLayerTest() {
+    delete blob_bottom_;
+    delete blob_top_;
+  }
 
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_bottom_2_;
-  Blob<Dtype>* const blob_bottom_3_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_bottom_vec_2_;
-  vector<Blob<Dtype>*> blob_bottom_vec_3_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_bottom_2_;
+  Blob<Dtype> *const blob_bottom_3_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_bottom_vec_2_;
+  vector<Blob<Dtype> *> blob_bottom_vec_3_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(SPPLayerTest, TestDtypesAndDevices);
@@ -121,14 +123,13 @@ TYPED_TEST(SPPLayerTest, TestForwardBackward) {
 TYPED_TEST(SPPLayerTest, TestGradient) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  SPPParameter* spp_param = layer_param.mutable_spp_param();
+  SPPParameter *spp_param = layer_param.mutable_spp_param();
   spp_param->set_pyramid_height(3);
   SPPLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-4, 1e-2);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
-
 
 }  // namespace caffe

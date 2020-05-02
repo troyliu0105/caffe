@@ -12,11 +12,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class ReductionLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   ReductionLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 4, 5)),
         blob_top_(new Blob<Dtype>()) {
@@ -36,7 +36,7 @@ class ReductionLayerTest : public MultiDeviceTest<TypeParam> {
   void TestForward(ReductionParameter_ReductionOp op,
                    float coeff = 1, int axis = 0) {
     LayerParameter layer_param;
-    ReductionParameter* reduction_param = layer_param.mutable_reduction_param();
+    ReductionParameter *reduction_param = layer_param.mutable_reduction_param();
     reduction_param->set_operation(op);
     if (coeff != 1.0) { reduction_param->set_coeff(coeff); }
     if (axis != 0) { reduction_param->set_axis(axis); }
@@ -44,36 +44,36 @@ class ReductionLayerTest : public MultiDeviceTest<TypeParam> {
         new ReductionLayer<Dtype>(layer_param));
     layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-    const Dtype* in_data = this->blob_bottom_->cpu_data();
+    const Dtype *in_data = this->blob_bottom_->cpu_data();
     const int num = this->blob_bottom_->count(0, axis);
     const int dim = this->blob_bottom_->count(axis);
     for (int n = 0; n < num; ++n) {
       Dtype expected_result = 0;
       for (int d = 0; d < dim; ++d) {
         switch (op) {
-          case ReductionParameter_ReductionOp_SUM:
-            expected_result += *in_data;
-            break;
-          case ReductionParameter_ReductionOp_MEAN:
-            expected_result += *in_data / dim;
-            break;
-          case ReductionParameter_ReductionOp_ASUM:
-            expected_result += fabs(*in_data);
-            break;
-          case ReductionParameter_ReductionOp_SUMSQ:
-            expected_result += (*in_data) * (*in_data);
-            break;
-          default:
-            LOG(FATAL) << "Unknown reduction op: "
-                << ReductionParameter_ReductionOp_Name(op);
+        case ReductionParameter_ReductionOp_SUM:
+          expected_result += *in_data;
+          break;
+        case ReductionParameter_ReductionOp_MEAN:
+          expected_result += *in_data / dim;
+          break;
+        case ReductionParameter_ReductionOp_ASUM:
+          expected_result += fabs(*in_data);
+          break;
+        case ReductionParameter_ReductionOp_SUMSQ:
+          expected_result += (*in_data) * (*in_data);
+          break;
+        default:
+          LOG(FATAL) << "Unknown reduction op: "
+                     << ReductionParameter_ReductionOp_Name(op);
         }
         ++in_data;
       }
       expected_result *= coeff;
       const Dtype computed_result = this->blob_top_->cpu_data()[n];
       EXPECT_FLOAT_EQ(expected_result, computed_result)
-          << "Incorrect result computed with op "
-          << ReductionParameter_ReductionOp_Name(op) << ", coeff " << coeff;
+              << "Incorrect result computed with op "
+              << ReductionParameter_ReductionOp_Name(op) << ", coeff " << coeff;
     }
   }
 
@@ -81,20 +81,20 @@ class ReductionLayerTest : public MultiDeviceTest<TypeParam> {
                     float coeff = 1, int axis = 0) {
     typedef typename TypeParam::Dtype Dtype;
     LayerParameter layer_param;
-    ReductionParameter* reduction_param = layer_param.mutable_reduction_param();
+    ReductionParameter *reduction_param = layer_param.mutable_reduction_param();
     reduction_param->set_operation(op);
     reduction_param->set_coeff(coeff);
     reduction_param->set_axis(axis);
     ReductionLayer<Dtype> layer(layer_param);
     GradientChecker<Dtype> checker(1e-2, 2e-3);
     checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-        this->blob_top_vec_);
+                                    this->blob_top_vec_);
   }
 
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(ReductionLayerTest, TestDtypesAndDevices);

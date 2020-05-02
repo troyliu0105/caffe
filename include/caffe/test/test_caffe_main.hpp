@@ -16,22 +16,22 @@ using std::cout;
 using std::endl;
 
 #ifdef CMAKE_BUILD
-  #include "caffe_config.h"
+#include "caffe_config.h"
 #else
-  #define CUDA_TEST_DEVICE -1
-  #define EXAMPLES_SOURCE_DIR "examples/"
-  #define ABS_TEST_DATA_DIR "src/caffe/test/test_data"
+#define CUDA_TEST_DEVICE -1
+#define EXAMPLES_SOURCE_DIR "examples/"
+#define ABS_TEST_DATA_DIR "src/caffe/test/test_data"
 #endif
 
-int main(int argc, char** argv);
+int main(int argc, char **argv);
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class MultiDeviceTest : public ::testing::Test {
- public:
+public:
   typedef typename TypeParam::Dtype Dtype;
- protected:
+protected:
   MultiDeviceTest() {
     Caffe::set_mode(TypeParam::device);
   }
@@ -41,13 +41,13 @@ class MultiDeviceTest : public ::testing::Test {
 
 typedef ::testing::Types<float, double> TestDtypes;
 
-template <typename TypeParam>
+template<typename TypeParam>
 struct CPUDevice {
   typedef TypeParam Dtype;
   static const Caffe::Brew device = Caffe::CPU;
 };
 
-template <typename Dtype>
+template<typename Dtype>
 class CPUDeviceTest : public MultiDeviceTest<CPUDevice<Dtype> > {
 };
 

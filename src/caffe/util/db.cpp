@@ -4,13 +4,14 @@
 
 #include <string>
 
-namespace caffe { namespace db {
+namespace caffe {
+namespace db {
 
-DB* GetDB(DataParameter::DB backend) {
+DB *GetDB(DataParameter::DB backend) {
   switch (backend) {
 #ifdef USE_LEVELDB
-  case DataParameter_DB_LEVELDB:
-    return new LevelDB();
+    case DataParameter_DB_LEVELDB:
+      return new LevelDB();
 #endif  // USE_LEVELDB
 #ifdef USE_LMDB
   case DataParameter_DB_LMDB:
@@ -22,7 +23,7 @@ DB* GetDB(DataParameter::DB backend) {
   }
 }
 
-DB* GetDB(const string& backend) {
+DB *GetDB(const string &backend) {
 #ifdef USE_LEVELDB
   if (backend == "leveldb") {
     return new LevelDB();

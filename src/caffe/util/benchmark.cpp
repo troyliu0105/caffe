@@ -54,7 +54,6 @@ void Timer::Stop() {
   }
 }
 
-
 float Timer::MicroSeconds() {
   if (!has_run_at_least_once()) {
     LOG(WARNING) << "Timer has never been run before reading time.";
@@ -71,7 +70,7 @@ float Timer::MicroSeconds() {
     // Cuda only measure milliseconds
     elapsed_microseconds_ = elapsed_milliseconds_ * 1000;
 #else
-      NO_GPU;
+    NO_GPU;
 #endif
   } else {
     elapsed_microseconds_ = (stop_cpu_ - start_cpu_).total_microseconds();
@@ -93,7 +92,7 @@ float Timer::MilliSeconds() {
     CUDA_CHECK(cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
                                     stop_gpu_));
 #else
-      NO_GPU;
+    NO_GPU;
 #endif
   } else {
     elapsed_milliseconds_ = (stop_cpu_ - start_cpu_).total_milliseconds();
@@ -149,7 +148,7 @@ float CPUTimer::MilliSeconds() {
     Stop();
   }
   this->elapsed_milliseconds_ = (this->stop_cpu_ -
-                                this->start_cpu_).total_milliseconds();
+      this->start_cpu_).total_milliseconds();
   return this->elapsed_milliseconds_;
 }
 
@@ -162,7 +161,7 @@ float CPUTimer::MicroSeconds() {
     Stop();
   }
   this->elapsed_microseconds_ = (this->stop_cpu_ -
-                                this->start_cpu_).total_microseconds();
+      this->start_cpu_).total_microseconds();
   return this->elapsed_microseconds_;
 }
 

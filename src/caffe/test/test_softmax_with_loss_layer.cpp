@@ -16,11 +16,11 @@ using boost::scoped_ptr;
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class SoftmaxWithLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   SoftmaxWithLossLayerTest()
       : blob_bottom_data_(new Blob<Dtype>(10, 5, 2, 3)),
         blob_bottom_label_(new Blob<Dtype>(10, 1, 2, 3)),
@@ -42,11 +42,11 @@ class SoftmaxWithLossLayerTest : public MultiDeviceTest<TypeParam> {
     delete blob_bottom_label_;
     delete blob_top_loss_;
   }
-  Blob<Dtype>* const blob_bottom_data_;
-  Blob<Dtype>* const blob_bottom_label_;
-  Blob<Dtype>* const blob_top_loss_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_data_;
+  Blob<Dtype> *const blob_bottom_label_;
+  Blob<Dtype> *const blob_top_loss_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(SoftmaxWithLossLayerTest, TestDtypesAndDevices);
@@ -58,7 +58,7 @@ TYPED_TEST(SoftmaxWithLossLayerTest, TestGradient) {
   SoftmaxWithLossLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(SoftmaxWithLossLayerTest, TestForwardIgnoreLabel) {
@@ -92,7 +92,7 @@ TYPED_TEST(SoftmaxWithLossLayerTest, TestGradientIgnoreLabel) {
   SoftmaxWithLossLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(SoftmaxWithLossLayerTest, TestGradientUnnormalized) {
@@ -102,7 +102,7 @@ TYPED_TEST(SoftmaxWithLossLayerTest, TestGradientUnnormalized) {
   SoftmaxWithLossLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 }  // namespace caffe

@@ -14,11 +14,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class ContrastiveLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   ContrastiveLossLayerTest()
       : blob_bottom_data_i_(new Blob<Dtype>(512, 2, 1, 1)),
         blob_bottom_data_j_(new Blob<Dtype>(512, 2, 1, 1)),
@@ -46,12 +46,12 @@ class ContrastiveLossLayerTest : public MultiDeviceTest<TypeParam> {
     delete blob_top_loss_;
   }
 
-  Blob<Dtype>* const blob_bottom_data_i_;
-  Blob<Dtype>* const blob_bottom_data_j_;
-  Blob<Dtype>* const blob_bottom_y_;
-  Blob<Dtype>* const blob_top_loss_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_data_i_;
+  Blob<Dtype> *const blob_bottom_data_j_;
+  Blob<Dtype> *const blob_bottom_y_;
+  Blob<Dtype> *const blob_top_loss_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(ContrastiveLossLayerTest, TestDtypesAndDevices);
@@ -70,15 +70,15 @@ TYPED_TEST(ContrastiveLossLayerTest, TestForward) {
   for (int i = 0; i < num; ++i) {
     Dtype dist_sq(0);
     for (int j = 0; j < channels; ++j) {
-      Dtype diff = this->blob_bottom_data_i_->cpu_data()[i*channels+j] -
-          this->blob_bottom_data_j_->cpu_data()[i*channels+j];
-      dist_sq += diff*diff;
+      Dtype diff = this->blob_bottom_data_i_->cpu_data()[i * channels + j] -
+          this->blob_bottom_data_j_->cpu_data()[i * channels + j];
+      dist_sq += diff * diff;
     }
     if (this->blob_bottom_y_->cpu_data()[i]) {  // similar pairs
       loss += dist_sq;
     } else {
       Dtype dist = std::max<Dtype>(margin - sqrt(dist_sq), 0.0);
-      loss += dist*dist;
+      loss += dist * dist;
     }
   }
   loss /= static_cast<Dtype>(num) * Dtype(2);
@@ -93,9 +93,9 @@ TYPED_TEST(ContrastiveLossLayerTest, TestGradient) {
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   // check the gradient for the first two bottom layers
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 1);
+                                  this->blob_top_vec_, 1);
 }
 
 TYPED_TEST(ContrastiveLossLayerTest, TestForwardLegacy) {
@@ -113,9 +113,9 @@ TYPED_TEST(ContrastiveLossLayerTest, TestForwardLegacy) {
   for (int i = 0; i < num; ++i) {
     Dtype dist_sq(0);
     for (int j = 0; j < channels; ++j) {
-      Dtype diff = this->blob_bottom_data_i_->cpu_data()[i*channels+j] -
-          this->blob_bottom_data_j_->cpu_data()[i*channels+j];
-      dist_sq += diff*diff;
+      Dtype diff = this->blob_bottom_data_i_->cpu_data()[i * channels + j] -
+          this->blob_bottom_data_j_->cpu_data()[i * channels + j];
+      dist_sq += diff * diff;
     }
     if (this->blob_bottom_y_->cpu_data()[i]) {  // similar pairs
       loss += dist_sq;
@@ -136,9 +136,9 @@ TYPED_TEST(ContrastiveLossLayerTest, TestGradientLegacy) {
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   // check the gradient for the first two bottom layers
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 1);
+                                  this->blob_top_vec_, 1);
 }
 
 }  // namespace caffe

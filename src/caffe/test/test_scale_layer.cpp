@@ -13,11 +13,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class ScaleLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   ScaleLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 4, 5)),
         blob_bottom_eltwise_(new Blob<Dtype>(2, 3, 4, 5)),
@@ -28,11 +28,14 @@ class ScaleLayerTest : public MultiDeviceTest<TypeParam> {
         blob_top_(new Blob<Dtype>()) {
     Caffe::set_random_seed(1701);
     vector<int> broadcast_shape(2);
-    broadcast_shape[0] = 2; broadcast_shape[1] = 3;
+    broadcast_shape[0] = 2;
+    broadcast_shape[1] = 3;
     this->blob_bottom_broadcast_0_->Reshape(broadcast_shape);
-    broadcast_shape[0] = 3; broadcast_shape[1] = 4;
+    broadcast_shape[0] = 3;
+    broadcast_shape[1] = 4;
     this->blob_bottom_broadcast_1_->Reshape(broadcast_shape);
-    broadcast_shape[0] = 4; broadcast_shape[1] = 5;
+    broadcast_shape[0] = 4;
+    broadcast_shape[1] = 5;
     this->blob_bottom_broadcast_2_->Reshape(broadcast_shape);
     FillerParameter filler_param;
     filler_param.set_min(1);
@@ -56,15 +59,15 @@ class ScaleLayerTest : public MultiDeviceTest<TypeParam> {
     delete blob_bottom_scale_;
     delete blob_top_;
   }
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_bottom_eltwise_;
-  Blob<Dtype>* const blob_bottom_broadcast_0_;
-  Blob<Dtype>* const blob_bottom_broadcast_1_;
-  Blob<Dtype>* const blob_bottom_broadcast_2_;
-  Blob<Dtype>* const blob_bottom_scale_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_bottom_eltwise_;
+  Blob<Dtype> *const blob_bottom_broadcast_0_;
+  Blob<Dtype> *const blob_bottom_broadcast_1_;
+  Blob<Dtype> *const blob_bottom_broadcast_2_;
+  Blob<Dtype> *const blob_bottom_scale_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(ScaleLayerTest, TestDtypesAndDevices);
@@ -78,10 +81,10 @@ TYPED_TEST(ScaleLayerTest, TestForwardEltwise) {
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* data = this->blob_top_->cpu_data();
+  const Dtype *data = this->blob_top_->cpu_data();
   const int count = this->blob_top_->count();
-  const Dtype* in_data_a = this->blob_bottom_->cpu_data();
-  const Dtype* in_data_b = this->blob_bottom_eltwise_->cpu_data();
+  const Dtype *in_data_a = this->blob_bottom_->cpu_data();
+  const Dtype *in_data_b = this->blob_bottom_eltwise_->cpu_data();
   for (int i = 0; i < count; ++i) {
     EXPECT_NEAR(data[i], in_data_a[i] * in_data_b[i], 1e-5);
   }
@@ -98,10 +101,10 @@ TYPED_TEST(ScaleLayerTest, TestForwardEltwiseInPlace) {
   shared_ptr<ScaleLayer<Dtype> > layer(new ScaleLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* data = this->blob_bottom_->cpu_data();
+  const Dtype *data = this->blob_bottom_->cpu_data();
   const int count = this->blob_bottom_->count();
-  const Dtype* in_data_a = orig_bottom.cpu_data();
-  const Dtype* in_data_b = this->blob_bottom_eltwise_->cpu_data();
+  const Dtype *in_data_a = orig_bottom.cpu_data();
+  const Dtype *in_data_b = this->blob_bottom_eltwise_->cpu_data();
   for (int i = 0; i < count; ++i) {
     EXPECT_NEAR(data[i], in_data_a[i] * in_data_b[i], 1e-5);
   }
@@ -135,7 +138,7 @@ TYPED_TEST(ScaleLayerTest, TestBackwardEltwiseInPlace) {
   orig_bottom_diff.CopyFrom(*this->blob_bottom_, kCopyDiff, kReshape);
   Blob<Dtype> orig_scale_diff;
   orig_scale_diff.CopyFrom(*this->blob_bottom_eltwise_,
-                            kCopyDiff, kReshape);
+                           kCopyDiff, kReshape);
   // Rerun forward + backward with in-place computation;
   // check that resulting bottom diffs are the same.
   this->blob_top_vec_[0] = this->blob_bottom_;  // in-place computation
@@ -156,7 +159,7 @@ TYPED_TEST(ScaleLayerTest, TestBackwardEltwiseInPlace) {
 TYPED_TEST(ScaleLayerTest, TestForwardEltwiseWithParam) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  ScaleParameter* scale_param = layer_param.mutable_scale_param();
+  ScaleParameter *scale_param = layer_param.mutable_scale_param();
   scale_param->set_axis(0);
   scale_param->set_num_axes(-1);
   scale_param->mutable_filler()->set_type("gaussian");
@@ -164,10 +167,10 @@ TYPED_TEST(ScaleLayerTest, TestForwardEltwiseWithParam) {
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* data = this->blob_top_->cpu_data();
+  const Dtype *data = this->blob_top_->cpu_data();
   const int count = this->blob_top_->count();
-  const Dtype* in_data_a = this->blob_bottom_->cpu_data();
-  const Dtype* in_data_b = layer->blobs()[0]->cpu_data();
+  const Dtype *in_data_a = this->blob_bottom_->cpu_data();
+  const Dtype *in_data_b = layer->blobs()[0]->cpu_data();
   for (int i = 0; i < count; ++i) {
     EXPECT_NEAR(data[i], in_data_a[i] * in_data_b[i], 1e-5);
   }
@@ -188,7 +191,7 @@ TYPED_TEST(ScaleLayerTest, TestForwardBroadcastBegin) {
         for (int w = 0; w < this->blob_bottom_->width(); ++w) {
           EXPECT_NEAR(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_->data_at(n, c, h, w) *
-                      this->blob_bottom_broadcast_0_->data_at(n, c, 0, 0),
+                          this->blob_bottom_broadcast_0_->data_at(n, c, 0, 0),
                       1e-5);
         }
       }
@@ -211,7 +214,7 @@ TYPED_TEST(ScaleLayerTest, TestForwardBroadcastMiddle) {
         for (int w = 0; w < this->blob_bottom_->width(); ++w) {
           EXPECT_NEAR(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_->data_at(n, c, h, w) *
-                      this->blob_bottom_broadcast_1_->data_at(c, h, 0, 0),
+                          this->blob_bottom_broadcast_1_->data_at(c, h, 0, 0),
                       1e-5);
         }
       }
@@ -236,7 +239,7 @@ TYPED_TEST(ScaleLayerTest, TestForwardBroadcastMiddleInPlace) {
         for (int w = 0; w < this->blob_bottom_->width(); ++w) {
           EXPECT_NEAR(this->blob_bottom_->data_at(n, c, h, w),
                       orig_bottom.data_at(n, c, h, w) *
-                      this->blob_bottom_broadcast_1_->data_at(c, h, 0, 0),
+                          this->blob_bottom_broadcast_1_->data_at(c, h, 0, 0),
                       1e-5);
         }
       }
@@ -272,7 +275,7 @@ TYPED_TEST(ScaleLayerTest, TestBackwardBroadcastMiddleInPlace) {
   orig_bottom_diff.CopyFrom(*this->blob_bottom_, kCopyDiff, kReshape);
   Blob<Dtype> orig_scale_diff;
   orig_scale_diff.CopyFrom(*this->blob_bottom_broadcast_1_,
-                            kCopyDiff, kReshape);
+                           kCopyDiff, kReshape);
   // Rerun forward + backward with in-place computation;
   // check that resulting bottom diffs are the same.
   this->blob_top_vec_[0] = this->blob_bottom_;  // in-place computation
@@ -293,7 +296,7 @@ TYPED_TEST(ScaleLayerTest, TestBackwardBroadcastMiddleInPlace) {
 TYPED_TEST(ScaleLayerTest, TestForwardBroadcastMiddleWithParam) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  ScaleParameter* scale_param = layer_param.mutable_scale_param();
+  ScaleParameter *scale_param = layer_param.mutable_scale_param();
   scale_param->set_axis(1);
   scale_param->set_num_axes(2);
   scale_param->mutable_filler()->set_type("gaussian");
@@ -307,7 +310,7 @@ TYPED_TEST(ScaleLayerTest, TestForwardBroadcastMiddleWithParam) {
         for (int w = 0; w < this->blob_bottom_->width(); ++w) {
           EXPECT_NEAR(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_->data_at(n, c, h, w) *
-                      layer->blobs()[0]->data_at(c, h, 0, 0), 1e-5);
+                          layer->blobs()[0]->data_at(c, h, 0, 0), 1e-5);
         }
       }
     }
@@ -317,7 +320,7 @@ TYPED_TEST(ScaleLayerTest, TestForwardBroadcastMiddleWithParam) {
 TYPED_TEST(ScaleLayerTest, TestForwardBroadcastMiddleWithParamAndBias) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  ScaleParameter* scale_param = layer_param.mutable_scale_param();
+  ScaleParameter *scale_param = layer_param.mutable_scale_param();
   scale_param->set_axis(1);
   scale_param->set_num_axes(2);
   scale_param->mutable_filler()->set_type("gaussian");
@@ -333,8 +336,8 @@ TYPED_TEST(ScaleLayerTest, TestForwardBroadcastMiddleWithParamAndBias) {
         for (int w = 0; w < this->blob_bottom_->width(); ++w) {
           EXPECT_NEAR(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_->data_at(n, c, h, w) *
-                      layer->blobs()[0]->data_at(c, h, 0, 0) +
-                      layer->blobs()[1]->data_at(c, h, 0, 0), 1e-5);
+                          layer->blobs()[0]->data_at(c, h, 0, 0) +
+                          layer->blobs()[1]->data_at(c, h, 0, 0), 1e-5);
         }
       }
     }
@@ -356,7 +359,7 @@ TYPED_TEST(ScaleLayerTest, TestForwardBroadcastEnd) {
         for (int w = 0; w < this->blob_bottom_->width(); ++w) {
           EXPECT_NEAR(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_->data_at(n, c, h, w) *
-                      this->blob_bottom_broadcast_2_->data_at(h, w, 0, 0),
+                          this->blob_bottom_broadcast_2_->data_at(h, w, 0, 0),
                       1e-5);
         }
       }
@@ -372,9 +375,9 @@ TYPED_TEST(ScaleLayerTest, TestForwardScale) {
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* data = this->blob_top_->cpu_data();
+  const Dtype *data = this->blob_top_->cpu_data();
   const int count = this->blob_top_->count();
-  const Dtype* in_data = this->blob_bottom_->cpu_data();
+  const Dtype *in_data = this->blob_bottom_->cpu_data();
   const Dtype scale = *this->blob_bottom_scale_->cpu_data();
   for (int i = 0; i < count; ++i) {
     EXPECT_NEAR(data[i], in_data[i] * scale, 1e-5);
@@ -390,9 +393,9 @@ TYPED_TEST(ScaleLayerTest, TestForwardScaleAxis2) {
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  const Dtype* data = this->blob_top_->cpu_data();
+  const Dtype *data = this->blob_top_->cpu_data();
   const int count = this->blob_top_->count();
-  const Dtype* in_data = this->blob_bottom_->cpu_data();
+  const Dtype *in_data = this->blob_bottom_->cpu_data();
   const Dtype scale = *this->blob_bottom_scale_->cpu_data();
   for (int i = 0; i < count; ++i) {
     EXPECT_NEAR(data[i], in_data[i] * scale, 1e-5);
@@ -407,20 +410,20 @@ TYPED_TEST(ScaleLayerTest, TestGradientEltwise) {
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                               this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientEltwiseWithParam) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  ScaleParameter* scale_param = layer_param.mutable_scale_param();
+  ScaleParameter *scale_param = layer_param.mutable_scale_param();
   scale_param->set_axis(0);
   scale_param->set_num_axes(-1);
   scale_param->mutable_filler()->set_type("gaussian");
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientBroadcastBegin) {
@@ -431,7 +434,7 @@ TYPED_TEST(ScaleLayerTest, TestGradientBroadcastBegin) {
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientBroadcastMiddle) {
@@ -442,21 +445,21 @@ TYPED_TEST(ScaleLayerTest, TestGradientBroadcastMiddle) {
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientBroadcastMiddleWithParam) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_broadcast_1_);
   LayerParameter layer_param;
-  ScaleParameter* scale_param = layer_param.mutable_scale_param();
+  ScaleParameter *scale_param = layer_param.mutable_scale_param();
   scale_param->set_axis(1);
   scale_param->set_num_axes(2);
   scale_param->mutable_filler()->set_type("gaussian");
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientBroadcastEnd) {
@@ -467,7 +470,7 @@ TYPED_TEST(ScaleLayerTest, TestGradientBroadcastEnd) {
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientScale) {
@@ -477,20 +480,20 @@ TYPED_TEST(ScaleLayerTest, TestGradientScale) {
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientScaleAndBias) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_scale_);
   LayerParameter layer_param;
-  ScaleParameter* scale_param = layer_param.mutable_scale_param();
+  ScaleParameter *scale_param = layer_param.mutable_scale_param();
   scale_param->set_bias_term(true);
   scale_param->mutable_bias_filler()->set_type("gaussian");
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(ScaleLayerTest, TestGradientScaleAxis2) {
@@ -501,7 +504,7 @@ TYPED_TEST(ScaleLayerTest, TestGradientScaleAxis2) {
   ScaleLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 }  // namespace caffe

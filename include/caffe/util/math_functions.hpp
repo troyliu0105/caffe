@@ -14,99 +14,99 @@ namespace caffe {
 
 // Caffe gemm provides a simpler interface to the gemm functions, with the
 // limitation that the data has to be contiguous in memory.
-template <typename Dtype>
+template<typename Dtype>
 void caffe_cpu_gemm(const CBLAS_TRANSPOSE TransA,
-    const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
-    const Dtype alpha, const Dtype* A, const Dtype* B, const Dtype beta,
-    Dtype* C);
+                    const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
+                    const Dtype alpha, const Dtype *A, const Dtype *B, const Dtype beta,
+                    Dtype *C);
 
-template <typename Dtype>
+template<typename Dtype>
 void caffe_cpu_gemv(const CBLAS_TRANSPOSE TransA, const int M, const int N,
-    const Dtype alpha, const Dtype* A, const Dtype* x, const Dtype beta,
-    Dtype* y);
+                    const Dtype alpha, const Dtype *A, const Dtype *x, const Dtype beta,
+                    Dtype *y);
 
-template <typename Dtype>
-void caffe_axpy(const int N, const Dtype alpha, const Dtype* X,
-    Dtype* Y);
+template<typename Dtype>
+void caffe_axpy(const int N, const Dtype alpha, const Dtype *X,
+                Dtype *Y);
 
-template <typename Dtype>
-void caffe_cpu_axpby(const int N, const Dtype alpha, const Dtype* X,
-    const Dtype beta, Dtype* Y);
+template<typename Dtype>
+void caffe_cpu_axpby(const int N, const Dtype alpha, const Dtype *X,
+                     const Dtype beta, Dtype *Y);
 
-template <typename Dtype>
+template<typename Dtype>
 void caffe_copy(const int N, const Dtype *X, Dtype *Y);
 
-template <typename Dtype>
+template<typename Dtype>
 void caffe_set(const int N, const Dtype alpha, Dtype *X);
 
-inline void caffe_memset(const size_t N, const int alpha, void* X) {
+inline void caffe_memset(const size_t N, const int alpha, void *X) {
   memset(X, alpha, N);  // NOLINT(caffe/alt_fn)
 }
 
-template <typename Dtype>
+template<typename Dtype>
 void caffe_add_scalar(const int N, const Dtype alpha, Dtype *X);
 
-template <typename Dtype>
+template<typename Dtype>
 void caffe_scal(const int N, const Dtype alpha, Dtype *X);
 
-template <typename Dtype>
-void caffe_sqr(const int N, const Dtype* a, Dtype* y);
+template<typename Dtype>
+void caffe_sqr(const int N, const Dtype *a, Dtype *y);
 
-template <typename Dtype>
-void caffe_sqrt(const int N, const Dtype* a, Dtype* y);
+template<typename Dtype>
+void caffe_sqrt(const int N, const Dtype *a, Dtype *y);
 
-template <typename Dtype>
-void caffe_add(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+template<typename Dtype>
+void caffe_add(const int N, const Dtype *a, const Dtype *b, Dtype *y);
 
-template <typename Dtype>
-void caffe_sub(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+template<typename Dtype>
+void caffe_sub(const int N, const Dtype *a, const Dtype *b, Dtype *y);
 
-template <typename Dtype>
-void caffe_mul(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+template<typename Dtype>
+void caffe_mul(const int N, const Dtype *a, const Dtype *b, Dtype *y);
 
-template <typename Dtype>
-void caffe_div(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+template<typename Dtype>
+void caffe_div(const int N, const Dtype *a, const Dtype *b, Dtype *y);
 
-template <typename Dtype>
-void caffe_powx(const int n, const Dtype* a, const Dtype b, Dtype* y);
+template<typename Dtype>
+void caffe_powx(const int n, const Dtype *a, const Dtype b, Dtype *y);
 
 unsigned int caffe_rng_rand();
 
-template <typename Dtype>
+template<typename Dtype>
 Dtype caffe_nextafter(const Dtype b);
 
-template <typename Dtype>
-void caffe_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r);
+template<typename Dtype>
+void caffe_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype *r);
 
-template <typename Dtype>
+template<typename Dtype>
 void caffe_rng_gaussian(const int n, const Dtype mu, const Dtype sigma,
-                        Dtype* r);
+                        Dtype *r);
 
-template <typename Dtype>
-void caffe_rng_bernoulli(const int n, const Dtype p, int* r);
+template<typename Dtype>
+void caffe_rng_bernoulli(const int n, const Dtype p, int *r);
 
-template <typename Dtype>
-void caffe_rng_bernoulli(const int n, const Dtype p, unsigned int* r);
+template<typename Dtype>
+void caffe_rng_bernoulli(const int n, const Dtype p, unsigned int *r);
 
-template <typename Dtype>
-void caffe_exp(const int n, const Dtype* a, Dtype* y);
+template<typename Dtype>
+void caffe_exp(const int n, const Dtype *a, Dtype *y);
 
-template <typename Dtype>
-void caffe_log(const int n, const Dtype* a, Dtype* y);
+template<typename Dtype>
+void caffe_log(const int n, const Dtype *a, Dtype *y);
 
-template <typename Dtype>
-void caffe_abs(const int n, const Dtype* a, Dtype* y);
+template<typename Dtype>
+void caffe_abs(const int n, const Dtype *a, Dtype *y);
 
-template <typename Dtype>
-Dtype caffe_cpu_dot(const int n, const Dtype* x, const Dtype* y);
+template<typename Dtype>
+Dtype caffe_cpu_dot(const int n, const Dtype *x, const Dtype *y);
 
-template <typename Dtype>
-Dtype caffe_cpu_strided_dot(const int n, const Dtype* x, const int incx,
-    const Dtype* y, const int incy);
+template<typename Dtype>
+Dtype caffe_cpu_strided_dot(const int n, const Dtype *x, const int incx,
+                            const Dtype *y, const int incy);
 
 // Returns the sum of the absolute values of the elements of vector x
-template <typename Dtype>
-Dtype caffe_cpu_asum(const int n, const Dtype* x);
+template<typename Dtype>
+Dtype caffe_cpu_asum(const int n, const Dtype *x);
 
 // the branchless, type-safe version from
 // http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
@@ -142,8 +142,8 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(sgnbit, \
 
 DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, y[i] = std::fabs(x[i]))
 
-template <typename Dtype>
-void caffe_cpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype* y);
+template<typename Dtype>
+void caffe_cpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype *y);
 
 #ifndef CPU_ONLY  // GPU
 

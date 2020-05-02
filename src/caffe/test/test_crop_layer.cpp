@@ -12,11 +12,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class CropLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   CropLayerTest()
       : blob_bottom_0_(new Blob<Dtype>(2, 4, 5, 4)),
         blob_bottom_1_(new Blob<Dtype>(2, 3, 4, 2)),
@@ -34,17 +34,17 @@ class CropLayerTest : public MultiDeviceTest<TypeParam> {
   }
 
   virtual ~CropLayerTest() {
-    delete blob_bottom_0_; delete blob_bottom_1_;
+    delete blob_bottom_0_;
+    delete blob_bottom_1_;
     delete blob_top_;
   }
 
-  Blob<Dtype>* const blob_bottom_0_;
-  Blob<Dtype>* const blob_bottom_1_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_0_;
+  Blob<Dtype> *const blob_bottom_1_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
-
 
 TYPED_TEST_CASE(CropLayerTest, TestDtypesAndDevices);
 
@@ -120,12 +120,12 @@ TYPED_TEST(CropLayerTest, TestCropAll) {
     for (int c = 0; c < this->blob_bottom_0_->channels(); ++c) {
       for (int h = 0; h < this->blob_bottom_0_->height(); ++h) {
         for (int w = 0; w < this->blob_bottom_0_->width(); ++w) {
-          if ( n < this->blob_top_->shape(0) &&
+          if (n < this->blob_top_->shape(0) &&
               c < this->blob_top_->shape(1) &&
               h < this->blob_top_->shape(2) &&
-              w < this->blob_top_->shape(3) ) {
+              w < this->blob_top_->shape(3)) {
             EXPECT_EQ(this->blob_top_->data_at(n, c, h, w),
-                this->blob_bottom_0_->data_at(n, c, h, w));
+                      this->blob_bottom_0_->data_at(n, c, h, w));
           }
         }
       }
@@ -148,12 +148,12 @@ TYPED_TEST(CropLayerTest, TestCropAllOffset) {
     for (int c = 0; c < this->blob_bottom_0_->channels(); ++c) {
       for (int h = 0; h < this->blob_bottom_0_->height(); ++h) {
         for (int w = 0; w < this->blob_bottom_0_->width(); ++w) {
-          if ( n < this->blob_top_->shape(0) &&
+          if (n < this->blob_top_->shape(0) &&
               c < this->blob_top_->shape(1) &&
               h < this->blob_top_->shape(2) &&
-              w < this->blob_top_->shape(3) ) {
+              w < this->blob_top_->shape(3)) {
             EXPECT_EQ(this->blob_top_->data_at(n, c, h, w),
-                this->blob_bottom_0_->data_at(n, c+1, h+1, w+2));
+                      this->blob_bottom_0_->data_at(n, c + 1, h + 1, w + 2));
           }
         }
       }
@@ -179,7 +179,7 @@ TYPED_TEST(CropLayerTest, TestCropHW) {
               h < this->blob_top_->shape(2) &&
               w < this->blob_top_->shape(3)) {
             EXPECT_EQ(this->blob_top_->data_at(n, c, h, w),
-                this->blob_bottom_0_->data_at(n, c, h+1, w+2));
+                      this->blob_bottom_0_->data_at(n, c, h + 1, w + 2));
           }
         }
       }
@@ -226,10 +226,10 @@ TYPED_TEST(CropLayerTest, TestCrop5D) {
               bottom_idx[2] = z;
               bottom_idx[3] = h;
               bottom_idx[4] = top_idx[4] = w;
-              top_idx[2] = z+1;
-              top_idx[3] = h+2;
+              top_idx[2] = z + 1;
+              top_idx[3] = h + 2;
               EXPECT_EQ(this->blob_top_->data_at(bottom_idx),
-                  this->blob_bottom_0_->data_at(top_idx));
+                        this->blob_bottom_0_->data_at(top_idx));
             }
           }
         }
@@ -245,7 +245,7 @@ TYPED_TEST(CropLayerTest, TestCropAllGradient) {
   CropLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(CropLayerTest, TestCropHWGradient) {
@@ -257,7 +257,7 @@ TYPED_TEST(CropLayerTest, TestCropHWGradient) {
   CropLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(CropLayerTest, TestCrop5DGradient) {
@@ -277,7 +277,7 @@ TYPED_TEST(CropLayerTest, TestCrop5DGradient) {
   this->blob_bottom_1_->Reshape(bottom_1_shape);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 }  // namespace caffe

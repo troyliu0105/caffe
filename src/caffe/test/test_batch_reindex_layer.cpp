@@ -16,7 +16,7 @@ template<typename TypeParam>
 class BatchReindexLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   BatchReindexLayerTest()
       : blob_bottom_(new Blob<Dtype>()),
         blob_bottom_permute_(new Blob<Dtype>()),
@@ -38,7 +38,7 @@ class BatchReindexLayerTest : public MultiDeviceTest<TypeParam> {
     FillerParameter filler_param;
     GaussianFiller<Dtype> filler(filler_param);
     filler.Fill(this->blob_bottom_);
-    int perm[] = { 4, 0, 4, 0, 1, 2 };
+    int perm[] = {4, 0, 4, 0, 1, 2};
     for (int i = 0; i < blob_bottom_permute_->count(); ++i) {
       blob_bottom_permute_->mutable_cpu_data()[i] = perm[i];
     }
@@ -52,11 +52,11 @@ class BatchReindexLayerTest : public MultiDeviceTest<TypeParam> {
     delete blob_bottom_;
     delete blob_top_;
   }
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_bottom_permute_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_bottom_permute_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 
   void TestForward() {
     LayerParameter layer_param;
@@ -74,7 +74,7 @@ class BatchReindexLayerTest : public MultiDeviceTest<TypeParam> {
     vector<int> permsz;
     permsz.push_back(6);
     blob_bottom_permute_->Reshape(permsz);
-    int perm[] = { 4, 0, 4, 0, 1, 2 };
+    int perm[] = {4, 0, 4, 0, 1, 2};
     for (int i = 0; i < blob_bottom_permute_->count(); ++i) {
       blob_bottom_permute_->mutable_cpu_data()[i] = perm[i];
     }
@@ -112,7 +112,7 @@ TYPED_TEST(BatchReindexLayerTest, TestGradient) {
   BatchReindexLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-4, 1e-2);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
-  }
+                                  this->blob_top_vec_, 0);
+}
 
 }  // namespace caffe

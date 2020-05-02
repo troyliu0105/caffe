@@ -17,11 +17,11 @@ namespace caffe {
 
 class IOTest : public ::testing::Test {};
 
-bool ReadImageToDatumReference(const string& filename, const int label,
-    const int height, const int width, const bool is_color, Datum* datum) {
+bool ReadImageToDatumReference(const string &filename, const int label,
+                               const int height, const int width, const bool is_color, Datum *datum) {
   cv::Mat cv_img;
   int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR :
-    CV_LOAD_IMAGE_GRAYSCALE);
+                      CV_LOAD_IMAGE_GRAYSCALE);
 
   cv::Mat cv_img_origin = cv::imread(filename, cv_read_flag);
   if (!cv_img_origin.data) {
@@ -41,13 +41,13 @@ bool ReadImageToDatumReference(const string& filename, const int label,
   datum->set_label(label);
   datum->clear_data();
   datum->clear_float_data();
-  string* datum_string = datum->mutable_data();
+  string *datum_string = datum->mutable_data();
   if (is_color) {
     for (int c = 0; c < num_channels; ++c) {
       for (int h = 0; h < cv_img.rows; ++h) {
         for (int w = 0; w < cv_img.cols; ++w) {
           datum_string->push_back(
-            static_cast<char>(cv_img.at<cv::Vec3b>(h, w)[c]));
+              static_cast<char>(cv_img.at<cv::Vec3b>(h, w)[c]));
         }
       }
     }
@@ -55,9 +55,9 @@ bool ReadImageToDatumReference(const string& filename, const int label,
     for (int h = 0; h < cv_img.rows; ++h) {
       for (int w = 0; w < cv_img.cols; ++w) {
         datum_string->push_back(
-          static_cast<char>(cv_img.at<uchar>(h, w)));
-        }
+            static_cast<char>(cv_img.at<uchar>(h, w)));
       }
+    }
   }
   return true;
 }
@@ -81,14 +81,13 @@ TEST_F(IOTest, TestReadImageToDatumReference) {
   EXPECT_EQ(datum.width(), datum_ref.width());
   EXPECT_EQ(datum.data().size(), datum_ref.data().size());
 
-  const string& data = datum.data();
-  const string& data_ref = datum.data();
+  const string &data = datum.data();
+  const string &data_ref = datum.data();
 
   for (int i = 0; i < datum.data().size(); ++i) {
     EXPECT_TRUE(data[i] == data_ref[i]);
   }
 }
-
 
 TEST_F(IOTest, TestReadImageToDatumReferenceResized) {
   string filename = EXAMPLES_SOURCE_DIR "images/cat.jpg";
@@ -100,8 +99,8 @@ TEST_F(IOTest, TestReadImageToDatumReferenceResized) {
   EXPECT_EQ(datum.width(), datum_ref.width());
   EXPECT_EQ(datum.data().size(), datum_ref.data().size());
 
-  const string& data = datum.data();
-  const string& data_ref = datum.data();
+  const string &data = datum.data();
+  const string &data_ref = datum.data();
 
   for (int i = 0; i < datum.data().size(); ++i) {
     EXPECT_TRUE(data[i] == data_ref[i]);
@@ -117,13 +116,13 @@ TEST_F(IOTest, TestReadImageToDatumContent) {
   EXPECT_EQ(datum.height(), cv_img.rows);
   EXPECT_EQ(datum.width(), cv_img.cols);
 
-  const string& data = datum.data();
+  const string &data = datum.data();
   int index = 0;
   for (int c = 0; c < datum.channels(); ++c) {
     for (int h = 0; h < datum.height(); ++h) {
       for (int w = 0; w < datum.width(); ++w) {
         EXPECT_TRUE(data[index++] ==
-          static_cast<char>(cv_img.at<cv::Vec3b>(h, w)[c]));
+            static_cast<char>(cv_img.at<cv::Vec3b>(h, w)[c]));
       }
     }
   }
@@ -139,7 +138,7 @@ TEST_F(IOTest, TestReadImageToDatumContentGray) {
   EXPECT_EQ(datum.height(), cv_img.rows);
   EXPECT_EQ(datum.width(), cv_img.cols);
 
-  const string& data = datum.data();
+  const string &data = datum.data();
   int index = 0;
   for (int h = 0; h < datum.height(); ++h) {
     for (int w = 0; w < datum.width(); ++w) {
@@ -156,7 +155,6 @@ TEST_F(IOTest, TestReadImageToDatumResized) {
   EXPECT_EQ(datum.height(), 100);
   EXPECT_EQ(datum.width(), 200);
 }
-
 
 TEST_F(IOTest, TestReadImageToDatumResizedSquare) {
   string filename = EXAMPLES_SOURCE_DIR "images/cat.jpg";
@@ -251,8 +249,8 @@ TEST_F(IOTest, TestCVMatToDatumContent) {
   EXPECT_EQ(datum.width(), datum_ref.width());
   EXPECT_EQ(datum.data().size(), datum_ref.data().size());
 
-  const string& data = datum.data();
-  const string& data_ref = datum_ref.data();
+  const string &data = datum.data();
+  const string &data_ref = datum_ref.data();
   for (int i = 0; i < datum.data().size(); ++i) {
     EXPECT_TRUE(data[i] == data_ref[i]);
   }
@@ -270,8 +268,8 @@ TEST_F(IOTest, TestCVMatToDatumReference) {
   EXPECT_EQ(datum.width(), datum_ref.width());
   EXPECT_EQ(datum.data().size(), datum_ref.data().size());
 
-  const string& data = datum.data();
-  const string& data_ref = datum_ref.data();
+  const string &data = datum.data();
+  const string &data_ref = datum_ref.data();
   for (int i = 0; i < datum.data().size(); ++i) {
     EXPECT_TRUE(data[i] == data_ref[i]);
   }
@@ -299,8 +297,8 @@ TEST_F(IOTest, TestDecodeDatum) {
   EXPECT_EQ(datum.width(), datum_ref.width());
   EXPECT_EQ(datum.data().size(), datum_ref.data().size());
 
-  const string& data = datum.data();
-  const string& data_ref = datum_ref.data();
+  const string &data = datum.data();
+  const string &data_ref = datum_ref.data();
   for (int i = 0; i < datum.data().size(); ++i) {
     EXPECT_TRUE(data[i] == data_ref[i]);
   }
@@ -333,8 +331,8 @@ TEST_F(IOTest, TestDecodeDatumToCVMatContent) {
   for (int c = 0; c < datum.channels(); ++c) {
     for (int h = 0; h < datum.height(); ++h) {
       for (int w = 0; w < datum.width(); ++w) {
-        EXPECT_TRUE(cv_img.at<cv::Vec3b>(h, w)[c]==
-          cv_img_ref.at<cv::Vec3b>(h, w)[c]);
+        EXPECT_TRUE(cv_img.at<cv::Vec3b>(h, w)[c] ==
+            cv_img_ref.at<cv::Vec3b>(h, w)[c]);
       }
     }
   }
@@ -353,8 +351,8 @@ TEST_F(IOTest, TestDecodeDatumNative) {
   EXPECT_EQ(datum.width(), datum_ref.width());
   EXPECT_EQ(datum.data().size(), datum_ref.data().size());
 
-  const string& data = datum.data();
-  const string& data_ref = datum_ref.data();
+  const string &data = datum.data();
+  const string &data_ref = datum_ref.data();
   for (int i = 0; i < datum.data().size(); ++i) {
     EXPECT_TRUE(data[i] == data_ref[i]);
   }
@@ -383,8 +381,8 @@ TEST_F(IOTest, TestDecodeDatumNativeGray) {
   EXPECT_EQ(datum.width(), datum_ref.width());
   EXPECT_EQ(datum.data().size(), datum_ref.data().size());
 
-  const string& data = datum.data();
-  const string& data_ref = datum_ref.data();
+  const string &data = datum.data();
+  const string &data_ref = datum_ref.data();
   for (int i = 0; i < datum.data().size(); ++i) {
     EXPECT_TRUE(data[i] == data_ref[i]);
   }
@@ -413,8 +411,8 @@ TEST_F(IOTest, TestDecodeDatumToCVMatContentNative) {
   for (int c = 0; c < datum.channels(); ++c) {
     for (int h = 0; h < datum.height(); ++h) {
       for (int w = 0; w < datum.width(); ++w) {
-        EXPECT_TRUE(cv_img.at<cv::Vec3b>(h, w)[c]==
-          cv_img_ref.at<cv::Vec3b>(h, w)[c]);
+        EXPECT_TRUE(cv_img.at<cv::Vec3b>(h, w)[c] ==
+            cv_img_ref.at<cv::Vec3b>(h, w)[c]);
       }
     }
   }

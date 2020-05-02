@@ -13,11 +13,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class EuclideanLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   EuclideanLossLayerTest()
       : blob_bottom_data_(new Blob<Dtype>(10, 5, 1, 1)),
         blob_bottom_label_(new Blob<Dtype>(10, 5, 1, 1)),
@@ -61,11 +61,11 @@ class EuclideanLossLayerTest : public MultiDeviceTest<TypeParam> {
     EXPECT_GE(fabs(loss_weight_1), kNonTrivialAbsThresh);
   }
 
-  Blob<Dtype>* const blob_bottom_data_;
-  Blob<Dtype>* const blob_bottom_label_;
-  Blob<Dtype>* const blob_top_loss_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_data_;
+  Blob<Dtype> *const blob_bottom_label_;
+  Blob<Dtype> *const blob_top_loss_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
 TYPED_TEST_CASE(EuclideanLossLayerTest, TestDtypesAndDevices);
@@ -83,7 +83,7 @@ TYPED_TEST(EuclideanLossLayerTest, TestGradient) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 }  // namespace caffe

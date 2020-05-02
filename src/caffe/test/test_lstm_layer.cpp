@@ -13,11 +13,11 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class LSTMLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   LSTMLayerTest() : num_output_(7) {
     blob_bottom_vec_.push_back(&blob_bottom_);
     blob_bottom_vec_.push_back(&blob_bottom_cont_);
@@ -31,11 +31,11 @@ class LSTMLayerTest : public MultiDeviceTest<TypeParam> {
     ReshapeBlobs(1, 3);
 
     layer_param_.mutable_recurrent_param()->set_num_output(num_output_);
-    FillerParameter* weight_filler =
+    FillerParameter *weight_filler =
         layer_param_.mutable_recurrent_param()->mutable_weight_filler();
     weight_filler->set_type("gaussian");
     weight_filler->set_std(0.2);
-    FillerParameter* bias_filler =
+    FillerParameter *bias_filler =
         layer_param_.mutable_recurrent_param()->mutable_bias_filler();
     bias_filler->set_type("gaussian");
     bias_filler->set_std(0.1);
@@ -52,12 +52,17 @@ class LSTMLayerTest : public MultiDeviceTest<TypeParam> {
     blob_bottom_cont_.Reshape(shape);
     shape.push_back(num_output_);
 
-    shape[0] = 1; shape[1] = num_instances; shape[2] = 4 * num_output_;
+    shape[0] = 1;
+    shape[1] = num_instances;
+    shape[2] = 4 * num_output_;
     unit_blob_bottom_x_.Reshape(shape);
-    shape[0] = 1; shape[1] = num_instances; shape[2] = num_output_;
+    shape[0] = 1;
+    shape[1] = num_instances;
+    shape[2] = num_output_;
     unit_blob_bottom_c_prev_.Reshape(shape);
     shape.resize(2);
-    shape[0] = 1; shape[1] = num_instances;
+    shape[0] = 1;
+    shape[1] = num_instances;
     unit_blob_bottom_cont_.Reshape(shape);
 
     FillerParameter filler_param;
@@ -75,16 +80,16 @@ class LSTMLayerTest : public MultiDeviceTest<TypeParam> {
   Blob<Dtype> blob_bottom_cont_;
   Blob<Dtype> blob_bottom_static_;
   Blob<Dtype> blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 
   Blob<Dtype> unit_blob_bottom_cont_;
   Blob<Dtype> unit_blob_bottom_c_prev_;
   Blob<Dtype> unit_blob_bottom_x_;
   Blob<Dtype> unit_blob_top_c_;
   Blob<Dtype> unit_blob_top_h_;
-  vector<Blob<Dtype>*> unit_blob_bottom_vec_;
-  vector<Blob<Dtype>*> unit_blob_top_vec_;
+  vector<Blob<Dtype> *> unit_blob_bottom_vec_;
+  vector<Blob<Dtype> *> unit_blob_top_vec_;
 };
 
 TYPED_TEST_CASE(LSTMLayerTest, TestDtypesAndDevices);
@@ -154,7 +159,7 @@ TYPED_TEST(LSTMLayerTest, TestForward) {
       ASSERT_LT(t * top_count + i, top_copy.count());
       EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i], kEpsilon)
-         << "t = " << t << "; i = " << i;
+              << "t = " << t << "; i = " << i;
     }
   }
 
@@ -175,11 +180,11 @@ TYPED_TEST(LSTMLayerTest, TestForward) {
       if (t == 0) {
         EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                     top_copy.cpu_data()[t * top_count + i], kEpsilon)
-           << "t = " << t << "; i = " << i;
+                << "t = " << t << "; i = " << i;
       } else {
         EXPECT_NE(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i])
-           << "t = " << t << "; i = " << i;
+                << "t = " << t << "; i = " << i;
       }
     }
   }
@@ -206,14 +211,14 @@ TYPED_TEST(LSTMLayerTest, TestLSTMUnitGradient) {
   LayerParameter layer_param;
   LSTMUnitLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
-  Dtype* cont_data = this->blob_bottom_cont_.mutable_cpu_data();
+  Dtype *cont_data = this->blob_bottom_cont_.mutable_cpu_data();
   cont_data[0] = 0;
   cont_data[1] = 0;
   cont_data[2] = 0;
   checker.CheckGradientExhaustive(&layer, this->unit_blob_bottom_vec_,
-      this->unit_blob_top_vec_, 0);
+                                  this->unit_blob_top_vec_, 0);
   checker.CheckGradientExhaustive(&layer, this->unit_blob_bottom_vec_,
-      this->unit_blob_top_vec_, 1);
+                                  this->unit_blob_top_vec_, 1);
 }
 
 TYPED_TEST(LSTMLayerTest, TestLSTMUnitGradientNonZeroCont) {
@@ -221,14 +226,14 @@ TYPED_TEST(LSTMLayerTest, TestLSTMUnitGradientNonZeroCont) {
   LayerParameter layer_param;
   LSTMUnitLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
-  Dtype* cont_data = this->blob_bottom_cont_.mutable_cpu_data();
+  Dtype *cont_data = this->blob_bottom_cont_.mutable_cpu_data();
   cont_data[0] = 1;
   cont_data[1] = 0;
   cont_data[2] = 1;
   checker.CheckGradientExhaustive(&layer, this->unit_blob_bottom_vec_,
-      this->unit_blob_top_vec_, 0);
+                                  this->unit_blob_top_vec_, 0);
   checker.CheckGradientExhaustive(&layer, this->unit_blob_bottom_vec_,
-      this->unit_blob_top_vec_, 1);
+                                  this->unit_blob_top_vec_, 1);
 }
 
 TYPED_TEST(LSTMLayerTest, TestGradient) {
@@ -236,7 +241,7 @@ TYPED_TEST(LSTMLayerTest, TestGradient) {
   LSTMLayer<Dtype> layer(this->layer_param_);
   GradientChecker<Dtype> checker(1e-2, 1e-3);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(LSTMLayerTest, TestGradientNonZeroCont) {
@@ -247,7 +252,7 @@ TYPED_TEST(LSTMLayerTest, TestGradientNonZeroCont) {
     this->blob_bottom_cont_.mutable_cpu_data()[i] = i > 2;
   }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(LSTMLayerTest, TestGradientNonZeroContBufferSize2) {
@@ -262,7 +267,7 @@ TYPED_TEST(LSTMLayerTest, TestGradientNonZeroContBufferSize2) {
     this->blob_bottom_cont_.mutable_cpu_data()[i] = i > 2;
   }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
 }
 
 TYPED_TEST(LSTMLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
@@ -279,10 +284,9 @@ TYPED_TEST(LSTMLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
     this->blob_bottom_cont_.mutable_cpu_data()[i] = i > 2;
   }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 0);
+                                  this->blob_top_vec_, 0);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_, 2);
+                                  this->blob_top_vec_, 2);
 }
-
 
 }  // namespace caffe

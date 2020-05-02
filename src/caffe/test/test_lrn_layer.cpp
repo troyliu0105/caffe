@@ -21,11 +21,11 @@ using std::max;
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class LRNLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
- protected:
+protected:
   LRNLayerTest()
       : epsilon_(Dtype(1e-5)),
         blob_bottom_(new Blob<Dtype>()),
@@ -40,25 +40,28 @@ class LRNLayerTest : public MultiDeviceTest<TypeParam> {
     blob_bottom_vec_.push_back(blob_bottom_);
     blob_top_vec_.push_back(blob_top_);
   }
-  virtual ~LRNLayerTest() { delete blob_bottom_; delete blob_top_; }
-  void ReferenceLRNForward(const Blob<Dtype>& blob_bottom,
-      const LayerParameter& layer_param, Blob<Dtype>* blob_top);
+  virtual ~LRNLayerTest() {
+    delete blob_bottom_;
+    delete blob_top_;
+  }
+  void ReferenceLRNForward(const Blob<Dtype> &blob_bottom,
+                           const LayerParameter &layer_param, Blob<Dtype> *blob_top);
 
   Dtype epsilon_;
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  Blob<Dtype> *const blob_bottom_;
+  Blob<Dtype> *const blob_top_;
+  vector<Blob<Dtype> *> blob_bottom_vec_;
+  vector<Blob<Dtype> *> blob_top_vec_;
 };
 
-template <typename TypeParam>
+template<typename TypeParam>
 void LRNLayerTest<TypeParam>::ReferenceLRNForward(
-    const Blob<Dtype>& blob_bottom, const LayerParameter& layer_param,
-    Blob<Dtype>* blob_top) {
+    const Blob<Dtype> &blob_bottom, const LayerParameter &layer_param,
+    Blob<Dtype> *blob_top) {
   typedef typename TypeParam::Dtype Dtype;
   blob_top->Reshape(blob_bottom.num(), blob_bottom.channels(),
-      blob_bottom.height(), blob_bottom.width());
-  Dtype* top_data = blob_top->mutable_cpu_data();
+                    blob_bottom.height(), blob_bottom.width());
+  Dtype *top_data = blob_top->mutable_cpu_data();
   LRNParameter lrn_param = layer_param.lrn_param();
   Dtype alpha = lrn_param.alpha();
   Dtype beta = lrn_param.beta();
@@ -78,7 +81,7 @@ void LRNLayerTest<TypeParam>::ReferenceLRNForward(
               scale += value * value * alpha / size;
             }
             *(top_data + blob_top->offset(n, c, h, w)) =
-              blob_bottom.data_at(n, c, h, w) / pow(scale, beta);
+                blob_bottom.data_at(n, c, h, w) / pow(scale, beta);
           }
         }
       }
@@ -103,7 +106,7 @@ void LRNLayerTest<TypeParam>::ReferenceLRNForward(
               }
             }
             *(top_data + blob_top->offset(n, c, h, w)) =
-              blob_bottom.data_at(n, c, h, w) / pow(scale, beta);
+                blob_bottom.data_at(n, c, h, w) / pow(scale, beta);
           }
         }
       }
@@ -135,7 +138,7 @@ TYPED_TEST(LRNLayerTest, TestForwardAcrossChannels) {
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
   this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-      &top_reference);
+                            &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -151,7 +154,7 @@ TYPED_TEST(LRNLayerTest, TestForwardAcrossChannelsLargeRegion) {
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
   this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-      &top_reference);
+                            &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -176,7 +179,7 @@ TYPED_TEST(LRNLayerTest, TestGradientAcrossChannels) {
   //       << std::endl;
   // }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(LRNLayerTest, TestGradientAcrossChannelsLargeRegion) {
@@ -198,7 +201,7 @@ TYPED_TEST(LRNLayerTest, TestGradientAcrossChannelsLargeRegion) {
   //       << std::endl;
   // }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 TYPED_TEST(LRNLayerTest, TestSetupWithinChannel) {
@@ -226,7 +229,7 @@ TYPED_TEST(LRNLayerTest, TestForwardWithinChannel) {
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
   this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-      &top_reference);
+                            &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -247,7 +250,7 @@ TYPED_TEST(LRNLayerTest, TestGradientWithinChannel) {
     this->blob_top_->mutable_cpu_diff()[i] = 1.;
   }
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
+                                  this->blob_top_vec_);
 }
 
 #ifdef USE_CUDNN

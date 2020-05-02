@@ -4,8 +4,8 @@
 
 namespace caffe {
 SyncedMemory::SyncedMemory()
-  : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(0), head_(UNINITIALIZED),
-    own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false) {
+    : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(0), head_(UNINITIALIZED),
+      own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false) {
 #ifndef CPU_ONLY
 #ifdef DEBUG
   CUDA_CHECK(cudaGetDevice(&device_));
@@ -14,8 +14,8 @@ SyncedMemory::SyncedMemory()
 }
 
 SyncedMemory::SyncedMemory(size_t size)
-  : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(size), head_(UNINITIALIZED),
-    own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false) {
+    : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(size), head_(UNINITIALIZED),
+      own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false) {
 #ifndef CPU_ONLY
 #ifdef DEBUG
   CUDA_CHECK(cudaGetDevice(&device_));
@@ -90,13 +90,13 @@ inline void SyncedMemory::to_gpu() {
 #endif
 }
 
-const void* SyncedMemory::cpu_data() {
+const void *SyncedMemory::cpu_data() {
   check_device();
   to_cpu();
-  return (const void*)cpu_ptr_;
+  return (const void *) cpu_ptr_;
 }
 
-void SyncedMemory::set_cpu_data(void* data) {
+void SyncedMemory::set_cpu_data(void *data) {
   check_device();
   CHECK(data);
   if (own_cpu_data_) {
@@ -107,7 +107,7 @@ void SyncedMemory::set_cpu_data(void* data) {
   own_cpu_data_ = false;
 }
 
-const void* SyncedMemory::gpu_data() {
+const void *SyncedMemory::gpu_data() {
   check_device();
 #ifndef CPU_ONLY
   to_gpu();
@@ -118,7 +118,7 @@ const void* SyncedMemory::gpu_data() {
 #endif
 }
 
-void SyncedMemory::set_gpu_data(void* data) {
+void SyncedMemory::set_gpu_data(void *data) {
   check_device();
 #ifndef CPU_ONLY
   CHECK(data);
@@ -133,14 +133,14 @@ void SyncedMemory::set_gpu_data(void* data) {
 #endif
 }
 
-void* SyncedMemory::mutable_cpu_data() {
+void *SyncedMemory::mutable_cpu_data() {
   check_device();
   to_cpu();
   head_ = HEAD_AT_CPU;
   return cpu_ptr_;
 }
 
-void* SyncedMemory::mutable_gpu_data() {
+void *SyncedMemory::mutable_gpu_data() {
   check_device();
 #ifndef CPU_ONLY
   to_gpu();

@@ -19,19 +19,19 @@ namespace caffe {
  * and in Backward, the diff pointer of the bottom Blob to that of the top Blob
  * (see Blob::ShareDiff).
  */
-template <typename Dtype>
+template<typename Dtype>
 class FlattenLayer : public Layer<Dtype> {
- public:
-  explicit FlattenLayer(const LayerParameter& param)
+public:
+  explicit FlattenLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "Flatten"; }
+  virtual inline const char *type() const { return "Flatten"; }
   virtual inline int ExactNumBottomBlobs() const { return 1; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
- protected:
+protected:
   /**
    * @param bottom input Blob vector (length 2+)
    *   -# @f$ (N \times C \times H \times W) @f$
@@ -40,8 +40,8 @@ class FlattenLayer : public Layer<Dtype> {
    *   -# @f$ (N \times CHW \times 1 \times 1) @f$
    *      the outputs -- i.e., the (virtually) copied, flattened inputs
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the error gradient w.r.t. the concatenate inputs.
@@ -52,8 +52,8 @@ class FlattenLayer : public Layer<Dtype> {
    * @param bottom input Blob vector (length K), into which the top error
    *        gradient is (virtually) copied
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 };
 
 }  // namespace caffe

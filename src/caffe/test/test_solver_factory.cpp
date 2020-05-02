@@ -13,9 +13,9 @@
 
 namespace caffe {
 
-template <typename TypeParam>
+template<typename TypeParam>
 class SolverFactoryTest : public MultiDeviceTest<TypeParam> {
- protected:
+protected:
   SolverParameter simple_solver_param() {
     const string solver_proto =
         "train_net_param { "
@@ -35,12 +35,12 @@ TYPED_TEST_CASE(SolverFactoryTest, TestDtypesAndDevices);
 
 TYPED_TEST(SolverFactoryTest, TestCreateSolver) {
   typedef typename TypeParam::Dtype Dtype;
-  typename SolverRegistry<Dtype>::CreatorRegistry& registry =
+  typename SolverRegistry<Dtype>::CreatorRegistry &registry =
       SolverRegistry<Dtype>::Registry();
   shared_ptr<Solver<Dtype> > solver;
   SolverParameter solver_param = this->simple_solver_param();
   for (typename SolverRegistry<Dtype>::CreatorRegistry::iterator iter =
-       registry.begin(); iter != registry.end(); ++iter) {
+      registry.begin(); iter != registry.end(); ++iter) {
     solver_param.set_type(iter->first);
     solver.reset(SolverRegistry<Dtype>::CreateSolver(solver_param));
     EXPECT_EQ(iter->first, solver->type());

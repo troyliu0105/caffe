@@ -16,9 +16,9 @@ namespace caffe {
  *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
  *        and base @f$ \gamma @f$.
  */
-template <typename Dtype>
+template<typename Dtype>
 class LogLayer : public NeuronLayer<Dtype> {
- public:
+public:
   /**
    * @param param provides LogParameter log_param,
    *     with LogLayer options:
@@ -27,14 +27,14 @@ class LogLayer : public NeuronLayer<Dtype> {
    *   - base (\b optional, default -1 for a value of @f$ e \approx 2.718 @f$)
    *         the base @f$ \gamma @f$
    */
-  explicit LogLayer(const LayerParameter& param)
+  explicit LogLayer(const LayerParameter &param)
       : NeuronLayer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "Log"; }
+  virtual inline const char *type() const { return "Log"; }
 
- protected:
+protected:
   /**
    * @param bottom input Blob vector (length 1)
    *   -# @f$ (N \times C \times H \times W) @f$
@@ -45,10 +45,10 @@ class LogLayer : public NeuronLayer<Dtype> {
    *        y = log_{\gamma}(\alpha x + \beta)
    *      @f$
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the error gradient w.r.t. the exp inputs.
@@ -67,10 +67,10 @@ class LogLayer : public NeuronLayer<Dtype> {
    *            \frac{\partial E}{\partial y} y \alpha \log_e(gamma)
    *      @f$ if propagate_down[0]
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 
   Dtype base_scale_;
   Dtype input_scale_, input_shift_;
