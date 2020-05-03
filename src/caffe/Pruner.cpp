@@ -1,3 +1,4 @@
+#ifndef _MSC_VER
 #include "caffe/Pruner.h"
 #include "caffe/util/io.hpp"
 #include <cmath>
@@ -848,3 +849,4 @@ string Pruner::hasTop(const string layerName) {
   }
   return "";
 }
+#endif

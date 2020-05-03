@@ -1,3 +1,7 @@
+#if defined(_MSC_VER)
+#include <io.h>
+#endif
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>

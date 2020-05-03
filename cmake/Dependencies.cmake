@@ -159,10 +159,7 @@ if(BUILD_python)
     find_package(NumPy 1.7.1)
     # Find the matching boost python implementation
     set(version ${PYTHONLIBS_VERSION_STRING})
-    message(python_version=>${python_version})
     STRING(REGEX REPLACE "[^0-9]" "" boost_py_version ${version} )
-    message(version=>${version})
-    message(boost_py_version=>${boost_py_version})
     find_package(Boost 1.46 COMPONENTS "python${boost_py_version}")
     set(Boost_PYTHON_FOUND ${Boost_PYTHON-PY${boost_py_version}_FOUND})
 
