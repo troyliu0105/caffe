@@ -66,6 +66,9 @@ Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
+float box_iou(const box &a, const box &b) {
+  return box_iou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+}
 template<typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
@@ -205,9 +208,6 @@ void RegionLossLayer<Dtype>::LayerSetUp(
   //CHECK_EQ(input_count, tmp_input_count);
   //CHECK_EQ(label_count, tmp_label_count);
 }
-typedef struct {
-  float x, y, w, h;
-} box;
 
 template<typename Dtype>
 void RegionLossLayer<Dtype>::Reshape(

@@ -22,7 +22,7 @@ void SegmentationEvaluateLayer<Dtype>::LayerSetUp(
   const SegmentationEvaluateParameter &segmentation_evaluate_param =
       this->layer_param_.segmentation_evaluate_param();
   CHECK(segmentation_evaluate_param.has_num_classes())
-  << "Must provide num_classes.";
+          << "Must provide num_classes.";
   num_classes_ = segmentation_evaluate_param.num_classes();
   threshold_ = segmentation_evaluate_param.threshold();
   iter_ = 0;

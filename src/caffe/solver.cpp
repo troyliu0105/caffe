@@ -99,21 +99,21 @@ void Solver<Dtype>::InitTrainNet() {
   NetParameter net_param;
   if (param_.has_train_net_param()) {
     LOG_IF(INFO, Caffe::root_solver())
-    << "Creating training net specified in train_net_param.";
+            << "Creating training net specified in train_net_param.";
     net_param.CopyFrom(param_.train_net_param());
   } else if (param_.has_train_net()) {
     LOG_IF(INFO, Caffe::root_solver())
-    << "Creating training net from train_net file: " << param_.train_net();
+            << "Creating training net from train_net file: " << param_.train_net();
     ReadNetParamsFromTextFileOrDie(param_.train_net(), &net_param);
   }
   if (param_.has_net_param()) {
     LOG_IF(INFO, Caffe::root_solver())
-    << "Creating training net specified in net_param.";
+            << "Creating training net specified in net_param.";
     net_param.CopyFrom(param_.net_param());
   }
   if (param_.has_net()) {
     LOG_IF(INFO, Caffe::root_solver())
-    << "Creating training net from net file: " << param_.net();
+            << "Creating training net from net file: " << param_.net();
     ReadNetParamsFromTextFileOrDie(param_.net(), &net_param);
   }
   // Set the correct NetState.  We start with the solver defaults (lowest
@@ -736,7 +736,7 @@ template<typename Dtype>
 void Solver<Dtype>::CheckSnapshotWritePermissions() {
   if (Caffe::root_solver() && param_.snapshot()) {
     CHECK(param_.has_snapshot_prefix())
-    << "In solver params, snapshot is specified but snapshot_prefix is not";
+            << "In solver params, snapshot is specified but snapshot_prefix is not";
     string probe_filename = SnapshotFilename(".tempfile");
     std::ofstream probe_ofs(probe_filename.c_str());
     if (probe_ofs.good()) {

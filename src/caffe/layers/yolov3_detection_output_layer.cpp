@@ -18,10 +18,6 @@
 #include "caffe/util/io.hpp"
 
 namespace caffe {
-template<typename Dtype>
-inline Dtype sigmoid(Dtype x) {
-  return 1. / (1. + exp(-x));
-}
 
 template<typename Dtype>
 Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
@@ -408,12 +404,13 @@ void Yolov3DetectionOutputLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *>
   return;
 }
 #ifdef CPU_ONLY
-template <typename Dtype>
-void Yolov3DetectionOutputLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
-  const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+template<typename Dtype>
+void Yolov3DetectionOutputLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
+                                                     const vector<bool> &propagate_down,
+                                                     const vector<Blob<Dtype> *> &bottom) {
   return;
 }
-  STUB_GPU_FORWARD(Yolov3DetectionOutputLayer, Forward);
+STUB_GPU_FORWARD(Yolov3DetectionOutputLayer, Forward);
 #endif
 
 INSTANTIATE_CLASS(Yolov3DetectionOutputLayer);

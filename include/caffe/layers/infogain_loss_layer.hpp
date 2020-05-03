@@ -45,15 +45,15 @@ namespace caffe {
  *        \log(\hat{p}_{n,k})
  *      @f$, where @f$ H_{l_n} @f$ denotes row @f$l_n@f$ of @f$H@f$.
  */
-template <typename Dtype>
+template<typename Dtype>
 class InfogainLossLayer : public LossLayer<Dtype> {
- public:
-  explicit InfogainLossLayer(const LayerParameter& param)
+public:
+  explicit InfogainLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), infogain_() {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
   // InfogainLossLayer takes 2-3 bottom Blobs; if there are 3 the third should
   // be the infogain matrix.  (Otherwise the infogain matrix is loaded from a
@@ -68,12 +68,12 @@ class InfogainLossLayer : public LossLayer<Dtype> {
   virtual inline int MinTopBlobs() const { return 1; }
   virtual inline int MaxTopBlobs() const { return 2; }
 
-  virtual inline const char* type() const { return "InfogainLoss"; }
+  virtual inline const char *type() const { return "InfogainLoss"; }
 
- protected:
+protected:
   /// @copydoc InfogainLossLayer
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the infogain loss error gradient w.r.t. the predictions.
@@ -107,8 +107,8 @@ class InfogainLossLayer : public LossLayer<Dtype> {
    *      (\b optional) the information gain matrix -- ignored as its error
    *      gradient computation is not implemented.
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 
   /// Read the normalization mode parameter and compute the normalizer based
   /// on the blob size.  If normalization_mode is VALID, the count of valid
@@ -117,16 +117,16 @@ class InfogainLossLayer : public LossLayer<Dtype> {
   virtual Dtype get_normalizer(
       LossParameter_NormalizationMode normalization_mode, int valid_count);
   /// fill sum_rows_H_ according to matrix H
-  virtual void sum_rows_of_H(const Blob<Dtype>* H);
+  virtual void sum_rows_of_H(const Blob<Dtype> *H);
 
   /// The internal SoftmaxLayer used to map predictions to a distribution.
   shared_ptr<Layer<Dtype> > softmax_layer_;
   /// prob stores the output probability predictions from the SoftmaxLayer.
   Blob<Dtype> prob_;
   /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector<Blob<Dtype>*> softmax_bottom_vec_;
+  vector<Blob<Dtype> *> softmax_bottom_vec_;
   /// top vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector<Blob<Dtype>*> softmax_top_vec_;
+  vector<Blob<Dtype> *> softmax_top_vec_;
 
   Blob<Dtype> infogain_;
   Blob<Dtype> sum_rows_H_;  // cache the row sums of H.

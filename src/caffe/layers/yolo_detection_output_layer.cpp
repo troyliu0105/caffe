@@ -182,9 +182,9 @@ void YoloDetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bo
     } else {
       LabelMap label_map;
       CHECK(ReadProtoFromTextFile(label_map_file, &label_map))
-      << "Failed to read label map file: " << label_map_file;
+              << "Failed to read label map file: " << label_map_file;
       CHECK(MapLabelToName(label_map, true, &label_to_name_))
-      << "Failed to convert label to name.";
+              << "Failed to convert label to name.";
     }
   }
 }

@@ -16,34 +16,34 @@ namespace caffe {
  */
 
 // The main function which does the permute.
-template <typename Dtype>
-void Permute(const int count, Dtype* bottom_data, const bool forward,
-    const int* permute_order, const int* old_steps, const int* new_steps,
-    const int num_axes, Dtype* top_data);
+template<typename Dtype>
+void Permute(const int count, Dtype *bottom_data, const bool forward,
+             const int *permute_order, const int *old_steps, const int *new_steps,
+             const int num_axes, Dtype *top_data);
 
-template <typename Dtype>
+template<typename Dtype>
 class PermuteLayer : public Layer<Dtype> {
- public:
-  explicit PermuteLayer(const LayerParameter& param)
+public:
+  explicit PermuteLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "Permute"; }
+  virtual inline const char *type() const { return "Permute"; }
   virtual inline int ExactNumBottomBlobs() const { return 1; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
- protected:
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 
   int num_axes_;
   bool need_permute_;

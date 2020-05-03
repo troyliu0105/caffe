@@ -90,8 +90,8 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const Dtype *label_data;
   Dtype loss(0.0);
 #ifdef CPU_ONLY
-  const Dtype* bottom_data = bottom[0]->cpu_data();
-  Dtype* top_data = top[0]->mutable_cpu_data();
+  const Dtype *bottom_data = bottom[0]->cpu_data();
+  Dtype *top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
   label_data = bottom[1]->cpu_data(); //[label,x,y,w,h]
   if (diff_.width() != bottom[0]->width()) {
@@ -100,7 +100,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
   diff = diff_.mutable_cpu_data();
   //caffe_set(diff_.count(), Dtype(0.0), diff);
-  
+
   for (int i = 0; i < count; ++i) {
     diff[i] = sigmoid(bottom_data[i]);
   }

@@ -167,7 +167,7 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   if (datum.encoded()) {
 #ifdef USE_OPENCV
     CHECK(!(param_.force_color() && param_.force_gray()))
-    << "cannot set both force_color and force_gray";
+            << "cannot set both force_color and force_gray";
     cv::Mat cv_img;
     if (param_.force_color() || param_.force_gray()) {
       // If force_color then decode in color otherwise decode in gray.
@@ -370,7 +370,7 @@ void DataTransformer<Dtype>::CropImage(const Datum &datum,
   if (datum.encoded()) {
 #ifdef USE_OPENCV
     CHECK(!(param_.force_color() && param_.force_gray()))
-    << "cannot set both force_color and force_gray";
+            << "cannot set both force_color and force_gray";
     cv::Mat cv_img;
     if (param_.force_color() || param_.force_gray()) {
       // If force_color then decode in color otherwise decode in gray.
@@ -461,7 +461,7 @@ void DataTransformer<Dtype>::ExpandImage(const Datum &datum,
   if (datum.encoded()) {
 #ifdef USE_OPENCV
     CHECK(!(param_.force_color() && param_.force_gray()))
-    << "cannot set both force_color and force_gray";
+            << "cannot set both force_color and force_gray";
     cv::Mat cv_img;
     if (param_.force_color() || param_.force_gray()) {
       // If force_color then decode in color otherwise decode in gray.
@@ -572,7 +572,7 @@ void DataTransformer<Dtype>::DistortImage(const Datum &datum,
   if (datum.encoded()) {
 #ifdef USE_OPENCV
     CHECK(!(param_.force_color() && param_.force_gray()))
-    << "cannot set both force_color and force_gray";
+            << "cannot set both force_color and force_gray";
     cv::Mat cv_img;
     if (param_.force_color() || param_.force_gray()) {
       // If force_color then decode in color otherwise decode in gray.
@@ -1313,8 +1313,8 @@ void DataTransformer<Dtype>::Transform(Blob<Dtype> *input_blob,
 
   if (has_mean_values) {
     CHECK(mean_values_.size() == 1 || mean_values_.size() == input_channels)
-    << "Specify either 1 mean_value or as many as channels: "
-    << input_channels;
+            << "Specify either 1 mean_value or as many as channels: "
+            << input_channels;
     if (mean_values_.size() == 1) {
       caffe_add_scalar(input_blob->count(), -(mean_values_[0]), input_data);
     } else {
@@ -1363,7 +1363,7 @@ vector<int> DataTransformer<Dtype>::InferBlobShape(const Datum &datum, int polic
   if (datum.encoded()) {
 #ifdef USE_OPENCV
     CHECK(!(param_.force_color() && param_.force_gray()))
-    << "cannot set both force_color and force_gray";
+            << "cannot set both force_color and force_gray";
     cv::Mat cv_img;
     if (param_.force_color() || param_.force_gray()) {
       // If force_color then decode in color otherwise decode in gray.

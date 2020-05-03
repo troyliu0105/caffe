@@ -34,12 +34,12 @@ void InfogainLossLayer<Dtype>::LayerSetUp(
   }
   // normalization
   CHECK(!this->layer_param_.loss_param().has_normalize())
-  << "normalize is deprecated. use \"normalization\"";
+          << "normalize is deprecated. use \"normalization\"";
   normalization_ = this->layer_param_.loss_param().normalization();
   // matrix H
   if (bottom.size() < 3) {
     CHECK(this->layer_param_.infogain_loss_param().has_source())
-    << "Infogain matrix source must be specified.";
+            << "Infogain matrix source must be specified.";
     BlobProto blob_proto;
     ReadProtoFromBinaryFile(
         this->layer_param_.infogain_loss_param().source(), &blob_proto);

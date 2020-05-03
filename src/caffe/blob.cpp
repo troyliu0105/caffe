@@ -221,11 +221,11 @@ Dtype Blob<Dtype>::asum_data() const {
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
 #ifndef CPU_ONLY
-  {
-    Dtype asum;
-    caffe_gpu_asum(count_, gpu_data(), &asum);
-    return asum;
-  }
+    {
+      Dtype asum;
+      caffe_gpu_asum(count_, gpu_data(), &asum);
+      return asum;
+    }
 #else
     NO_GPU;
 #endif
@@ -261,11 +261,11 @@ Dtype Blob<Dtype>::asum_diff() const {
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
 #ifndef CPU_ONLY
-  {
-    Dtype asum;
-    caffe_gpu_asum(count_, gpu_diff(), &asum);
-    return asum;
-  }
+    {
+      Dtype asum;
+      caffe_gpu_asum(count_, gpu_diff(), &asum);
+      return asum;
+    }
 #else
     NO_GPU;
 #endif

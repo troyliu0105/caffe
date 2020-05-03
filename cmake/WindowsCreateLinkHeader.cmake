@@ -3,17 +3,17 @@ set(_windows_create_link_header "${CMAKE_CURRENT_LIST_FILE}")
 # function to add a post build command to create a link header
 function(windows_create_link_header target outputfile)
     add_custom_command(TARGET ${target} POST_BUILD
-                       COMMAND ${CMAKE_COMMAND}
-                                #-DCMAKE_GENERATOR=${CMAKE_GENERATOR}
-                                -DMSVC_VERSION=${MSVC_VERSION}
-                                -DTARGET_FILE=$<TARGET_FILE:${target}>
-                                #-DPROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}
-                                #-DCMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
-                                #-DCONFIGURATION=$<CONFIGURATION>
-                                -DOUTPUT_FILE=${outputfile}
-                                -P ${_windows_create_link_header}
-                        BYPRODUCTS ${outputfile}
-                      )
+            COMMAND ${CMAKE_COMMAND}
+            #-DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+            -DMSVC_VERSION=${MSVC_VERSION}
+            -DTARGET_FILE=$<TARGET_FILE:${target}>
+            #-DPROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}
+            #-DCMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            #-DCONFIGURATION=$<CONFIGURATION>
+            -DOUTPUT_FILE=${outputfile}
+            -P ${_windows_create_link_header}
+            BYPRODUCTS ${outputfile}
+            )
 endfunction()
 
 
@@ -40,9 +40,9 @@ function(find_dumpbin var)
     get_filename_component(MSVC_VC_DIR [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${MSVC_PRODUCT_VERSION_${MSVC_VERSION}}\\Setup\\VC;ProductDir] REALPATH CACHE)
 
     find_program(DUMPBIN_EXECUTABLE dumpbin ${MSVC_VC_DIR}/bin)
-    if(NOT DUMPBIN_EXECUTABLE)
+    if (NOT DUMPBIN_EXECUTABLE)
         message(FATAL_ERROR "Could not find DUMPBIN_EXECUTABLE please define this variable")
-    endif()
+    endif ()
     set(${var} ${DUMPBIN_EXECUTABLE} PARENT_SCOPE)
 endfunction()
 
@@ -51,22 +51,22 @@ macro(print_date)
 endmacro()
 
 
-if(CMAKE_SCRIPT_MODE_FILE)
+if (CMAKE_SCRIPT_MODE_FILE)
     cmake_policy(SET CMP0007 NEW)
     # find the dumpbin exe
     find_dumpbin(dumpbin)
     # execute dumpbin to generate a list of symbols
     execute_process(COMMAND ${dumpbin} /SYMBOLS ${TARGET_FILE}
-                    RESULT_VARIABLE _result
-                    OUTPUT_VARIABLE _output
-                    ERROR_VARIABLE _error
-    )
+            RESULT_VARIABLE _result
+            OUTPUT_VARIABLE _output
+            ERROR_VARIABLE _error
+            )
     # match all layers and solvers instantiation guard
     string(REGEX MATCHALL "\\?gInstantiationGuard[^\\(\\) ]*" __symbols ${_output})
     # define a string to generate a list of pragmas
-    foreach(__symbol ${__symbols})
-        set(__pragma "${__pragma}#pragma comment(linker, \"/include:${__symbol}\")\n")        
-    endforeach()
+    foreach (__symbol ${__symbols})
+        set(__pragma "${__pragma}#pragma comment(linker, \"/include:${__symbol}\")\n")
+    endforeach ()
     file(WRITE ${OUTPUT_FILE} ${__pragma})
-endif()
+endif ()
 

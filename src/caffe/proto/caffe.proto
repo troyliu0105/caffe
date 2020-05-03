@@ -513,6 +513,13 @@ message Yolov3Parameter {
     optional float iou_thresh = 17 [default = 0.5];
     optional float max_delta = 18 [default = 10];
     optional bool accumulate = 19 [default = true];
+
+    enum ARC {
+        DEFAULT = 0;
+        BCE = 1;
+        CE = 2;
+    }
+    optional ARC arc = 20 [default = DEFAULT];
 }
 message RegionLossParameter {
     //Yolo 9000
@@ -658,6 +665,9 @@ message LayerParameter {
     optional TileParameter tile_param = 138;
     optional WindowDataParameter window_data_param = 129;
     optional UpsampleParameter upsample_param = 150; //old: nothing
+    optional NNPACKConvolutionParameter nnpack_convolution_param = 151;
+    optional ShuffleChannelParameter shuffle_channel_param = 152;
+    optional FocalLossParameter focal_loss_param = 154;
 }
 
 // Message that stores parameters used to apply transformation
@@ -1037,6 +1047,7 @@ message ConvolutionParameter {
         DEFAULT = 0;
         CAFFE = 1;
         CUDNN = 2;
+        NNPACK = 3;
     }
     optional Engine engine = 15 [default = DEFAULT];
 
@@ -1389,6 +1400,13 @@ message InnerProductParameter {
     // of the weight matrix. The weight matrix itself is not going to be transposed
     // but rather the transfer flag of operations will be toggled accordingly.
     optional bool transpose = 6 [default = false];
+
+    enum Engine {
+        DEFAULT = 0;
+        CAFFE = 1;
+        NNPACK = 2;
+    }
+    optional Engine engine = 7 [default = DEFAULT];
 }
 
 message InputParameter {
@@ -1562,6 +1580,7 @@ message PoolingParameter {
         DEFAULT = 0;
         CAFFE = 1;
         CUDNN = 2;
+        NNPACK = 3;
     }
     optional Engine engine = 11 [default = DEFAULT];
     // If global_pooling then it will pool over the size of the bottom by doing
@@ -1696,6 +1715,7 @@ message ReLUParameter {
         DEFAULT = 0;
         CAFFE = 1;
         CUDNN = 2;
+        NNPACK = 3;
     }
     optional Engine engine = 2 [default = DEFAULT];
 }
@@ -2115,6 +2135,46 @@ message PReLUParameter {
     // Whether or not slope parameters are shared across channels.
     optional bool channel_shared = 2 [default = false];
 }
-message UpsampleParameter { //old: nothing
+
+message NNPACKConvolutionParameter {
+    enum Algorithm {
+        /** Let NNPACK choose the algorithm depending on layer parameters */
+        AUTO = 0;
+        /** Tiled convolution based on 2D Fourier transform with 8x8 blocks. Supports kernels up to 8x8. */
+        FFT_8x8 = 1;
+        /** Tiled convolution based on 2D Fourier transform with 16x16 blocks. Supports kernels up to 16x16. */
+        FFT_16x16 = 2;
+        /** Tiled convolution based on 2D Winograd transform F(3x3, 6x6) with 8x8 blocks. Supports only 3x3 kernels. */
+        WINOGRAD = 3;
+    }
+    optional Algorithm algorithm = 1 [default = AUTO];
+    enum KernelTransformStrategy {
+        COMPUTE = 0;
+        RECOMPUTE = 1;
+        REUSE = 2;
+    }
+    optional KernelTransformStrategy kernel_transform_strategy = 2 [default = RECOMPUTE];
+}
+
+message UpsampleParameter {
                             optional int32 scale = 1 [default = 1]; //old: nothing
+}
+
+message ShuffleChannelParameter {
+    optional uint32 group = 1 [default = 1]; // The number of group
+}
+
+message FocalLossParameter {
+    enum ActivateType {
+        NONE = 0;
+        SIGMOID = 1;
+        SOFTMAX = 2;
+    }
+    optional ActivateType activate = 1 [default = SOFTMAX];
+    // The axis along which to perform the softmax -- may be negative to index
+    // from the end (e.g., -1 for the last axis).
+    // Any other axes will be evaluated as independent softmaxes.
+    optional int32 axis = 2 [default = 1];
+    optional float alpha = 3 [default = 0.25];
+    optional float gamma = 4 [default = 2.0];
 }

@@ -130,7 +130,7 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
   if (this->output_seg_labels_) {
 
     CHECK(ReadProtoFromTextFile(label_map_file_, &label_map_))
-    << "Failed to read label map file.";
+            << "Failed to read label map file.";
     int maxima = 0;
     if (!single_class_) {
       for (int i = 0; i < label_map_.item().size(); i++) {

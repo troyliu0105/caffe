@@ -434,9 +434,6 @@ void Yolov3Layer<Dtype>::LayerSetUp(
   CHECK_EQ(input_count, tmp_input_count);
   //CHECK_EQ(label_count, tmp_label_count);
 }
-typedef struct {
-  float x, y, w, h;
-} box;
 
 template<typename Dtype>
 void Yolov3Layer<Dtype>::Reshape(
@@ -540,12 +537,11 @@ void Yolov3Layer<Dtype>::Forward_cpu(
         vector<Dtype> best_truth;
 #ifdef CPU_ONLY
         for (int c = 0; c < len; ++c) {
-          int index2 = c*stride + index;
+          int index2 = c * stride + index;
           //LOG(INFO)<<index2;
-          if (c == 2 || c==3) {
+          if (c == 2 || c == 3) {
             swap_data[index2] = (input_data[index2 + 0]);
-          }
-          else {
+          } else {
             swap_data[index2] = logistic_activate(input_data[index2 + 0]);
           }
         }

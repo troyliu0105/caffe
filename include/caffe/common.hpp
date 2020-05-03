@@ -18,6 +18,10 @@
 
 #include "caffe/util/device_alternate.hpp"
 
+#ifdef USE_NNPACK
+#include "caffe/nnpack_pool.hpp"
+#endif
+
 // Convert macro to string
 #define STRINGIFY(m) #m
 #define AS_STRING(m) STRINGIFY(m)
@@ -175,7 +179,14 @@ class Caffe {
   inline static void set_multiprocess(bool val) { Get().multiprocess_ = val; }
   inline static bool root_solver() { return Get().solver_rank_ == 0; }
 
- protected:
+#ifdef USE_NNPACK
+  template<typename Dtype> static bool nnpack_supported();
+  inline static pthreadpool_t nnpack_threadpool() {
+    return Get().nnpack_threadpool_.pool();
+  }
+#endif
+
+protected:
 #ifndef CPU_ONLY
   cublasHandle_t cublas_handle_;
   curandGenerator_t curand_generator_;
@@ -188,6 +199,9 @@ class Caffe {
   int solver_count_;
   int solver_rank_;
   bool multiprocess_;
+#ifdef USE_NNPACK
+  NNPACKPool nnpack_threadpool_;
+#endif
 
  private:
   // The private constructor to avoid duplicate instantiation.

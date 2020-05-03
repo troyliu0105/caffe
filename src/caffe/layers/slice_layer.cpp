@@ -11,7 +11,7 @@ void SliceLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   const SliceParameter &slice_param = this->layer_param_.slice_param();
   CHECK(!(slice_param.has_axis() && slice_param.has_slice_dim()))
-  << "Either axis or slice_dim should be specified; not both.";
+          << "Either axis or slice_dim should be specified; not both.";
   slice_point_.clear();
   std::copy(slice_param.slice_point().begin(),
             slice_param.slice_point().end(),

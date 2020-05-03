@@ -52,7 +52,7 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 
   if (do_neg_mining_) {
     CHECK(share_location_)
-    << "Currently only support negative mining if share_location is true.";
+            << "Currently only support negative mining if share_location is true.";
   }
 
   vector<int> loss_shape(1, 1);

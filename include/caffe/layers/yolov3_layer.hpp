@@ -11,22 +11,19 @@
 #include <map>
 #include "caffe/util/bbox_util.hpp"
 namespace caffe {
-  
 
-
-
-template <typename Dtype>
+template<typename Dtype>
 class Yolov3Layer : public LossLayer<Dtype> {
 public:
-  explicit Yolov3Layer(const LayerParameter& param)
-    : LossLayer<Dtype>(param), diff_() {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-    const vector<Blob<Dtype>*>& top);
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-    const vector<Blob<Dtype>*>& top);
+  explicit Yolov3Layer(const LayerParameter &param)
+      : LossLayer<Dtype>(param), diff_() {}
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "Yolov3"; }
-  
+  virtual inline const char *type() const { return "Yolov3"; }
+
   class PredictionResult {
   public:
     Dtype x;
@@ -39,16 +36,16 @@ public:
     int classType;
   };
 
-  protected:
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-    const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-       const vector<Blob<Dtype>*>& top);
+protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-    const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
   int iter_;
   int side_w_;
   int side_h_;

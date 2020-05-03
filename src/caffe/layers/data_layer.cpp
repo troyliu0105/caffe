@@ -39,9 +39,9 @@ void DataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
     this->prefetch_[i]->data_.Reshape(top_shape);
   }
   LOG_IF(INFO, Caffe::root_solver())
-  << "output data size: " << top[0]->num() << ","
-  << top[0]->channels() << "," << top[0]->height() << ","
-  << top[0]->width();
+          << "output data size: " << top[0]->num() << ","
+          << top[0]->channels() << "," << top[0]->height() << ","
+          << top[0]->width();
   // label
   if (this->output_labels_) {
     vector<int> label_shape(1, batch_size);

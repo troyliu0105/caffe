@@ -17,19 +17,19 @@ namespace caffe {
  * batch.  The second blob is cast to int and treated as an index into the
  * first axis of the first blob.
  */
-template <typename Dtype>
+template<typename Dtype>
 class BatchReindexLayer : public Layer<Dtype> {
- public:
-  explicit BatchReindexLayer(const LayerParameter& param)
+public:
+  explicit BatchReindexLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "BatchReindex"; }
+  virtual inline const char *type() const { return "BatchReindex"; }
   virtual inline int ExactNumBottomBlobs() const { return 2; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
- protected:
+protected:
   /**
    * @param bottom input Blob vector (length 2+)
    *   -# @f$ (N \times ...) @f$
@@ -42,10 +42,10 @@ class BatchReindexLayer : public Layer<Dtype> {
    *        y = x_1[x_2]
    *      @f$
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the error gradient w.r.t. the reordered input.
@@ -62,12 +62,12 @@ class BatchReindexLayer : public Layer<Dtype> {
    *   - This layer cannot backprop to x_2, i.e. propagate_down[1] must be
    *     false.
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 
- private:
+private:
   struct pair_sort_first {
     bool operator()(const std::pair<int, int> &left,
                     const std::pair<int, int> &right) {
@@ -75,7 +75,7 @@ class BatchReindexLayer : public Layer<Dtype> {
     }
   };
   void check_batch_reindex(int initial_num, int final_num,
-                           const Dtype* ridx_data);
+                           const Dtype *ridx_data);
 };
 
 }  // namespace caffe

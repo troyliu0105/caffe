@@ -40,20 +40,20 @@ namespace caffe {
  *        \frac{-1}{N} \sum\limits_{n=1}^N \log(\hat{p}_{n,l_n})
  *      @f$
  */
-template <typename Dtype>
+template<typename Dtype>
 class MultinomialLogisticLossLayer : public LossLayer<Dtype> {
- public:
-  explicit MultinomialLogisticLossLayer(const LayerParameter& param)
+public:
+  explicit MultinomialLogisticLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param) {}
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "MultinomialLogisticLoss"; }
+  virtual inline const char *type() const { return "MultinomialLogisticLoss"; }
 
- protected:
+protected:
   /// @copydoc MultinomialLogisticLossLayer
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the multinomial logistic loss error gradient w.r.t. the
@@ -83,8 +83,8 @@ class MultinomialLogisticLossLayer : public LossLayer<Dtype> {
    *   -# @f$ (N \times 1 \times 1 \times 1) @f$
    *      the labels -- ignored as we can't compute their error gradients
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 };
 
 }  // namespace caffe

@@ -51,11 +51,11 @@ void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom
     } else {
       LabelMap label_map;
       CHECK(ReadProtoFromTextFile(label_map_file, &label_map))
-      << "Failed to read label map file: " << label_map_file;
+              << "Failed to read label map file: " << label_map_file;
       CHECK(MapLabelToName(label_map, true, &label_to_name_))
-      << "Failed to convert label to name.";
+              << "Failed to convert label to name.";
       CHECK(MapLabelToDisplayName(label_map, true, &label_to_display_name_))
-      << "Failed to convert label to display name.";
+              << "Failed to convert label to display name.";
     }
   } else {
     need_save_ = false;
@@ -69,7 +69,7 @@ void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom
     } else {
       std::ifstream infile(name_size_file.c_str());
       CHECK(infile.good())
-      << "Failed to open name size file: " << name_size_file;
+              << "Failed to open name size file: " << name_size_file;
       // The file is in the following format:
       //    name height width
       //    ...
@@ -290,7 +290,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
       vector<int> &indices = it->second;
       if (need_save_) {
         CHECK(label_to_name_.find(label) != label_to_name_.end())
-        << "Cannot find label: " << label << " in the label map.";
+                << "Cannot find label: " << label << " in the label map.";
         CHECK_LT(name_count_, names_.size());
       }
       for (int j = 0; j < indices.size(); ++j) {

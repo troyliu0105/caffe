@@ -14,7 +14,7 @@ void DetectionEvaluateLayer<Dtype>::LayerSetUp(
   const DetectionEvaluateParameter &detection_evaluate_param =
       this->layer_param_.detection_evaluate_param();
   CHECK(detection_evaluate_param.has_num_classes())
-  << "Must provide num_classes.";
+          << "Must provide num_classes.";
   num_classes_ = detection_evaluate_param.num_classes();
   background_label_id_ = detection_evaluate_param.background_label_id();
   overlap_threshold_ = detection_evaluate_param.overlap_threshold();
@@ -24,7 +24,7 @@ void DetectionEvaluateLayer<Dtype>::LayerSetUp(
     string name_size_file = detection_evaluate_param.name_size_file();
     std::ifstream infile(name_size_file.c_str());
     CHECK(infile.good())
-    << "Failed to open name size file: " << name_size_file;
+            << "Failed to open name size file: " << name_size_file;
     // The file is in the following format:
     //    name height width
     //    ...

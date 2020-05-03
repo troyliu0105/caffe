@@ -516,8 +516,8 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
   if (param.saltpepper_param().value_size() > 0) {
     CHECK(param.saltpepper_param().value_size() == 1
               || param.saltpepper_param().value_size() == out_img.channels())
-    << "Specify either 1 pad_value or as many as channels: "
-    << out_img.channels();
+            << "Specify either 1 pad_value or as many as channels: "
+            << out_img.channels();
 
     for (int i = 0; i < param.saltpepper_param().value_size(); i++) {
       noise_values.push_back(uchar(param.saltpepper_param().value(i)));

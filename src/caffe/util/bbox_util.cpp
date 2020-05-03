@@ -371,6 +371,25 @@ void get_gaussian_yolo_box<double>(vector<double> &b,
 }
 
 template<typename Dtype>
+void get_region_box(box &b,
+                    Dtype *x,
+                    vector<Dtype> biases,
+                    int n,
+                    int index,
+                    int i,
+                    int j,
+                    int lw,
+                    int lh,
+                    int w,
+                    int h,
+                    int stride) {
+  b.x = ((i + (x[index + 0 * stride])) / lw);
+  b.y = ((j + (x[index + 1 * stride])) / lh);
+  b.w = (exp(x[index + 2 * stride]) * biases[2 * n] / (w));
+  b.h = (exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
+}
+
+template<typename Dtype>
 void get_region_box(vector<Dtype> &b,
                     Dtype *x,
                     vector<Dtype> biases,
@@ -1310,8 +1329,8 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
   vector<vector<float> > all_conf_loss;
 #ifdef CPU_ONLY
   ComputeConfLoss(conf_blob.cpu_data(), num, num_priors, num_classes,
-      background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
-      &all_conf_loss);
+                  background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
+                  &all_conf_loss);
 #else
   ComputeConfLossGPU(conf_blob, num, num_priors, num_classes,
                      background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,

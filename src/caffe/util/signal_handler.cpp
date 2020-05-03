@@ -14,11 +14,11 @@ static bool already_hooked_up = false;
 void handle_signal(int signal) {
   switch (signal) {
 #ifdef _MSC_VER
-  case SIGBREAK:  // there is no SIGHUP in windows, take SIGBREAK instead.
-    got_sighup = true;
-    break;
+    case SIGBREAK:  // there is no SIGHUP in windows, take SIGBREAK instead.
+      got_sighup = true;
+      break;
 #else
-    case SIGHUP:
+  case SIGHUP:
     got_sighup = true;
     break;
 #endif

@@ -12,21 +12,21 @@
 # Copyright 2013 Conrad Steenberg <conrad.steenberg@gmail.com>
 # Aug 31, 2013
 
-if(MSVC)
-  find_package(LMDB NO_MODULE)
-else()
-  find_path(LMDB_INCLUDE_DIR NAMES  lmdb.h PATHS "$ENV{LMDB_DIR}/include")
-  find_library(LMDB_LIBRARIES NAMES lmdb   PATHS "$ENV{LMDB_DIR}/lib" )
-endif()
+if (MSVC)
+    find_package(LMDB NO_MODULE)
+else ()
+    find_path(LMDB_INCLUDE_DIR NAMES lmdb.h PATHS "$ENV{LMDB_DIR}/include")
+    find_library(LMDB_LIBRARIES NAMES lmdb PATHS "$ENV{LMDB_DIR}/lib")
+endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LMDB DEFAULT_MSG LMDB_INCLUDE_DIR LMDB_LIBRARIES)
 
-if(LMDB_FOUND)
-  message(STATUS "Found lmdb    (include: ${LMDB_INCLUDE_DIR}, library: ${LMDB_LIBRARIES})")
-  mark_as_advanced(LMDB_INCLUDE_DIR LMDB_LIBRARIES)
+if (LMDB_FOUND)
+    message(STATUS "Found lmdb    (include: ${LMDB_INCLUDE_DIR}, library: ${LMDB_LIBRARIES})")
+    mark_as_advanced(LMDB_INCLUDE_DIR LMDB_LIBRARIES)
 
-  caffe_parse_header(${LMDB_INCLUDE_DIR}/lmdb.h
-                     LMDB_VERSION_LINES MDB_VERSION_MAJOR MDB_VERSION_MINOR MDB_VERSION_PATCH)
-  set(LMDB_VERSION "${MDB_VERSION_MAJOR}.${MDB_VERSION_MINOR}.${MDB_VERSION_PATCH}")
-endif()
+    caffe_parse_header(${LMDB_INCLUDE_DIR}/lmdb.h
+            LMDB_VERSION_LINES MDB_VERSION_MAJOR MDB_VERSION_MINOR MDB_VERSION_PATCH)
+    set(LMDB_VERSION "${MDB_VERSION_MAJOR}.${MDB_VERSION_MINOR}.${MDB_VERSION_PATCH}")
+endif ()

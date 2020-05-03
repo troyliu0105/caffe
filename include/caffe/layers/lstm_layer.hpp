@@ -14,7 +14,7 @@
 
 namespace caffe {
 
-template <typename Dtype> class RecurrentLayer;
+template<typename Dtype> class RecurrentLayer;
 
 /**
  * @brief Processes sequential inputs using a "Long Short-Term Memory" (LSTM)
@@ -44,20 +44,20 @@ template <typename Dtype> class RecurrentLayer;
  * [3] Graves, Alex. "Generating sequences with recurrent neural networks."
  *     arXiv preprint arXiv:1308.0850 (2013).
  */
-template <typename Dtype>
+template<typename Dtype>
 class LSTMLayer : public RecurrentLayer<Dtype> {
- public:
-  explicit LSTMLayer(const LayerParameter& param)
+public:
+  explicit LSTMLayer(const LayerParameter &param)
       : RecurrentLayer<Dtype>(param) {}
 
-  virtual inline const char* type() const { return "LSTM"; }
+  virtual inline const char *type() const { return "LSTM"; }
 
- protected:
-  virtual void FillUnrolledNet(NetParameter* net_param) const;
-  virtual void RecurrentInputBlobNames(vector<string>* names) const;
-  virtual void RecurrentOutputBlobNames(vector<string>* names) const;
-  virtual void RecurrentInputShapes(vector<BlobShape>* shapes) const;
-  virtual void OutputBlobNames(vector<string>* names) const;
+protected:
+  virtual void FillUnrolledNet(NetParameter *net_param) const;
+  virtual void RecurrentInputBlobNames(vector<string> *names) const;
+  virtual void RecurrentOutputBlobNames(vector<string> *names) const;
+  virtual void RecurrentInputShapes(vector<BlobShape> *shapes) const;
+  virtual void OutputBlobNames(vector<string> *names) const;
 };
 
 /**
@@ -65,15 +65,15 @@ class LSTMLayer : public RecurrentLayer<Dtype> {
  *        non-linearity of the LSTM, producing the updated cell and hidden
  *        states.
  */
-template <typename Dtype>
+template<typename Dtype>
 class LSTMUnitLayer : public Layer<Dtype> {
- public:
-  explicit LSTMUnitLayer(const LayerParameter& param)
+public:
+  explicit LSTMUnitLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "LSTMUnit"; }
+  virtual inline const char *type() const { return "LSTMUnit"; }
   virtual inline int ExactNumBottomBlobs() const { return 3; }
   virtual inline int ExactNumTopBlobs() const { return 2; }
 
@@ -82,7 +82,7 @@ class LSTMUnitLayer : public Layer<Dtype> {
     return bottom_index != 2;
   }
 
- protected:
+protected:
   /**
    * @param bottom input Blob vector (length 3)
    *   -# @f$ (1 \times N \times D) @f$
@@ -103,10 +103,10 @@ class LSTMUnitLayer : public Layer<Dtype> {
    *      the updated hidden state @f$ h_t @f$, computed as:
    *          h_t := o_t .* \tanh[c_t]
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the error gradient w.r.t. the LSTMUnit inputs.
@@ -139,10 +139,10 @@ class LSTMUnitLayer : public Layer<Dtype> {
    *      the gradient w.r.t. the sequence continuation indicators
    *      @f$ \delta_t @f$ is currently not computed.
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
 
   /// @brief The hidden and output dimension.
   int hidden_dim_;

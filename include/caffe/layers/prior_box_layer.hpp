@@ -17,9 +17,9 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template <typename Dtype>
+template<typename Dtype>
 class PriorBoxLayer : public Layer<Dtype> {
- public:
+public:
   /**
    * @param param provides PriorBoxParameter prior_box_param,
    *     with PriorBoxLayer options:
@@ -30,18 +30,18 @@ class PriorBoxLayer : public Layer<Dtype> {
    *   - flip (\b optional bool, default true).
    *     if set, flip the aspect ratio.
    */
-  explicit PriorBoxLayer(const LayerParameter& param)
+  explicit PriorBoxLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char* type() const { return "PriorBox"; }
+  virtual inline const char *type() const { return "PriorBox"; }
   virtual inline int ExactBottomBlobs() const { return 2; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
- protected:
+protected:
   /**
    * @brief Generates prior boxes for a layer with specified parameters.
    *
@@ -55,11 +55,11 @@ class PriorBoxLayer : public Layer<Dtype> {
    *   By default, a box of aspect ratio 1 and min_size and a box of aspect
    *   ratio 1 and sqrt(min_size * max_size) are created.
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
   /// @brief Not implemented
-  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
-      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
     return;
   }
 

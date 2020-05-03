@@ -16,7 +16,9 @@
 #include <iostream>
 #include <algorithm>
 #define BOUND(a, min_val, max_val)           ( (a < min_val) ? min_val : (a >= max_val) ? (max_val) : a )
+#ifndef M_PI
 #define M_PI 3.14159265358979323846/* pi */
+#endif
 namespace caffe {
 
 template<typename Dtype>

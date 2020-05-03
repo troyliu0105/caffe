@@ -19,6 +19,15 @@
 #include "caffe/caffe.hpp"
 
 namespace caffe {
+
+/**
+ * @brief yolo 中的激活模式
+ * Source: ultralytics/yolov3
+ */
+typedef enum {
+  DEFAULT, BCE, CE,
+} ARC;
+
 typedef enum {
   IOU, GIOU, MSE, DIOU, CIOU
 } IOU_LOSS;  
@@ -29,6 +38,9 @@ typedef struct dxrep {
 } dxrep;
 
 // box.h
+typedef struct box {
+  float x, y, w, h;
+} box;
 typedef struct ious {
   float iou, giou , diou , ciou;
   dxrep dx_iou;
@@ -57,6 +69,20 @@ template <typename Dtype>
 Dtype box_diou(vector<Dtype> a, vector<Dtype> b);
 template <typename Dtype>
 Dtype box_ciou(vector<Dtype> a, vector<Dtype> b);
+
+template<typename Dtype>
+void get_region_box(box &b,
+                    Dtype *x,
+                    vector<Dtype> biases,
+                    int n,
+                    int index,
+                    int i,
+                    int j,
+                    int lw,
+                    int lh,
+                    int w,
+                    int h,
+                    int stride);
 template <typename Dtype>
 void get_region_box(vector<Dtype> &b, Dtype* x, vector<Dtype> biases, int n, int index, int i, int j, int lw, int lh, int w, int h, int stride);
 

@@ -10,7 +10,7 @@ void ConcatLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   const ConcatParameter &concat_param = this->layer_param_.concat_param();
   CHECK(!(concat_param.has_axis() && concat_param.has_concat_dim()))
-  << "Either axis or concat_dim should be specified; not both.";
+          << "Either axis or concat_dim should be specified; not both.";
 }
 
 template<typename Dtype>
