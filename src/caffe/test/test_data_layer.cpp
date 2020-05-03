@@ -1,5 +1,4 @@
 #ifdef USE_OPENCV
-
 #include <string>
 #include <vector>
 
@@ -30,7 +29,6 @@ protected:
         blob_top_data_(new Blob<Dtype>()),
         blob_top_label_(new Blob<Dtype>()),
         seed_(1701) {}
-
   virtual void SetUp() {
     filename_.reset(new string());
     MakeTempDir(filename_.get());
@@ -101,7 +99,7 @@ protected:
       for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 24; ++j) {
           EXPECT_EQ(scale * i, blob_top_data_->cpu_data()[i * 24 + j])
-              << "debug: iter " << iter << " i " << i << " j " << j;
+                  << "debug: iter " << iter << " i " << i << " j " << j;
         }
       }
     }
@@ -190,8 +188,8 @@ protected:
           for (int w = 0; w < width; ++w) {
             const int idx = (c * height + h) * width + w;
             EXPECT_EQ(idx, static_cast<int>(blob_top_data_->cpu_data()[idx]))
-                << "debug: iter " << iter << " c " << c
-                << " h " << h << " w " << w;
+                    << "debug: iter " << iter << " c " << c
+                    << " h " << h << " w " << w;
           }
         }
       }
@@ -239,7 +237,7 @@ protected:
           // At TEST time, check that we always get center value.
           if (phase == caffe::TEST) {
             EXPECT_EQ(center_value, this->blob_top_data_->cpu_data()[i * 2 + j])
-                << "debug: iter " << iter << " i " << i << " j " << j;
+                    << "debug: iter " << iter << " i " << i << " j " << j;
           }
         }
       }
@@ -301,7 +299,7 @@ protected:
         for (int j = 0; j < 2; ++j) {
           EXPECT_EQ(crop_sequence[iter][i * 2 + j],
                     blob_top_data_->cpu_data()[i * 2 + j])
-              << "debug: iter " << iter << " i " << i << " j " << j;
+                  << "debug: iter " << iter << " i " << i << " j " << j;
         }
       }
     }
@@ -378,8 +376,7 @@ protected:
   int seed_;
 };
 
-TYPED_TEST_CASE(DataLayerTest, TestDtypesAndDevices
-);
+TYPED_TEST_CASE(DataLayerTest, TestDtypesAndDevices);
 
 #ifdef USE_LEVELDB
 TYPED_TEST(DataLayerTest, TestReadLevelDB) {
@@ -427,79 +424,47 @@ TYPED_TEST(DataLayerTest, TestReadCropTestLevelDB) {
 #endif  // USE_LEVELDB
 
 #ifdef USE_LMDB
-
-TYPED_TEST(DataLayerTest, TestReadLMDB
-) {
-const bool unique_pixels = false;  // all pixels the same; images different
-this->
-Fill(unique_pixels, DataParameter_DB_LMDB
-);
-this->
-
-TestRead();
+TYPED_TEST(DataLayerTest, TestReadLMDB) {
+  const bool unique_pixels = false;  // all pixels the same; images different
+  this->Fill(unique_pixels, DataParameter_DB_LMDB);
+  this->TestRead();
 }
 
-TYPED_TEST(DataLayerTest, TestSkipLMDB
-) {
-this->Fill(false, DataParameter_DB_LMDB);
-this->
-
-TestSkip();
-
+TYPED_TEST(DataLayerTest, TestSkipLMDB) {
+  this->Fill(false, DataParameter_DB_LMDB);
+  this->TestSkip();
 }
 
-TYPED_TEST(DataLayerTest, TestReshapeLMDB
-) {
-this->
-TestReshape(DataParameter_DB_LMDB);
+TYPED_TEST(DataLayerTest, TestReshapeLMDB) {
+  this->TestReshape(DataParameter_DB_LMDB);
 }
 
-TYPED_TEST(DataLayerTest, TestReadCropTrainLMDB
-) {
-const bool unique_pixels = true;  // all images the same; pixels different
-this->
-Fill(unique_pixels, DataParameter_DB_LMDB
-);
-this->
-TestReadCrop(TRAIN);
+TYPED_TEST(DataLayerTest, TestReadCropTrainLMDB) {
+  const bool unique_pixels = true;  // all images the same; pixels different
+  this->Fill(unique_pixels, DataParameter_DB_LMDB);
+  this->TestReadCrop(TRAIN);
 }
 
 // Test that the sequence of random crops is consistent when using
 // Caffe::set_random_seed.
-TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceSeededLMDB
-) {
-const bool unique_pixels = true;  // all images the same; pixels different
-this->
-Fill(unique_pixels, DataParameter_DB_LMDB
-);
-this->
-
-TestReadCropTrainSequenceSeeded();
-
+TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceSeededLMDB) {
+  const bool unique_pixels = true;  // all images the same; pixels different
+  this->Fill(unique_pixels, DataParameter_DB_LMDB);
+  this->TestReadCropTrainSequenceSeeded();
 }
 
 // Test that the sequence of random crops differs across iterations when
 // Caffe::set_random_seed isn't called (and seeds from srand are ignored).
-TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceUnseededLMDB
-) {
-const bool unique_pixels = true;  // all images the same; pixels different
-this->
-Fill(unique_pixels, DataParameter_DB_LMDB
-);
-this->
-
-TestReadCropTrainSequenceUnseeded();
-
+TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceUnseededLMDB) {
+  const bool unique_pixels = true;  // all images the same; pixels different
+  this->Fill(unique_pixels, DataParameter_DB_LMDB);
+  this->TestReadCropTrainSequenceUnseeded();
 }
 
-TYPED_TEST(DataLayerTest, TestReadCropTestLMDB
-) {
-const bool unique_pixels = true;  // all images the same; pixels different
-this->
-Fill(unique_pixels, DataParameter_DB_LMDB
-);
-this->
-TestReadCrop(TEST);
+TYPED_TEST(DataLayerTest, TestReadCropTestLMDB) {
+  const bool unique_pixels = true;  // all images the same; pixels different
+  this->Fill(unique_pixels, DataParameter_DB_LMDB);
+  this->TestReadCrop(TEST);
 }
 
 #endif  // USE_LMDB

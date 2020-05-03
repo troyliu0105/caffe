@@ -49,12 +49,10 @@ void SplitLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(SplitLayer);
 #endif
 
 INSTANTIATE_CLASS(SplitLayer);
-
 REGISTER_LAYER_CLASS(Split);
 
 }  // namespace caffe

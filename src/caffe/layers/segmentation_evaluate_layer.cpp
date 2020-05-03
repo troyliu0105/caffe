@@ -13,7 +13,6 @@
 
 #include "caffe/layers/segmentation_evaluate_layer.hpp"
 #include "caffe/util/bbox_util.hpp"
-
 #define BOUND(a, min_val, max_val)           ( (a < min_val) ? min_val : (a >= max_val) ? (max_val) : a )
 namespace caffe {
 
@@ -23,7 +22,7 @@ void SegmentationEvaluateLayer<Dtype>::LayerSetUp(
   const SegmentationEvaluateParameter &segmentation_evaluate_param =
       this->layer_param_.segmentation_evaluate_param();
   CHECK(segmentation_evaluate_param.has_num_classes())
-          << "Must provide num_classes.";
+  << "Must provide num_classes.";
   num_classes_ = segmentation_evaluate_param.num_classes();
   threshold_ = segmentation_evaluate_param.threshold();
   iter_ = 0;
@@ -41,7 +40,6 @@ void SegmentationEvaluateLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bott
   top[0]->Reshape(top_shape);
 
 }
-
 template<typename Dtype>
 void SegmentationEvaluateLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom,
                                                      const vector<Blob<Dtype> *> &top) {
@@ -70,7 +68,6 @@ void SegmentationEvaluateLayer<Dtype>::visualization(const vector<Blob<Dtype> *>
   cv::imshow("show", img2);
   cv::waitKey(1);
 }
-
 template<typename Dtype>
 void SegmentationEvaluateLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
@@ -114,7 +111,7 @@ void SegmentationEvaluateLayer<Dtype>::Forward_cpu(
       else
         iou = 0;
       top_data[c] = iou;
-      //LOG(INFO) << "class" << c << " : "<<iou;
+      //LOG(INFO) << "class" << c << " : "<<iou;      
     }
 
   } else {
@@ -179,7 +176,6 @@ void SegmentationEvaluateLayer<Dtype>::Forward_cpu(
 }
 
 INSTANTIATE_CLASS(SegmentationEvaluateLayer);
-
 REGISTER_LAYER_CLASS(SegmentationEvaluate);
 
 }  // namespace caffe

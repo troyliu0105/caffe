@@ -77,11 +77,9 @@ void UpsampleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(UpsampleLayer);
 #endif
 
 INSTANTIATE_CLASS(UpsampleLayer);
-
 REGISTER_LAYER_CLASS(Upsample);
 }  // namespace caffe

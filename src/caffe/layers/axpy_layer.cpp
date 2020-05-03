@@ -85,12 +85,10 @@ void AxpyLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(AxpyLayer);
 #endif
 
 INSTANTIATE_CLASS(AxpyLayer);
-
 REGISTER_LAYER_CLASS(Axpy);
 
 } // namespace

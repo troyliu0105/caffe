@@ -1,9 +1,9 @@
 """
 Generate data used in the HDF5DataLayer and GradientBasedSolver tests.
 """
-import h5py
-import numpy as np
 import os
+import numpy as np
+import h5py
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 

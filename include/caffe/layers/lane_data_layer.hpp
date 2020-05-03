@@ -15,21 +15,21 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 class LaneDataLayer : public BasePrefetchingDataLayer<Dtype> {
-public:
-  explicit LaneDataLayer(const LayerParameter &param);
+ public:
+  explicit LaneDataLayer(const LayerParameter& param);
   virtual ~LaneDataLayer();
-  virtual void DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
-                              const vector<Blob<Dtype> *> &top);
+  virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
   // AnnotatedDataLayer uses DataReader instead for sharing for parallelism
   virtual inline bool ShareInParallel() const { return false; }
-  virtual inline const char *type() const { return "LaneData"; }
+  virtual inline const char* type() const { return "LaneData"; }
   virtual inline int ExactNumBottomBlobs() const { return 0; }
   virtual inline int MinTopBlobs() const { return 1; }
 
-protected:
-  virtual void load_batch(Batch<Dtype> *batch);
+ protected:
+  virtual void load_batch(Batch<Dtype>* batch);
 
   DataReader<AnnotatedDatum> reader_;
   bool has_anno_type_;
@@ -40,7 +40,7 @@ protected:
   float yolo_data_jitter_;
   bool train_diffcult_;
   int iters_;
-  int policy_num_;
+  int policy_num_ ;
   bool single_class_; //for yolo segementation
   YoloSegLabel label_map_;
   int seg_label_maxima_;

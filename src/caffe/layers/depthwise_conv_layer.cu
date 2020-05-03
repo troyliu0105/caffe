@@ -13,14 +13,24 @@ namespace caffe {
 
 template<typename Dtype>
 __global__ void ConvForward(const int nthreads,
-                            const Dtype *const bottom_data, const int num, const int channels,
-                            const int height, const int width, const int conved_height,
-                            const int conved_width, const int kernel_h, const int kernel_w,
-                            const int stride_h, const int stride_w, const int pad_h, const int pad_w,
-                            Dtype *const top_data, const Dtype *const weight, const Dtype *const bias,
+                            const Dtype *const bottom_data,
+                            const int num,
+                            const int channels,
+                            const int height,
+                            const int width,
+                            const int conved_height,
+                            const int conved_width,
+                            const int kernel_h,
+                            const int kernel_w,
+                            const int stride_h,
+                            const int stride_w,
+                            const int pad_h,
+                            const int pad_w,
+                            Dtype *const top_data,
+                            const Dtype *const weight,
+                            const Dtype *const bias,
                             const bool bias_term_) {
-  CUDA_KERNEL_LOOP(index, nthreads)
-  {
+  CUDA_KERNEL_LOOP(index, nthreads) {
 
     const int pw = index % conved_width;
     const int ph = (index / conved_width) % conved_height;
@@ -67,67 +77,47 @@ __global__ void ConvForward(const int nthreads,
 
 template<typename Dtype>
 void DepthwiseConvolutionLayer<Dtype>::Forward_gpu(
-    const vector<Blob < Dtype> *
-
->& bottom, const vector<Blob < Dtype>*>& top) {
+    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
 //	std::cout << "fp" << std::endl;
-const Dtype *weight = this->blobs_[0]->gpu_data();
-int *kernel_shape_data = this->kernel_shape_.mutable_cpu_data();
-int *stride_data = this->stride_.mutable_cpu_data();
-int *pad_data = this->pad_.mutable_cpu_data();
+  const Dtype *weight = this->blobs_[0]->gpu_data();
+  int *kernel_shape_data = this->kernel_shape_.mutable_cpu_data();
+  int *stride_data = this->stride_.mutable_cpu_data();
+  int *pad_data = this->pad_.mutable_cpu_data();
 
-for (
-int i = 0;
-i<bottom.
+  for (int i = 0; i < bottom.size(); ++i) {
+    const Dtype *bottom_data = bottom[i]->gpu_data();
+    Dtype *top_data = top[i]->mutable_gpu_data();
+    const int count = top[i]->count();
+    vector<int> shape_ = bottom[i]->shape();
+    const int channels_ = shape_[1];
+    const int height_ = shape_[2];
+    const int width_ = shape_[3];
 
-size();
+    const int kernel_h_ = kernel_shape_data[0];
+    const int kernel_w_ = kernel_shape_data[1];
+    const int stride_h_ = stride_data[0];
+    const int stride_w_ = stride_data[1];
+    const int pad_h_ = pad_data[0];
+    const int pad_w_ = pad_data[1];
 
-++i) {
-const Dtype *bottom_data = bottom[i]->gpu_data();
-Dtype *top_data = top[i]->mutable_gpu_data();
-const int count = top[i]->count();
-vector<int> shape_ = bottom[i]->shape();
-const int channels_ = shape_[1];
-const int height_ = shape_[2];
-const int width_ = shape_[3];
+    const int conved_height = this->output_shape_[0];
+    const int conved_weight = this->output_shape_[1];
 
-const int kernel_h_ = kernel_shape_data[0];
-const int kernel_w_ = kernel_shape_data[1];
-const int stride_h_ = stride_data[0];
-const int stride_w_ = stride_data[1];
-const int pad_h_ = pad_data[0];
-const int pad_w_ = pad_data[1];
+    const bool bias_term_ = this->bias_term_;
 
-const int conved_height = this->output_shape_[0];
-const int conved_weight = this->output_shape_[1];
-
-const bool bias_term_ = this->bias_term_;
-
-if (bias_term_) {
-const Dtype *const bias = this->blobs_[1]->gpu_data();
-ConvForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-    count, bottom_data, bottom[i]
-->
-
-num(), channels_,
-    height_, width_, conved_height, conved_weight, kernel_h_,
-    kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data, weight, bias, bias_term_
-
-);
-}
-else {
-ConvForward <Dtype><<<
-CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS
->>>(
-count, bottom_data, bottom[i]->
-
-num(), channels_,
-    height_, width_, conved_height, conved_weight, kernel_h_,
-    kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data, weight,
-
-0,bias_term_);
-}
-}
+    if (bias_term_) {
+      const Dtype *const bias = this->blobs_[1]->gpu_data();
+      ConvForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+          count, bottom_data, bottom[i]->num(), channels_,
+          height_, width_, conved_height, conved_weight, kernel_h_,
+          kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data, weight, bias, bias_term_);
+    } else {
+      ConvForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+          count, bottom_data, bottom[i]->num(), channels_,
+          height_, width_, conved_height, conved_weight, kernel_h_,
+          kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data, weight, 0, bias_term_);
+    }
+  }
 }
 
 template<typename Dtype>
@@ -140,8 +130,7 @@ __global__ void ConvBackward(const int nthreads,
                              Dtype *const bottom_diff,
                              const Dtype *const weight) {
 
-  CUDA_KERNEL_LOOP(index, nthreads)
-  {
+  CUDA_KERNEL_LOOP(index, nthreads) {
     const int w = index % width + pad_w;
     const int h = (index / width) % height + pad_h;
     const int c = (index / width / height) % channels;
@@ -212,8 +201,7 @@ __global__ void ConvBackwardWeight(const int nthreads,
                                    Dtype *const weight_diff,
                                    const Dtype *const bottom_data) {
 
-  CUDA_KERNEL_LOOP(index, nthreads)
-  {
+  CUDA_KERNEL_LOOP(index, nthreads) {
     const int kw = index % kernel_w;
     const int kh = (index / kernel_w) % kernel_h;
     const int c = index / kernel_w / kernel_h;
@@ -261,8 +249,7 @@ __global__ void ConvBackwardBias(const int nthreads,
                                  const int kernel_h, const int kernel_w, const int stride_h,
                                  const int stride_w, const int pad_h, const int pad_w,
                                  Dtype *const bias_diff) {
-  CUDA_KERNEL_LOOP(index, nthreads)
-  {
+  CUDA_KERNEL_LOOP(index, nthreads) {
     const int c = index;
     Dtype gradient = 0;
     for (int n = 0; n < num; n++) {
@@ -277,36 +264,32 @@ __global__ void ConvBackwardBias(const int nthreads,
     bias_diff[c] += gradient;
   }
 }
-
 template<typename Dtype>
 void DepthwiseConvolutionLayer<Dtype>::Backward_gpu(
-    const vector<Blob < Dtype> *
+    const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
+    const vector<Blob<Dtype> *> &bottom) {
 
->& top,
-const vector<bool> &propagate_down,
-const vector<Blob < Dtype>*>& bottom) {
+  int *kernel_shape_data = this->kernel_shape_.mutable_cpu_data();
+  int *stride_data = this->stride_.mutable_cpu_data();
+  int *pad_data = this->pad_.mutable_cpu_data();
 
-int *kernel_shape_data = this->kernel_shape_.mutable_cpu_data();
-int *stride_data = this->stride_.mutable_cpu_data();
-int *pad_data = this->pad_.mutable_cpu_data();
+  const Dtype *weight = this->blobs_[0]->gpu_data();
+  Dtype *weight_diff = this->blobs_[0]->mutable_gpu_diff();
 
-const Dtype *weight = this->blobs_[0]->gpu_data();
-Dtype *weight_diff = this->blobs_[0]->mutable_gpu_diff();
+  const bool bias_term_ = this->bias_term_;
+  Dtype *bias_diff = bias_term_ ? this->blobs_[1]->mutable_gpu_diff() : 0;
+  const bool bias_propagate_down_ = this->param_propagate_down_[1];
+  const bool weight_propagate_down_ = this->param_propagate_down_[0];
 
-const bool bias_term_ = this->bias_term_;
-Dtype *bias_diff = bias_term_ ? this->blobs_[1]->mutable_gpu_diff() : 0;
-const bool bias_propagate_down_ = this->param_propagate_down_[1];
-const bool weight_propagate_down_ = this->param_propagate_down_[0];
+  const int kernel_h_ = kernel_shape_data[0];
+  const int kernel_w_ = kernel_shape_data[1];
+  const int stride_h_ = stride_data[0];
+  const int stride_w_ = stride_data[1];
+  const int pad_h_ = pad_data[0];
+  const int pad_w_ = pad_data[1];
 
-const int kernel_h_ = kernel_shape_data[0];
-const int kernel_w_ = kernel_shape_data[1];
-const int stride_h_ = stride_data[0];
-const int stride_w_ = stride_data[1];
-const int pad_h_ = pad_data[0];
-const int pad_w_ = pad_data[1];
-
-const int conved_height = this->output_shape_[0];
-const int conved_weight = this->output_shape_[1];
+  const int conved_height = this->output_shape_[0];
+  const int conved_weight = this->output_shape_[1];
 
 //	CHECK_EQ(stride_h_, 1)
 //	        << "The backward of the net whose stride is bigger than 1 is not implemented now. ";
@@ -314,70 +297,47 @@ const int conved_weight = this->output_shape_[1];
 //	        << "The backward of the net whose stride is bigger than 1 is not implemented now. ";
 
 
-for (
-int i = 0;
-i<top.
+  for (int i = 0; i < top.size(); ++i) {
 
-size();
+    const Dtype *top_diff = top[i]->gpu_diff();
+    const Dtype *bottom_data = bottom[i]->gpu_data();
+    Dtype *bottom_diff = bottom[i]->mutable_gpu_diff();
 
-++i) {
+    vector<int> shape_ = bottom[i]->shape();
+    const int channels_ = shape_[1];
+    const int height_ = shape_[2];
+    const int width_ = shape_[3];
 
-const Dtype *top_diff = top[i]->gpu_diff();
-const Dtype *bottom_data = bottom[i]->gpu_data();
-Dtype *bottom_diff = bottom[i]->mutable_gpu_diff();
-
-vector<int> shape_ = bottom[i]->shape();
-const int channels_ = shape_[1];
-const int height_ = shape_[2];
-const int width_ = shape_[3];
-
-// Bias gradient, if necessary.
-if (
-bias_term_ &&bias_propagate_down_
-) {
-const int count_bias = channels_;
-ConvBackwardBias<Dtype><<<CAFFE_GET_BLOCKS(count_bias), CAFFE_CUDA_NUM_THREADS>>>(
-    count_bias, top_diff, bottom[i]
-->
-
-num(), channels_,
-    height_, width_, conved_height, conved_weight, kernel_h_,
-    kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
-    bias_diff
-
-);
-}
-// gradient w.r.t. weight. Note that we will accumulate diffs.
-if (weight_propagate_down_) {
-const int count_weight = channels_ * kernel_h_ * kernel_w_;
-ConvBackwardWeight<Dtype><<<CAFFE_GET_BLOCKS(count_weight), CAFFE_CUDA_NUM_THREADS>>>(
-    count_weight, top_diff, bottom[i]
-->
-
-num(), channels_,
-    height_, width_, conved_height, conved_weight, kernel_h_,
-    kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
-    weight_diff,
-    bottom_data
-
-);
-}
-// gradient w.r.t. bottom data, if necessary.
-if (propagate_down[i]) {
-const int count_bottom = bottom[i]->count();
-ConvBackward<Dtype><<<CAFFE_GET_BLOCKS(count_bottom), CAFFE_CUDA_NUM_THREADS>>>(
-    count_bottom, top_diff, bottom[i]
-->
-
-num(), channels_,
-    height_, width_, conved_height, conved_weight, kernel_h_,
-    kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
-    bottom_diff,
-    weight
-
-);
-}
-}
+    // Bias gradient, if necessary.
+    if (bias_term_ && bias_propagate_down_) {
+      const int count_bias = channels_;
+      ConvBackwardBias < Dtype ><<<CAFFE_GET_BLOCKS(count_bias), CAFFE_CUDA_NUM_THREADS >> > (
+          count_bias, top_diff, bottom[i]->num(), channels_,
+              height_, width_, conved_height, conved_weight, kernel_h_,
+              kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
+              bias_diff);
+    }
+    // gradient w.r.t. weight. Note that we will accumulate diffs.
+    if (weight_propagate_down_) {
+      const int count_weight = channels_ * kernel_h_ * kernel_w_;
+      ConvBackwardWeight<Dtype><<<CAFFE_GET_BLOCKS(count_weight), CAFFE_CUDA_NUM_THREADS>>>(
+          count_weight, top_diff, bottom[i]->num(), channels_,
+          height_, width_, conved_height, conved_weight, kernel_h_,
+          kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
+          weight_diff,
+          bottom_data);
+    }
+    // gradient w.r.t. bottom data, if necessary.
+    if (propagate_down[i]) {
+      const int count_bottom = bottom[i]->count();
+      ConvBackward<Dtype><<<CAFFE_GET_BLOCKS(count_bottom), CAFFE_CUDA_NUM_THREADS>>>(
+          count_bottom, top_diff, bottom[i]->num(), channels_,
+          height_, width_, conved_height, conved_weight, kernel_h_,
+          kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
+          bottom_diff,
+          weight);
+    }
+  }
 
 }
 

@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
   while (std::getline(infile, line)) {
     pos = line.find_last_of(' ');
     label = atoi(line.substr(pos + 1).c_str());
-    lines.push_back(std::make_pair(line.substr(0, pos), label));
+    lines.emplace_back(line.substr(0, pos), label);
   }
   if (FLAGS_shuffle) {
     // randomly shuffle data
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
   }
   LOG(INFO) << "A total of " << lines.size() << " images.";
 
-  if (encode_type.size() && !encoded)
+  if (!encode_type.empty() && !encoded)
     LOG(INFO) << "encode_type specified, assuming encoded=true.";
 
   int resize_height = std::max<int>(0, FLAGS_resize_height);
@@ -109,11 +109,11 @@ int main(int argc, char** argv) {
   for (int line_id = 0; line_id < lines.size(); ++line_id) {
     bool status;
     std::string enc = encode_type;
-    if (encoded && !enc.size()) {
+    if (encoded && enc.empty()) {
       // Guess the encoding type from the file name
       string fn = lines[line_id].first;
       size_t p = fn.rfind('.');
-      if ( p == fn.npos )
+      if ( p == std::string::npos )
         LOG(WARNING) << "Failed to guess the encoding of '" << fn << "'";
       enc = fn.substr(p);
       std::transform(enc.begin(), enc.end(), enc.begin(), ::tolower);
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
     status = ReadImageToDatum(root_folder + lines[line_id].first,
         lines[line_id].second, resize_height, resize_width, is_color,
         enc, &datum);
-    if (status == false) continue;
+    if (!status) continue;
     if (check_size) {
       if (!data_size_initialized) {
         data_size = datum.channels() * datum.height() * datum.width();

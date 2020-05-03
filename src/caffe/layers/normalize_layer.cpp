@@ -224,12 +224,10 @@ void NormalizeLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(NormalizeLayer);
 #endif
 
 INSTANTIATE_CLASS(NormalizeLayer);
-
 REGISTER_LAYER_CLASS(Normalize);
 
 }  // namespace caffe

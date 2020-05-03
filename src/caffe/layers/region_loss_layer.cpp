@@ -14,13 +14,10 @@
 #include <vector>
 #include "caffe/common.hpp"
 #include "caffe/util/bbox_util.hpp"
-
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #endif  // USE_OPENCV
 
 
@@ -55,7 +52,6 @@ Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
   float right = r1 < r2 ? r1 : r2;
   return right - left;
 }
-
 template<typename Dtype>
 Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float w = overlap(a[0], a[2], b[0], b[2]);
@@ -64,21 +60,27 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
-
 template<typename Dtype>
 Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-
 template<typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
 }
 
 template<typename Dtype>
-void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n, int index, int i, int j, int w, int h,
+void get_region_box(vector<Dtype> &b,
+                    Dtype *x,
+                    vector<Dtype> biases,
+                    int n,
+                    int index,
+                    int i,
+                    int j,
+                    int w,
+                    int h,
                     int stride) {
 
   b.clear();
@@ -87,11 +89,19 @@ void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n, int
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
-
 template<typename Dtype>
-Dtype
-delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases, int n, int index, int i, int j, int w, int h,
-                 Dtype *delta, float scale, int stride) {
+Dtype delta_region_box(vector<Dtype> truth,
+                       Dtype *x,
+                       vector<Dtype> biases,
+                       int n,
+                       int index,
+                       int i,
+                       int j,
+                       int w,
+                       int h,
+                       Dtype *delta,
+                       float scale,
+                       int stride) {
   vector<Dtype> pred;
   pred.clear();
   get_region_box(pred, x, biases, n, index, i, j, w, h, stride);
@@ -103,10 +113,10 @@ delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases, int n, int
   float tw = log(truth[2] * w / biases[2 * n]); //truth[2]=biases/w tw = 0
   float th = log(truth[3] * h / biases[2 * n + 1]); //th = 0
 
-  delta[index + 0 * stride] = (-1) * scale * (tx - sigmoid(x[index + 0 * stride])) * sigmoid(x[index + 0 * stride]) *
-      (1 - sigmoid(x[index + 0 * stride]));
-  delta[index + 1 * stride] = (-1) * scale * (ty - sigmoid(x[index + 1 * stride])) * sigmoid(x[index + 1 * stride]) *
-      (1 - sigmoid(x[index + 1 * stride]));
+  delta[index + 0 * stride] = (-1) * scale * (tx - sigmoid(x[index + 0 * stride])) * sigmoid(x[index + 0 * stride])
+      * (1 - sigmoid(x[index + 0 * stride]));
+  delta[index + 1 * stride] = (-1) * scale * (ty - sigmoid(x[index + 1 * stride])) * sigmoid(x[index + 1 * stride])
+      * (1 - sigmoid(x[index + 1 * stride]));
   //delta[index + 0] = (-1) * scale * (1 - (tx - x[index + 0])*(tx - x[index + 0]));
   //delta[index + 1] = (-1) * scale * (1 - (ty - x[index + 1])*(ty - x[index + 1]));
   delta[index + 2 * stride] = (-1) * scale * (tw - x[index + 2 * stride]);
@@ -116,8 +126,14 @@ delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases, int n, int
 }
 
 template<typename Dtype>
-void delta_region_class(Dtype *input_data, Dtype *&diff, int index, int class_label, int classes, float scale,
-                        Dtype *avg_cat, int stride) {
+void delta_region_class(Dtype *input_data,
+                        Dtype *&diff,
+                        int index,
+                        int class_label,
+                        int classes,
+                        float scale,
+                        Dtype *avg_cat,
+                        int stride) {
   for (int n = 0; n < classes; ++n) {
     diff[index + n * stride] = (-1.0) * scale * (((n == class_label) ? 1 : 0) - input_data[index + n * stride]);
     //std::cout<<diff[index+n]<<",";
@@ -189,7 +205,6 @@ void RegionLossLayer<Dtype>::LayerSetUp(
   //CHECK_EQ(input_count, tmp_input_count);
   //CHECK_EQ(label_count, tmp_label_count);
 }
-
 typedef struct {
   float x, y, w, h;
 } box;
@@ -276,8 +291,8 @@ void RegionLossLayer<Dtype>::Forward_cpu(
         }
         avg_anyobj += swap_data[index + 4 * stride];
         //diff[index + 4] = (-1) * noobject_scale_* (0 - swap_data[index + 4]);
-        diff[index + 4 * stride] = (-1) * noobject_scale_ * (0 - swap_data[index + 4 * stride]) *
-            logistic_gradient(swap_data[index + 4 * stride]);
+        diff[index + 4 * stride] = (-1) * noobject_scale_ * (0 - swap_data[index + 4 * stride])
+            * logistic_gradient(swap_data[index + 4 * stride]);
         if (best_iou > thresh_) {
           diff[index + 4 * stride] = 0;
         }
@@ -344,11 +359,31 @@ void RegionLossLayer<Dtype>::Forward_cpu(
       }
       float iou;
       if (rescore_) {
-        iou = delta_region_box(truth, swap_data, biases_, best_n, best_index, i, j, side_, side_, diff, coord_scale_,
+        iou = delta_region_box(truth,
+                               swap_data,
+                               biases_,
+                               best_n,
+                               best_index,
+                               i,
+                               j,
+                               side_,
+                               side_,
+                               diff,
+                               coord_scale_,
                                stride);
       } else {
-        iou = delta_region_box(truth, swap_data, biases_, best_n, best_index, i, j, side_, side_, diff,
-                               coord_scale_ * (2 - truth[2] * truth[3]), stride);
+        iou = delta_region_box(truth,
+                               swap_data,
+                               biases_,
+                               best_n,
+                               best_index,
+                               i,
+                               j,
+                               side_,
+                               side_,
+                               diff,
+                               coord_scale_ * (2 - truth[2] * truth[3]),
+                               stride);
       }
       if (iou > 0.5)
         recall += 1;
@@ -357,15 +392,21 @@ void RegionLossLayer<Dtype>::Forward_cpu(
       avg_iou += iou;
       avg_obj += swap_data[best_index + 4 * stride];
       if (rescore_) {
-        diff[best_index + 4 * stride] = (-1.0) * object_scale_ * (iou - swap_data[best_index + 4 * stride]) *
-            logistic_gradient(swap_data[best_index + 4 * stride]);
+        diff[best_index + 4 * stride] = (-1.0) * object_scale_ * (iou - swap_data[best_index + 4 * stride])
+            * logistic_gradient(swap_data[best_index + 4 * stride]);
       } else {
         //LOG(INFO)<<"test";
-        diff[best_index + 4 * stride] = (-1.0) * object_scale_ * (1 - swap_data[best_index + 4 * stride]) *
-            logistic_gradient(swap_data[best_index + 4 * stride]);
+        diff[best_index + 4 * stride] = (-1.0) * object_scale_ * (1 - swap_data[best_index + 4 * stride])
+            * logistic_gradient(swap_data[best_index + 4 * stride]);
       }
 
-      delta_region_class(swap_data, diff, best_index + 5 * stride, class_label, num_class_, class_scale_, &avg_cat,
+      delta_region_class(swap_data,
+                         diff,
+                         best_index + 5 * stride,
+                         class_label,
+                         num_class_,
+                         class_scale_,
+                         &avg_cat,
                          stride); //softmax_tree_
 
       ++count;
@@ -432,7 +473,6 @@ void RegionLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 #endif
 
 INSTANTIATE_CLASS(RegionLossLayer);
-
 REGISTER_LAYER_CLASS(RegionLoss);
 
 }  // namespace caffe

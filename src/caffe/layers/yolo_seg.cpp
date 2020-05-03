@@ -7,16 +7,12 @@
 */
 
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #if (!defined(CV_VERSION_EPOCH) && CV_VERSION_MAJOR >= 3)
-
 #include <opencv2/videoio.hpp>
 #include <opencv2/video.hpp>
-
 #endif
 #endif  // USE_OPENCV
 
@@ -28,7 +24,6 @@
 #include "caffe/layers/region_loss_layer.hpp"
 #include <iostream>
 #include <algorithm>
-
 namespace caffe {
 
 template<typename Dtype>
@@ -59,7 +54,6 @@ void YoloSegLayer<Dtype>::Reshape(
   diff_.ReshapeLike(*bottom[0]);
   swap_.ReshapeLike(*bottom[0]);
 }
-
 template<typename Dtype>
 void YoloSegLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   int w = bottom[0]->width();
@@ -87,7 +81,6 @@ void YoloSegLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom, con
   cv::imshow("show", img2);
   cv::waitKey(1);
 }
-
 template<typename Dtype>
 void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
@@ -97,8 +90,8 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const Dtype *label_data;
   Dtype loss(0.0);
 #ifdef CPU_ONLY
-  const Dtype *bottom_data = bottom[0]->cpu_data();
-  Dtype *top_data = top[0]->mutable_cpu_data();
+  const Dtype* bottom_data = bottom[0]->cpu_data();
+  Dtype* top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
   label_data = bottom[1]->cpu_data(); //[label,x,y,w,h]
   if (diff_.width() != bottom[0]->width()) {
@@ -107,7 +100,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
   diff = diff_.mutable_cpu_data();
   //caffe_set(diff_.count(), Dtype(0.0), diff);
-
+  
   for (int i = 0; i < count; ++i) {
     diff[i] = sigmoid(bottom_data[i]);
   }
@@ -214,8 +207,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   mIOU /= (float) classes_num;
 
   if (iter_ % 16 == 0) {
-    LOG(INFO) << "no_obj : " << no_obj_score_ / 16 << " , obj : " << obj_score_ / 16 << " , mIOU : "
-              << IOU_score_ / 16;
+    LOG(INFO) << "no_obj : " << no_obj_score_ / 16 << " , obj : " << obj_score_ / 16 << " , mIOU : " << IOU_score_ / 16;
     obj_score_ = 0;
     no_obj_score_ = 0;
     IOU_score_ = 0;
@@ -229,7 +221,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
   iter_++;
   top[0]->mutable_cpu_data()[0] = loss / bottom[0]->num();
-  //visualization(bottom,top);
+  //visualization(bottom,top);	
 }
 
 template<typename Dtype>
@@ -256,12 +248,10 @@ void YoloSegLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(YoloSegLayer);
 #endif
 
 INSTANTIATE_CLASS(YoloSegLayer);
-
 REGISTER_LAYER_CLASS(YoloSeg);
 
 }  // namespace caffe

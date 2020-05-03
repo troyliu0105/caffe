@@ -6,24 +6,15 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <fcntl.h>
-
-#if defined(_MSC_VER)
-#include <io.h>
-#endif
-
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
-
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/highgui/highgui_c.h>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #endif  // USE_OPENCV
-
 #include <stdint.h>
 
 #include <algorithm>
@@ -88,7 +79,6 @@ void WriteProtoToBinaryFile(const Message &proto, const char *filename) {
 }
 
 #ifdef USE_OPENCV
-
 cv::Mat ReadImageToCVMat(const string &filename,
                          const int height, const int width, const bool is_color,
                          const bool nearest_neighbour_interp) {
@@ -110,7 +100,6 @@ cv::Mat ReadImageToCVMat(const string &filename,
   }
   return cv_img;
 }
-
 cv::Mat ReadImageToCVMat(const string &filename, const int height,
                          const int width, const int min_dim, const int max_dim,
                          const bool is_color) {
@@ -213,7 +202,6 @@ bool ReadImageToDatum(const string &filename, const int label,
     return false;
   }
 }
-
 bool ReadImageToDatumSeg(const string &filename, const int label,
                          const int height, const int width, const int min_dim, const int max_dim,
                          const bool is_color, const std::string &encoding, Datum *datum) {
@@ -241,7 +229,6 @@ bool ReadImageToDatumSeg(const string &filename, const int label,
     return false;
   }
 }
-
 void GetImageSize(const string &filename, int *height, int *width) {
   cv::Mat cv_img = cv::imread(filename);
   if (!cv_img.data) {
@@ -251,13 +238,18 @@ void GetImageSize(const string &filename, int *height, int *width) {
   *height = cv_img.rows;
   *width = cv_img.cols;
 }
-
 bool ReadRichImageToAnnotatedDatumWithSeg(const string &filename,
-                                          const string &labelfile, const string &seg_filename, const int height,
+                                          const string &labelfile,
+                                          const string &seg_filename,
+                                          const int height,
                                           const int width,
-                                          const int min_dim, const int max_dim, const bool is_color,
-                                          const std::string &encoding, const AnnotatedDatum_AnnotationType type,
-                                          const string &labeltype, const std::map<string, int> &name_to_label,
+                                          const int min_dim,
+                                          const int max_dim,
+                                          const bool is_color,
+                                          const std::string &encoding,
+                                          const AnnotatedDatum_AnnotationType type,
+                                          const string &labeltype,
+                                          const std::map<string, int> &name_to_label,
                                           AnnotatedDatum *anno_datum) {
   // Read image to datum.
   bool status = ReadImageToDatum(filename, -1, height, width,
@@ -319,7 +311,6 @@ bool ReadRichImageToAnnotatedDatumWithSeg(const string &filename,
   }
 
 }
-
 bool ReadRichImageToAnnotatedDatum(const string &filename,
                                    const string &labelfile, const int height, const int width,
                                    const int min_dim, const int max_dim, const bool is_color,
@@ -389,7 +380,6 @@ bool ReadFileToDatum(const string &filename, const int label,
     return false;
   }
 }
-
 bool ReadFileToDatumSeg(const string &filename, const int label,
                         Datum *datum) {
   std::streampos size;
@@ -409,7 +399,6 @@ bool ReadFileToDatumSeg(const string &filename, const int label,
     return false;
   }
 }
-
 // Parse VOC/ILSVRC detection annotation.
 bool ReadXMLToAnnotatedDatum(const string &labelfile, const int img_height,
                              const int img_width, const std::map<string, int> &name_to_label,
@@ -512,7 +501,6 @@ bool ReadXMLToAnnotatedDatum(const string &labelfile, const int img_height,
         }
   return true;
 }
-
 // Parse tusimple lane detection annotation.
 bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
                               const int img_width, AnnotatedDatum *anno_datum) {
@@ -580,7 +568,6 @@ bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
 
   return true;
 }
-
 // Parse MSCOCO detection annotation.
 bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
                               const int img_width, const std::map<string, int> &name_to_label,
@@ -871,7 +858,6 @@ bool MapLabelToDisplayName(const LabelMap &map, const bool strict_check,
 }
 
 #ifdef USE_OPENCV
-
 cv::Mat DecodeDatumToCVMatNative(const Datum &datum) {
   cv::Mat cv_img;
   CHECK(datum.encoded()) << "Datum not encoded";
@@ -883,7 +869,6 @@ cv::Mat DecodeDatumToCVMatNative(const Datum &datum) {
   }
   return cv_img;
 }
-
 cv::Mat DecodeDatumToCVMat(const Datum &datum, bool is_color) {
   cv::Mat cv_img;
   CHECK(datum.encoded()) << "Datum not encoded";
@@ -897,7 +882,6 @@ cv::Mat DecodeDatumToCVMat(const Datum &datum, bool is_color) {
   }
   return cv_img;
 }
-
 cv::Mat DecodeDatumToCVMatSeg(const Datum &datum, bool is_color) {
   cv::Mat cv_img;
   CHECK(datum.encoded()) << "Datum not encoded";
@@ -911,7 +895,6 @@ cv::Mat DecodeDatumToCVMatSeg(const Datum &datum, bool is_color) {
   }
   return cv_img;
 }
-
 // If Datum is encoded will decoded using DecodeDatumToCVMat and CVMatToDatum
 // If Datum is not encoded will do nothing
 bool DecodeDatumNative(Datum *datum) {
@@ -923,7 +906,6 @@ bool DecodeDatumNative(Datum *datum) {
     return false;
   }
 }
-
 bool DecodeDatum(Datum *datum, bool is_color) {
   if (datum->encoded()) {
     cv::Mat cv_img = DecodeDatumToCVMat((*datum), is_color);
@@ -945,7 +927,6 @@ void EncodeCVMatToDatum(const cv::Mat &cv_img, const string &encoding,
   datum->set_width(cv_img.cols);
   datum->set_encoded(true);
 }
-
 void EncodeCVMatToDatumSeg(const cv::Mat &cv_img, const string &encoding,
                            Datum *datum) {
   std::vector<uchar> buf;
@@ -957,7 +938,6 @@ void EncodeCVMatToDatumSeg(const cv::Mat &cv_img, const string &encoding,
   //datum->set_width(cv_img.cols);
   //datum->set_encoded(true);
 }
-
 void CVMatToDatumSeg(const cv::Mat &cv_img, Datum *datum) {
 
   int datum_channels = datum->channels();
@@ -977,7 +957,6 @@ void CVMatToDatumSeg(const cv::Mat &cv_img, Datum *datum) {
   }
   datum->set_seg_label(buffer);
 }
-
 void CVMatToDatum(const cv::Mat &cv_img, Datum *datum) {
   CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
   datum->set_channels(cv_img.channels());
@@ -1003,6 +982,5 @@ void CVMatToDatum(const cv::Mat &cv_img, Datum *datum) {
   }
   datum->set_data(buffer);
 }
-
 #endif  // USE_OPENCV
 }  // namespace caffe

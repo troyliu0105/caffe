@@ -1,11 +1,5 @@
 #ifdef USE_LMDB
-
 #include "caffe/util/db_lmdb.hpp"
-
-#if defined(_MSC_VER)
-#include <direct.h>
-#define mkdir(X, Y) _mkdir(X)
-#endif
 
 #include <sys/stat.h>
 

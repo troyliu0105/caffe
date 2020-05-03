@@ -58,9 +58,7 @@ void ReorgLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top, const vec
   reorg_cpu(top_diff, width_, height_,
             channels_, batch_num_, stride_, !reverse_, bottom_diff);
 }
-
 #ifdef CPU_ONLY
-
 STUB_GPU(ReorgLayer);
 #endif
 INSTANTIATE_CLASS(ReorgLayer);

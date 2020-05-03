@@ -17,9 +17,9 @@ void AdaDeltaSolver<Dtype>::AdaDeltaPreSolve() {
 }
 
 #ifndef CPU_ONLY
-template <typename Dtype>
-void adadelta_update_gpu(int N, Dtype* g, Dtype* h, Dtype* h2, Dtype momentum,
-    Dtype delta, Dtype local_rate);
+template<typename Dtype>
+void adadelta_update_gpu(int N, Dtype *g, Dtype *h, Dtype *h2, Dtype momentum,
+                         Dtype delta, Dtype local_rate);
 #endif
 
 template<typename Dtype>
@@ -92,10 +92,10 @@ void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
   case Caffe::GPU: {
 #ifndef CPU_ONLY
     adadelta_update_gpu(net_params[param_id]->count(),
-        net_params[param_id]->mutable_gpu_diff(),
-        this->history_[param_id]->mutable_gpu_data(),
-        this->history_[update_history_offset + param_id]->mutable_gpu_data(),
-        momentum, delta, local_rate);
+                        net_params[param_id]->mutable_gpu_diff(),
+                        this->history_[param_id]->mutable_gpu_data(),
+                        this->history_[update_history_offset + param_id]->mutable_gpu_data(),
+                        momentum, delta, local_rate);
 #else
     NO_GPU;
 #endif
@@ -107,7 +107,6 @@ void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
 }
 
 INSTANTIATE_CLASS(AdaDeltaSolver);
-
 REGISTER_SOLVER_CLASS(AdaDelta);
 
 }  // namespace caffe

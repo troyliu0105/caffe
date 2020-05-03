@@ -20,41 +20,41 @@ namespace caffe {
  * subset of the database. Data is distributed to solvers in a round-robin
  * way to keep parallel training deterministic.
  */
-template<typename T>
+template <typename T>
 class DataReader {
-public:
-  explicit DataReader(const LayerParameter &param);
+ public:
+  explicit DataReader(const LayerParameter& param);
   ~DataReader();
 
-  inline BlockingQueue<T *> &free() const {
+  inline BlockingQueue<T*>& free() const {
     return queue_pair_->free_;
   }
-  inline BlockingQueue<T *> &full() const {
+  inline BlockingQueue<T*>& full() const {
     return queue_pair_->full_;
   }
 
-protected:
+ protected:
   // Queue pairs are shared between a body and its readers
   class QueuePair {
-  public:
+   public:
     explicit QueuePair(int size);
     ~QueuePair();
 
-    BlockingQueue<T *> free_;
-    BlockingQueue<T *> full_;
+    BlockingQueue<T*> free_;
+    BlockingQueue<T*> full_;
 
   DISABLE_COPY_AND_ASSIGN(QueuePair);
   };
 
   // A single body is created per source
   class Body : public InternalThread {
-  public:
-    explicit Body(const LayerParameter &param);
+   public:
+    explicit Body(const LayerParameter& param);
     virtual ~Body();
 
-  protected:
+   protected:
     void InternalThreadEntry();
-    void read_one(db::Cursor *cursor, QueuePair *qp);
+    void read_one(db::Cursor* cursor, QueuePair* qp);
 
     const LayerParameter param_;
     BlockingQueue<shared_ptr<QueuePair> > new_queue_pairs_;
@@ -66,7 +66,7 @@ protected:
 
   // A source is uniquely identified by its layer name + path, in case
   // the same database is read from two different locations in the net.
-  static inline string source_key(const LayerParameter &param) {
+  static inline string source_key(const LayerParameter& param) {
     return param.name() + ":" + param.data_param().source();
   }
 

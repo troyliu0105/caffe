@@ -1,13 +1,11 @@
 
 
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/video.hpp>
-
 #endif  // USE_OPENCV
 
 #include <cmath>
@@ -17,7 +15,6 @@
 #include "caffe/layers/region_loss_layer.hpp"
 #include <iostream>
 #include <algorithm>
-
 #define BOUND(a, min_val, max_val)           ( (a < min_val) ? min_val : (a >= max_val) ? (max_val) : a )
 #define M_PI 3.14159265358979323846/* pi */
 namespace caffe {
@@ -40,10 +37,9 @@ void AssistedExcitationLayer<Dtype>::Reshape(
   //out_shape.push_back(1);
   top[0]->Reshape(out_shape);
 }
-
 template<typename Dtype>
-void
-AssistedExcitationLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+void AssistedExcitationLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom,
+                                                   const vector<Blob<Dtype> *> &top) {
   int w = bottom[0]->width();
   int h = bottom[0]->height();
   //LOG(INFO)<<w<<","<<h;
@@ -73,7 +69,6 @@ AssistedExcitationLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &botto
   cv::imshow("show", img2);
   cv::waitKey(1);
 }
-
 template<typename Dtype>
 void AssistedExcitationLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                                  const vector<Blob<Dtype> *> &top) {
@@ -142,10 +137,10 @@ void AssistedExcitationLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bo
   //if (diff_.width() != bottom[0]->width()) {
   //  diff_.ReshapeLike(*bottom[0]);
   //  swap_.ReshapeLike(*bottom[0]);
-  //}
+  //} 
   //diff = diff_.mutable_cpu_data();
   //caffe_set(diff_.count(), Dtype(0.0), diff);
-  //visualization(bottom,top);
+  //visualization(bottom,top);	
 }
 
 template<typename Dtype>
@@ -162,12 +157,10 @@ void AssistedExcitationLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &t
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(AssistedExcitationLayer);
 #endif
 
 INSTANTIATE_CLASS(AssistedExcitationLayer);
-
 REGISTER_LAYER_CLASS(AssistedExcitation);
 
 }  // namespace caffe

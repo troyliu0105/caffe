@@ -31,7 +31,6 @@ __host__ __device__ Dtype BBoxSizeGPU(const Dtype *bbox,
 
 template __host__ __device__ float BBoxSizeGPU(const float *bbox,
                                                const bool normalized);
-
 template __host__ __device__ double BBoxSizeGPU(const double *bbox,
                                                 const bool normalized);
 
@@ -60,7 +59,6 @@ __host__ __device__ Dtype JaccardOverlapGPU(const Dtype *bbox1,
 
 template __host__ __device__ float JaccardOverlapGPU(const float *bbox1,
                                                      const float *bbox2);
-
 template __host__ __device__ double JaccardOverlapGPU(const double *bbox1,
                                                       const double *bbox2);
 
@@ -82,7 +80,6 @@ __device__ void ClipBBoxGPU(const Dtype *bbox, Dtype *clip_bbox) {
 }
 
 template __device__ void ClipBBoxGPU(const float *bbox, float *clip_bbox);
-
 template __device__ void ClipBBoxGPU(const double *bbox, double *clip_bbox);
 
 template<typename Dtype>
@@ -215,7 +212,6 @@ template void DecodeBBoxesGPU(const int nthreads,
                               const int num_priors, const bool share_location,
                               const int num_loc_classes, const int background_label_id,
                               const bool clip_bbox, float *bbox_data);
-
 template void DecodeBBoxesGPU(const int nthreads,
                               const double *loc_data, const double *prior_data,
                               const CodeType code_type, const bool variance_encoded_in_target,
@@ -252,7 +248,6 @@ void PermuteDataGPU(const int nthreads,
 template void PermuteDataGPU(const int nthreads,
                              const float *data, const int num_classes, const int num_data,
                              const int num_dim, float *new_data);
-
 template void PermuteDataGPU(const int nthreads,
                              const double *data, const int num_classes, const int num_data,
                              const int num_dim, double *new_data);
@@ -360,7 +355,6 @@ void SoftMaxGPU(const Dtype *data, const int outer_num,
 
 template void SoftMaxGPU(const float *data, const int outer_num,
                          const int channels, const int inner_num, float *prob);
-
 template void SoftMaxGPU(const double *data, const int outer_num,
                          const int channels, const int inner_num, double *prob);
 
@@ -403,7 +397,6 @@ void ComputeOverlappedGPU(const int nthreads,
 template void ComputeOverlappedGPU(const int nthreads,
                                    const float *bbox_data, const int num_bboxes, const int num_classes,
                                    const float overlap_threshold, bool *overlapped_data);
-
 template void ComputeOverlappedGPU(const int nthreads,
                                    const double *bbox_data, const int num_bboxes, const int num_classes,
                                    const double overlap_threshold, bool *overlapped_data);
@@ -445,7 +438,6 @@ void ComputeOverlappedByIdxGPU(const int nthreads,
 template void ComputeOverlappedByIdxGPU(const int nthreads,
                                         const float *bbox_data, const float overlap_threshold,
                                         const int *idx, const int num_idx, bool *overlapped_data);
-
 template void ComputeOverlappedByIdxGPU(const int nthreads,
                                         const double *bbox_data, const double overlap_threshold,
                                         const int *idx, const int num_idx, bool *overlapped_data);
@@ -500,7 +492,6 @@ template
 void ApplyNMSGPU(const float *bbox_data, const float *conf_data,
                  const int num_bboxes, const float confidence_threshold,
                  const int top_k, const float nms_threshold, vector<int> *indices);
-
 template
 void ApplyNMSGPU(const double *bbox_data, const double *conf_data,
                  const int num_bboxes, const float confidence_threshold,
@@ -552,7 +543,6 @@ void GetDetectionsGPU(const Dtype *bbox_data, const Dtype *conf_data,
 template void GetDetectionsGPU(const float *bbox_data, const float *conf_data,
                                const int image_id, const int label, const vector<int> &indices,
                                const bool clip_bbox, Blob<float> *detection_blob);
-
 template void GetDetectionsGPU(const double *bbox_data, const double *conf_data,
                                const int image_id, const int label, const vector<int> &indices,
                                const bool clip_bbox, Blob<double> *detection_blob);
@@ -595,7 +585,6 @@ void ComputeConfLossGPU(const Blob <Dtype> &conf_blob, const int num,
                         const int num_preds_per_class, const int num_classes,
                         const int background_label_id, const ConfLossType loss_type,
                         const vector <map<int, vector < int>>
-
 >& all_match_indices,
 const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
     vector<vector < float>
@@ -619,33 +608,25 @@ for (map<int, vector < int> >
 ::const_iterator it =
     match_indices.begin();
 it != match_indices.
-
 end();
-
 ++it) {
 const vector<int> &match_index = it->second;
 CHECK_EQ(match_index
 .
-
 size(), num_preds_per_class
-
 );
 if (match_index[p] > -1) {
 CHECK(all_gt_bboxes
 .
 find(i)
 != all_gt_bboxes.
-
 end()
-
 );
 const vector <NormalizedBBox> &gt_bboxes =
     all_gt_bboxes.find(i)->second;
 CHECK_LT(match_index[p], gt_bboxes
 .
-
 size()
-
 );
 label = gt_bboxes[match_index[p]].label();
 CHECK_GE(label,
@@ -673,9 +654,7 @@ if (loss_type == MultiBoxLossParameter_ConfLossType_SOFTMAX) {
 Dtype *prob_gpu_data = prob_blob.mutable_gpu_data();
 SoftMaxGPU(conf_blob
 .
-
 gpu_data(), num
-
 * num_preds_per_class, num_classes, 1,
 prob_gpu_data);
 conf_gpu_data = prob_blob.gpu_data();
@@ -690,15 +669,11 @@ CAFFE_GET_BLOCKS(num_threads),
     CAFFE_CUDA_NUM_THREADS
 >>>(num_threads, conf_gpu_data, num_preds_per_class,
 num_classes, loss_type, match_blob.
-
 gpu_data(), conf_loss_gpu_data
-
 );
 // Save the loss.
 all_conf_loss->
-
 clear();
-
 const Dtype *loss_data = conf_loss_blob.cpu_data();
 for (
 int i = 0;
@@ -717,17 +692,14 @@ template void ComputeConfLossGPU(const Blob<float> &conf_data, const int num,
                                  const int num_preds_per_class, const int num_classes,
                                  const int background_label_id, const ConfLossType loss_type,
                                  const vector <map<int, vector < int>>
-
 >& all_match_indices,
 const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
     vector<vector < float>
 >* all_conf_loss);
-
 template void ComputeConfLossGPU(const Blob<double> &conf_data, const int num,
                                  const int num_preds_per_class, const int num_classes,
                                  const int background_label_id, const ConfLossType loss_type,
                                  const vector <map<int, vector < int>>
-
 >& all_match_indices,
 const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
     vector<vector < float>

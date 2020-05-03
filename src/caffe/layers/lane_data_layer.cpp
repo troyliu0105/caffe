@@ -1,11 +1,8 @@
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #endif  // USE_OPENCV
-
 #include <stdint.h>
 
 #include <algorithm>
@@ -18,8 +15,7 @@
 #include "caffe/util/sampler.hpp"
 #include "caffe/util/im_transforms.hpp"
 #include "caffe/util/bbox_util.hpp"
-
-//#define draw
+//#define draw 
 const float prob_eps = 0.01;
 namespace caffe {
 
@@ -171,7 +167,7 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   vector<int> label_shape(4, 1);
   if (this->output_labels_) {
     label_shape[0] = batch_size;
-    label_shape[1] = 5; // maxima lane
+    label_shape[1] = 5; // maxima lane 
     label_shape[2] = 64; // maxima node
     label_shape[3] = 3; // coor. x and y
     batch->label_.Reshape(label_shape);
@@ -212,8 +208,8 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       if (batch_samplers_.size() > 0) {
         GenerateBatchSamples(*expand_datum, batch_samplers_, &sampled_bboxes);
       } else {
-        bool keep = transform_param.resize_param(policy_num_).resize_mode() ==
-            ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD;
+        bool keep = transform_param.resize_param(policy_num_).resize_mode()
+            == ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD;
         GenerateJitterSamples(yolo_data_jitter_, &sampled_bboxes, keep);
       }
       if (sampled_bboxes.size() > 0) {
@@ -323,7 +319,10 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
             int iy = y * cv_lab.rows;
             int ipx = px * cv_lab.cols;
             int ipy = py * cv_lab.rows;
-            cv::line(cv_lab, cv::Point(ix, iy), cv::Point(ipx, ipy), cv::Scalar(255, 255, 255),
+            cv::line(cv_lab,
+                     cv::Point(ix, iy),
+                     cv::Point(ipx, ipy),
+                     cv::Scalar(255, 255, 255),
                      1); //test draw
 #ifdef draw
             cv::line(cv_img,cv::Point(ix,iy),cv::Point(ipx,ipy),cv::Scalar(128,255,128),2); //test draw
@@ -372,7 +371,6 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
 }
 
 INSTANTIATE_CLASS(LaneDataLayer);
-
 REGISTER_LAYER_CLASS(LaneData);
 
 }  // namespace caffe

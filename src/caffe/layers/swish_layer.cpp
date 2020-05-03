@@ -59,12 +59,10 @@ void SwishLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(SwishLayer);
 #endif
 
 INSTANTIATE_CLASS(SwishLayer);
-
 REGISTER_LAYER_CLASS(Swish);
 
 }  // namespace caffe

@@ -73,7 +73,6 @@ void HingeLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 INSTANTIATE_CLASS(HingeLossLayer);
-
 REGISTER_LAYER_CLASS(HingeLoss);
 
 }  // namespace caffe

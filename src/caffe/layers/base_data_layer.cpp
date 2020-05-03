@@ -74,9 +74,9 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
       prefetch_[i]->data_.mutable_gpu_data();
       if (this->output_labels_) {
         prefetch_[i]->label_.mutable_gpu_data();
-    if (this->output_seg_labels_) {
-      prefetch_[i]->seg_label_.mutable_gpu_data();
-    }
+        if (this->output_seg_labels_) {
+          prefetch_[i]->seg_label_.mutable_gpu_data();
+        }
       }
     }
   }
@@ -105,9 +105,9 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
         batch->data_.data().get()->async_gpu_push(stream);
         if (this->output_labels_) {
           batch->label_.data().get()->async_gpu_push(stream);
-      if (this->output_seg_labels_) {
-        batch->seg_label_.data().get()->async_gpu_push(stream);
-      }
+          if (this->output_seg_labels_) {
+            batch->seg_label_.data().get()->async_gpu_push(stream);
+          }
         }
         CUDA_CHECK(cudaStreamSynchronize(stream));
       }
@@ -146,12 +146,10 @@ void BasePrefetchingDataLayer<Dtype>::Forward_cpu(
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU_FORWARD(BasePrefetchingDataLayer, Forward);
 #endif
 
 INSTANTIATE_CLASS(BaseDataLayer);
-
 INSTANTIATE_CLASS(BasePrefetchingDataLayer);
 
 }  // namespace caffe

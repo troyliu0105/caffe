@@ -41,26 +41,26 @@ namespace caffe {
  *              \right]
  *      @f$
  */
-template<typename Dtype>
+template <typename Dtype>
 class SigmoidCrossEntropyLossLayer : public LossLayer<Dtype> {
-public:
-  explicit SigmoidCrossEntropyLossLayer(const LayerParameter &param)
+ public:
+  explicit SigmoidCrossEntropyLossLayer(const LayerParameter& param)
       : LossLayer<Dtype>(param),
-        sigmoid_layer_(new SigmoidLayer<Dtype>(param)),
-        sigmoid_output_(new Blob<Dtype>()) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
-                          const vector<Blob<Dtype> *> &top);
-  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
-                       const vector<Blob<Dtype> *> &top);
+          sigmoid_layer_(new SigmoidLayer<Dtype>(param)),
+          sigmoid_output_(new Blob<Dtype>()) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
-  virtual inline const char *type() const { return "SigmoidCrossEntropyLoss"; }
+  virtual inline const char* type() const { return "SigmoidCrossEntropyLoss"; }
 
-protected:
+ protected:
   /// @copydoc SigmoidCrossEntropyLossLayer
-  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
-  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
   /**
    * @brief Computes the sigmoid cross-entropy loss error gradient w.r.t. the
@@ -92,10 +92,10 @@ protected:
    *   -# @f$ (N \times 1 \times 1 \times 1) @f$
    *      the labels -- ignored as we can't compute their error gradients
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
   /// Read the normalization mode parameter and compute the normalizer based
   /// on the blob size.  If normalization_mode is VALID, the count of valid
@@ -109,9 +109,9 @@ protected:
   /// sigmoid_output stores the output of the SigmoidLayer.
   shared_ptr<Blob<Dtype> > sigmoid_output_;
   /// bottom vector holder to call the underlying SigmoidLayer::Forward
-  vector<Blob<Dtype> *> sigmoid_bottom_vec_;
+  vector<Blob<Dtype>*> sigmoid_bottom_vec_;
   /// top vector holder to call the underlying SigmoidLayer::Forward
-  vector<Blob<Dtype> *> sigmoid_top_vec_;
+  vector<Blob<Dtype>*> sigmoid_top_vec_;
 
   /// Whether to ignore instances with a certain label.
   bool has_ignore_label_;

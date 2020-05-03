@@ -24,7 +24,6 @@ Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
   float right = r1 < r2 ? r1 : r2;
   return right - left;
 }
-
 template<typename Dtype>
 Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float w = overlap(a[0], a[2], b[0], b[2]);
@@ -33,19 +32,16 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
-
 template<typename Dtype>
 Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-
 template<typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
 }
-
 template<typename Dtype>
 void setNormalizedBBox(NormalizedBBox &bbox, Dtype x, Dtype y, Dtype w, Dtype h) {
   Dtype xmin = x - w / 2.0;
@@ -72,7 +68,6 @@ void setNormalizedBBox(NormalizedBBox &bbox, Dtype x, Dtype y, Dtype w, Dtype h)
   float bbox_size = BBoxSize(bbox, true);
   bbox.set_size(bbox_size);
 }
-
 template<typename Dtype>
 void ApplyNms(vector<PredictionResult<Dtype> > &boxes, vector<int> &idxes, Dtype threshold) {
   map<int, int> idx_map;
@@ -106,7 +101,7 @@ void ApplyNms(vector<PredictionResult<Dtype> > &boxes, vector<int> &idxes, Dtype
       float overlap = JaccardOverlap(Bbox1, Bbox2, true);
 
       if (overlap >= threshold) {
-        idx_map[j] = 1;
+          idx_map[j] = 1;
       }*/
     }
   }
@@ -116,7 +111,6 @@ void ApplyNms(vector<PredictionResult<Dtype> > &boxes, vector<int> &idxes, Dtype
     }
   }
 }
-
 template<typename Dtype>
 void class_index_and_score(Dtype *input, int classes, PredictionResult<Dtype> &predict) {
   Dtype sum = 0;
@@ -147,16 +141,21 @@ void class_index_and_score(Dtype *input, int classes, PredictionResult<Dtype> &p
   predict.classType = classIndex;
   predict.classScore = large;
 }
-
 template<typename Dtype>
-void get_region_box(Dtype *x, PredictionResult<Dtype> &predict, vector<Dtype> biases, int n, int index, int i, int j,
-                    int w, int h) {
+void get_region_box(Dtype *x,
+                    PredictionResult<Dtype> &predict,
+                    vector<Dtype> biases,
+                    int n,
+                    int index,
+                    int i,
+                    int j,
+                    int w,
+                    int h) {
   predict.x = (i + sigmoid(x[index + 0])) / w;
   predict.y = (j + sigmoid(x[index + 1])) / h;
   predict.w = exp(x[index + 2]) * biases[2 * n] / w;
   predict.h = exp(x[index + 3]) * biases[2 * n + 1] / h;
 }
-
 template<typename Dtype>
 void YoloDetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                                  const vector<Blob<Dtype> *> &top) {
@@ -183,9 +182,9 @@ void YoloDetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bo
     } else {
       LabelMap label_map;
       CHECK(ReadProtoFromTextFile(label_map_file, &label_map))
-              << "Failed to read label map file: " << label_map_file;
+      << "Failed to read label map file: " << label_map_file;
       CHECK(MapLabelToName(label_map, true, &label_to_name_))
-              << "Failed to convert label to name.";
+      << "Failed to convert label to name.";
     }
   }
 }
@@ -205,20 +204,17 @@ void YoloDetectionOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &botto
   top_shape.push_back(7);
   top[0]->Reshape(top_shape);
 }
-
 template<typename Dtype>
 bool BoxSortDecendScore(const PredictionResult<Dtype> &box1, const PredictionResult<Dtype> &box2) {
   return box1.confidence > box2.confidence;
 }
-
 template<typename Dtype>
 void YoloDetectionOutputLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const int num = bottom[0]->num();
   side_ = bottom[0]->width();
   Blob<Dtype> swap;
-  swap.Reshape(bottom[0]->num(), bottom[0]->height() * bottom[0]->width(), num_box_,
-               bottom[0]->channels() / num_box_);
+  swap.Reshape(bottom[0]->num(), bottom[0]->height() * bottom[0]->width(), num_box_, bottom[0]->channels() / num_box_);
   //std::cout<<"4"<<std::endl;
   Dtype *swap_data = swap.mutable_cpu_data();
   int index = 0;
@@ -244,8 +240,8 @@ void YoloDetectionOutputLayer<Dtype>::Forward_cpu(
       for (int i = 0; i < side_; ++i) {
         for (int n = 0; n < num_box_; ++n) {
           int index =
-              b * swap.channels() * swap.height() * swap.width() + (j * side_ + i) * swap.height() * swap.width() +
-                  n * swap.width();
+              b * swap.channels() * swap.height() * swap.width() + (j * side_ + i) * swap.height() * swap.width()
+                  + n * swap.width();
           CHECK_EQ(swap_data[index], swap.data_at(b, j * side_ + i, n, 0));
           get_region_box(swap_data, predict, biases_, n, index, i, j, side_, side_);
           predict.objScore = sigmoid(swap_data[index + 4]);
@@ -263,7 +259,9 @@ void YoloDetectionOutputLayer<Dtype>::Forward_cpu(
     const int num = bottom[1]->num();
     side_ = bottom[1]->width();
     Blob<Dtype> swap2;
-    swap2.Reshape(bottom[1]->num(), bottom[1]->height() * bottom[1]->width(), num_box_,
+    swap2.Reshape(bottom[1]->num(),
+                  bottom[1]->height() * bottom[1]->width(),
+                  num_box_,
                   bottom[1]->channels() / num_box_);
     //std::cout<<"4"<<std::endl;
     Dtype *swap_data = swap2.mutable_cpu_data();
@@ -283,8 +281,9 @@ void YoloDetectionOutputLayer<Dtype>::Forward_cpu(
       for (int j = 0; j < side_; ++j) {
         for (int i = 0; i < side_; ++i) {
           for (int n = 0; n < num_box_; ++n) {
-            int index = b * swap2.channels() * swap2.height() * swap2.width() +
-                (j * side_ + i) * swap2.height() * swap2.width() + n * swap2.width();
+            int index =
+                b * swap2.channels() * swap2.height() * swap2.width() + (j * side_ + i) * swap2.height() * swap2.width()
+                    + n * swap2.width();
             CHECK_EQ(swap_data[index], swap2.data_at(b, j * side_ + i, n, 0));
             get_region_box(swap_data, predict, biases_, n, index, i, j, side_, side_);
             predict.objScore = sigmoid(swap_data[index + 4]);
@@ -353,7 +352,6 @@ void YoloDetectionOutputLayer<Dtype>::Forward_cpu(
 #endif
 
 INSTANTIATE_CLASS(YoloDetectionOutputLayer);
-
 REGISTER_LAYER_CLASS(YoloDetectionOutput);
 
 }  // namespace caffe

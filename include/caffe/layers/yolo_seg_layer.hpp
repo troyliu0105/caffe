@@ -18,32 +18,33 @@
 
 namespace caffe {
 
-template<typename Dtype>
+
+template <typename Dtype>
 class YoloSegLayer : public LossLayer<Dtype> {
-public:
-  explicit YoloSegLayer(const LayerParameter &param)
+ public:
+  explicit YoloSegLayer(const LayerParameter& param)
       : LossLayer<Dtype>(param), diff_() {}
-  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
-                          const vector<Blob<Dtype> *> &top);
-  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
-                       const vector<Blob<Dtype> *> &top);
-  virtual inline const char *type() const { return "YoloSeg"; }
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual inline const char* type() const { return "YoloSeg"; }
   virtual inline int ExactNumBottomBlobs() const { return 3; }
-protected:
+ protected:
+ 
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
-  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
-  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
-  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  void visualization(const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
 
-  void visualization(const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top);
-
-protected:
+ protected:
   Blob<Dtype> diff_;  // cached for backward pass
   Blob<Dtype> swap_;  // cached for backward pass
   bool enable_weighting_;

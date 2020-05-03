@@ -5,7 +5,6 @@
 #include "caffe/util/math_functions.hpp"
 #include <iostream>
 #include <algorithm>
-
 namespace caffe {
 
 template<typename Dtype>

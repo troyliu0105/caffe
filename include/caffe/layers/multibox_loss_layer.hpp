@@ -22,17 +22,17 @@ namespace caffe {
  *  - use matched boxes and confidences to compute loss.
  *
  */
-template<typename Dtype>
+template <typename Dtype>
 class MultiBoxLossLayer : public LossLayer<Dtype> {
-public:
-  explicit MultiBoxLossLayer(const LayerParameter &param)
+ public:
+  explicit MultiBoxLossLayer(const LayerParameter& param)
       : LossLayer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
-                          const vector<Blob<Dtype> *> &top);
-  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
-                       const vector<Blob<Dtype> *> &top);
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
-  virtual inline const char *type() const { return "MultiBoxLoss"; }
+  virtual inline const char* type() const { return "MultiBoxLoss"; }
   // bottom[0] stores the location predictions.
   // bottom[1] stores the confidence predictions.
   // bottom[2] stores the prior bounding boxes.
@@ -40,20 +40,20 @@ public:
   virtual inline int ExactNumBottomBlobs() const { return 4; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
-protected:
-  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
-  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+ protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
   // The internal localization loss layer.
   shared_ptr<Layer<Dtype> > loc_loss_layer_;
   LocLossType loc_loss_type_;
   float loc_weight_;
   // bottom vector holder used in Forward function.
-  vector<Blob<Dtype> *> loc_bottom_vec_;
+  vector<Blob<Dtype>*> loc_bottom_vec_;
   // top vector holder used in Forward function.
-  vector<Blob<Dtype> *> loc_top_vec_;
+  vector<Blob<Dtype>*> loc_top_vec_;
   // blob which stores the matched location prediction.
   Blob<Dtype> loc_pred_;
   // blob which stores the corresponding matched ground truth.
@@ -65,9 +65,9 @@ protected:
   shared_ptr<Layer<Dtype> > conf_loss_layer_;
   ConfLossType conf_loss_type_;
   // bottom vector holder used in Forward function.
-  vector<Blob<Dtype> *> conf_bottom_vec_;
+  vector<Blob<Dtype>*> conf_bottom_vec_;
   // top vector holder used in Forward function.
-  vector<Blob<Dtype> *> conf_top_vec_;
+  vector<Blob<Dtype>*> conf_top_vec_;
   // blob which stores the confidence prediction.
   Blob<Dtype> conf_pred_;
   // blob which stores the corresponding ground truth label.

@@ -86,7 +86,6 @@ void SoftmaxLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(SoftmaxLayer);
 #endif
 

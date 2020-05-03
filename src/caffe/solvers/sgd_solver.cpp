@@ -150,7 +150,7 @@ void SGDSolver<Dtype>::Normalize(int param_id) {
   case Caffe::GPU: {
 #ifndef CPU_ONLY
     caffe_gpu_scal(net_params[param_id]->count(), accum_normalization,
-        net_params[param_id]->mutable_gpu_diff());
+                   net_params[param_id]->mutable_gpu_diff());
 #else
     NO_GPU;
 #endif
@@ -198,17 +198,17 @@ void SGDSolver<Dtype>::Regularize(int param_id) {
       if (regularization_type == "L2") {
         // add weight decay
         caffe_gpu_axpy(net_params[param_id]->count(),
-            local_decay,
-            net_params[param_id]->gpu_data(),
-            net_params[param_id]->mutable_gpu_diff());
+                       local_decay,
+                       net_params[param_id]->gpu_data(),
+                       net_params[param_id]->mutable_gpu_diff());
       } else if (regularization_type == "L1") {
         caffe_gpu_sign(net_params[param_id]->count(),
-            net_params[param_id]->gpu_data(),
-            temp_[param_id]->mutable_gpu_data());
+                       net_params[param_id]->gpu_data(),
+                       temp_[param_id]->mutable_gpu_data());
         caffe_gpu_axpy(net_params[param_id]->count(),
-            local_decay,
-            temp_[param_id]->gpu_data(),
-            net_params[param_id]->mutable_gpu_diff());
+                       local_decay,
+                       temp_[param_id]->gpu_data(),
+                       net_params[param_id]->mutable_gpu_diff());
       } else {
         LOG(FATAL) << "Unknown regularization type: " << regularization_type;
       }
@@ -224,9 +224,9 @@ void SGDSolver<Dtype>::Regularize(int param_id) {
 }
 
 #ifndef CPU_ONLY
-template <typename Dtype>
-void sgd_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
-    Dtype local_rate);
+template<typename Dtype>
+void sgd_update_gpu(int N, Dtype *g, Dtype *h, Dtype momentum,
+                    Dtype local_rate);
 #endif
 
 template<typename Dtype>
@@ -249,9 +249,9 @@ void SGDSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
   case Caffe::GPU: {
 #ifndef CPU_ONLY
     sgd_update_gpu(net_params[param_id]->count(),
-        net_params[param_id]->mutable_gpu_diff(),
-        history_[param_id]->mutable_gpu_data(),
-        momentum, local_rate);
+                   net_params[param_id]->mutable_gpu_diff(),
+                   history_[param_id]->mutable_gpu_data(),
+                   momentum, local_rate);
 #else
     NO_GPU;
 #endif
@@ -367,7 +367,6 @@ void SGDSolver<Dtype>::RestoreSolverStateFromHDF5(const string &state_file) {
 }
 
 INSTANTIATE_CLASS(SGDSolver);
-
 REGISTER_SOLVER_CLASS(SGD);
 
 }  // namespace caffe

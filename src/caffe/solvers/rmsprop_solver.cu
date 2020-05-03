@@ -12,7 +12,6 @@ __global__ void RMSPropUpdate(int N, Dtype *g, Dtype *h,
     g[i] = local_rate * g[i] / (sqrt(hi) + delta);
   }
 }
-
 template<typename Dtype>
 void rmsprop_update_gpu(int N, Dtype *g, Dtype *h, Dtype rms_decay,
                         Dtype delta, Dtype local_rate) {
@@ -21,10 +20,8 @@ void rmsprop_update_gpu(int N, Dtype *g, Dtype *h, Dtype rms_decay,
       N, g, h, rms_decay, delta, local_rate);
   CUDA_POST_KERNEL_CHECK;
 }
-
 template void rmsprop_update_gpu<float>(int, float *, float *, float, float,
                                         float);
-
 template void rmsprop_update_gpu<double>(int, double *, double *, double, double,
                                          double);
 

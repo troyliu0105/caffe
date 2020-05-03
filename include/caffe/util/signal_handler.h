@@ -7,13 +7,13 @@
 namespace caffe {
 
 class SignalHandler {
-public:
+ public:
   // Contructor. Specify what action to take when a signal is received.
   SignalHandler(SolverAction::Enum SIGINT_action,
                 SolverAction::Enum SIGHUP_action);
   ~SignalHandler();
   ActionCallback GetActionFunction();
-private:
+ private:
   SolverAction::Enum CheckForSignals() const;
   SolverAction::Enum SIGINT_action_;
   SolverAction::Enum SIGHUP_action_;

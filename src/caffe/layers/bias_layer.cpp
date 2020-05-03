@@ -112,12 +112,10 @@ void BiasLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(BiasLayer);
 #endif
 
 INSTANTIATE_CLASS(BiasLayer);
-
 REGISTER_LAYER_CLASS(Bias);
 
 }  // namespace caffe

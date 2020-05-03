@@ -13,8 +13,8 @@ void DummyDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   const int num_data_filler = param.data_filler_size();
   CHECK(num_data_filler == 0 || num_data_filler == 1 ||
       num_data_filler == num_top)
-          << "Number of data fillers must be 0, 1 or equal to the number of tops: "
-          << num_top << "; you specified " << num_data_filler << " data fillers.";
+  << "Number of data fillers must be 0, 1 or equal to the number of tops: "
+  << num_top << "; you specified " << num_data_filler << " data fillers.";
 
   const bool legacy_dims = param.num_size() || param.channels_size() ||
       param.height_size() || param.width_size();
@@ -23,21 +23,21 @@ void DummyDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
       << "Both shape and legacy fields were specified";
     // Using deprecated 4D output dim specifiers.
     CHECK(param.num_size() == 1 || param.num_size() == num_top)
-            << "Must specify 'num' once, or once per top blob "
-            << "(" << num_top << "); specified " << param.num_size() << ".";
+    << "Must specify 'num' once, or once per top blob "
+    << "(" << num_top << "); specified " << param.num_size() << ".";
     CHECK(param.channels_size() == 1 || param.channels_size() == num_top)
-            << "Must specify 'channels' once, or once per top blob "
-            << "(" << num_top << "); specified " << param.channels_size() << ".";
+    << "Must specify 'channels' once, or once per top blob "
+    << "(" << num_top << "); specified " << param.channels_size() << ".";
     CHECK(param.height_size() == 1 || param.height_size() == num_top)
-            << "Must specify 'height' once, or once per top blob "
-            << "(" << num_top << "); specified " << param.height_size() << ".";
+    << "Must specify 'height' once, or once per top blob "
+    << "(" << num_top << "); specified " << param.height_size() << ".";
     CHECK(param.width_size() == 1 || param.width_size() == num_top)
-            << "Must specify 'width' once, or once per top blob "
-            << "(" << num_top << "); specified " << param.width_size() << ".";
+    << "Must specify 'width' once, or once per top blob "
+    << "(" << num_top << "); specified " << param.width_size() << ".";
   } else {
     CHECK(param.shape_size() == 1 || param.shape_size() == num_top)
-            << "Must specify 'shape' once, or once per top blob "
-            << "(" << num_top << "); specified " << param.shape_size() << ".";
+    << "Must specify 'shape' once, or once per top blob "
+    << "(" << num_top << "); specified " << param.shape_size() << ".";
   }
   // refill_[i] tells Forward i whether or not to actually refill top Blob i.
   // If refill_[i] is false, Forward does nothing for Blob i. We use this to
@@ -109,7 +109,6 @@ void DummyDataLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 }
 
 INSTANTIATE_CLASS(DummyDataLayer);
-
 REGISTER_LAYER_CLASS(DummyData);
 
 }  // namespace caffe

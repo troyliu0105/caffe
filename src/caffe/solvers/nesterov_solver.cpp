@@ -5,9 +5,9 @@
 namespace caffe {
 
 #ifndef CPU_ONLY
-template <typename Dtype>
-void nesterov_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
-    Dtype local_rate);
+template<typename Dtype>
+void nesterov_update_gpu(int N, Dtype *g, Dtype *h, Dtype momentum,
+                         Dtype local_rate);
 #endif
 
 template<typename Dtype>
@@ -42,9 +42,9 @@ void NesterovSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
   case Caffe::GPU: {
 #ifndef CPU_ONLY
     nesterov_update_gpu(net_params[param_id]->count(),
-        net_params[param_id]->mutable_gpu_diff(),
-        this->history_[param_id]->mutable_gpu_data(),
-        momentum, local_rate);
+                        net_params[param_id]->mutable_gpu_diff(),
+                        this->history_[param_id]->mutable_gpu_data(),
+                        momentum, local_rate);
 #else
     NO_GPU;
 #endif
@@ -56,7 +56,6 @@ void NesterovSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
 }
 
 INSTANTIATE_CLASS(NesterovSolver);
-
 REGISTER_SOLVER_CLASS(Nesterov);
 
 }  // namespace caffe

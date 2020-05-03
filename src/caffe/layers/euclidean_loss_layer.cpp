@@ -30,8 +30,7 @@ void EuclideanLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
 template<typename Dtype>
 void EuclideanLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                             const vector<bool> &propagate_down,
-                                             const vector<Blob<Dtype> *> &bottom) {
+                                             const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
   for (int i = 0; i < 2; ++i) {
     if (propagate_down[i]) {
       const Dtype sign = (i == 0) ? 1 : -1;
@@ -47,12 +46,10 @@ void EuclideanLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(EuclideanLossLayer);
 #endif
 
 INSTANTIATE_CLASS(EuclideanLossLayer);
-
 REGISTER_LAYER_CLASS(EuclideanLoss);
 
 }  // namespace caffe

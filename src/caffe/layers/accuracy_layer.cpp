@@ -98,12 +98,10 @@ void AccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(AccuracyLayer);
 #endif
 
 INSTANTIATE_CLASS(AccuracyLayer);
-
 REGISTER_LAYER_CLASS(Accuracy);
 
 }  // namespace caffe

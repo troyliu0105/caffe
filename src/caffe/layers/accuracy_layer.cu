@@ -70,16 +70,16 @@ void AccuracyLayer<Dtype>::Forward_gpu(
   const int dim = bottom[0]->count() / outer_num_;
   const int num_labels = bottom[0]->shape(label_axis_);
   const int nthreads = outer_num_ * inner_num_;
-// Since this memory is not used for anything, we use it here to avoid having
-// to allocate new GPU memory to accumulate intermediate results.
+  // Since this memory is not used for anything, we use it here to avoid having
+  // to allocate new GPU memory to accumulate intermediate results.
   Dtype *acc_data = bottom[0]->mutable_gpu_diff();
   if (top.size() == 1) {
-// simple case - report only global accuracy.
+    // simple case - report only global accuracy.
 
-// Similarly, this memory is never used elsewhere, and thus we can use it
-// to avoid having to allocate additional GPU memory.
+    // Similarly, this memory is never used elsewhere, and thus we can use it
+    // to avoid having to allocate additional GPU memory.
     Dtype *counts = bottom[1]->mutable_gpu_diff();
-// NOLINT_NEXT_LINE(whitespace/operators)
+    // NOLINT_NEXT_LINE(whitespace/operators)
     AccuracyForwardGPU<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
     CAFFE_CUDA_NUM_THREADS>>>(nthreads, bottom_data, bottom_label,
                               acc_data, outer_num_, dim, inner_num_, num_labels, top_k_,
@@ -94,105 +94,52 @@ void AccuracyLayer<Dtype>::Forward_gpu(
       top[0]->mutable_cpu_data()[0] = 0;
     }
   } else {
-// need to report per-class accuracy as well
+    // need to report per-class accuracy as well
 
-// allocate space for more detailed "counts"
-    nums_buffer_.
-        ReshapeLike(*bottom[0]);
+    // allocate space for more detailed "counts"
+    nums_buffer_.ReshapeLike(*bottom[0]);
     Dtype *counts = nums_buffer_.mutable_gpu_data();
 
-    caffe_gpu_set(bottom[0]
-                      ->
+    caffe_gpu_set(bottom[0]->count(), Dtype(0), acc_data);
+    caffe_gpu_set(nums_buffer_.count(), Dtype(0), counts);
 
-                          count(), Dtype(0), acc_data
+    // NOLINT_NEXT_LINE(whitespace/operators)
+    AccuracyForwardWithPerClassGPU<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
+    CAFFE_CUDA_NUM_THREADS>>>(nthreads, bottom_data, bottom_label,
+                              acc_data, counts, outer_num_, dim, inner_num_, num_labels, top_k_,
+                              has_ignore_label_, ignore_label_);
 
-    );
-    caffe_gpu_set(nums_buffer_
-                      .
-
-                          count(), Dtype(0), counts
-
-    );
-
-// NOLINT_NEXT_LINE(whitespace/operators)
-    AccuracyForwardWithPerClassGPU<Dtype><<<
-    CAFFE_GET_BLOCKS(nthreads),
-    CAFFE_CUDA_NUM_THREADS
-    >>>(nthreads, bottom_data, bottom_label,
-        acc_data, counts, outer_num_, dim, inner_num_, num_labels, top_k_,
-        has_ignore_label_, ignore_label_);
-
-// get the overall accuracy
+    // get the overall accuracy
     Dtype acc;
-    caffe_gpu_asum(bottom[0]
-                       ->
-
-                           count(), acc_data, &acc
-
-    );
+    caffe_gpu_asum(bottom[0]->count(), acc_data, &acc);
     Dtype valid_count;
-    caffe_gpu_asum(nums_buffer_
-                       .
-
-                           count(), counts, &valid_count
-
-    );
+    caffe_gpu_asum(nums_buffer_.count(), counts, &valid_count);
     if (valid_count > 0) {
-      top[0]->
-
-          mutable_cpu_data()[0] = acc / valid_count;
-
+      top[0]->mutable_cpu_data()[0] = acc / valid_count;
     } else {
-      top[0]->
-
-          mutable_cpu_data()[0] = 0;
-
+      top[0]->mutable_cpu_data()[0] = 0;
     }
 
-// get per-class accuracy
+    // get per-class accuracy
     Dtype *per_class_acc = top[1]->mutable_cpu_data();
-    for (
-        int l = 0;
-        l < num_labels;
-        l++) {
-      caffe_gpu_asum(nthreads, acc_data
-          +
-              l * nthreads, per_class_acc
-                         + l);
-      caffe_gpu_asum(nthreads, counts
-          +
-              l * nthreads, &valid_count
-      );
+    for (int l = 0; l < num_labels; l++) {
+      caffe_gpu_asum(nthreads, acc_data + l * nthreads, per_class_acc + l);
+      caffe_gpu_asum(nthreads, counts + l * nthreads, &valid_count);
       if (valid_count > 0) {
-        per_class_acc[l] /=
-            valid_count;
+        per_class_acc[l] /= valid_count;
       } else {
         per_class_acc[l] = 0;
       }
     }
   }
-// Clear scratch memory to prevent interfering with backward (see #6202).
-  caffe_gpu_set(bottom[0]
-                    ->
-
-                        count(), Dtype(0), bottom[0]
-
-                    ->
-
-                        mutable_gpu_diff()
-
-  );
+  // Clear scratch memory to prevent interfering with backward (see #6202).
+  caffe_gpu_set(bottom[0]->count(), Dtype(0), bottom[0]->mutable_gpu_diff());
 }
 
 template<typename Dtype>
-void AccuracyLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *
-
-> &top,
-                                        const vector<bool> &propagate_down,
-                                        const vector<Blob<Dtype> *> &bottom) {
-  if (propagate_down[1]) {
-    NOT_IMPLEMENTED;
-  }
+void AccuracyLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
+                                        const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+  if (propagate_down[1]) { NOT_IMPLEMENTED; }
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(AccuracyLayer);

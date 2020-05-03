@@ -239,7 +239,6 @@ void LSTMLayer<Dtype>::FillUnrolledNet(NetParameter *net_param) const {
 }
 
 INSTANTIATE_CLASS(LSTMLayer);
-
 REGISTER_LAYER_CLASS(LSTM);
 
 }  // namespace caffe

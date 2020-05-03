@@ -16,7 +16,6 @@ void caffe_cpu_logistic_activate(float *x, const int n) {
     x[i] = logistic_activate(x[i]);
   }
 }
-
 template<>
 void caffe_cpu_hard_sigmoid(float *x, const int n) {
   int i;
@@ -24,7 +23,6 @@ void caffe_cpu_hard_sigmoid(float *x, const int n) {
     x[i] = hard_sigmoid(x[i]);
   }
 }
-
 template<>
 void caffe_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
                            const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
@@ -81,9 +79,7 @@ void caffe_set(const int N, const Dtype alpha, Dtype *Y) {
 }
 
 template void caffe_set<int>(const int N, const int alpha, int *Y);
-
 template void caffe_set<float>(const int N, const float alpha, float *Y);
-
 template void caffe_set<double>(const int N, const double alpha, double *Y);
 
 template<>
@@ -117,14 +113,10 @@ void caffe_copy(const int N, const Dtype *X, Dtype *Y) {
 }
 
 template void caffe_copy<bool>(const int N, const bool *X, bool *Y);
-
 template void caffe_copy<int>(const int N, const int *X, int *Y);
-
 template void caffe_copy<unsigned int>(const int N, const unsigned int *X,
                                        unsigned int *Y);
-
 template void caffe_copy<float>(const int N, const float *X, float *Y);
-
 template void caffe_copy<double>(const int N, const double *X, double *Y);
 
 template<>

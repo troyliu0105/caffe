@@ -15,8 +15,7 @@ using std::max;
 
 template<typename Dtype>
 LayerParameter SPPLayer<Dtype>::GetPoolingParam(const int pyramid_level,
-                                                const int bottom_h, const int bottom_w,
-                                                const SPPParameter spp_param) {
+                                                const int bottom_h, const int bottom_w, const SPPParameter spp_param) {
   LayerParameter pooling_param;
   int num_bins = pow(2, pyramid_level);
 
@@ -224,7 +223,6 @@ void SPPLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 INSTANTIATE_CLASS(SPPLayer);
-
 REGISTER_LAYER_CLASS(SPP);
 
 }  // namespace caffe

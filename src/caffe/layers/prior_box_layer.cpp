@@ -64,7 +64,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 
   if (prior_box_param.has_img_h() || prior_box_param.has_img_w()) {
     CHECK(!prior_box_param.has_img_size())
-            << "Either img_size or img_h/img_w should be specified; not both.";
+    << "Either img_size or img_h/img_w should be specified; not both.";
     img_h_ = prior_box_param.img_h();
     CHECK_GT(img_h_, 0) << "img_h should be larger than 0.";
     img_w_ = prior_box_param.img_w();
@@ -81,7 +81,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 
   if (prior_box_param.has_step_h() || prior_box_param.has_step_w()) {
     CHECK(!prior_box_param.has_step())
-            << "Either step or step_h/step_w should be specified; not both.";
+    << "Either step or step_h/step_w should be specified; not both.";
     step_h_ = prior_box_param.step_h();
     CHECK_GT(step_h_, 0.) << "step_h should be larger than 0.";
     step_w_ = prior_box_param.step_w();
@@ -219,7 +219,6 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 }
 
 INSTANTIATE_CLASS(PriorBoxLayer);
-
 REGISTER_LAYER_CLASS(PriorBox);
 
 }  // namespace caffe

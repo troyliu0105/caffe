@@ -17,7 +17,6 @@ protected:
     filler_param_.set_value(10.);
     filler_.reset(new ConstantFiller<Dtype>(filler_param_));
   }
-
   virtual void test_params(const vector<int> &shape) {
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
@@ -28,54 +27,43 @@ protected:
       EXPECT_EQ(data[i], filler_param_.value());
     }
   }
-
   virtual ~ConstantFillerTest() { delete blob_; }
-
   Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
   shared_ptr<ConstantFiller<Dtype> > filler_;
 };
 
-TYPED_TEST_CASE(ConstantFillerTest, TestDtypes
-);
+TYPED_TEST_CASE(ConstantFillerTest, TestDtypes);
 
-TYPED_TEST(ConstantFillerTest, TestFill
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-this->
-test_params(blob_shape);
+TYPED_TEST(ConstantFillerTest, TestFill) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(ConstantFillerTest, TestFill1D
-) {
-vector<int> blob_shape(1, 15);
-this->
-test_params(blob_shape);
+TYPED_TEST(ConstantFillerTest, TestFill1D) {
+  vector<int> blob_shape(1, 15);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(ConstantFillerTest, TestFill2D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(8);
-blob_shape.push_back(3);
-this->
-test_params(blob_shape);
+TYPED_TEST(ConstantFillerTest, TestFill2D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(8);
+  blob_shape.push_back(3);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(ConstantFillerTest, TestFill5D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-blob_shape.push_back(2);
-this->
-test_params(blob_shape);
+TYPED_TEST(ConstantFillerTest, TestFill5D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  blob_shape.push_back(2);
+  this->test_params(blob_shape);
 }
 
 template<typename Dtype>
@@ -88,7 +76,6 @@ protected:
     filler_param_.set_max(2.);
     filler_.reset(new UniformFiller<Dtype>(filler_param_));
   }
-
   virtual void test_params(const vector<int> &shape) {
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
@@ -100,54 +87,43 @@ protected:
       EXPECT_LE(data[i], filler_param_.max());
     }
   }
-
   virtual ~UniformFillerTest() { delete blob_; }
-
-  Blob <Dtype> *const blob_;
+  Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr <UniformFiller<Dtype>> filler_;
+  shared_ptr<UniformFiller<Dtype> > filler_;
 };
 
-TYPED_TEST_CASE(UniformFillerTest, TestDtypes
-);
+TYPED_TEST_CASE(UniformFillerTest, TestDtypes);
 
-TYPED_TEST(UniformFillerTest, TestFill
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-this->
-test_params(blob_shape);
+TYPED_TEST(UniformFillerTest, TestFill) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(UniformFillerTest, TestFill1D
-) {
-vector<int> blob_shape(1, 15);
-this->
-test_params(blob_shape);
+TYPED_TEST(UniformFillerTest, TestFill1D) {
+  vector<int> blob_shape(1, 15);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(UniformFillerTest, TestFill2D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(8);
-blob_shape.push_back(3);
-this->
-test_params(blob_shape);
+TYPED_TEST(UniformFillerTest, TestFill2D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(8);
+  blob_shape.push_back(3);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(UniformFillerTest, TestFill5D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-blob_shape.push_back(2);
-this->
-test_params(blob_shape);
+TYPED_TEST(UniformFillerTest, TestFill5D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  blob_shape.push_back(2);
+  this->test_params(blob_shape);
 }
 
 template<typename Dtype>
@@ -158,7 +134,6 @@ protected:
         filler_param_() {
     filler_.reset(new PositiveUnitballFiller<Dtype>(filler_param_));
   }
-
   virtual void test_params(const vector<int> &shape) {
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
@@ -180,54 +155,43 @@ protected:
       EXPECT_LE(sum, 1.001);
     }
   }
-
   virtual ~PositiveUnitballFillerTest() { delete blob_; }
-
-  Blob <Dtype> *const blob_;
+  Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr <PositiveUnitballFiller<Dtype>> filler_;
+  shared_ptr<PositiveUnitballFiller<Dtype> > filler_;
 };
 
-TYPED_TEST_CASE(PositiveUnitballFillerTest, TestDtypes
-);
+TYPED_TEST_CASE(PositiveUnitballFillerTest, TestDtypes);
 
-TYPED_TEST(PositiveUnitballFillerTest, TestFill
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-this->
-test_params(blob_shape);
+TYPED_TEST(PositiveUnitballFillerTest, TestFill) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(PositiveUnitballFillerTest, TestFill1D
-) {
-vector<int> blob_shape(1, 15);
-this->
-test_params(blob_shape);
+TYPED_TEST(PositiveUnitballFillerTest, TestFill1D) {
+  vector<int> blob_shape(1, 15);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(PositiveUnitballFillerTest, TestFill2D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(8);
-blob_shape.push_back(3);
-this->
-test_params(blob_shape);
+TYPED_TEST(PositiveUnitballFillerTest, TestFill2D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(8);
+  blob_shape.push_back(3);
+  this->test_params(blob_shape);
 }
 
-TYPED_TEST(PositiveUnitballFillerTest, TestFill5D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-blob_shape.push_back(2);
-this->
-test_params(blob_shape);
+TYPED_TEST(PositiveUnitballFillerTest, TestFill5D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  blob_shape.push_back(2);
+  this->test_params(blob_shape);
 }
 
 template<typename Dtype>
@@ -240,7 +204,6 @@ protected:
     filler_param_.set_std(0.1);
     filler_.reset(new GaussianFiller<Dtype>(filler_param_));
   }
-
   virtual void test_params(const vector<int> &shape,
                            const Dtype tolerance = Dtype(5), const int repetitions = 100) {
     // Tests for statistical properties should be ran multiple times.
@@ -250,7 +213,6 @@ protected:
       test_params_iter(shape, tolerance);
     }
   }
-
   virtual void test_params_iter(const vector<int> &shape,
                                 const Dtype tolerance) {
     // This test has a configurable tolerance parameter - by default it was
@@ -275,62 +237,47 @@ protected:
     EXPECT_GE(var, target_var / tolerance);
     EXPECT_LE(var, target_var * tolerance);
   }
-
   virtual ~GaussianFillerTest() { delete blob_; }
-
-  Blob <Dtype> *const blob_;
+  Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr <GaussianFiller<Dtype>> filler_;
+  shared_ptr<GaussianFiller<Dtype> > filler_;
 };
 
-TYPED_TEST_CASE(GaussianFillerTest, TestDtypes
-);
+TYPED_TEST_CASE(GaussianFillerTest, TestDtypes);
 
-TYPED_TEST(GaussianFillerTest, TestFill
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-const TypeParam tolerance = TypeParam(3);  // enough for a 120-element blob
-this->
-test_params(blob_shape, tolerance
-);
+TYPED_TEST(GaussianFillerTest, TestFill) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  const TypeParam tolerance = TypeParam(3);  // enough for a 120-element blob
+  this->test_params(blob_shape, tolerance);
 }
 
-TYPED_TEST(GaussianFillerTest, TestFill1D
-) {
-vector<int> blob_shape(1, 125);
-const TypeParam tolerance = TypeParam(3);
-this->
-test_params(blob_shape, tolerance
-);
+TYPED_TEST(GaussianFillerTest, TestFill1D) {
+  vector<int> blob_shape(1, 125);
+  const TypeParam tolerance = TypeParam(3);
+  this->test_params(blob_shape, tolerance);
 }
 
-TYPED_TEST(GaussianFillerTest, TestFill2D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(8);
-blob_shape.push_back(15);
-const TypeParam tolerance = TypeParam(3);
-this->
-test_params(blob_shape, tolerance
-);
+TYPED_TEST(GaussianFillerTest, TestFill2D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(8);
+  blob_shape.push_back(15);
+  const TypeParam tolerance = TypeParam(3);
+  this->test_params(blob_shape, tolerance);
 }
 
-TYPED_TEST(GaussianFillerTest, TestFill5D
-) {
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-blob_shape.push_back(2);
-const TypeParam tolerance = TypeParam(2);
-this->
-test_params(blob_shape, tolerance
-);
+TYPED_TEST(GaussianFillerTest, TestFill5D) {
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  blob_shape.push_back(2);
+  const TypeParam tolerance = TypeParam(2);
+  this->test_params(blob_shape, tolerance);
 }
 
 template<typename Dtype>
@@ -340,7 +287,6 @@ protected:
       : blob_(new Blob<Dtype>()),
         filler_param_() {
   }
-
   virtual void test_params(FillerParameter_VarianceNorm variance_norm,
                            Dtype n, const vector<int> &shape, const int repetitions = 100) {
     EXPECT_TRUE(blob_);
@@ -349,7 +295,6 @@ protected:
       test_params_iter(variance_norm, n);
     }
   }
-
   virtual void test_params_iter(FillerParameter_VarianceNorm variance_norm,
                                 Dtype n) {
     filler_param_.set_variance_norm(variance_norm);
@@ -370,98 +315,77 @@ protected:
     EXPECT_NEAR(mean, 0.0, 0.1);
     EXPECT_NEAR(std, target_std, 0.1);
   }
-
   virtual ~XavierFillerTest() { delete blob_; }
-
-  Blob <Dtype> *const blob_;
+  Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr <XavierFiller<Dtype>> filler_;
+  shared_ptr<XavierFiller<Dtype> > filler_;
 };
 
-TYPED_TEST_CASE(XavierFillerTest, TestDtypes
-);
+TYPED_TEST_CASE(XavierFillerTest, TestDtypes);
 
-TYPED_TEST(XavierFillerTest, TestFillFanIn
-) {
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-TypeParam n = 2 * 4 * 5;
-this->
-test_params(FillerParameter_VarianceNorm_FAN_IN, n, blob_shape
-);
+TYPED_TEST(XavierFillerTest, TestFillFanIn) {
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  TypeParam n = 2 * 4 * 5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_IN, n, blob_shape);
 }
 
-TYPED_TEST(XavierFillerTest, TestFillFanOut
-) {
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-TypeParam n = 1000 * 4 * 5;
-this->
-test_params(FillerParameter_VarianceNorm_FAN_OUT, n, blob_shape
-);
+TYPED_TEST(XavierFillerTest, TestFillFanOut) {
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  TypeParam n = 1000 * 4 * 5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_OUT, n, blob_shape);
 }
 
-TYPED_TEST(XavierFillerTest, TestFillAverage
-) {
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-TypeParam n = (2 * 4 * 5 + 1000 * 4 * 5) / 2.0;
-this->
-test_params(FillerParameter_VarianceNorm_AVERAGE, n, blob_shape
-);
+TYPED_TEST(XavierFillerTest, TestFillAverage) {
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  TypeParam n = (2 * 4 * 5 + 1000 * 4 * 5) / 2.0;
+  this->test_params(FillerParameter_VarianceNorm_AVERAGE, n, blob_shape);
 }
 
-TYPED_TEST(XavierFillerTest, TestFill1D
-) {
-// This makes little sense but at least we will know that we can fill it
-EXPECT_TRUE(this->blob_);
-vector<int> blob_shape(1, 25);
-this->blob_->
-Reshape(blob_shape);
-this->filler_param_.
-set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
-this->filler_.reset(new XavierFiller<TypeParam>(this->filler_param_));
-this->filler_->Fill(this->blob_);
+TYPED_TEST(XavierFillerTest, TestFill1D) {
+  // This makes little sense but at least we will know that we can fill it
+  EXPECT_TRUE(this->blob_);
+  vector<int> blob_shape(1, 25);
+  this->blob_->Reshape(blob_shape);
+  this->filler_param_.set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
+  this->filler_.reset(new XavierFiller<TypeParam>(this->filler_param_));
+  this->filler_->Fill(this->blob_);
 }
 
-TYPED_TEST(XavierFillerTest, TestFill2D
-) {
-EXPECT_TRUE(this->blob_);
-vector<int> blob_shape;
-blob_shape.push_back(8);
-blob_shape.push_back(3);
-this->blob_->
-Reshape(blob_shape);
-this->filler_param_.
-set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
-this->filler_.reset(new XavierFiller<TypeParam>(this->filler_param_));
-this->filler_->Fill(this->blob_);
+TYPED_TEST(XavierFillerTest, TestFill2D) {
+  EXPECT_TRUE(this->blob_);
+  vector<int> blob_shape;
+  blob_shape.push_back(8);
+  blob_shape.push_back(3);
+  this->blob_->Reshape(blob_shape);
+  this->filler_param_.set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
+  this->filler_.reset(new XavierFiller<TypeParam>(this->filler_param_));
+  this->filler_->Fill(this->blob_);
 }
 
-TYPED_TEST(XavierFillerTest, TestFill5D
-) {
-EXPECT_TRUE(this->blob_);
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-blob_shape.push_back(2);
-this->blob_->
-Reshape(blob_shape);
-this->filler_param_.
-set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
-this->filler_.reset(new XavierFiller<TypeParam>(this->filler_param_));
-this->filler_->Fill(this->blob_);
+TYPED_TEST(XavierFillerTest, TestFill5D) {
+  EXPECT_TRUE(this->blob_);
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  blob_shape.push_back(2);
+  this->blob_->Reshape(blob_shape);
+  this->filler_param_.set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
+  this->filler_.reset(new XavierFiller<TypeParam>(this->filler_param_));
+  this->filler_->Fill(this->blob_);
 }
 
 template<typename Dtype>
@@ -471,7 +395,6 @@ protected:
       : blob_(new Blob<Dtype>()),
         filler_param_() {
   }
-
   virtual void test_params(FillerParameter_VarianceNorm variance_norm,
                            Dtype n, const vector<int> &shape, const int repetitions = 100) {
     EXPECT_TRUE(blob_);
@@ -480,7 +403,6 @@ protected:
       test_params_iter(variance_norm, n);
     }
   }
-
   virtual void test_params_iter(FillerParameter_VarianceNorm variance_norm,
                                 Dtype n) {
     filler_param_.set_variance_norm(variance_norm);
@@ -501,98 +423,77 @@ protected:
     EXPECT_NEAR(mean, 0.0, 0.1);
     EXPECT_NEAR(std, target_std, 0.1);
   }
-
   virtual ~MSRAFillerTest() { delete blob_; }
-
-  Blob <Dtype> *const blob_;
+  Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr <MSRAFiller<Dtype>> filler_;
+  shared_ptr<MSRAFiller<Dtype> > filler_;
 };
 
-TYPED_TEST_CASE(MSRAFillerTest, TestDtypes
-);
+TYPED_TEST_CASE(MSRAFillerTest, TestDtypes);
 
-TYPED_TEST(MSRAFillerTest, TestFillFanIn
-) {
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-TypeParam n = 2 * 4 * 5;
-this->
-test_params(FillerParameter_VarianceNorm_FAN_IN, n, blob_shape
-);
+TYPED_TEST(MSRAFillerTest, TestFillFanIn) {
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  TypeParam n = 2 * 4 * 5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_IN, n, blob_shape);
 }
 
-TYPED_TEST(MSRAFillerTest, TestFillFanOut
-) {
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-TypeParam n = 1000 * 4 * 5;
-this->
-test_params(FillerParameter_VarianceNorm_FAN_OUT, n, blob_shape
-);
+TYPED_TEST(MSRAFillerTest, TestFillFanOut) {
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  TypeParam n = 1000 * 4 * 5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_OUT, n, blob_shape);
 }
 
-TYPED_TEST(MSRAFillerTest, TestFillAverage
-) {
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-TypeParam n = (2 * 4 * 5 + 1000 * 4 * 5) / 2.0;
-this->
-test_params(FillerParameter_VarianceNorm_AVERAGE, n, blob_shape
-);
+TYPED_TEST(MSRAFillerTest, TestFillAverage) {
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  TypeParam n = (2 * 4 * 5 + 1000 * 4 * 5) / 2.0;
+  this->test_params(FillerParameter_VarianceNorm_AVERAGE, n, blob_shape);
 }
 
-TYPED_TEST(MSRAFillerTest, TestFill1D
-) {
-// Like with Xavier - no checking for correctness, just if it can be filled.
-EXPECT_TRUE(this->blob_);
-vector<int> blob_shape(1, 25);
-this->blob_->
-Reshape(blob_shape);
-this->filler_param_.
-set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
-this->filler_.reset(new MSRAFiller<TypeParam>(this->filler_param_));
-this->filler_->Fill(this->blob_);
+TYPED_TEST(MSRAFillerTest, TestFill1D) {
+  // Like with Xavier - no checking for correctness, just if it can be filled.
+  EXPECT_TRUE(this->blob_);
+  vector<int> blob_shape(1, 25);
+  this->blob_->Reshape(blob_shape);
+  this->filler_param_.set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
+  this->filler_.reset(new MSRAFiller<TypeParam>(this->filler_param_));
+  this->filler_->Fill(this->blob_);
 }
 
-TYPED_TEST(MSRAFillerTest, TestFill2D
-) {
-EXPECT_TRUE(this->blob_);
-vector<int> blob_shape;
-blob_shape.push_back(8);
-blob_shape.push_back(3);
-this->blob_->
-Reshape(blob_shape);
-this->filler_param_.
-set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
-this->filler_.reset(new MSRAFiller<TypeParam>(this->filler_param_));
-this->filler_->Fill(this->blob_);
+TYPED_TEST(MSRAFillerTest, TestFill2D) {
+  EXPECT_TRUE(this->blob_);
+  vector<int> blob_shape;
+  blob_shape.push_back(8);
+  blob_shape.push_back(3);
+  this->blob_->Reshape(blob_shape);
+  this->filler_param_.set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
+  this->filler_.reset(new MSRAFiller<TypeParam>(this->filler_param_));
+  this->filler_->Fill(this->blob_);
 }
 
-TYPED_TEST(MSRAFillerTest, TestFill5D
-) {
-EXPECT_TRUE(this->blob_);
-vector<int> blob_shape;
-blob_shape.push_back(2);
-blob_shape.push_back(3);
-blob_shape.push_back(4);
-blob_shape.push_back(5);
-blob_shape.push_back(2);
-this->blob_->
-Reshape(blob_shape);
-this->filler_param_.
-set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
-this->filler_.reset(new MSRAFiller<TypeParam>(this->filler_param_));
-this->filler_->Fill(this->blob_);
+TYPED_TEST(MSRAFillerTest, TestFill5D) {
+  EXPECT_TRUE(this->blob_);
+  vector<int> blob_shape;
+  blob_shape.push_back(2);
+  blob_shape.push_back(3);
+  blob_shape.push_back(4);
+  blob_shape.push_back(5);
+  blob_shape.push_back(2);
+  this->blob_->Reshape(blob_shape);
+  this->filler_param_.set_variance_norm(FillerParameter_VarianceNorm_AVERAGE);
+  this->filler_.reset(new MSRAFiller<TypeParam>(this->filler_param_));
+  this->filler_->Fill(this->blob_);
 }
 
 template<typename Dtype>
@@ -602,7 +503,6 @@ protected:
       : blob_(new Blob<Dtype>()),
         filler_param_() {
   }
-
   virtual void test_params(const vector<int> &shape) {
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
@@ -624,43 +524,31 @@ protected:
       }
     }
   }
-
   virtual ~BilinearFillerTest() { delete blob_; }
-
-  Blob <Dtype> *blob_;
+  Blob<Dtype> *blob_;
   FillerParameter filler_param_;
-  shared_ptr <BilinearFiller<Dtype>> filler_;
+  shared_ptr<BilinearFiller<Dtype> > filler_;
 };
 
-TYPED_TEST_CASE(BilinearFillerTest, TestDtypes
-);
+TYPED_TEST_CASE(BilinearFillerTest, TestDtypes);
 
-TYPED_TEST(BilinearFillerTest, TestFillOdd
-) {
-const int n = 7;
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.
-push_back(n);
-blob_shape.
-push_back(n);
-this->
-test_params(blob_shape);
+TYPED_TEST(BilinearFillerTest, TestFillOdd) {
+  const int n = 7;
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(n);
+  blob_shape.push_back(n);
+  this->test_params(blob_shape);
 }
-
-TYPED_TEST(BilinearFillerTest, TestFillEven
-) {
-const int n = 6;
-vector<int> blob_shape;
-blob_shape.push_back(1000);
-blob_shape.push_back(2);
-blob_shape.
-push_back(n);
-blob_shape.
-push_back(n);
-this->
-test_params(blob_shape);
+TYPED_TEST(BilinearFillerTest, TestFillEven) {
+  const int n = 6;
+  vector<int> blob_shape;
+  blob_shape.push_back(1000);
+  blob_shape.push_back(2);
+  blob_shape.push_back(n);
+  blob_shape.push_back(n);
+  this->test_params(blob_shape);
 }
 
 }  // namespace caffe

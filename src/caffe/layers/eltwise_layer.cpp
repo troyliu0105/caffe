@@ -32,8 +32,8 @@ void EltwiseLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                   const vector<Blob<Dtype> *> &top) {
   for (int i = 1; i < bottom.size(); ++i) {
     CHECK(bottom[0]->shape() == bottom[i]->shape())
-            << "bottom[0]: " << bottom[0]->shape_string()
-            << ", bottom[" << i << "]: " << bottom[i]->shape_string();
+    << "bottom[0]: " << bottom[0]->shape_string()
+    << ", bottom[" << i << "]: " << bottom[i]->shape_string();
   }
   top[0]->ReshapeLike(*bottom[0]);
   // If max operation, we will initialize the vector index part.
@@ -153,12 +153,10 @@ void EltwiseLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(EltwiseLayer);
 #endif
 
 INSTANTIATE_CLASS(EltwiseLayer);
-
 REGISTER_LAYER_CLASS(Eltwise);
 
 }  // namespace caffe

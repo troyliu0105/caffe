@@ -36,12 +36,10 @@ void ReLU6Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(ReLU6Layer);
 #endif
 
 INSTANTIATE_CLASS(ReLU6Layer);
-
 REGISTER_LAYER_CLASS(ReLU6);
 }  // namespace caffe
 

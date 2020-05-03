@@ -37,15 +37,15 @@ namespace caffe {
  * (Note: Caffe, and SGD in general, is certainly \b not the best way to solve
  * linear least squares problems! We use it only as an instructive example.)
  */
-template<typename Dtype>
+template <typename Dtype>
 class EuclideanLossLayer : public LossLayer<Dtype> {
-public:
-  explicit EuclideanLossLayer(const LayerParameter &param)
+ public:
+  explicit EuclideanLossLayer(const LayerParameter& param)
       : LossLayer<Dtype>(param), diff_() {}
-  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
-                       const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
-  virtual inline const char *type() const { return "EuclideanLoss"; }
+  virtual inline const char* type() const { return "EuclideanLoss"; }
   /**
    * Unlike most loss layers, in the EuclideanLossLayer we can backpropagate
    * to both inputs -- override to return true and always allow force_backward.
@@ -54,12 +54,12 @@ public:
     return true;
   }
 
-protected:
+ protected:
   /// @copydoc EuclideanLossLayer
-  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
-  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
   /**
    * @brief Computes the Euclidean error gradient w.r.t. the inputs.
@@ -94,10 +94,10 @@ protected:
    *          \frac{1}{n} \sum\limits_{n=1}^N (y_n - \hat{y}_n)
    *      @f$ if propagate_down[1]
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
   Blob<Dtype> diff_;
 };

@@ -20,21 +20,21 @@ namespace caffe {
  *        \end{array} \right.
  *      @f$.  
  */
-template<typename Dtype>
+template <typename Dtype>
 class ELULayer : public NeuronLayer<Dtype> {
-public:
+ public:
   /**
    * @param param provides ELUParameter elu_param,
    *     with ELULayer options:
    *   - alpha (\b optional, default 1).
    *     the value @f$ \alpha @f$ by which controls saturation for negative inputs.
    */
-  explicit ELULayer(const LayerParameter &param)
+  explicit ELULayer(const LayerParameter& param)
       : NeuronLayer<Dtype>(param) {}
 
-  virtual inline const char *type() const { return "ELU"; }
+  virtual inline const char* type() const { return "ELU"; }
 
-protected:
+ protected:
   /**
    * @param bottom input Blob vector (length 1)
    *   -# @f$ (N \times C \times H \times W) @f$
@@ -49,10 +49,10 @@ protected:
    *        \end{array} \right.
    *      @f$.  
    */
-  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
-  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
-                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
   /**
    * @brief Computes the error gradient w.r.t. the ELU inputs.
@@ -74,11 +74,12 @@ protected:
    *        \end{array} \right.
    *      @f$ if propagate_down[0].
    */
-  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
-  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 };
+
 
 }  // namespace caffe
 

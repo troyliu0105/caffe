@@ -15,9 +15,9 @@ extern cudaDeviceProp CAFFE_TEST_CUDA_PROP;
 class PlatformTest : public ::testing::Test {};
 
 TEST_F(PlatformTest, TestInitialization) {
-  printf("Major revision number:         %d\n",  CAFFE_TEST_CUDA_PROP.major);
-  printf("Minor revision number:         %d\n",  CAFFE_TEST_CUDA_PROP.minor);
-  printf("Name:                          %s\n",  CAFFE_TEST_CUDA_PROP.name);
+  printf("Major revision number:         %d\n", CAFFE_TEST_CUDA_PROP.major);
+  printf("Minor revision number:         %d\n", CAFFE_TEST_CUDA_PROP.minor);
+  printf("Name:                          %s\n", CAFFE_TEST_CUDA_PROP.name);
   printf("Total global memory:           %lu\n",
          CAFFE_TEST_CUDA_PROP.totalGlobalMem);
   printf("Total shared memory per block: %lu\n",

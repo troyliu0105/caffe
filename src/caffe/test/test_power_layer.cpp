@@ -29,7 +29,6 @@ protected:
     blob_bottom_vec_.push_back(blob_bottom_);
     blob_top_vec_.push_back(blob_top_);
   }
-
   virtual ~PowerLayerTest() {
     delete blob_bottom_;
     delete blob_top_;
@@ -89,117 +88,86 @@ protected:
   vector<Blob<Dtype> *> blob_top_vec_;
 };
 
-TYPED_TEST_CASE(PowerLayerTest, TestDtypesAndDevices
-);
+TYPED_TEST_CASE(PowerLayerTest, TestDtypesAndDevices);
 
-TYPED_TEST(PowerLayerTest, TestPower
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 0.37;
-Dtype scale = 0.83;
-Dtype shift = -2.4;
-this->
-TestForward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPower) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 0.37;
+  Dtype scale = 0.83;
+  Dtype shift = -2.4;
+  this->TestForward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerGradient
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 0.37;
-Dtype scale = 0.83;
-Dtype shift = -2.4;
-this->
-TestBackward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerGradient) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 0.37;
+  Dtype scale = 0.83;
+  Dtype shift = -2.4;
+  this->TestBackward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerGradientShiftZero
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 0.37;
-Dtype scale = 0.83;
-Dtype shift = 0.0;
-this->
-TestBackward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerGradientShiftZero) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 0.37;
+  Dtype scale = 0.83;
+  Dtype shift = 0.0;
+  this->TestBackward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerZero
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 0.0;
-Dtype scale = 0.83;
-Dtype shift = -2.4;
-this->
-TestForward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerZero) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 0.0;
+  Dtype scale = 0.83;
+  Dtype shift = -2.4;
+  this->TestForward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerZeroGradient
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 0.0;
-Dtype scale = 0.83;
-Dtype shift = -2.4;
-this->
-TestBackward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerZeroGradient) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 0.0;
+  Dtype scale = 0.83;
+  Dtype shift = -2.4;
+  this->TestBackward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerOne
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 1.0;
-Dtype scale = 0.83;
-Dtype shift = -2.4;
-this->
-TestForward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerOne) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 1.0;
+  Dtype scale = 0.83;
+  Dtype shift = -2.4;
+  this->TestForward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerOneGradient
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 1.0;
-Dtype scale = 0.83;
-Dtype shift = -2.4;
-this->
-TestBackward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerOneGradient) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 1.0;
+  Dtype scale = 0.83;
+  Dtype shift = -2.4;
+  this->TestBackward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerTwo
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 2.0;
-Dtype scale = 0.34;
-Dtype shift = -2.4;
-this->
-TestForward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerTwo) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 2.0;
+  Dtype scale = 0.34;
+  Dtype shift = -2.4;
+  this->TestForward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerTwoGradient
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 2.0;
-Dtype scale = 0.83;
-Dtype shift = -2.4;
-this->
-TestBackward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerTwoGradient) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 2.0;
+  Dtype scale = 0.83;
+  Dtype shift = -2.4;
+  this->TestBackward(power, scale, shift);
 }
 
-TYPED_TEST(PowerLayerTest, TestPowerTwoScaleHalfGradient
-) {
-typedef typename TypeParam::Dtype Dtype;
-Dtype power = 2.0;
-Dtype scale = 0.5;
-Dtype shift = -2.4;
-this->
-TestBackward(power, scale, shift
-);
+TYPED_TEST(PowerLayerTest, TestPowerTwoScaleHalfGradient) {
+  typedef typename TypeParam::Dtype Dtype;
+  Dtype power = 2.0;
+  Dtype scale = 0.5;
+  Dtype shift = -2.4;
+  this->TestBackward(power, scale, shift);
 }
 
 }  // namespace caffe

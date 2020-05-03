@@ -1,11 +1,8 @@
 #ifdef USE_OPENCV
-
 #include <opencv2/highgui/highgui.hpp>
 
 #if CV_VERSION_MAJOR >= 3
-
 #include <opencv2/imgcodecs/imgcodecs.hpp>
-
 #define CV_GRAY2BGR cv::COLOR_GRAY2BGR
 #define CV_BGR2GRAY cv::COLOR_BGR2GRAY
 #define CV_BGR2YCrCb cv::COLOR_BGR2YCrCb
@@ -130,7 +127,6 @@ void InferNewSize(const ResizeParameter &resize_param,
 }
 
 #ifdef USE_OPENCV
-
 template<typename T>
 bool is_border(const cv::Mat &edge, T color) {
   cv::Mat im = edge.clone().reshape(0, 1);
@@ -395,8 +391,7 @@ cv::Mat ApplyResize(const cv::Mat &in_img, const ResizeParameter &param) {
   if (param.pad_value_size() > 0) {
     CHECK(param.pad_value_size() == 1 ||
         param.pad_value_size() == img_channels) <<
-                                                "Specify either 1 pad_value or as many as channels: "
-                                                << img_channels;
+                                                "Specify either 1 pad_value or as many as channels: " << img_channels;
     vector<float> pad_values;
     for (int i = 0; i < param.pad_value_size(); ++i) {
       pad_values.push_back(param.pad_value(i));
@@ -521,8 +516,8 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
   if (param.saltpepper_param().value_size() > 0) {
     CHECK(param.saltpepper_param().value_size() == 1
               || param.saltpepper_param().value_size() == out_img.channels())
-            << "Specify either 1 pad_value or as many as channels: "
-            << out_img.channels();
+    << "Specify either 1 pad_value or as many as channels: "
+    << out_img.channels();
 
     for (int i = 0; i < param.saltpepper_param().value_size(); i++) {
       noise_values.push_back(uchar(param.saltpepper_param().value(i)));
@@ -736,7 +731,6 @@ cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param) {
 
   return out_img;
 }
-
 #endif  // USE_OPENCV
 
 }  // namespace caffe

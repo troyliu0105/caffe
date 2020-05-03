@@ -40,7 +40,6 @@ protected:
     blob_bottom_vec_.push_back(blob_bottom_);
     blob_top_vec_.push_back(blob_top_);
   }
-
   virtual ~TanHLayerTest() {
     delete blob_bottom_;
     delete blob_top_;
@@ -87,23 +86,19 @@ protected:
   vector<Blob<Dtype> *> blob_top_vec_;
 };
 
-TYPED_TEST_CASE(TanHLayerTest, TestDtypesAndDevices
-);
+TYPED_TEST_CASE(TanHLayerTest, TestDtypesAndDevices);
 
-TYPED_TEST(TanHLayerTest, TestTanH
-) {
-this->TestForward(1.0);
+TYPED_TEST(TanHLayerTest, TestTanH) {
+  this->TestForward(1.0);
 }
 
-TYPED_TEST(TanHLayerTest, TestTanHOverflow
-) {
-// this will fail if tanh overflow is not properly handled
-this->TestForward(10000.0);
+TYPED_TEST(TanHLayerTest, TestTanHOverflow) {
+  // this will fail if tanh overflow is not properly handled
+  this->TestForward(10000.0);
 }
 
-TYPED_TEST(TanHLayerTest, TestTanHGradient
-) {
-this->TestBackward(1.0);
+TYPED_TEST(TanHLayerTest, TestTanHGradient) {
+  this->TestBackward(1.0);
 }
 
 }  // namespace caffe

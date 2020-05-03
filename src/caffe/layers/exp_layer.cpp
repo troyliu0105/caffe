@@ -17,9 +17,9 @@ void ExpLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   // Otherwise, calculate its log explicitly.
   const Dtype log_base = (base == Dtype(-1)) ? Dtype(1) : log(base);
   CHECK(!isnan(log_base))
-          << "NaN result: log(base) = log(" << base << ") = " << log_base;
+  << "NaN result: log(base) = log(" << base << ") = " << log_base;
   CHECK(!isinf(log_base))
-          << "Inf result: log(base) = log(" << base << ") = " << log_base;
+  << "Inf result: log(base) = log(" << base << ") = " << log_base;
   const Dtype input_scale = this->layer_param_.exp_param().scale();
   const Dtype input_shift = this->layer_param_.exp_param().shift();
   inner_scale_ = log_base * input_scale;
@@ -59,12 +59,10 @@ void ExpLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(ExpLayer);
 #endif
 
 INSTANTIATE_CLASS(ExpLayer);
-
 REGISTER_LAYER_CLASS(Exp);
 
 }  // namespace caffe

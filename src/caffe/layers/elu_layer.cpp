@@ -37,12 +37,10 @@ void ELULayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(ELULayer);
 #endif
 
 INSTANTIATE_CLASS(ELULayer);
-
 REGISTER_LAYER_CLASS(ELU);
 
 }  // namespace caffe

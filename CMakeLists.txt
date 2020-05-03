@@ -15,7 +15,8 @@ if(POLICY CMP0054)
 endif()
 
 # ---[ Caffe project
-project(Caffe C CXX)
+project(Caffe LANGUAGES C CXX)
+set(CMAKE_CUDA_STANDARD 11)
 
 # ---[ Caffe version
 set(CAFFE_TARGET_VERSION "1.0.0" CACHE STRING "Caffe logical version")
@@ -82,6 +83,8 @@ include(cmake/Dependencies.cmake)
 # ---[ Flags
 if(UNIX OR APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
 
 caffe_set_caffe_link()

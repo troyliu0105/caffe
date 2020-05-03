@@ -5,9 +5,9 @@
 
 namespace caffe {
 
-template <typename Dtype>
-void CuDNNTanHLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top) {
+template<typename Dtype>
+void CuDNNTanHLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                                       const vector<Blob<Dtype> *> &top) {
   TanHLayer<Dtype>::LayerSetUp(bottom, top);
   // initialize cuDNN
   CUDNN_CHECK(cudnnCreate(&handle_));
@@ -17,9 +17,9 @@ void CuDNNTanHLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   handles_setup_ = true;
 }
 
-template <typename Dtype>
-void CuDNNTanHLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top) {
+template<typename Dtype>
+void CuDNNTanHLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
+                                    const vector<Blob<Dtype> *> &top) {
   TanHLayer<Dtype>::Reshape(bottom, top);
   const int N = bottom[0]->num();
   const int K = bottom[0]->channels();
@@ -29,7 +29,7 @@ void CuDNNTanHLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   cudnn::setTensor4dDesc<Dtype>(&top_desc_, N, K, H, W);
 }
 
-template <typename Dtype>
+template<typename Dtype>
 CuDNNTanHLayer<Dtype>::~CuDNNTanHLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) { return; }

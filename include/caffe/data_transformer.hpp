@@ -17,10 +17,10 @@ namespace caffe {
  * @brief Applies common transformations to the input data, such as
  * scaling, mirroring, substracting the image mean...
  */
-template<typename Dtype>
+template <typename Dtype>
 class DataTransformer {
-public:
-  explicit DataTransformer(const TransformationParameter &param, Phase phase);
+ public:
+  explicit DataTransformer(const TransformationParameter& param, Phase phase);
   virtual ~DataTransformer() {}
 
   /**
@@ -39,7 +39,7 @@ public:
    *    This is destination blob. It can be part of top blob's data if
    *    set_cpu_data() is used. See data_layer.cpp for an example.
    */
-  void Transform(const Datum &datum, Blob<Dtype> *transformed_blob, int policy_num = 0);
+  void Transform(const Datum& datum, Blob<Dtype>* transformed_blob, int policy_num=0);
 
   /**
    * @brief Applies the transformation defined in the data layer's
@@ -51,8 +51,8 @@ public:
    *    This is destination blob. It can be part of top blob's data if
    *    set_cpu_data() is used. See memory_layer.cpp for an example.
    */
-  void Transform(const vector<Datum> &datum_vector,
-                 Blob<Dtype> *transformed_blob);
+  void Transform(const vector<Datum> & datum_vector,
+                Blob<Dtype>* transformed_blob);
 
   /**
    * @brief Applies the transformation defined in the data layer's
@@ -66,20 +66,20 @@ public:
    * @param transformed_anno_vec
    *    This is destination annotation.
    */
-  void Transform(const AnnotatedDatum &anno_datum,
-                 Blob<Dtype> *transformed_blob,
-                 RepeatedPtrField<AnnotationGroup> *transformed_anno_vec, int policy_num = 0);
-  void Transform(const AnnotatedDatum &anno_datum,
-                 Blob<Dtype> *transformed_blob,
-                 RepeatedPtrField<AnnotationGroup> *transformed_anno_vec,
-                 bool *do_mirror, int policy_num = 0);
-  void Transform(const AnnotatedDatum &anno_datum,
-                 Blob<Dtype> *transformed_blob,
-                 vector<AnnotationGroup> *transformed_anno_vec,
-                 bool *do_mirror, int policy_num = 0);
-  void Transform(const AnnotatedDatum &anno_datum,
-                 Blob<Dtype> *transformed_blob,
-                 vector<AnnotationGroup> *transformed_anno_vec, int policy_num = 0);
+  void Transform(const AnnotatedDatum& anno_datum,
+                 Blob<Dtype>* transformed_blob,
+                 RepeatedPtrField<AnnotationGroup>* transformed_anno_vec, int policy_num = 0);
+  void Transform(const AnnotatedDatum& anno_datum,
+                 Blob<Dtype>* transformed_blob,
+                 RepeatedPtrField<AnnotationGroup>* transformed_anno_vec,
+                 bool* do_mirror, int policy_num = 0);
+  void Transform(const AnnotatedDatum& anno_datum,
+                 Blob<Dtype>* transformed_blob,
+                 vector<AnnotationGroup>* transformed_anno_vec,
+                 bool* do_mirror, int policy_num = 0);
+  void Transform(const AnnotatedDatum& anno_datum,
+                 Blob<Dtype>* transformed_blob,
+                 vector<AnnotationGroup>* transformed_anno_vec, int policy_num = 0);
 
   /**
    * @brief Transform the annotation according to the transformation applied
@@ -97,38 +97,38 @@ public:
    *    Stores all transformed AnnotationGroup.
    */
   void TransformAnnotation(
-      const AnnotatedDatum &anno_datum, const bool do_resize,
-      const NormalizedBBox &crop_bbox, const bool do_mirror,
-      RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all, int policy_num = 0);
+      const AnnotatedDatum& anno_datum, const bool do_resize,
+      const NormalizedBBox& crop_bbox, const bool do_mirror,
+      RepeatedPtrField<AnnotationGroup>* transformed_anno_group_all, int policy_num = 0);
 
   /**
    * @brief Crops the datum according to bbox.
    */
-  void CropImage(const Datum &datum, const NormalizedBBox &bbox,
-                 Datum *crop_datum);
+  void CropImage(const Datum& datum, const NormalizedBBox& bbox,
+                 Datum* crop_datum);
 
   /**
    * @brief Crops the datum and AnnotationGroup according to bbox.
    */
-  void CropImage(const AnnotatedDatum &anno_datum, const NormalizedBBox &bbox,
-                 AnnotatedDatum *cropped_anno_datum, bool has_anno = true);
+  void CropImage(const AnnotatedDatum& anno_datum, const NormalizedBBox& bbox,
+                 AnnotatedDatum* cropped_anno_datum , bool has_anno = true);
 
   /**
    * @brief Expand the datum.
    */
-  void ExpandImage(const Datum &datum, const float expand_ratio,
-                   NormalizedBBox *expand_bbox, Datum *expanded_datum);
+  void ExpandImage(const Datum& datum, const float expand_ratio,
+                   NormalizedBBox* expand_bbox, Datum* expanded_datum);
 
   /**
    * @brief Expand the datum and adjust AnnotationGroup.
    */
-  void ExpandImage(const AnnotatedDatum &anno_datum,
-                   AnnotatedDatum *expanded_anno_datum);
+  void ExpandImage(const AnnotatedDatum& anno_datum,
+                   AnnotatedDatum* expanded_anno_datum);
 
   /**
    * @brief Apply distortion to the datum.
    */
-  void DistortImage(const Datum &datum, Datum *distort_datum);
+  void DistortImage(const Datum& datum, Datum* distort_datum);
 
 #ifdef USE_OPENCV
   /**
@@ -141,8 +141,8 @@ public:
    *    This is destination blob. It can be part of top blob's data if
    *    set_cpu_data() is used. See memory_layer.cpp for an example.
    */
-  void Transform(const vector<cv::Mat> &mat_vector,
-                 Blob<Dtype> *transformed_blob);
+  void Transform(const vector<cv::Mat> & mat_vector,
+                Blob<Dtype>* transformed_blob);
 
   /**
    * @brief Applies the transformation defined in the data layer's
@@ -157,31 +157,31 @@ public:
    *    Use with dense label images to preserve the input pixel values
    *    which would be labels (and thus cannot be interpolated or scaled).
    */
-  void Transform2(const std::vector<cv::Mat> cv_imgs, Blob<Dtype> *transformed_blob,
-                  bool preserve_pixel_vals = false);
+  void Transform2(const std::vector<cv::Mat> cv_imgs, Blob<Dtype>* transformed_blob,
+                 bool preserve_pixel_vals = false);
 
-  void Transform(const cv::Mat &cv_img, Blob<Dtype> *transformed_blob,
-                 NormalizedBBox *crop_bbox, bool *do_mirror, int policy_num = 0);
-  void Transform(const cv::Mat &cv_img, Blob<Dtype> *transformed_blob);
+  void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob,
+                 NormalizedBBox* crop_bbox, bool* do_mirror, int policy_num = 0);
+  void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
   /**
    *@brief For classfication task data augmentation
    */
-  void Transform3(const cv::Mat &cv_img, Blob<Dtype> *transformed_blob);
+  void Transform3(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
 
   /**
    * @brief Crops img according to bbox.
    */
-  void CropImage(const cv::Mat &img, const NormalizedBBox &bbox,
-                 cv::Mat *crop_img);
+  void CropImage(const cv::Mat& img, const NormalizedBBox& bbox,
+                 cv::Mat* crop_img);
 
   /**
    * @brief Expand img to include mean value as background.
    */
-  void ExpandImage(const cv::Mat &img, const float expand_ratio,
-                   NormalizedBBox *expand_bbox, cv::Mat *expand_img);
+  void ExpandImage(const cv::Mat& img, const float expand_ratio,
+                   NormalizedBBox* expand_bbox, cv::Mat* expand_img);
 
-  void TransformInv(const Blob<Dtype> *blob, vector<cv::Mat> *cv_imgs);
-  void TransformInv(const Dtype *data, cv::Mat *cv_img, const int height,
+  void TransformInv(const Blob<Dtype>* blob, vector<cv::Mat>* cv_imgs);
+  void TransformInv(const Dtype* data, cv::Mat* cv_img, const int height,
                     const int width, const int channels);
 #endif  // USE_OPENCV
 
@@ -196,7 +196,7 @@ public:
    *    This is destination blob, it will contain as many images as the
    *    input blob. It can be part of top blob's data.
    */
-  void Transform(Blob<Dtype> *input_blob, Blob<Dtype> *transformed_blob);
+  void Transform(Blob<Dtype>* input_blob, Blob<Dtype>* transformed_blob);
 
   /**
    * @brief Infers the shape of transformed_blob will have when
@@ -205,7 +205,7 @@ public:
    * @param datum
    *    Datum containing the data to be transformed.
    */
-  vector<int> InferBlobShape(const Datum &datum, int policy_num = 0);
+  vector<int> InferBlobShape(const Datum& datum,int policy_num = 0);
   /**
    * @brief Infers the shape of transformed_blob will have when
    *    the transformation is applied to the data.
@@ -214,7 +214,7 @@ public:
    * @param datum_vector
    *    A vector of Datum containing the data to be transformed.
    */
-  vector<int> InferBlobShape(const vector<Datum> &datum_vector);
+  vector<int> InferBlobShape(const vector<Datum> & datum_vector);
   /**
    * @brief Infers the shape of transformed_blob will have when
    *    the transformation is applied to the data.
@@ -224,7 +224,7 @@ public:
    *    A vector of Mat containing the data to be transformed.
    */
 #ifdef USE_OPENCV
-  vector<int> InferBlobShape(const vector<cv::Mat> &mat_vector);
+  vector<int> InferBlobShape(const vector<cv::Mat> & mat_vector);
   /**
    * @brief Infers the shape of transformed_blob will have when
    *    the transformation is applied to the data.
@@ -232,35 +232,36 @@ public:
    * @param cv_img
    *    cv::Mat containing the data to be transformed.
    */
-  vector<int> InferBlobShape(const cv::Mat &cv_img, int policy_num = 0);
+  vector<int> InferBlobShape(const cv::Mat& cv_img, int policy_num = 0);
 #endif  // USE_OPENCV
   bool mirror_param_;
   bool get_mirror() { return mirror_param_; }
-protected:
-  /**
-  * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
-  *
-  * @param n
-  *    The upperbound (exclusive) value of the random number.
-  * @return
-  *    A uniformly random integer value from ({0, 1, ..., n-1}).
-  */
+ protected:
+   /**
+   * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
+   *
+   * @param n
+   *    The upperbound (exclusive) value of the random number.
+   * @return
+   *    A uniformly random integer value from ({0, 1, ..., n-1}).
+   */
   virtual int Rand(int n);
 
   // Transform and return the transformation information.
-  void Transform(const Datum &datum, Dtype *transformed_data,
-                 NormalizedBBox *crop_bbox, bool *do_mirror);
-  void Transform(const Datum &datum, Dtype *transformed_data);
+  void Transform(const Datum& datum, Dtype* transformed_data,
+                 NormalizedBBox* crop_bbox, bool* do_mirror);
+  void Transform(const Datum& datum, Dtype* transformed_data);
 
   /**
    * @brief Applies the transformation defined in the data layer's
    * transform_param block to the data and return transform information.
    */
-  void Transform(const Datum &datum, Blob<Dtype> *transformed_blob,
-                 NormalizedBBox *crop_bbox, bool *do_mirror, int policy_num = 0);
+  void Transform(const Datum& datum, Blob<Dtype>* transformed_blob,
+                 NormalizedBBox* crop_bbox, bool* do_mirror, int policy_num = 0);
 
   // Tranformation parameters
   TransformationParameter param_;
+
 
   shared_ptr<Caffe::RNG> rng_;
   Phase phase_;

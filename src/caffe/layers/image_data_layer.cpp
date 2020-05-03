@@ -1,5 +1,4 @@
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 
 #include <fstream>  // NOLINT(readability/streams)
@@ -174,7 +173,6 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
 }
 
 INSTANTIATE_CLASS(ImageDataLayer);
-
 REGISTER_LAYER_CLASS(ImageData);
 
 }  // namespace caffe

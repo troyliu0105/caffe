@@ -65,12 +65,10 @@ void DropoutLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(DropoutLayer);
 #endif
 
 INSTANTIATE_CLASS(DropoutLayer);
-
 REGISTER_LAYER_CLASS(Dropout);
 
 }  // namespace caffe

@@ -157,7 +157,7 @@ void RecurrentLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   for (int i = 0; i < unrolled_net_->layers().size(); ++i) {
     for (int j = 0; j < unrolled_net_->layers()[i]->blobs().size(); ++j) {
       CHECK(unrolled_net_->layers()[i]->param_propagate_down(j))
-              << "param_propagate_down not set for layer " << i << ", param " << j;
+      << "param_propagate_down not set for layer " << i << ", param " << j;
     }
   }
   this->param_propagate_down_.clear();
@@ -214,9 +214,9 @@ void RecurrentLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
     const int bottom_offset = 2 + static_input_;
     for (int i = bottom_offset, j = 0; i < bottom.size(); ++i, ++j) {
       CHECK(recur_input_blobs_[j]->shape() == bottom[i]->shape())
-              << "shape mismatch - recur_input_blobs_[" << j << "]: "
-              << recur_input_blobs_[j]->shape_string()
-              << " vs. bottom[" << i << "]: " << bottom[i]->shape_string();
+      << "shape mismatch - recur_input_blobs_[" << j << "]: "
+      << recur_input_blobs_[j]->shape_string()
+      << " vs. bottom[" << i << "]: " << bottom[i]->shape_string();
       recur_input_blobs_[j]->ShareData(*bottom[i]);
     }
   }
@@ -288,7 +288,6 @@ void RecurrentLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU_FORWARD(RecurrentLayer, Forward);
 #endif
 

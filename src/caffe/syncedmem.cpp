@@ -111,7 +111,7 @@ const void *SyncedMemory::gpu_data() {
   check_device();
 #ifndef CPU_ONLY
   to_gpu();
-  return (const void*)gpu_ptr_;
+  return (const void *) gpu_ptr_;
 #else
   NO_GPU;
   return NULL;
@@ -153,7 +153,7 @@ void *SyncedMemory::mutable_gpu_data() {
 }
 
 #ifndef CPU_ONLY
-void SyncedMemory::async_gpu_push(const cudaStream_t& stream) {
+void SyncedMemory::async_gpu_push(const cudaStream_t &stream) {
   check_device();
   CHECK(head_ == HEAD_AT_CPU);
   if (gpu_ptr_ == NULL) {

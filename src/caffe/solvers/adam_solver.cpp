@@ -17,9 +17,9 @@ void AdamSolver<Dtype>::AdamPreSolve() {
 }
 
 #ifndef CPU_ONLY
-template <typename Dtype>
-void adam_update_gpu(int N, Dtype* g, Dtype* m, Dtype* v, Dtype beta1,
-    Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate);
+template<typename Dtype>
+void adam_update_gpu(int N, Dtype *g, Dtype *m, Dtype *v, Dtype beta1,
+                     Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate);
 #endif
 
 template<typename Dtype>
@@ -76,8 +76,8 @@ void AdamSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
   case Caffe::GPU: {
 #ifndef CPU_ONLY
     adam_update_gpu(N, net_params[param_id]->mutable_gpu_diff(),
-        val_m->mutable_gpu_data(), val_v->mutable_gpu_data(), beta1, beta2,
-        eps_hat, local_rate*correction);
+                    val_m->mutable_gpu_data(), val_v->mutable_gpu_data(), beta1, beta2,
+                    eps_hat, local_rate * correction);
 #else
     NO_GPU;
 #endif
@@ -89,7 +89,6 @@ void AdamSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
 }
 
 INSTANTIATE_CLASS(AdamSolver);
-
 REGISTER_SOLVER_CLASS(Adam);
 
 }  // namespace caffe

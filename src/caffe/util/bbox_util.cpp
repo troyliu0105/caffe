@@ -24,7 +24,6 @@ Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
   float right = r1 < r2 ? r1 : r2;
   return right - left;
 }
-
 template<typename Dtype>
 Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float w = overlap(a[0], a[2], b[0], b[2]);
@@ -33,14 +32,12 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
-
 template<typename Dtype>
 Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-
 template<typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
@@ -50,7 +47,7 @@ template<typename Dtype>
 boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = {0};
   ba.top = fmin(a[1] - a[3] / 2, b[1] - b[3] / 2);
-  ba.bottom = fmax(a[1] + a[3] / 2, b[1] + b[3] / 2);
+  ba.bot = fmax(a[1] + a[3] / 2, b[1] + b[3] / 2);
   ba.left = fmin(a[0] - a[2] / 2, b[0] - b[2] / 2);
   ba.right = fmax(a[0] + a[2] / 2, b[0] + b[2] / 2);
   return ba;
@@ -58,52 +55,49 @@ boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
 
 // representation from x, y, w, h to top, left, bottom, right
 template<typename Dtype>
-boxabs xywh2xyxy(vector<Dtype> a) {
+boxabs to_tblr(vector<Dtype> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
   float l = a[0] - (a[2] / 2);
   float r = a[0] + (a[2] / 2);
   tblr.top = t;
-  tblr.bottom = b;
+  tblr.bot = b;
   tblr.left = l;
   tblr.right = r;
   return tblr;
 }
-
 template<>
-boxabs xywh2xyxy(vector<float> a) {
+boxabs to_tblr(vector<float> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
   float l = a[0] - (a[2] / 2);
   float r = a[0] + (a[2] / 2);
   tblr.top = t;
-  tblr.bottom = b;
+  tblr.bot = b;
   tblr.left = l;
   tblr.right = r;
   return tblr;
 }
-
 template<>
-boxabs xywh2xyxy(vector<double> a) {
+boxabs to_tblr(vector<double> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
   float l = a[0] - (a[2] / 2);
   float r = a[0] + (a[2] / 2);
   tblr.top = t;
-  tblr.bottom = b;
+  tblr.bot = b;
   tblr.left = l;
   tblr.right = r;
   return tblr;
 }
-
 template<typename Dtype>
 Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
-  float h = ba.bottom - ba.top;
+  float h = ba.bot - ba.top;
   float c = w * h;
   float iou = box_iou(a, b);
   if (c == 0) {
@@ -119,7 +113,7 @@ template<>
 float box_giou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
-  float h = ba.bottom - ba.top;
+  float h = ba.bot - ba.top;
   float c = w * h;
   float iou = box_iou(a, b);
   if (c == 0) {
@@ -130,12 +124,11 @@ float box_giou(vector<float> a, vector<float> b) {
 
   return iou - giou_term;
 }
-
 template<>
 double box_giou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
-  double h = ba.bottom - ba.top;
+  double h = ba.bot - ba.top;
   double c = w * h;
   double iou = box_iou(a, b);
   if (c == 0) {
@@ -146,14 +139,13 @@ double box_giou(vector<double> a, vector<double> b) {
 
   return iou - giou_term;
 }
-
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
 template<typename Dtype>
 Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
-  Dtype h = ba.bottom - ba.top;
+  Dtype h = ba.bot - ba.top;
   Dtype c = w * w + h * h;
   Dtype iou = box_iou(a, b);
   if (c == 0) {
@@ -165,12 +157,11 @@ Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
 
   return iou - diou_term;
 }
-
 template<>
 float box_diou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
-  float h = ba.bottom - ba.top;
+  float h = ba.bot - ba.top;
   float c = w * w + h * h;
   float iou = box_iou(a, b);
   if (c == 0) {
@@ -182,12 +173,11 @@ float box_diou(vector<float> a, vector<float> b) {
 
   return iou - diou_term;
 }
-
 template<>
 double box_diou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
-  double h = ba.bottom - ba.top;
+  double h = ba.bot - ba.top;
   double c = w * w + h * h;
   double iou = box_iou(a, b);
   if (c == 0) {
@@ -199,11 +189,10 @@ double box_diou(vector<double> a, vector<double> b) {
 
   return iou - diou_term;
 }
-
 float box_diounms(vector<float> a, vector<float> b, float beta1) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
-  float h = ba.bottom - ba.top;
+  float h = ba.bot - ba.top;
   float c = w * w + h * h;
   float iou = box_iou(a, b);
   if (c == 0) {
@@ -217,14 +206,13 @@ float box_diounms(vector<float> a, vector<float> b, float beta1) {
 #endif
   return iou - diou_term;
 }
-
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
 template<typename Dtype>
 Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
-  Dtype h = ba.bottom - ba.top;
+  Dtype h = ba.bot - ba.top;
   Dtype c = w * w + h * h;
   Dtype iou = box_iou(a, b);
   if (c == 0) {
@@ -239,12 +227,11 @@ Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   Dtype ciou_term = d + alpha * ar_loss;                   //ciou
   return iou - ciou_term;
 }
-
 template<>
 float box_ciou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
-  float h = ba.bottom - ba.top;
+  float h = ba.bot - ba.top;
   float c = w * w + h * h;
   float iou = box_iou(a, b);
   if (c == 0) {
@@ -260,12 +247,11 @@ float box_ciou(vector<float> a, vector<float> b) {
   return iou - ciou_term;
 
 }
-
 template<>
 double box_ciou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
-  double h = ba.bottom - ba.top;
+  double h = ba.bot - ba.top;
   double c = w * w + h * h;
   double iou = box_iou(a, b);
   if (c == 0) {
@@ -281,7 +267,6 @@ double box_ciou(vector<double> a, vector<double> b) {
   return iou - ciou_term;
 
 }
-
 template<typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
   Dtype iou;
@@ -296,7 +281,6 @@ Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
   }
   return iou;
 }
-
 template<>
 float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
   float iou;
@@ -311,7 +295,6 @@ float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
   }
   return iou;
 }
-
 template<>
 double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
   double iou;
@@ -326,45 +309,80 @@ double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
   }
   return iou;
 }
+template<typename Dtype>
+void get_gaussian_yolo_box(vector<Dtype> &b,
+                           Dtype *x,
+                           vector<Dtype> biases,
+                           int n,
+                           int index,
+                           int i,
+                           int j,
+                           int lw,
+                           int lh,
+                           int w,
+                           int h,
+                           int stride) {
+
+  b.clear();
+  b.push_back((i + (x[index + 0 * stride])) / lw);
+  b.push_back((j + (x[index + 2 * stride])) / lh);
+  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
+  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
+}
+template<>
+void get_gaussian_yolo_box<float>(vector<float> &b,
+                                  float *x,
+                                  vector<float> biases,
+                                  int n,
+                                  int index,
+                                  int i,
+                                  int j,
+                                  int lw,
+                                  int lh,
+                                  int w,
+                                  int h,
+                                  int stride) {
+
+  b.clear();
+  b.push_back((i + (x[index + 0 * stride])) / lw);
+  b.push_back((j + (x[index + 2 * stride])) / lh);
+  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
+  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
+}
+template<>
+void get_gaussian_yolo_box<double>(vector<double> &b,
+                                   double *x,
+                                   vector<double> biases,
+                                   int n,
+                                   int index,
+                                   int i,
+                                   int j,
+                                   int lw,
+                                   int lh,
+                                   int w,
+                                   int h,
+                                   int stride) {
+
+  b.clear();
+  b.push_back((i + (x[index + 0 * stride])) / lw);
+  b.push_back((j + (x[index + 2 * stride])) / lh);
+  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
+  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
+}
 
 template<typename Dtype>
-void get_gaussian_yolo_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n, int index, int i, int j, int lw,
-                           int lh, int w, int h, int stride) {
-
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 2 * stride])) / lh);
-  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
-}
-
-template<>
-void
-get_gaussian_yolo_box<float>(vector<float> &b, float *x, vector<float> biases, int n, int index, int i, int j, int lw,
-                             int lh, int w, int h, int stride) {
-
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 2 * stride])) / lh);
-  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
-}
-
-template<>
-void
-get_gaussian_yolo_box<double>(vector<double> &b, double *x, vector<double> biases, int n, int index, int i, int j,
-                              int lw, int lh, int w, int h, int stride) {
-
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 2 * stride])) / lh);
-  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
-}
-
-template<typename Dtype>
-void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n, int index, int i, int j, int lw, int lh,
-                    int w, int h, int stride) {
+void get_region_box(vector<Dtype> &b,
+                    Dtype *x,
+                    vector<Dtype> biases,
+                    int n,
+                    int index,
+                    int i,
+                    int j,
+                    int lw,
+                    int lh,
+                    int w,
+                    int h,
+                    int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -372,10 +390,19 @@ void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n, int
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
-
 template<>
-void get_region_box<float>(vector<float> &b, float *x, vector<float> biases, int n, int index, int i, int j, int lw,
-                           int lh, int w, int h, int stride) {
+void get_region_box<float>(vector<float> &b,
+                           float *x,
+                           vector<float> biases,
+                           int n,
+                           int index,
+                           int i,
+                           int j,
+                           int lw,
+                           int lh,
+                           int w,
+                           int h,
+                           int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -383,11 +410,19 @@ void get_region_box<float>(vector<float> &b, float *x, vector<float> biases, int
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
-
 template<>
-void
-get_region_box<double>(vector<double> &b, double *x, vector<double> biases, int n, int index, int i, int j, int lw,
-                       int lh, int w, int h, int stride) {
+void get_region_box<double>(vector<double> &b,
+                            double *x,
+                            vector<double> biases,
+                            int n,
+                            int index,
+                            int i,
+                            int j,
+                            int lw,
+                            int lh,
+                            int w,
+                            int h,
+                            int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -395,7 +430,6 @@ get_region_box<double>(vector<double> &b, double *x, vector<double> biases, int 
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
-
 bool SortBBoxAscend(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2) {
   return bbox1.score() < bbox2.score();
 }
@@ -413,7 +447,6 @@ bool SortScorePairAscend(const pair<float, T> &pair1,
 // Explicit initialization.
 template bool SortScorePairAscend(const pair<float, int> &pair1,
                                   const pair<float, int> &pair2);
-
 template bool SortScorePairAscend(const pair<float, pair<int, int> > &pair1,
                                   const pair<float, pair<int, int> > &pair2);
 
@@ -426,7 +459,6 @@ bool SortScorePairDescend(const pair<float, T> &pair1,
 // Explicit initialization.
 template bool SortScorePairDescend(const pair<float, int> &pair1,
                                    const pair<float, int> &pair2);
-
 template bool SortScorePairDescend(const pair<float, pair<int, int> > &pair1,
                                    const pair<float, pair<int, int> > &pair2);
 
@@ -501,7 +533,6 @@ Dtype BBoxSize(const Dtype *bbox, const bool normalized) {
 }
 
 template float BBoxSize(const float *bbox, const bool normalized);
-
 template double BBoxSize(const double *bbox, const bool normalized);
 
 void ClipBBox(const NormalizedBBox &bbox, NormalizedBBox *clip_bbox) {
@@ -701,7 +732,6 @@ Dtype JaccardOverlap(const Dtype *bbox1, const Dtype *bbox2) {
 }
 
 template float JaccardOverlap(const float *bbox1, const float *bbox2);
-
 template double JaccardOverlap(const double *bbox1, const double *bbox2);
 
 float BBoxCoverage(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2) {
@@ -1280,12 +1310,12 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
   vector<vector<float> > all_conf_loss;
 #ifdef CPU_ONLY
   ComputeConfLoss(conf_blob.cpu_data(), num, num_priors, num_classes,
-                  background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
-                  &all_conf_loss);
+      background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
+      &all_conf_loss);
 #else
   ComputeConfLossGPU(conf_blob, num, num_priors, num_classes,
-background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
-&all_conf_loss);
+                     background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
+                     &all_conf_loss);
 #endif
   vector<vector<float> > all_loc_loss;
   if (mining_type == MultiBoxLossParameter_MiningType_HARD_EXAMPLE) {
@@ -1426,7 +1456,6 @@ template void MineHardExamples(const Blob<float> &conf_blob,
                                int *num_matches, int *num_negs,
                                vector<map<int, vector<int> > > *all_match_indices,
                                vector<vector<int> > *all_neg_indices);
-
 template void MineHardExamples(const Blob<double> &conf_blob,
                                const vector<LabelBBox> &all_loc_preds,
                                const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
@@ -1474,7 +1503,6 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
 template void GetGroundTruth(const float *gt_data, const int num_gt,
                              const int background_label_id, const bool use_difficult_gt,
                              map<int, vector<NormalizedBBox> > *all_gt_bboxes);
-
 template void GetGroundTruth(const double *gt_data, const int num_gt,
                              const int background_label_id, const bool use_difficult_gt,
                              map<int, vector<NormalizedBBox> > *all_gt_bboxes);
@@ -1514,7 +1542,6 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
 template void GetGroundTruth(const float *gt_data, const int num_gt,
                              const int background_label_id, const bool use_difficult_gt,
                              map<int, LabelBBox> *all_gt_bboxes);
-
 template void GetGroundTruth(const double *gt_data, const int num_gt,
                              const int background_label_id, const bool use_difficult_gt,
                              map<int, LabelBBox> *all_gt_bboxes);
@@ -1551,7 +1578,6 @@ void GetLocPredictions(const Dtype *loc_data, const int num,
 template void GetLocPredictions(const float *loc_data, const int num,
                                 const int num_preds_per_class, const int num_loc_classes,
                                 const bool share_location, vector<LabelBBox> *loc_preds);
-
 template void GetLocPredictions(const double *loc_data, const int num,
                                 const int num_preds_per_class, const int num_loc_classes,
                                 const bool share_location, vector<LabelBBox> *loc_preds);
@@ -1651,7 +1677,6 @@ template void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
                                   const vector<vector<float> > &prior_variances,
                                   const MultiBoxLossParameter &multibox_loss_param,
                                   float *loc_pred_data, float *loc_gt_data);
-
 template void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
                                   const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
                                   const vector<map<int, vector<int> > > &all_match_indices,
@@ -1717,7 +1742,6 @@ template void ComputeLocLoss(const Blob<float> &loc_pred,
                              const vector<map<int, vector<int> > > &all_match_indices,
                              const int num, const int num_priors, const LocLossType loc_loss_type,
                              vector<vector<float> > *all_loc_loss);
-
 template void ComputeLocLoss(const Blob<double> &loc_pred,
                              const Blob<double> &loc_gt,
                              const vector<map<int, vector<int> > > &all_match_indices,
@@ -1746,7 +1770,6 @@ void GetConfidenceScores(const Dtype *conf_data, const int num,
 template void GetConfidenceScores(const float *conf_data, const int num,
                                   const int num_preds_per_class, const int num_classes,
                                   vector<map<int, vector<float> > > *conf_preds);
-
 template void GetConfidenceScores(const double *conf_data, const int num,
                                   const int num_preds_per_class, const int num_classes,
                                   vector<map<int, vector<float> > > *conf_preds);
@@ -1780,7 +1803,6 @@ void GetConfidenceScores(const Dtype *conf_data, const int num,
 template void GetConfidenceScores(const float *conf_data, const int num,
                                   const int num_preds_per_class, const int num_classes,
                                   const bool class_major, vector<map<int, vector<float> > > *conf_preds);
-
 template void GetConfidenceScores(const double *conf_data, const int num,
                                   const int num_preds_per_class, const int num_classes,
                                   const bool class_major, vector<map<int, vector<float> > > *conf_preds);
@@ -1839,7 +1861,6 @@ template void ComputeConfLoss(const float *conf_data, const int num,
                               const int num_preds_per_class, const int num_classes,
                               const int background_label_id, const ConfLossType loss_type,
                               vector<vector<float> > *all_conf_loss);
-
 template void ComputeConfLoss(const double *conf_data, const int num,
                               const int num_preds_per_class, const int num_classes,
                               const int background_label_id, const ConfLossType loss_type,
@@ -1924,7 +1945,6 @@ template void ComputeConfLoss(const float *conf_data, const int num,
                               const vector<map<int, vector<int> > > &all_match_indices,
                               const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
                               vector<vector<float> > *all_conf_loss);
-
 template void ComputeConfLoss(const double *conf_data, const int num,
                               const int num_preds_per_class, const int num_classes,
                               const int background_label_id, const ConfLossType loss_type,
@@ -2040,7 +2060,6 @@ template void EncodeConfPrediction(const float *conf_data, const int num,
                                    const vector<vector<int> > &all_neg_indices,
                                    const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
                                    float *conf_pred_data, float *conf_gt_data);
-
 template void EncodeConfPrediction(const double *conf_data, const int num,
                                    const int num_priors, const MultiBoxLossParameter &multibox_loss_param,
                                    const vector<map<int, vector<int> > > &all_match_indices,
@@ -2080,7 +2099,6 @@ void GetPriorBBoxes(const Dtype *prior_data, const int num_priors,
 template void GetPriorBBoxes(const float *prior_data, const int num_priors,
                              vector<NormalizedBBox> *prior_bboxes,
                              vector<vector<float> > *prior_variances);
-
 template void GetPriorBBoxes(const double *prior_data, const int num_priors,
                              vector<NormalizedBBox> *prior_bboxes,
                              vector<vector<float> > *prior_variances);
@@ -2115,7 +2133,6 @@ void GetDetectionResults(const Dtype *det_data, const int num_det,
 template void GetDetectionResults(const float *det_data, const int num_det,
                                   const int background_label_id,
                                   map<int, map<int, vector<NormalizedBBox> > > *all_detections);
-
 template void GetDetectionResults(const double *det_data, const int num_det,
                                   const int background_label_id,
                                   map<int, map<int, vector<NormalizedBBox> > > *all_detections);
@@ -2181,7 +2198,6 @@ void GetMaxScoreIndex(const Dtype *scores, const int num, const float threshold,
 template
 void GetMaxScoreIndex(const float *scores, const int num, const float threshold,
                       const int top_k, vector<pair<float, int> > *score_index_vec);
-
 template
 void GetMaxScoreIndex(const double *scores, const int num,
                       const float threshold, const int top_k,
@@ -2372,7 +2388,6 @@ template
 void ApplyNMSFast(const float *bboxes, const float *scores, const int num,
                   const float score_threshold, const float nms_threshold,
                   const float eta, const int top_k, vector<int> *indices);
-
 template
 void ApplyNMSFast(const double *bboxes, const double *scores, const int num,
                   const float score_threshold, const float nms_threshold,
@@ -2483,7 +2498,6 @@ void ComputeAP(const vector<pair<float, int> > &tp, const int num_pos,
 }
 
 #ifdef USE_OPENCV
-
 cv::Scalar HSV2RGB(const float h, const float s, const float v) {
   const int h_i = static_cast<int>(h * 6);
   const float f = h * 6 - h_i;
@@ -2646,7 +2660,7 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
                                     30, size, true);
 #else
         cv::VideoWriter outputVideo(save_file, CV_FOURCC('D', 'I', 'V', 'X'),
-30, size, true);
+            30, size, true);
 #endif
         cap_out = outputVideo;
       }
@@ -2666,7 +2680,6 @@ void VisualizeBBox(const vector<cv::Mat> &images,
                    const float threshold, const vector<cv::Scalar> &colors,
                    const map<int, string> &label_to_display_name,
                    const string &save_file);
-
 template
 void VisualizeBBox(const vector<cv::Mat> &images,
                    const Blob<double> *detections,

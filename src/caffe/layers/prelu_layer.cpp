@@ -131,12 +131,10 @@ void PReLULayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(PReLULayer);
 #endif
 
 INSTANTIATE_CLASS(PReLULayer);
-
 REGISTER_LAYER_CLASS(PReLU);
 
 }  // namespace caffe

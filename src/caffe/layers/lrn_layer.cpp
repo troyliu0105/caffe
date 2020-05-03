@@ -247,11 +247,8 @@ void LRNLayer<Dtype>::WithinChannelBackward(
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(LRNLayer);
-
 STUB_GPU_FORWARD(LRNLayer, CrossChannelForward);
-
 STUB_GPU_BACKWARD(LRNLayer, CrossChannelBackward);
 #endif
 

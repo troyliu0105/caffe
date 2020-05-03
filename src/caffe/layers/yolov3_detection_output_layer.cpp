@@ -33,7 +33,6 @@ Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
   float right = r1 < r2 ? r1 : r2;
   return right - left;
 }
-
 template<typename Dtype>
 Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float w = overlap(a[0], a[2], b[0], b[2]);
@@ -42,19 +41,16 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
-
 template<typename Dtype>
 Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-
 template<typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
 }
-
 template<typename Dtype>
 void setNormalizedBBox(NormalizedBBox &bbox, Dtype x, Dtype y, Dtype w, Dtype h) {
   Dtype xmin = x - w / 2.0;
@@ -81,7 +77,6 @@ void setNormalizedBBox(NormalizedBBox &bbox, Dtype x, Dtype y, Dtype w, Dtype h)
   float bbox_size = BBoxSize(bbox, true);
   bbox.set_size(bbox_size);
 }
-
 template<typename Dtype>
 void ApplyNms(vector<PredictionResult<Dtype> > &boxes, vector<int> &idxes, Dtype threshold) {
   map<int, int> idx_map;
@@ -125,7 +120,6 @@ void ApplyNms(vector<PredictionResult<Dtype> > &boxes, vector<int> &idxes, Dtype
     }
   }
 }
-
 template<typename Dtype>
 void class_index_and_score(Dtype *input, int classes, PredictionResult<Dtype> &predict) {
   Dtype sum = 0;
@@ -156,11 +150,13 @@ void class_index_and_score(Dtype *input, int classes, PredictionResult<Dtype> &p
   predict.classType = classIndex;
   predict.classScore = large;
 }
-
 template<typename Dtype>
-void
-Yolov3DetectionOutputLayer<Dtype>::correct_yolo_boxes(PredictionResult<Dtype> &det, int w, int h, int netw, int neth,
-                                                      int relative) {
+void Yolov3DetectionOutputLayer<Dtype>::correct_yolo_boxes(PredictionResult<Dtype> &det,
+                                                           int w,
+                                                           int h,
+                                                           int netw,
+                                                           int neth,
+                                                           int relative) {
   int i;
   int new_w = 0;
   int new_h = 0;
@@ -184,7 +180,6 @@ Yolov3DetectionOutputLayer<Dtype>::correct_yolo_boxes(PredictionResult<Dtype> &d
   }
 
 }
-
 template<typename Dtype>
 void Yolov3DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                                    const vector<Blob<Dtype> *> &top) {
@@ -228,7 +223,6 @@ void Yolov3DetectionOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bot
   top_shape.push_back(7);
   top[0]->Reshape(top_shape);
 }
-
 template<typename Dtype>
 bool BoxSortDecendScore(const PredictionResult<Dtype> &box1, const PredictionResult<Dtype> &box2) {
   return box1.confidence > box2.confidence;
@@ -298,8 +292,9 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
             int x2 = s % side_w_;
             Dtype obj_score;
             if (gaussian_box_) {
-              Dtype uc_ver = 4.0 - swap_data[index + 1 * stride] - swap_data[index + 3 * stride] -
-                  swap_data[index + 5 * stride] - swap_data[index + 7 * stride];
+              Dtype uc_ver =
+                  4.0 - swap_data[index + 1 * stride] - swap_data[index + 3 * stride] - swap_data[index + 5 * stride]
+                      - swap_data[index + 7 * stride];
               obj_score = swap_data[index + 8 * stride] * uc_ver / 4.0;
             } else {
               obj_score = swap_data[index + 4 * stride];
@@ -310,11 +305,31 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
               //LOG(INFO) << class_score[c];
               if (class_score[c] > confidence_threshold_) {
                 if (gaussian_box_) {
-                  get_gaussian_yolo_box(pred, swap_data, biases_, mask_[n + mask_offset], index, x2, y2, side_w_,
-                                        side_h_, nw, nh, stride);
+                  get_gaussian_yolo_box(pred,
+                                        swap_data,
+                                        biases_,
+                                        mask_[n + mask_offset],
+                                        index,
+                                        x2,
+                                        y2,
+                                        side_w_,
+                                        side_h_,
+                                        nw,
+                                        nh,
+                                        stride);
                 } else {
-                  get_region_box(pred, swap_data, biases_, mask_[n + mask_offset], index, x2, y2, side_w_, side_h_,
-                                 nw, nh, stride);
+                  get_region_box(pred,
+                                 swap_data,
+                                 biases_,
+                                 mask_[n + mask_offset],
+                                 index,
+                                 x2,
+                                 y2,
+                                 side_w_,
+                                 side_h_,
+                                 nw,
+                                 nh,
+                                 stride);
                 }
 
                 predict.x = pred[0];
@@ -386,28 +401,22 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
   }
 
 }
-
 template<typename Dtype>
 void Yolov3DetectionOutputLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                                      const vector<bool> &propagate_down,
                                                      const vector<Blob<Dtype> *> &bottom) {
   return;
 }
-
 #ifdef CPU_ONLY
-
-template<typename Dtype>
-void Yolov3DetectionOutputLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                                     const vector<bool> &propagate_down,
-                                                     const vector<Blob<Dtype> *> &bottom) {
+template <typename Dtype>
+void Yolov3DetectionOutputLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
+  const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
   return;
 }
-
-STUB_GPU_FORWARD(Yolov3DetectionOutputLayer, Forward);
+  STUB_GPU_FORWARD(Yolov3DetectionOutputLayer, Forward);
 #endif
 
 INSTANTIATE_CLASS(Yolov3DetectionOutputLayer);
-
 REGISTER_LAYER_CLASS(Yolov3DetectionOutput);
 
 }  // namespace caffe

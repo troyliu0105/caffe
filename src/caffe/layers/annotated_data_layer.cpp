@@ -1,12 +1,9 @@
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #endif  // USE_OPENCV
-
-#include <cstdint>
+#include <stdint.h>
 
 #include <algorithm>
 #include <map>
@@ -18,7 +15,6 @@
 #include "caffe/util/sampler.hpp"
 #include "caffe/util/im_transforms.hpp"
 #include "caffe/util/bbox_util.hpp"
-
 const float prob_eps = 0.01;
 namespace caffe {
 
@@ -95,8 +91,7 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
       }
       // Infer the label shape from anno_datum.AnnotationGroup().
       int num_bboxes = 0;
-      if (anno_type_ == AnnotatedDatum_AnnotationType_BBOX ||
-          anno_type_ == AnnotatedDatum_AnnotationType_BBOXandSeg) {
+      if (anno_type_ == AnnotatedDatum_AnnotationType_BBOX || anno_type_ == AnnotatedDatum_AnnotationType_BBOXandSeg) {
         // Since the number of bboxes can be different for each image,
         // we store the bbox information in a specific format. In specific:
         // All bboxes are stored in one spatial plane (num and channels are 1)
@@ -135,7 +130,7 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
   if (this->output_seg_labels_) {
 
     CHECK(ReadProtoFromTextFile(label_map_file_, &label_map_))
-            << "Failed to read label map file.";
+    << "Failed to read label map file.";
     int maxima = 0;
     if (!single_class_) {
       for (int i = 0; i < label_map_.item().size(); i++) {
@@ -170,7 +165,6 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
     this->transformed_label_.Reshape(seg_label_shape);
   }
 }
-
 string type2str(int type) {
   string r;
 
@@ -308,8 +302,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       if (batch_samplers_.size() > 0) {
         GenerateBatchSamples(*expand_datum, batch_samplers_, &sampled_bboxes);
       } else {
-        bool keep = transform_param.resize_param(policy_num_).resize_mode() ==
-            ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD;
+        bool keep = transform_param.resize_param(policy_num_).resize_mode()
+            == ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD;
         GenerateJitterSamples(yolo_data_jitter_, &sampled_bboxes, keep);
       }
       if (sampled_bboxes.size() > 0) {
@@ -368,8 +362,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         this->data_transformer_->Transform(*sampled_datum,
                                            &(this->transformed_data_),
                                            &transformed_anno_vec, policy_num_);
-        if (anno_type_ == AnnotatedDatum_AnnotationType_BBOX ||
-            anno_type_ == AnnotatedDatum_AnnotationType_BBOXandSeg) {
+        if (anno_type_ == AnnotatedDatum_AnnotationType_BBOX
+            || anno_type_ == AnnotatedDatum_AnnotationType_BBOXandSeg) {
           // Count the number of bboxes.
           for (int g = 0; g < transformed_anno_vec.size(); ++g) {
             num_bboxes += transformed_anno_vec[g].annotation_size();
@@ -502,7 +496,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         //LOG(INFO)<<this->transformed_label_.width()<<","<<this->transformed_label_.height();
         //LOG(INFO)<<cv_lab.cols<<","<<cv_lab.rows;
         //LOG(INFO)<<seg_label_shape[0]<<","<<seg_label_shape[1]<<","<<seg_label_shape[2]<<","<<seg_label_shape[3];
-        //LOG(INFO)<<this->transformed_label_.num()<<","<<this->transformed_label_.channels()<<","<<this->transformed_label_.width()<<","<<this->transformed_label_.height();
+        //LOG(INFO)<<this->transformed_label_.num()<<","<<this->transformed_label_.channels()<<","<<this->transformed_label_.width()<<","<<this->transformed_label_.height();      
         int offset = batch->seg_label_.offset(item_id);
         //LOG(INFO)<<offset;
         this->transformed_label_.set_cpu_data(top_seg_label + offset);
@@ -627,7 +621,6 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
 }
 
 INSTANTIATE_CLASS(AnnotatedDataLayer);
-
 REGISTER_LAYER_CLASS(AnnotatedData);
 
 }  // namespace caffe

@@ -6,16 +6,14 @@ namespace caffe {
 
 __global__ void ClipForward(const int n, const float *in, float *out,
                             float p_min, float p_max) {
-  CUDA_KERNEL_LOOP(index, n)
-  {
+  CUDA_KERNEL_LOOP(index, n) {
     out[index] = fmaxf(p_min, fminf(in[index], p_max));
   }
 }
 
 __global__ void ClipForward(const int n, const double *in, double *out,
                             double p_min, double p_max) {
-  CUDA_KERNEL_LOOP(index, n)
-  {
+  CUDA_KERNEL_LOOP(index, n) {
     out[index] = fmax(p_min, fmin(in[index], p_max));
   }
 }
@@ -39,8 +37,7 @@ CUDA_POST_KERNEL_CHECK;
 template<typename Dtype>
 __global__ void ClipBackward(const int n, const Dtype *in_diff,
                              const Dtype *in_data, Dtype *out_diff, Dtype p_min, Dtype p_max) {
-  CUDA_KERNEL_LOOP(index, n)
-  {
+  CUDA_KERNEL_LOOP(index, n) {
     out_diff[index] = in_diff[index] * (
         in_data[index] >= p_min && in_data[index] <= p_max);
   }

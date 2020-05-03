@@ -104,17 +104,13 @@ TYPED_TEST(Im2colKernelTest, Test2D
 ) {
 // Reshape the blobs to correct size for im2col output
 this->blob_top_->Reshape(this->blob_bottom_->
-
 num(),
-
 this->channels_ * this->kernel_size_ * this->kernel_size_,
 this->height_col_,
 this->width_col_);
 
 this->blob_top_cpu_->Reshape(this->blob_bottom_->
-
 num(),
-
 this->channels_ * this->kernel_size_ * this->kernel_size_,
 this->height_col_,
 this->width_col_);
@@ -127,14 +123,10 @@ TypeParam *cpu_data = this->blob_top_cpu_->mutable_cpu_data();
 for (
 int n = 0;
 n < this->blob_bottom_->
-
 num();
-
 ++n) {
 im2col_cpu(this->blob_bottom_->
-
 cpu_data()
-
 + this->blob_bottom_->
 offset(n),
 this->channels_, this->height_, this->width_,
@@ -156,9 +148,7 @@ grid_div <= 8; grid_div++) {
 for (
 int n = 0;
 n < this->blob_bottom_->
-
 num();
-
 ++n) {
 int grid_dim = default_grid_dim / grid_div;
 // NOLINT_NEXT_LINE(whitespace/operators)
@@ -179,9 +169,7 @@ CUDA_POST_KERNEL_CHECK;
 for (
 int i = 0;
 i < this->blob_top_->
-
 count();
-
 ++i) {
 TypeParam cpuval = cpu_data[i];
 TypeParam gpuval = this->blob_top_->cpu_data()[i];
@@ -198,9 +186,7 @@ TYPED_TEST(Im2colKernelTest, TestND
 ) {
 // Reshape the blobs to correct size for im2col output
 this->blob_top_->Reshape(this->blob_bottom_->
-
 num(),
-
 this->channels_ * this->kernel_size_ * this->kernel_size_,
 this->height_col_,
 this->width_col_);
@@ -214,49 +200,31 @@ TypeParam *top_data_cpu = this->blob_top_cpu_->mutable_cpu_data();
 for (
 int n = 0;
 n < this->blob_bottom_->
-
 num();
-
 ++n) {
 im2col_nd_cpu(bottom_data_cpu
 + this->blob_bottom_->
 offset(n),
 2,
 this->blob_bottom_->
-
 shape()
-
 .
-
 data()
-
 + 1,
 this->blob_top_cpu_->
-
 shape()
-
 .
-
 data()
-
 + 1,
 this->blob_kernel_shape_->
-
 cpu_data(),
-
 this->blob_pad_->
-
 cpu_data(),
-
 this->blob_stride_->
-
 cpu_data(),
-
 this->blob_dilation_->
-
 cpu_data(),
     top_data_cpu
-
 + this->blob_top_cpu_->
 offset(n)
 );
@@ -274,9 +242,7 @@ grid_div <= 8; grid_div++) {
 for (
 int n = 0;
 n < this->blob_bottom_->
-
 num();
-
 ++n) {
 const int grid_dim = default_grid_dim / grid_div;
 TypeParam *top_data_gpu = this->blob_top_->mutable_gpu_data();
@@ -285,31 +251,19 @@ im2col_nd_gpu_kernel<TypeParam, 2><<<grid_dim, CAFFE_CUDA_NUM_THREADS>>>(
 num_kernels, bottom_data_gpu + this->blob_bottom_->
 offset(n),
 this->blob_bottom_->
-
 gpu_shape()
-
 + 1, this->blob_top_->
-
 gpu_shape()
-
 + 1,
 this->blob_kernel_shape_->
-
 gpu_data(),
-
 this->blob_pad_->
-
 gpu_data(),
-
 this->blob_stride_->
-
 gpu_data(),
-
 this->blob_dilation_->
-
 gpu_data(),
     top_data_gpu
-
 + this->blob_top_->
 offset(n)
 );
@@ -320,9 +274,7 @@ CUDA_POST_KERNEL_CHECK;
 for (
 int i = 0;
 i < this->blob_top_->
-
 count();
-
 ++i) {
 TypeParam cpuval = top_data_cpu[i];
 TypeParam gpuval = this->blob_top_->cpu_data()[i];

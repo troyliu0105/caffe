@@ -1,9 +1,6 @@
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
-
 #endif  // USE_OPENCV
-
 #include <stdint.h>
 
 #include <vector>
@@ -42,9 +39,9 @@ void DataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
     this->prefetch_[i]->data_.Reshape(top_shape);
   }
   LOG_IF(INFO, Caffe::root_solver())
-          << "output data size: " << top[0]->num() << ","
-          << top[0]->channels() << "," << top[0]->height() << ","
-          << top[0]->width();
+  << "output data size: " << top[0]->num() << ","
+  << top[0]->channels() << "," << top[0]->height() << ","
+  << top[0]->width();
   // label
   if (this->output_labels_) {
     vector<int> label_shape(1, batch_size);
@@ -109,7 +106,6 @@ void DataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
 }
 
 INSTANTIATE_CLASS(DataLayer);
-
 REGISTER_LAYER_CLASS(Data);
 
 }  // namespace caffe

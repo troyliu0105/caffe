@@ -39,8 +39,7 @@ __device__ int translate_idx_inv(
 }
 
 template<typename Dtype>
-__global__ void
-upscale(const Dtype *input, Dtype *output, int no_elements, int scale_factor, int d1, int d2, int d3) {
+__global__ void upscale(const Dtype *input, Dtype *output, int no_elements, int scale_factor, int d1, int d2, int d3) {
   int ii = threadIdx.x + blockDim.x * blockIdx.x;
   if (ii >= no_elements) return;
   int ipidx = translate_idx(ii, d1, d2, d3, scale_factor);
@@ -48,9 +47,13 @@ upscale(const Dtype *input, Dtype *output, int no_elements, int scale_factor, in
 }
 
 template<typename Dtype>
-__global__ void
-downscale(Dtype *gradInput_data, const Dtype *gradOutput_data, int no_elements, int scale_factor, int d1, int d2,
-          int d3) {
+__global__ void downscale(Dtype *gradInput_data,
+                          const Dtype *gradOutput_data,
+                          int no_elements,
+                          int scale_factor,
+                          int d1,
+                          int d2,
+                          int d3) {
   int ii = threadIdx.x + blockDim.x * blockIdx.x;
   if (ii >= no_elements) return;
   for (int i = 0; i < scale_factor; i++) {
@@ -62,59 +65,35 @@ downscale(Dtype *gradInput_data, const Dtype *gradOutput_data, int no_elements, 
 }
 
 template<typename Dtype>
-void UpsampleLayer<Dtype>::Forward_gpu(const vector<Blob < Dtype> *
+void UpsampleLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+  int d1, d2, d3;
+  d1 = top[0]->shape(1);
+  d2 = top[0]->shape(2);
+  d3 = top[0]->shape(3);
 
->& bottom,const vector<Blob < Dtype>*>& top) {
-int d1, d2, d3;
-d1 = top[0]->shape(1);
-d2 = top[0]->shape(2);
-d3 = top[0]->shape(3);
+  int no_elements = top[0]->count();
 
-int no_elements = top[0]->count();
-
-upscale<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-<<<CAFFE_GET_BLOCKS(no_elements), CAFFE_CUDA_NUM_THREADS>>>(
-    bottom[0]
-->
-
-gpu_data(), top[0]
-
-->
-
-mutable_gpu_data(), no_elements, scale_, d1, d2, d3
-
-);
+  upscale<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
+  <<<CAFFE_GET_BLOCKS(no_elements), CAFFE_CUDA_NUM_THREADS>>>(
+      bottom[0]->gpu_data(), top[0]->mutable_gpu_data(), no_elements, scale_, d1, d2, d3);
 }
 
 template<typename Dtype>
-void UpsampleLayer<Dtype>::Backward_gpu(const vector<Blob < Dtype> *
+void UpsampleLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
+                                        const vector<bool> &propagate_down,
+                                        const vector<Blob<Dtype> *> &bottom) {
+  int d1, d2, d3;
+  Dtype *bottom_diff = bottom[0]->mutable_gpu_diff();
+  d1 = bottom[0]->shape(1);
+  d2 = bottom[0]->shape(2);
+  d3 = bottom[0]->shape(3);
 
->& top,
-const vector<bool> &propagate_down,
-const vector<Blob < Dtype>*>& bottom) {
-int d1, d2, d3;
-Dtype *bottom_diff = bottom[0]->mutable_gpu_diff();
-d1 = bottom[0]->shape(1);
-d2 = bottom[0]->shape(2);
-d3 = bottom[0]->shape(3);
+  int no_elements = bottom[0]->count();
 
-int no_elements = bottom[0]->count();
-
-caffe_gpu_set(bottom[0]
-->
-
-count(), Dtype(0), bottom_diff
-
-);
-downscale <Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-<<<
-CAFFE_GET_BLOCKS(no_elements), CAFFE_CUDA_NUM_THREADS
->>>(
-bottom_diff, top[0]->
-
-gpu_diff(), no_elements, scale_, d1, d2, d3
-
-);
+  caffe_gpu_set(bottom[0]->count(), Dtype(0), bottom_diff);
+  downscale<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
+  <<<CAFFE_GET_BLOCKS(no_elements), CAFFE_CUDA_NUM_THREADS>>>(
+      bottom_diff, top[0]->gpu_diff(), no_elements, scale_, d1, d2, d3);
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(UpsampleLayer);

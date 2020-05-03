@@ -17,23 +17,23 @@ void PoolingLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   if (pool_param.global_pooling()) {
     CHECK(!(pool_param.has_kernel_size() ||
         pool_param.has_kernel_h() || pool_param.has_kernel_w()))
-            << "With Global_pooling: true Filter size cannot specified";
+    << "With Global_pooling: true Filter size cannot specified";
   } else {
     CHECK(!pool_param.has_kernel_size() !=
         !(pool_param.has_kernel_h() && pool_param.has_kernel_w()))
-            << "Filter size is kernel_size OR kernel_h and kernel_w; not both";
+    << "Filter size is kernel_size OR kernel_h and kernel_w; not both";
     CHECK(pool_param.has_kernel_size() ||
         (pool_param.has_kernel_h() && pool_param.has_kernel_w()))
-            << "For non-square filters both kernel_h and kernel_w are required.";
+    << "For non-square filters both kernel_h and kernel_w are required.";
   }
   CHECK((!pool_param.has_pad() && pool_param.has_pad_h()
       && pool_param.has_pad_w())
             || (!pool_param.has_pad_h() && !pool_param.has_pad_w()))
-          << "pad is pad OR pad_h and pad_w are required.";
+  << "pad is pad OR pad_h and pad_w are required.";
   CHECK((!pool_param.has_stride() && pool_param.has_stride_h()
       && pool_param.has_stride_w())
             || (!pool_param.has_stride_h() && !pool_param.has_stride_w()))
-          << "Stride is stride OR stride_h and stride_w are required.";
+  << "Stride is stride OR stride_h and stride_w are required.";
   global_pooling_ = pool_param.global_pooling();
   round_mode_ = pool_param.round_mode();
   if (global_pooling_) {
@@ -63,14 +63,14 @@ void PoolingLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   }
   if (global_pooling_) {
     CHECK(pad_h_ == 0 && pad_w_ == 0 && stride_h_ == 1 && stride_w_ == 1)
-            << "With Global_pooling: true; only pad = 0 and stride = 1";
+    << "With Global_pooling: true; only pad = 0 and stride = 1";
   }
   if (pad_h_ != 0 || pad_w_ != 0) {
     CHECK(this->layer_param_.pooling_param().pool()
               == PoolingParameter_PoolMethod_AVE
               || this->layer_param_.pooling_param().pool()
                   == PoolingParameter_PoolMethod_MAX)
-            << "Padding implemented only for average and max pooling.";
+    << "Padding implemented only for average and max pooling.";
     CHECK_LT(pad_h_, kernel_h_);
     CHECK_LT(pad_w_, kernel_w_);
   }
@@ -320,7 +320,6 @@ void PoolingLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(PoolingLayer);
 #endif
 

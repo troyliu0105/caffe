@@ -242,11 +242,9 @@ void BatchNormLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(BatchNormLayer);
 #endif
 
 INSTANTIATE_CLASS(BatchNormLayer);
-
 REGISTER_LAYER_CLASS(BatchNorm);
 }  // namespace caffe

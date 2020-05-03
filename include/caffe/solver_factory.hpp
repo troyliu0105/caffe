@@ -47,39 +47,39 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 class Solver;
 
-template<typename Dtype>
+template <typename Dtype>
 class SolverRegistry {
-public:
-  typedef Solver<Dtype> *(*Creator)(const SolverParameter &);
+ public:
+  typedef Solver<Dtype>* (*Creator)(const SolverParameter&);
   typedef std::map<string, Creator> CreatorRegistry;
 
-  static CreatorRegistry &Registry() {
-    static CreatorRegistry *g_registry_ = new CreatorRegistry();
+  static CreatorRegistry& Registry() {
+    static CreatorRegistry* g_registry_ = new CreatorRegistry();
     return *g_registry_;
   }
 
   // Adds a creator.
-  static void AddCreator(const string &type, Creator creator) {
-    CreatorRegistry &registry = Registry();
+  static void AddCreator(const string& type, Creator creator) {
+    CreatorRegistry& registry = Registry();
     CHECK_EQ(registry.count(type), 0)
-      << "Solver type " << type << " already registered.";
+        << "Solver type " << type << " already registered.";
     registry[type] = creator;
   }
 
   // Get a solver using a SolverParameter.
-  static Solver<Dtype> *CreateSolver(const SolverParameter &param) {
-    const string &type = param.type();
-    CreatorRegistry &registry = Registry();
+  static Solver<Dtype>* CreateSolver(const SolverParameter& param) {
+    const string& type = param.type();
+    CreatorRegistry& registry = Registry();
     CHECK_EQ(registry.count(type), 1) << "Unknown solver type: " << type
-                                      << " (known types: " << SolverTypeListString() << ")";
+        << " (known types: " << SolverTypeListString() << ")";
     return registry[type](param);
   }
 
-  static vector <string> SolverTypeList() {
-    CreatorRegistry &registry = Registry();
+  static vector<string> SolverTypeList() {
+    CreatorRegistry& registry = Registry();
     vector<string> solver_types;
     for (typename CreatorRegistry::iterator iter = registry.begin();
          iter != registry.end(); ++iter) {
@@ -88,7 +88,7 @@ public:
     return solver_types;
   }
 
-private:
+ private:
   // Solver registry should never be instantiated - everything is done with its
   // static variables.
   SolverRegistry() {}
@@ -107,15 +107,17 @@ private:
   }
 };
 
-template<typename Dtype>
+
+template <typename Dtype>
 class SolverRegisterer {
-public:
-  SolverRegisterer(const string &type,
-                   Solver<Dtype> *(*creator)(const SolverParameter &)) {
+ public:
+  SolverRegisterer(const string& type,
+      Solver<Dtype>* (*creator)(const SolverParameter&)) {
     // LOG(INFO) << "Registering solver type: " << type;
     SolverRegistry<Dtype>::AddCreator(type, creator);
   }
 };
+
 
 #define REGISTER_SOLVER_CREATOR(type, creator)                                 \
   static SolverRegisterer<float> g_creator_f_##type(#type, creator<float>);    \

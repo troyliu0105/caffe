@@ -133,12 +133,10 @@ void PermuteLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(PermuteLayer);
 #endif
 
 INSTANTIATE_CLASS(PermuteLayer);
-
 REGISTER_LAYER_CLASS(Permute);
 
 }  // namespace caffe

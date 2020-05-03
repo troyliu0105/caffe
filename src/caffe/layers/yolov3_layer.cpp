@@ -21,43 +21,40 @@
 #include <cfloat>
 #include <vector>
 #include <float.h>
-
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #endif  // USE_OPENCV
 
 namespace caffe {
 
 template<typename Dtype>
 dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
-  boxabs pred_tblr = xywh2xyxy(pred);
-  float pred_t = fmin(pred_tblr.top, pred_tblr.bottom);
-  float pred_b = fmax(pred_tblr.top, pred_tblr.bottom);
+  boxabs pred_tblr = to_tblr(pred);
+  float pred_t = fmin(pred_tblr.top, pred_tblr.bot);
+  float pred_b = fmax(pred_tblr.top, pred_tblr.bot);
   float pred_l = fmin(pred_tblr.left, pred_tblr.right);
   float pred_r = fmax(pred_tblr.left, pred_tblr.right);
 
-  boxabs truth_tblr = xywh2xyxy(truth);
+  boxabs truth_tblr = to_tblr(truth);
 #ifdef DEBUG_PRINTS
   printf("\niou: %f, giou: %f\n", box_iou(pred, truth), box_giou(pred, truth));
-  printf("pred: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n", pred.x, pred.y, pred.w, pred.h, pred_tblr.top, pred_tblr.bottom, pred_tblr.left, pred_tblr.right);
-  printf("truth: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n", truth.x, truth.y, truth.w, truth.h, truth_tblr.top, truth_tblr.bottom, truth_tblr.left, truth_tblr.right);
+  printf("pred: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n", pred.x, pred.y, pred.w, pred.h, pred_tblr.top, pred_tblr.bot, pred_tblr.left, pred_tblr.right);
+  printf("truth: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n", truth.x, truth.y, truth.w, truth.h, truth_tblr.top, truth_tblr.bot, truth_tblr.left, truth_tblr.right);
 #endif
   //printf("pred (t,b,l,r): (%f, %f, %f, %f)\n", pred_t, pred_b, pred_l, pred_r);
-  //printf("trut (t,b,l,r): (%f, %f, %f, %f)\n", truth_tblr.top, truth_tblr.bottom, truth_tblr.left, truth_tblr.right);
+  //printf("trut (t,b,l,r): (%f, %f, %f, %f)\n", truth_tblr.top, truth_tblr.bot, truth_tblr.left, truth_tblr.right);
   dxrep ddx = {0};
   float X = (pred_b - pred_t) * (pred_r - pred_l);
-  float Xhat = (truth_tblr.bottom - truth_tblr.top) * (truth_tblr.right - truth_tblr.left);
-  float Ih = fmin(pred_b, truth_tblr.bottom) - fmax(pred_t, truth_tblr.top);
+  float Xhat = (truth_tblr.bot - truth_tblr.top) * (truth_tblr.right - truth_tblr.left);
+  float Ih = fmin(pred_b, truth_tblr.bot) - fmax(pred_t, truth_tblr.top);
   float Iw = fmin(pred_r, truth_tblr.right) - fmax(pred_l, truth_tblr.left);
   float I = Iw * Ih;
   float U = X + Xhat - I;
   float S = (pred[0] - truth[0]) * (pred[0] - truth[0]) + (pred[1] - truth[1]) * (pred[1] - truth[1]);
   float giou_Cw = fmax(pred_r, truth_tblr.right) - fmin(pred_l, truth_tblr.left);
-  float giou_Ch = fmax(pred_b, truth_tblr.bottom) - fmin(pred_t, truth_tblr.top);
+  float giou_Ch = fmax(pred_b, truth_tblr.bot) - fmin(pred_t, truth_tblr.top);
   float giou_C = giou_Cw * giou_Ch;
 
   // float IoU = I / U;
@@ -69,7 +66,7 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
 
   // gradient of I min/max in IoU calc (prediction)
   float dI_wrt_t = pred_t > truth_tblr.top ? (-1 * Iw) : 0;
-  float dI_wrt_b = pred_b < truth_tblr.bottom ? Iw : 0;
+  float dI_wrt_b = pred_b < truth_tblr.bot ? Iw : 0;
   float dI_wrt_l = pred_l > truth_tblr.left ? (-1 * Ih) : 0;
   float dI_wrt_r = pred_r < truth_tblr.right ? Ih : 0;
   // derivative of U with regard to x
@@ -79,7 +76,7 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
   float dU_wrt_r = dX_wrt_r - dI_wrt_r;
   // gradient of C min/max in IoU calc (prediction)
   float dC_wrt_t = pred_t < truth_tblr.top ? (-1 * giou_Cw) : 0;
-  float dC_wrt_b = pred_b > truth_tblr.bottom ? giou_Cw : 0;
+  float dC_wrt_b = pred_b > truth_tblr.bot ? giou_Cw : 0;
   float dC_wrt_l = pred_l < truth_tblr.left ? (-1 * giou_Ch) : 0;
   float dC_wrt_r = pred_r > truth_tblr.right ? giou_Ch : 0;
 
@@ -96,8 +93,8 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
   }
 
   // apply grad from prediction min/max for correct corner selection
-  p_dt = pred_tblr.top < pred_tblr.bottom ? p_dt : p_db;
-  p_db = pred_tblr.top < pred_tblr.bottom ? p_db : p_dt;
+  p_dt = pred_tblr.top < pred_tblr.bot ? p_dt : p_db;
+  p_db = pred_tblr.top < pred_tblr.bot ? p_db : p_dt;
   p_dl = pred_tblr.left < pred_tblr.right ? p_dl : p_dr;
   p_dr = pred_tblr.left < pred_tblr.right ? p_dr : p_dl;
 
@@ -131,9 +128,9 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
   float dCt_dh = pred_t < truth_tblr.top ? -0.5 : 0;
 
   float dCb_dx = 0;
-  float dCb_dy = pred_b > truth_tblr.bottom ? 1 : 0;
+  float dCb_dy = pred_b > truth_tblr.bot ? 1 : 0;
   float dCb_dw = 0;
-  float dCb_dh = pred_b > truth_tblr.bottom ? 0.5 : 0;
+  float dCb_dh = pred_b > truth_tblr.bot ? 0.5 : 0;
 
   float dCl_dx = pred_l < truth_tblr.left ? 1 : 0;
   float dCl_dy = 0;
@@ -158,7 +155,7 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
   // UNUSED
   //// ground truth
   //float dI_wrt_xhat_t = pred_t < truth_tblr.top ? (-1 * Iw) : 0;
-  //float dI_wrt_xhat_b = pred_b > truth_tblr.bottom ? Iw : 0;
+  //float dI_wrt_xhat_b = pred_b > truth_tblr.bot ? Iw : 0;
   //float dI_wrt_xhat_l = pred_l < truth_tblr.left ? (-1 * Ih) : 0;
   //float dI_wrt_xhat_r = pred_r > truth_tblr.right ? Ih : 0;
 
@@ -223,8 +220,15 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
 }
 
 template<typename Dtype>
-void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index, int class_label, int classes, float scale,
-                           Dtype *avg_cat, int stride, bool use_focal_loss) {
+void delta_region_class_v3(Dtype *input_data,
+                           Dtype *&diff,
+                           int index,
+                           int class_label,
+                           int classes,
+                           float scale,
+                           Dtype *avg_cat,
+                           int stride,
+                           bool use_focal_loss) {
   if (diff[index]) {
     diff[index + stride * class_label] = (-1.0) * (1 - input_data[index + stride * class_label]);
     *avg_cat += input_data[index + stride * class_label];
@@ -239,8 +243,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index, int class
     int ti = index + stride * class_label;
     float pt = input_data[ti] + 0.000000000000001F;
     // http://fooplot.com/#W3sidHlwZSI6MCwiZXEiOiItKDEteCkqKDIqeCpsb2coeCkreC0xKSIsImNvbG9yIjoiIzAwMDAwMCJ9LHsidHlwZSI6MTAwMH1d
-    float grad =
-        -(1 - pt) * (2 * pt * logf(pt) + pt - 1);    // http://blog.csdn.net/linmingan/article/details/77885832
+    float grad = -(1 - pt) * (2 * pt * logf(pt) + pt - 1);    // http://blog.csdn.net/linmingan/article/details/77885832
     //float grad = (1 - pt) * (2 * pt*logf(pt) + pt - 1);    // https://github.com/unsky/focal-loss
 
     for (int n = 0; n < classes; ++n) {
@@ -265,12 +268,10 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index, int class
   }
 
 }
-
 static inline float fix_nan_inf(float val) {
   if (isnan(val) || isinf(val)) val = 0;
   return val;
 }
-
 static inline float clip_value(float val, const float max_val) {
   if (val > max_val) {
     //printf("\n val = %f > max_val = %f \n", val, max_val);
@@ -283,11 +284,24 @@ static inline float clip_value(float val, const float max_val) {
 }
 
 template<typename Dtype>
-Dtype
-delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases, int n, int index, int i, int j, int lw, int lh,
-                 int w, int h,
-                 Dtype *delta, float scale, int stride, IOU_LOSS iou_loss, float iou_normalizer, float max_delta,
-                 bool accumulate) {
+Dtype delta_region_box(vector<Dtype> truth,
+                       Dtype *x,
+                       vector<Dtype> biases,
+                       int n,
+                       int index,
+                       int i,
+                       int j,
+                       int lw,
+                       int lh,
+                       int w,
+                       int h,
+                       Dtype *delta,
+                       float scale,
+                       int stride,
+                       IOU_LOSS iou_loss,
+                       float iou_normalizer,
+                       float max_delta,
+                       bool accumulate) {
   vector<Dtype> pred;
   pred.clear();
 
@@ -380,7 +394,6 @@ delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases, int n, int
   }
 
 }
-
 template<typename Dtype>
 void Yolov3Layer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
@@ -421,7 +434,6 @@ void Yolov3Layer<Dtype>::LayerSetUp(
   CHECK_EQ(input_count, tmp_input_count);
   //CHECK_EQ(label_count, tmp_label_count);
 }
-
 typedef struct {
   float x, y, w, h;
 } box;
@@ -433,7 +445,6 @@ void Yolov3Layer<Dtype>::Reshape(
   diff_.ReshapeLike(*bottom[0]);
   real_diff_.ReshapeLike(*bottom[0]);
 }
-
 template<typename Dtype>
 int int_index(vector<Dtype> a, int val, int n) {
   int i;
@@ -457,8 +468,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(
   Dtype *diff = diff_.mutable_cpu_data();
   caffe_set(diff_.count(), Dtype(0.0), diff);
 
-  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0),
-      recall(0.0), recall75(0.0), loss(0.0), avg_iou_loss(0.0);
+  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0), recall(0.0), recall75(0.0), loss(0.0),
+      avg_iou_loss(0.0);
   int count = 0;
 
   const Dtype *input_data = bottom[0]->cpu_data();
@@ -521,7 +532,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(
     //}*/
     for (int s = 0; s < stride; s++) {
       for (int n = 0; n < num_; n++) {
-        int index = b * bottom[0]->count(1) + n * len * stride + s;
+        int index = n * len * stride + s + b * bottom[0]->count(1);
         //LOG(INFO)<<index;
         vector<Dtype> pred;
         float best_iou = 0;
@@ -529,19 +540,30 @@ void Yolov3Layer<Dtype>::Forward_cpu(
         vector<Dtype> best_truth;
 #ifdef CPU_ONLY
         for (int c = 0; c < len; ++c) {
-          int index2 = c * stride + index;
+          int index2 = c*stride + index;
           //LOG(INFO)<<index2;
-          if (c == 2 || c == 3) {
+          if (c == 2 || c==3) {
             swap_data[index2] = (input_data[index2 + 0]);
-          } else {
+          }
+          else {
             swap_data[index2] = logistic_activate(input_data[index2 + 0]);
           }
         }
 #endif
         int y2 = s / side_w_;
         int x2 = s % side_w_;
-        get_region_box(pred, swap_data, biases_, mask_[n], index, x2, y2, side_w_, side_h_, side_w_ * anchors_scale_,
-                       side_h_ * anchors_scale_, stride);
+        get_region_box(pred,
+                       swap_data,
+                       biases_,
+                       mask_[n],
+                       index,
+                       x2,
+                       y2,
+                       side_w_,
+                       side_h_,
+                       side_w_ * anchors_scale_,
+                       side_h_ * anchors_scale_,
+                       stride);
         for (int t = 0; t < 300; ++t) {
           vector<Dtype> truth;
           Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
@@ -574,12 +596,33 @@ void Yolov3Layer<Dtype>::Forward_cpu(
           LOG(INFO) << "best_iou > 1"; // plz tell me ..
           diff[index + 4 * stride] = (-1) * (1 - swap_data[index + 4 * stride]);
 
-          delta_region_class_v3(swap_data, diff, index + 5 * stride, best_class, num_class_, class_scale_, &avg_cat,
-                                stride, use_focal_loss_);
-          delta_region_box(best_truth, swap_data, biases_, mask_[n], index, x2, y2, side_w_, side_h_,
-                           side_w_ * anchors_scale_, side_h_ * anchors_scale_, diff,
-                           coord_scale_ * (2 - best_truth[2] * best_truth[3]), stride, iou_loss_, iou_normalizer_,
-                           max_delta_, accumulate_);
+          delta_region_class_v3(swap_data,
+                                diff,
+                                index + 5 * stride,
+                                best_class,
+                                num_class_,
+                                class_scale_,
+                                &avg_cat,
+                                stride,
+                                use_focal_loss_);
+          delta_region_box(best_truth,
+                           swap_data,
+                           biases_,
+                           mask_[n],
+                           index,
+                           x2,
+                           y2,
+                           side_w_,
+                           side_h_,
+                           side_w_ * anchors_scale_,
+                           side_h_ * anchors_scale_,
+                           diff,
+                           coord_scale_ * (2 - best_truth[2] * best_truth[3]),
+                           stride,
+                           iou_loss_,
+                           iou_normalizer_,
+                           max_delta_,
+                           accumulate_);
         }
       }
     }
@@ -636,10 +679,24 @@ void Yolov3Layer<Dtype>::Forward_cpu(
         //LOG(INFO) << best_n;
         best_index = best_n * len * stride + pos + b * bottom[0]->count(1);
 
-        iou = delta_region_box(truth, swap_data, biases_, mask_[best_n], best_index, i, j, side_w_, side_h_,
-                               side_w_ * anchors_scale_, side_h_ * anchors_scale_,
-                               diff, coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_, iou_normalizer_,
-                               max_delta_, accumulate_);
+        iou = delta_region_box(truth,
+                               swap_data,
+                               biases_,
+                               mask_[best_n],
+                               best_index,
+                               i,
+                               j,
+                               side_w_,
+                               side_h_,
+                               side_w_ * anchors_scale_,
+                               side_h_ * anchors_scale_,
+                               diff,
+                               coord_scale_ * (2 - truth[2] * truth[3]),
+                               stride,
+                               iou_loss_,
+                               iou_normalizer_,
+                               max_delta_,
+                               accumulate_);
 
         if (iou > 0.5)
           recall += 1;
@@ -657,8 +714,15 @@ void Yolov3Layer<Dtype>::Forward_cpu(
 
         //diff[best_index + 4 * stride] = (-1.0) * (1 - swap_data[best_index + 4 * stride]) ;
 
-        delta_region_class_v3(swap_data, diff, best_index + 5 * stride, class_label, num_class_, class_scale_,
-                              &avg_cat, stride, use_focal_loss_); //softmax_tree_
+        delta_region_class_v3(swap_data,
+                              diff,
+                              best_index + 5 * stride,
+                              class_label,
+                              num_class_,
+                              class_scale_,
+                              &avg_cat,
+                              stride,
+                              use_focal_loss_); //softmax_tree_
 
         ++count;
         ++class_count_;
@@ -681,10 +745,24 @@ void Yolov3Layer<Dtype>::Forward_cpu(
             //LOG(INFO) << best_n;
             best_index = mask_n * len * stride + pos + b * bottom[0]->count(1);
 
-            iou = delta_region_box(truth, swap_data, biases_, mask_[mask_n], best_index, i, j, side_w_, side_h_,
-                                   side_w_ * anchors_scale_, side_h_ * anchors_scale_,
-                                   diff, coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_, iou_normalizer_,
-                                   max_delta_, accumulate_);
+            iou = delta_region_box(truth,
+                                   swap_data,
+                                   biases_,
+                                   mask_[mask_n],
+                                   best_index,
+                                   i,
+                                   j,
+                                   side_w_,
+                                   side_h_,
+                                   side_w_ * anchors_scale_,
+                                   side_h_ * anchors_scale_,
+                                   diff,
+                                   coord_scale_ * (2 - truth[2] * truth[3]),
+                                   stride,
+                                   iou_loss_,
+                                   iou_normalizer_,
+                                   max_delta_,
+                                   accumulate_);
 
             if (iou > 0.5)
               recall += 1;
@@ -702,8 +780,15 @@ void Yolov3Layer<Dtype>::Forward_cpu(
 
             //diff[best_index + 4 * stride] = (-1.0) * (1 - swap_data[best_index + 4 * stride]) ;
 
-            delta_region_class_v3(swap_data, diff, best_index + 5 * stride, class_label, num_class_, class_scale_,
-                                  &avg_cat, stride, use_focal_loss_); //softmax_tree_
+            delta_region_class_v3(swap_data,
+                                  diff,
+                                  best_index + 5 * stride,
+                                  class_label,
+                                  num_class_,
+                                  class_scale_,
+                                  &avg_cat,
+                                  stride,
+                                  use_focal_loss_); //softmax_tree_
 
             ++count;
             ++class_count_;
@@ -829,12 +914,10 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(Yolov3Layer);
 #endif
 
 INSTANTIATE_CLASS(Yolov3Layer);
-
 REGISTER_LAYER_CLASS(Yolov3);
 
 }  // namespace caffe

@@ -73,11 +73,9 @@ void DepthwiseConvolutionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> 
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(DepthwiseConvolutionLayer);
 #endif
 
 INSTANTIATE_CLASS(DepthwiseConvolutionLayer);
-
 REGISTER_LAYER_CLASS(DepthwiseConvolution);
 }  // namespace caffe

@@ -19,15 +19,15 @@ const float kLOG_THRESHOLD = 1e-20;
  * LossLayers are typically only capable of backpropagating to their first input
  * -- the predictions.
  */
-template<typename Dtype>
+template <typename Dtype>
 class LossLayer : public Layer<Dtype> {
-public:
-  explicit LossLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+ public:
+  explicit LossLayer(const LayerParameter& param)
+     : Layer<Dtype>(param) {}
   virtual void LayerSetUp(
-      const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top);
+      const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
   virtual void Reshape(
-      const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top);
+      const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
 
   /**
    * Read the normalization mode parameter and compute the normalizer based

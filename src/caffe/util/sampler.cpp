@@ -4,7 +4,6 @@
 #include "caffe/util/bbox_util.hpp"
 #include "caffe/util/sampler.hpp"
 #include "caffe/util/im_transforms.hpp"
-
 namespace caffe {
 
 void GroupObjectBBoxes(const AnnotatedDatum &anno_datum,
@@ -141,7 +140,6 @@ void GenerateSamples(const NormalizedBBox &source_bbox,
     }
   }
 }
-
 void GenerateJitterSamples(float jitter, vector<NormalizedBBox> *sampled_bboxes, bool keep_aspec_ratio) {
   float img_w, img_h, off_x, off_y;
   std::vector<float> probabilities;
@@ -179,7 +177,6 @@ void GenerateJitterSamples(float jitter, vector<NormalizedBBox> *sampled_bboxes,
   }
 
 }
-
 void GenerateBatchSamples(const AnnotatedDatum &anno_datum,
                           const vector<BatchSampler> &batch_samplers,
                           vector<NormalizedBBox> *sampled_bboxes) {

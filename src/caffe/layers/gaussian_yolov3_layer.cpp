@@ -21,19 +21,23 @@
 #include <vector>
 
 #ifdef USE_OPENCV
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #endif  // USE_OPENCV
 
 namespace caffe {
 
 template<typename Dtype>
-void
-delta_region_gaussian_class_v3(Dtype *input_data, Dtype *&diff, int index, int class_label, int classes, float scale,
-                               Dtype *avg_cat, int stride, bool use_focal_loss) {
+void delta_region_gaussian_class_v3(Dtype *input_data,
+                                    Dtype *&diff,
+                                    int index,
+                                    int class_label,
+                                    int classes,
+                                    float scale,
+                                    Dtype *avg_cat,
+                                    int stride,
+                                    bool use_focal_loss) {
   if (diff[index]) {
     diff[index + stride * class_label] = (-1.0) * (1 - input_data[index + stride * class_label]);
     *avg_cat += input_data[index + stride * class_label];
@@ -48,8 +52,7 @@ delta_region_gaussian_class_v3(Dtype *input_data, Dtype *&diff, int index, int c
     int ti = index + stride * class_label;
     float pt = input_data[ti] + 0.000000000000001F;
     // http://fooplot.com/#W3sidHlwZSI6MCwiZXEiOiItKDEteCkqKDIqeCpsb2coeCkreC0xKSIsImNvbG9yIjoiIzAwMDAwMCJ9LHsidHlwZSI6MTAwMH1d
-    float grad =
-        -(1 - pt) * (2 * pt * logf(pt) + pt - 1);    // http://blog.csdn.net/linmingan/article/details/77885832
+    float grad = -(1 - pt) * (2 * pt * logf(pt) + pt - 1);    // http://blog.csdn.net/linmingan/article/details/77885832
     //float grad = (1 - pt) * (2 * pt*logf(pt) + pt - 1);    // https://github.com/unsky/focal-loss
 
     for (int n = 0; n < classes; ++n) {
@@ -74,12 +77,10 @@ delta_region_gaussian_class_v3(Dtype *input_data, Dtype *&diff, int index, int c
   }
 
 }
-
 static inline float fix_nan_inf(float val) {
   if (isnan(val) || isinf(val)) val = 0;
   return val;
 }
-
 static inline float clip_value(float val, const float max_val) {
   if (val > max_val) {
     //printf("\n val = %f > max_val = %f \n", val, max_val);
@@ -93,11 +94,24 @@ static inline float clip_value(float val, const float max_val) {
 
 // Reference : https://github.com/jwchoi384/Gaussian_YOLOv3/blob/master/src/gaussian_yolo_layer.c
 template<typename Dtype>
-Dtype
-delta_region_gaussian_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases, int n, int index, int i, int j, int lw,
-                          int lh, int w, int h,
-                          Dtype *delta, float scale, int stride, IOU_LOSS iou_loss, float iou_normalizer,
-                          float max_delta, bool accumulate) {
+Dtype delta_region_gaussian_box(vector<Dtype> truth,
+                                Dtype *x,
+                                vector<Dtype> biases,
+                                int n,
+                                int index,
+                                int i,
+                                int j,
+                                int lw,
+                                int lh,
+                                int w,
+                                int h,
+                                Dtype *delta,
+                                float scale,
+                                int stride,
+                                IOU_LOSS iou_loss,
+                                float iou_normalizer,
+                                float max_delta,
+                                bool accumulate) {
   vector<Dtype> pred;
   pred.clear();
 
@@ -239,7 +253,6 @@ void GaussianYolov3Layer<Dtype>::LayerSetUp(
   CHECK_EQ(input_count, tmp_input_count);
   //CHECK_EQ(label_count, tmp_label_count);
 }
-
 typedef struct {
   float x, y, w, h;
 } box;
@@ -251,7 +264,6 @@ void GaussianYolov3Layer<Dtype>::Reshape(
   diff_.ReshapeLike(*bottom[0]);
   real_diff_.ReshapeLike(*bottom[0]);
 }
-
 template<typename Dtype>
 int int_index(vector<Dtype> a, int val, int n) {
   int i;
@@ -260,7 +272,6 @@ int int_index(vector<Dtype> a, int val, int n) {
   }
   return -1;
 }
-
 template<typename Dtype>
 void GaussianYolov3Layer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
@@ -275,8 +286,8 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
   Dtype *diff = diff_.mutable_cpu_data();
   caffe_set(diff_.count(), Dtype(0.0), diff);
 
-  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0), recall(0.0), recall75(0.0), loss(
-      0.0), avg_iou_loss(0.0);
+  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0), recall(0.0), recall75(0.0), loss(0.0),
+      avg_iou_loss(0.0);
   int count = 0;
 
   const Dtype *input_data = bottom[0]->cpu_data();
@@ -347,19 +358,30 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
         vector<Dtype> best_truth;
 #ifdef CPU_ONLY
         for (int c = 0; c < len; ++c) {
-          int index2 = c * stride + index;
+          int index2 = c*stride + index;
           //LOG(INFO)<<index2;
-          if (c == 4 || c == 6) {
+          if (c == 4 || c==6) {
             swap_data[index2] = (input_data[index2 + 0]);
-          } else {
+          }
+          else {
             swap_data[index2] = logistic_activate(input_data[index2 + 0]);
           }
         }
 #endif
         int y2 = s / side_w_;
         int x2 = s % side_w_;
-        get_gaussian_yolo_box(pred, swap_data, biases_, mask_[n], index, x2, y2, side_w_, side_h_,
-                              side_w_ * anchors_scale_, side_h_ * anchors_scale_, stride);
+        get_gaussian_yolo_box(pred,
+                              swap_data,
+                              biases_,
+                              mask_[n],
+                              index,
+                              x2,
+                              y2,
+                              side_w_,
+                              side_h_,
+                              side_w_ * anchors_scale_,
+                              side_h_ * anchors_scale_,
+                              stride);
         for (int t = 0; t < 300; ++t) {
           vector<Dtype> truth;
           Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
@@ -392,12 +414,33 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
           LOG(INFO) << "best_iou > 1"; // plz tell me ..
           diff[index + 8 * stride] = (-1) * (1 - swap_data[index + 8 * stride]);
 
-          delta_region_gaussian_class_v3(swap_data, diff, index + 9 * stride, best_class, num_class_, class_scale_,
-                                         &avg_cat, stride, use_focal_loss_);
-          delta_region_gaussian_box(best_truth, swap_data, biases_, mask_[n], index, x2, y2, side_w_, side_h_,
-                                    side_w_ * anchors_scale_, side_h_ * anchors_scale_, diff,
-                                    coord_scale_ * (2 - best_truth[2] * best_truth[3]), stride, iou_loss_,
-                                    iou_normalizer_, max_delta_, accumulate_);
+          delta_region_gaussian_class_v3(swap_data,
+                                         diff,
+                                         index + 9 * stride,
+                                         best_class,
+                                         num_class_,
+                                         class_scale_,
+                                         &avg_cat,
+                                         stride,
+                                         use_focal_loss_);
+          delta_region_gaussian_box(best_truth,
+                                    swap_data,
+                                    biases_,
+                                    mask_[n],
+                                    index,
+                                    x2,
+                                    y2,
+                                    side_w_,
+                                    side_h_,
+                                    side_w_ * anchors_scale_,
+                                    side_h_ * anchors_scale_,
+                                    diff,
+                                    coord_scale_ * (2 - best_truth[2] * best_truth[3]),
+                                    stride,
+                                    iou_loss_,
+                                    iou_normalizer_,
+                                    max_delta_,
+                                    accumulate_);
         }
       }
     }
@@ -454,10 +497,24 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
         //LOG(INFO) << best_n;
         best_index = best_n * len * stride + pos + b * bottom[0]->count(1);
 
-        iou = delta_region_gaussian_box(truth, swap_data, biases_, mask_[best_n], best_index, i, j, side_w_, side_h_,
-                                        side_w_ * anchors_scale_, side_h_ * anchors_scale_,
-                                        diff, coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_,
-                                        iou_normalizer_, max_delta_, accumulate_);
+        iou = delta_region_gaussian_box(truth,
+                                        swap_data,
+                                        biases_,
+                                        mask_[best_n],
+                                        best_index,
+                                        i,
+                                        j,
+                                        side_w_,
+                                        side_h_,
+                                        side_w_ * anchors_scale_,
+                                        side_h_ * anchors_scale_,
+                                        diff,
+                                        coord_scale_ * (2 - truth[2] * truth[3]),
+                                        stride,
+                                        iou_loss_,
+                                        iou_normalizer_,
+                                        max_delta_,
+                                        accumulate_);
 
         if (iou > 0.5)
           recall += 1;
@@ -475,8 +532,15 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
 
         //diff[best_index + 4 * stride] = (-1.0) * (1 - swap_data[best_index + 4 * stride]) ;
 
-        delta_region_gaussian_class_v3(swap_data, diff, best_index + 9 * stride, class_label, num_class_,
-                                       class_scale_, &avg_cat, stride, use_focal_loss_); //softmax_tree_
+        delta_region_gaussian_class_v3(swap_data,
+                                       diff,
+                                       best_index + 9 * stride,
+                                       class_label,
+                                       num_class_,
+                                       class_scale_,
+                                       &avg_cat,
+                                       stride,
+                                       use_focal_loss_); //softmax_tree_
 
         ++count;
         ++class_count_;
@@ -500,10 +564,24 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
             //LOG(INFO) << best_n;
             best_index = mask_n * len * stride + pos + b * bottom[0]->count(1);
 
-            iou = delta_region_gaussian_box(truth, swap_data, biases_, mask_[mask_n], best_index, i, j, side_w_,
-                                            side_h_, side_w_ * anchors_scale_, side_h_ * anchors_scale_,
-                                            diff, coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_,
-                                            iou_normalizer_, max_delta_, accumulate_);
+            iou = delta_region_gaussian_box(truth,
+                                            swap_data,
+                                            biases_,
+                                            mask_[mask_n],
+                                            best_index,
+                                            i,
+                                            j,
+                                            side_w_,
+                                            side_h_,
+                                            side_w_ * anchors_scale_,
+                                            side_h_ * anchors_scale_,
+                                            diff,
+                                            coord_scale_ * (2 - truth[2] * truth[3]),
+                                            stride,
+                                            iou_loss_,
+                                            iou_normalizer_,
+                                            max_delta_,
+                                            accumulate_);
 
             if (iou > 0.5)
               recall += 1;
@@ -521,8 +599,15 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
 
             //diff[best_index + 4 * stride] = (-1.0) * (1 - swap_data[best_index + 4 * stride]) ;
 
-            delta_region_gaussian_class_v3(swap_data, diff, best_index + 9 * stride, class_label, num_class_,
-                                           class_scale_, &avg_cat, stride, use_focal_loss_); //softmax_tree_
+            delta_region_gaussian_class_v3(swap_data,
+                                           diff,
+                                           best_index + 9 * stride,
+                                           class_label,
+                                           num_class_,
+                                           class_scale_,
+                                           &avg_cat,
+                                           stride,
+                                           use_focal_loss_); //softmax_tree_
 
             ++count;
             ++class_count_;
@@ -585,8 +670,7 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
 
 template<typename Dtype>
 void GaussianYolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                              const vector<bool> &propagate_down,
-                                              const vector<Blob<Dtype> *> &bottom) {
+                                              const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
   //LOG(INFO) <<" propagate_down: "<< propagate_down[1] << " " << propagate_down[0];
   if (propagate_down[1]) {
     LOG(FATAL) << this->type() << " Layer cannot backpropagate to label inputs.";
@@ -643,12 +727,10 @@ void GaussianYolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 }
 
 #ifdef CPU_ONLY
-
 STUB_GPU(GaussianYolov3Layer);
 #endif
 
 INSTANTIATE_CLASS(GaussianYolov3Layer);
-
 REGISTER_LAYER_CLASS(GaussianYolov3);
 
 }  // namespace caffe
