@@ -105,6 +105,7 @@ docs/dev
 *.ldb
 LOCK
 LOG*
+!log_layer.*
 CURRENT
 MANIFEST-*
 
