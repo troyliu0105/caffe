@@ -105,26 +105,38 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> 
                                side_w_,
                                side_h_,
                                nw,
-                               nh,
-                               stride);
-              }
-              predict.x = pred[0];
-              predict.y = pred[1];
-              predict.w = pred[2];
-              predict.h = pred[3];
-              predict.classType = c;
-              predict.confidence = class_score[c];
-              correct_yolo_boxes(predict, side_w_, side_h_, nw, nh, 1);
-              predicts_.push_back(predict);
+                    nh,
+                    stride
+);
+}
+predict.
+x = pred[0];
+predict.
+y = pred[1];
+predict.
+w = pred[2];
+predict.
+h = pred[3];
+predict.
+classType = c;
+predict.
+confidence = class_score[c];
+correct_yolo_boxes(predict, side_w_, side_h_, nw, nh,
+1);
+if (
+is_predict_valid(predict)
+) predicts_.
+push_back(predict);
 
-              //LOG(INFO) << predict.x << "," << predict.y << "," << predict.w << "," << predict.h;
-              //LOG(INFO) << predict.confidence;
-            }
-          }
-        }
-      }
-    }
-    mask_offset += groups_num_;
+//LOG(INFO) << predict.x << "," << predict.y << "," << predict.w << "," << predict.h;
+//LOG(INFO) << predict.confidence;
+}
+}
+}
+}
+}
+mask_offset +=
+groups_num_;
 
   }
 

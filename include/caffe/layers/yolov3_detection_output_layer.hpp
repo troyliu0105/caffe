@@ -25,6 +25,13 @@ public:
   Dtype confidence;
   int classType;
 };
+
+template<typename Dtype>
+bool is_predict_valid(const PredictionResult<Dtype> &predict) {
+  return std::isnormal(predict.x) and std::isnormal(predict.y)
+      and std::isnormal(predict.h) and std::isnormal(predict.w);
+}
+
 /**
  * @brief Generate the detection output based on location and confidence
  * predictions by doing non maximum suppression.

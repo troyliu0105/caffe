@@ -232,13 +232,11 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
   int len = 4 + num_class_ + 1;
   if (gaussian_box_)
     len = 8 + num_class_ + 1;
-  int stride = side_w_ * side_h_;
 
   if (Caffe::mode() == Caffe::CPU) {
     int mask_offset = 0;
     predicts_.clear();
-    Dtype *class_score = new Dtype[num_class_];
-
+    auto *class_score = new Dtype[num_class_];
     for (int t = 0; t < bottom.size(); t++) {
       side_w_ = bottom[t]->width();
       side_h_ = bottom[t]->height();
@@ -271,13 +269,13 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
                   }
                 }
               } else {
-                if (c == 2 || c == 3) {
+                if (c == 2 || c == 3) {  // w, h
                   swap_data[index2] = (input_data[index2 + 0]);
                 } else {
-                  if (c > 4) {
+                  if (c > 4) { // clz_score
                     //LOG(INFO) << c - 5;
                     class_score[c - 5] = logistic_activate(input_data[index2 + 0]);
-                  } else {
+                  } else { // obj_score
                     swap_data[index2] = logistic_activate(input_data[index2 + 0]);
                   }
                 }
@@ -295,7 +293,7 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
             } else {
               obj_score = swap_data[index + 4 * stride];
             }
-            PredictionResult<Dtype> predict;
+            PredictionResult<Dtype> predict{};
             for (int c = 0; c < num_class_; ++c) {
               class_score[c] *= obj_score;
               //LOG(INFO) << class_score[c];
@@ -335,7 +333,7 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
                 predict.classType = c;
                 predict.confidence = class_score[c];
                 correct_yolo_boxes(predict, side_w_, side_h_, nw, nh, 1);
-                predicts_.push_back(predict);
+                if (is_predict_valid(predict)) predicts_.push_back(predict);
               }
             }
           }
@@ -350,12 +348,11 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
   std::sort(predicts_.begin(), predicts_.end(), BoxSortDecendScore<Dtype>);
   vector<int> idxes;
   int num_kept = 0;
-  if (predicts_.size() > 0) {
-    //LOG(INFO) << predicts.size();
+  if (!predicts_.empty()) {
+    DLOG(INFO) << "Raw predict: " << predicts_.size();
     ApplyNms(predicts_, idxes, nms_threshold_);
     num_kept = idxes.size();
-    //LOG(INFO) << num_kept;
-
+    DLOG(INFO) << "Kept predict: " << num_kept;
   }
   vector<int> top_shape(2, 1);
   top_shape.push_back(num_kept);
