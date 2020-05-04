@@ -7,6 +7,7 @@ add_library(caffeproto STATIC ${proto_hdrs} ${proto_srcs} ${proto_python})
 caffe_default_properties(caffeproto)
 target_link_libraries(caffeproto PUBLIC ${PROTOBUF_LIBRARIES})
 target_include_directories(caffeproto PUBLIC ${PROTOBUF_INCLUDE_DIR})
+target_compile_definitions(caffeproto PUBLIC NO_STRICT)
 
 list(INSERT Caffe_LINKER_LIBS 0 PUBLIC caffeproto) # note, crucial to prepend!
 
