@@ -16,6 +16,9 @@
 #include <utility>  // pair
 #include <vector>
 
+#ifdef CMAKE_WINDOWS_BUILD
+  #include "caffe/export.hpp"
+#endif
 #include "caffe/util/device_alternate.hpp"
 
 #ifdef USE_NNPACK

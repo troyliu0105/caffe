@@ -4,6 +4,7 @@
 #include <boost/python.hpp>
 #endif
 #include <string>
+#include <vector>
 
 #include "caffe/layer.hpp"
 #include "caffe/layer_factory.hpp"
@@ -43,6 +44,78 @@
 
 namespace caffe {
 
+template<typename Dtype>
+typename LayerRegistry<Dtype>::CreatorRegistry &
+LayerRegistry<Dtype>::Registry() {
+  static CreatorRegistry *g_registry_ = new CreatorRegistry();
+  return *g_registry_;
+}
+
+// Adds a creator.
+template<typename Dtype>
+void LayerRegistry<Dtype>::AddCreator(const string &type, Creator creator) {
+  CreatorRegistry &registry = Registry();
+  CHECK_EQ(registry.count(type), 0) << "Layer type " << type
+                                    << " already registered.";
+  registry[type] = creator;
+}
+
+// Get a layer using a LayerParameter.
+template<typename Dtype>
+shared_ptr<Layer<Dtype> > LayerRegistry<Dtype>::CreateLayer(
+    const LayerParameter &param) {
+  if (Caffe::root_solver()) {
+    LOG(INFO) << "Creating layer " << param.name();
+  }
+  const string &type = param.type();
+  CreatorRegistry &registry = Registry();
+  CHECK_EQ(registry.count(type), 1)
+    << "Unknown layer type: " << type
+    << " (known types: " << LayerTypeListString() << ")";
+  return registry[type](param);
+}
+
+template<typename Dtype>
+vector<string> LayerRegistry<Dtype>::LayerTypeList() {
+  CreatorRegistry &registry = Registry();
+  vector<string> layer_types;
+  for (typename CreatorRegistry::iterator iter = registry.begin();
+       iter != registry.end(); ++iter) {
+    layer_types.push_back(iter->first);
+  }
+  return layer_types;
+}
+
+// Layer registry should never be instantiated - everything is done with its
+// static variables.
+template<typename Dtype>
+LayerRegistry<Dtype>::LayerRegistry() {}
+
+template<typename Dtype>
+string LayerRegistry<Dtype>::LayerTypeListString() {
+  vector<string> layer_types = LayerTypeList();
+  string layer_types_str;
+  for (vector<string>::iterator iter = layer_types.begin();
+       iter != layer_types.end(); ++iter) {
+    if (iter != layer_types.begin()) {
+      layer_types_str += ", ";
+    }
+    layer_types_str += *iter;
+  }
+  return layer_types_str;
+}
+
+template<typename Dtype>
+LayerRegisterer<Dtype>::LayerRegisterer(
+    const string &type,
+    shared_ptr<Layer<Dtype> > (*creator)(const LayerParameter &)) {
+  // LOG(INFO) << "Registering layer type: " << type;
+  LayerRegistry<Dtype>::AddCreator(type, creator);
+}
+
+INSTANTIATE_CLASS(LayerRegistry);
+INSTANTIATE_CLASS(LayerRegisterer);
+
 // Get convolution layer according to engine.
 template<typename Dtype>
 shared_ptr<Layer<Dtype> > GetConvolutionLayer(
@@ -68,14 +141,14 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
   if (engine == ConvolutionParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype>>(new ConvolutionLayer<Dtype>(param));
 #ifdef USE_NNPACK
-  } else if (engine == ConvolutionParameter_Engine_NNPACK) {
-    // If we're in CPU mode and on supported processor, we can use NNPACK.
-    // Otherwise, we can't fall-through (since we'll get an unknown
-    // layer, so just return the default ConvolutionLayer
-    if ((Caffe::mode() == Caffe::CPU) && Caffe::nnpack_supported<Dtype>()) {
-      return shared_ptr<Layer<Dtype>>(new NNPackConvolutionLayer<Dtype>(param));
-    }
-    return shared_ptr<Layer<Dtype>>(new ConvolutionLayer<Dtype>(param));
+    } else if (engine == ConvolutionParameter_Engine_NNPACK) {
+      // If we're in CPU mode and on supported processor, we can use NNPACK.
+      // Otherwise, we can't fall-through (since we'll get an unknown
+      // layer, so just return the default ConvolutionLayer
+      if ((Caffe::mode() == Caffe::CPU) && Caffe::nnpack_supported<Dtype>()) {
+        return shared_ptr<Layer<Dtype>>(new NNPackConvolutionLayer<Dtype>(param));
+      }
+      return shared_ptr<Layer<Dtype>>(new ConvolutionLayer<Dtype>(param));
 #endif
 #ifdef USE_CUDNN
     } else if (engine == ConvolutionParameter_Engine_CUDNN) {
@@ -145,14 +218,14 @@ shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter &param) {
   if (engine == PoolingParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype>>(new PoolingLayer<Dtype>(param));
 #ifdef USE_NNPACK
-  } else if (engine == PoolingParameter_Engine_NNPACK) {
-    // If we're in CPU mode and on supported processor, we can use NNPACK.
-    // Otherwise, we can't fall-through (since we'll get an unknown
-    // layer, so just return the default ConvolutionLayer
-    if ((Caffe::mode() == Caffe::CPU) && Caffe::nnpack_supported<Dtype>()) {
-      return shared_ptr<Layer<Dtype>>(new NNPackPoolingLayer<Dtype>(param));
-    }
-    return shared_ptr<Layer<Dtype>>(new PoolingLayer<Dtype>(param));
+    } else if (engine == PoolingParameter_Engine_NNPACK) {
+      // If we're in CPU mode and on supported processor, we can use NNPACK.
+      // Otherwise, we can't fall-through (since we'll get an unknown
+      // layer, so just return the default ConvolutionLayer
+      if ((Caffe::mode() == Caffe::CPU) && Caffe::nnpack_supported<Dtype>()) {
+        return shared_ptr<Layer<Dtype>>(new NNPackPoolingLayer<Dtype>(param));
+      }
+      return shared_ptr<Layer<Dtype>>(new PoolingLayer<Dtype>(param));
 #endif
 #ifdef USE_CUDNN
     } else if (engine == PoolingParameter_Engine_CUDNN) {
@@ -181,7 +254,7 @@ shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter &param) {
 REGISTER_LAYER_CREATOR(Pooling, GetPoolingLayer);
 
 // Get pooling layer according to engine.
-template <typename Dtype>
+template<typename Dtype>
 shared_ptr<Layer<Dtype>> GetInnerProductLayer(const LayerParameter &param) {
   InnerProductParameter_Engine engine = param.inner_product_param().engine();
   if (engine == InnerProductParameter_Engine_DEFAULT) {
@@ -190,15 +263,15 @@ shared_ptr<Layer<Dtype>> GetInnerProductLayer(const LayerParameter &param) {
   if (engine == InnerProductParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype>>(new InnerProductLayer<Dtype>(param));
 #ifdef USE_NNPACK
-  } else if (engine == InnerProductParameter_Engine_NNPACK) {
-    // If we're in CPU mode and on supported processor, we can use NNPACK.
-    // Otherwise, we can't fall-through (since we'll get an unknown
-    // layer, so just return the default InnerProductLayer
-    if ((Caffe::mode() == Caffe::CPU) && Caffe::nnpack_supported<Dtype>()) {
-      return shared_ptr<Layer<Dtype>>(
-          new NNPackInnerProductLayer<Dtype>(param));
-    }
-    return shared_ptr<Layer<Dtype>>(new InnerProductLayer<Dtype>(param));
+    } else if (engine == InnerProductParameter_Engine_NNPACK) {
+      // If we're in CPU mode and on supported processor, we can use NNPACK.
+      // Otherwise, we can't fall-through (since we'll get an unknown
+      // layer, so just return the default InnerProductLayer
+      if ((Caffe::mode() == Caffe::CPU) && Caffe::nnpack_supported<Dtype>()) {
+        return shared_ptr<Layer<Dtype>>(
+            new NNPackInnerProductLayer<Dtype>(param));
+      }
+      return shared_ptr<Layer<Dtype>>(new InnerProductLayer<Dtype>(param));
 #endif
   } else {
     LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";
@@ -263,8 +336,8 @@ shared_ptr<Layer<Dtype> > GetReLULayer(const LayerParameter &param) {
     return shared_ptr<Layer<Dtype>>(new CuDNNReLULayer<Dtype>(param));
 #endif
 #ifdef USE_NNPACK
-  } else if (engine == ReLUParameter_Engine_NNPACK) {
-    return shared_ptr<Layer<Dtype>>(new NNPackReLULayer<Dtype>(param));
+    } else if (engine == ReLUParameter_Engine_NNPACK) {
+      return shared_ptr<Layer<Dtype>>(new NNPackReLULayer<Dtype>(param));
 #endif
   } else {
     LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";
