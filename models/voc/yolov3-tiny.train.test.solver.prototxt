@@ -1,0 +1,24 @@
+net: "models/voc/yolov3-tiny.train.test.prototxt"
+# voc07 test has 4952 images
+#test_iter: 4952
+test_iter: 2476
+test_interval: 10000
+base_lr: 0.0001
+display: 10
+max_iter: 100000
+lr_policy: "multistep"
+gamma: 0.1
+weight_decay: 0.00001
+snapshot: 20000
+snapshot_prefix: "models/voc/yolov3-tiny.train.test"
+solver_mode: GPU
+debug_info: false
+snapshot_after_train: true
+test_initialization: true
+average_loss: 10
+stepvalue: 80000
+stepvalue: 90000
+type: "SGD"
+eval_type: "detection"
+ap_version: "11point"
+show_per_class_result: true
