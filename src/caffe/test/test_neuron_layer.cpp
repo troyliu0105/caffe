@@ -154,7 +154,7 @@ protected:
     layer_param.mutable_log_param()->set_base(base);
     layer_param.mutable_log_param()->set_scale(scale);
     layer_param.mutable_log_param()->set_shift(shift);
-    LogLayer <Dtype> layer(layer_param);
+    LogLayer<Dtype> layer(layer_param);
     layer.SetUp(blob_bottom_vec_, blob_top_vec_);
     layer.Forward(blob_bottom_vec_, blob_top_vec_);
     const Dtype kDelta = 2e-4;
@@ -178,7 +178,7 @@ protected:
     layer_param.mutable_log_param()->set_base(base);
     layer_param.mutable_log_param()->set_scale(scale);
     layer_param.mutable_log_param()->set_shift(shift);
-    LogLayer <Dtype> layer(layer_param);
+    LogLayer<Dtype> layer(layer_param);
     GradientChecker<Dtype> checker(1e-2, 1e-2);
     checker.CheckGradientEltwise(&layer, blob_bottom_vec_, blob_top_vec_);
   }

@@ -68,7 +68,7 @@ void YoloSegLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom, con
     int img_index2 = 0;
     for (int j = 0; j < w; j++) {
       //LOG(INFO)<<(int)(bottom_data[img_index1] * 255);
-      ptr2[img_index2] = (unsigned char) (sigmoid(bottom_data[img_index1]) * 255);
+      ptr2[img_index2] = (unsigned char) (logistic_activate(bottom_data[img_index1]) * 255);
 
       //ptr2[img_index2] = (unsigned char)((label_data[img_index1]) * 255);
       img_index1++;
@@ -102,7 +102,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   //caffe_set(diff_.count(), Dtype(0.0), diff);
 
   for (int i = 0; i < count; ++i) {
-    diff[i] = sigmoid(bottom_data[i]);
+    diff[i] = logistic_activate(bottom_data[i]);
   }
   //caffe_copy(count,swap,diff);
 #endif

@@ -265,9 +265,9 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
                 } else {
                   if (c > 7) {
                     //LOG(INFO) << c - 5;
-                    class_score[c - 8] = sigmoid(input_data[index2 + 0]);
+                    class_score[c - 8] = logistic_activate(input_data[index2 + 0]);
                   } else {
-                    swap_data[index2] = sigmoid(input_data[index2 + 0]);
+                    swap_data[index2] = logistic_activate(input_data[index2 + 0]);
                   }
                 }
               } else {
@@ -276,9 +276,9 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
                 } else {
                   if (c > 4) {
                     //LOG(INFO) << c - 5;
-                    class_score[c - 5] = sigmoid(input_data[index2 + 0]);
+                    class_score[c - 5] = logistic_activate(input_data[index2 + 0]);
                   } else {
-                    swap_data[index2] = sigmoid(input_data[index2 + 0]);
+                    swap_data[index2] = logistic_activate(input_data[index2 + 0]);
                   }
                 }
               }

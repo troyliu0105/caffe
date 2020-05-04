@@ -87,8 +87,8 @@ void get_region_box(vector<Dtype> &b,
                     int stride) {
 
   b.clear();
-  b.push_back((i + sigmoid(x[index + 0 * stride])) / w);
-  b.push_back((j + sigmoid(x[index + 1 * stride])) / h);
+  b.push_back((i + logistic_activate(x[index + 0 * stride])) / w);
+  b.push_back((j + logistic_activate(x[index + 1 * stride])) / h);
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
@@ -116,10 +116,12 @@ Dtype delta_region_box(vector<Dtype> truth,
   float tw = log(truth[2] * w / biases[2 * n]); //truth[2]=biases/w tw = 0
   float th = log(truth[3] * h / biases[2 * n + 1]); //th = 0
 
-  delta[index + 0 * stride] = (-1) * scale * (tx - sigmoid(x[index + 0 * stride])) * sigmoid(x[index + 0 * stride])
-      * (1 - sigmoid(x[index + 0 * stride]));
-  delta[index + 1 * stride] = (-1) * scale * (ty - sigmoid(x[index + 1 * stride])) * sigmoid(x[index + 1 * stride])
-      * (1 - sigmoid(x[index + 1 * stride]));
+  delta[index + 0 * stride] =
+      (-1) * scale * (tx - logistic_activate(x[index + 0 * stride])) * logistic_activate(x[index + 0 * stride])
+          * (1 - logistic_activate(x[index + 0 * stride]));
+  delta[index + 1 * stride] =
+      (-1) * scale * (ty - logistic_activate(x[index + 1 * stride])) * logistic_activate(x[index + 1 * stride])
+          * (1 - logistic_activate(x[index + 1 * stride]));
   //delta[index + 0] = (-1) * scale * (1 - (tx - x[index + 0])*(tx - x[index + 0]));
   //delta[index + 1] = (-1) * scale * (1 - (ty - x[index + 1])*(ty - x[index + 1]));
   delta[index + 2 * stride] = (-1) * scale * (tw - x[index + 2 * stride]);

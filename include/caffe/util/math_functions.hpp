@@ -17,8 +17,8 @@ Dtype epsilon() {
   return std::numeric_limits<Dtype>().epsilon();
 }
 
-#define sigmoid(x)  logistic_activate(x)
-#define sigmoid_gradient(x)  logistic_gradient(x)
+//#define sigmoid(x)  logistic_activate(x)
+//#define sigmoid_gradient(x)  logistic_gradient(x)
 
 template<typename Dtype>
 static inline Dtype logistic_activate(Dtype x) { return 1. / (1. + exp(-x)); }

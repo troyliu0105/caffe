@@ -97,7 +97,7 @@ void EmbedLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
       DCHECK_GE(index, 0);
       DCHECK_LT(index, K_);
       DCHECK_EQ(static_cast<Dtype>(index), bottom_data[n])
-          << "non-integer input";
+        << "non-integer input";
       caffe_axpy(N_, Dtype(1), top_diff + n * N_, weight_diff + index * N_);
     }
   }
