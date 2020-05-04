@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "boost/algorithm/string.hpp"
+#include "caffe/common.hpp"
 #include "caffe/solver.hpp"
 #include "caffe/util/bbox_util.hpp"
 #include "caffe/util/format.hpp"
@@ -374,6 +375,9 @@ void Solver<Dtype>::TestClassification(const int test_net_id) {
   vector<int> test_score_output_id;
   const shared_ptr<Net<Dtype> > &test_net = test_nets_[test_net_id];
   Dtype loss = 0;
+#ifndef DEBUG
+  MAKE_PROGRESSBAR(param_.test_iter(test_net_id), "Testing Classification")
+#endif
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
     SolverAction::Enum request = GetRequestedAction();
     // Check to see if stoppage of testing/training has been requested.
@@ -413,6 +417,9 @@ void Solver<Dtype>::TestClassification(const int test_net_id) {
         }
       }
     }
+#ifndef DEBUG
+    INC_PROGRESSBAR
+#endif
   }
   if (requested_early_exit_) {
     LOG(INFO) << "Test interrupted.";
@@ -449,6 +456,9 @@ void Solver<Dtype>::TestDetection(const int test_net_id) {
   map<int, map<int, int> > all_num_pos;
   const shared_ptr<Net<Dtype> > &test_net = test_nets_[test_net_id];
   Dtype loss = 0;
+#ifndef DEBUG
+  MAKE_PROGRESSBAR(param_.test_iter(test_net_id), "Testing Detection")
+#endif
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
     SolverAction::Enum request = GetRequestedAction();
     // Check to see if stoppage of testing/training has been requested.
@@ -499,6 +509,9 @@ void Solver<Dtype>::TestDetection(const int test_net_id) {
         }
       }
     }
+#ifndef DEBUG
+    INC_PROGRESSBAR
+#endif
   }
   if (requested_early_exit_) {
     LOG(INFO) << "Test interrupted.";
