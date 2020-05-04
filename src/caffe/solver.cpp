@@ -376,7 +376,7 @@ void Solver<Dtype>::TestClassification(const int test_net_id) {
   const shared_ptr<Net<Dtype> > &test_net = test_nets_[test_net_id];
   Dtype loss = 0;
 #ifndef DEBUG
-  MAKE_PROGRESSBAR(param_.test_iter(test_net_id), "Testing Classification")
+  MAKE_PROGRESSBAR(param_.test_iter(test_net_id), "Testing Classification\n")
 #endif
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
     SolverAction::Enum request = GetRequestedAction();
@@ -457,7 +457,7 @@ void Solver<Dtype>::TestDetection(const int test_net_id) {
   const shared_ptr<Net<Dtype> > &test_net = test_nets_[test_net_id];
   Dtype loss = 0;
 #ifndef DEBUG
-  MAKE_PROGRESSBAR(param_.test_iter(test_net_id), "Testing Detection")
+  MAKE_PROGRESSBAR(param_.test_iter(test_net_id), "Testing Detection\n")
 #endif
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
     SolverAction::Enum request = GetRequestedAction();
