@@ -63,15 +63,17 @@ void WriteProtoToTextFile(const Message &proto, const char *filename) {
 }
 
 bool ReadProtoFromBinaryFile(const char *filename, Message *proto) {
-  int fd = open(filename, O_RDONLY);
+  int fd = open(filename, O_RDONLY | O_BINARY);
   CHECK_NE(fd, -1) << "File not found: " << filename;
   ZeroCopyInputStream *raw_input = new FileInputStream(fd);
-  CodedInputStream *coded_input = new CodedInputStream(raw_input);
-  coded_input->SetTotalBytesLimit(kProtoReadBytesLimit, 536870912);
+// CodedInputStream doesn't works with protubuf with version larger than 3.2.0
+//  CodedInputStream *coded_input = new CodedInputStream(raw_input);
+//  coded_input->SetTotalBytesLimit(kProtoReadBytesLimit, 536870912);
 
-  bool success = proto->ParseFromCodedStream(coded_input);
+//  bool success = proto->ParseFromCodedStream(coded_input);
+  bool success = proto->ParseFromZeroCopyStream(raw_input);
 
-  delete coded_input;
+//  delete coded_input;
   delete raw_input;
   close(fd);
   return success;

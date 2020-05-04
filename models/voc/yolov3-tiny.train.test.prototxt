@@ -8,11 +8,11 @@ layer {
     phase: TRAIN
   }
   transform_param {
-    scale: 0.0039215
+    scale: 0.007843
     mirror: true
-    mean_value: 0
-    mean_value: 0
-    mean_value: 0
+    mean_value: 127.5
+    mean_value: 127.5
+    mean_value: 127.5
 	force_color: true
  	resize_param {
       prob: 0.1

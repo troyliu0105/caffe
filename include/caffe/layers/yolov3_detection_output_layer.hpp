@@ -28,8 +28,8 @@ public:
 
 template<typename Dtype>
 bool is_predict_valid(const PredictionResult<Dtype> &predict) {
-  return std::isnormal(predict.x) and std::isnormal(predict.y)
-      and std::isnormal(predict.h) and std::isnormal(predict.w);
+  return std::isnormal(predict.x) && std::isnormal(predict.y) \
+ && std::isnormal(predict.h) && std::isnormal(predict.w);
 }
 
 /**

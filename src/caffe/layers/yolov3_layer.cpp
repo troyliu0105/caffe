@@ -17,10 +17,6 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/layers/sigmoid_layer.hpp"
 
-#include <algorithm>
-#include <cfloat>
-#include <vector>
-#include <float.h>
 #ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -459,14 +455,14 @@ void Yolov3Layer<Dtype>::Forward_cpu(
   //LOG(INFO)<<"iou loss" << iou_loss_<<","<<GIOU;
   //LOG(INFO) << side_*anchors_scale_;
   const Dtype *label_data = bottom[1]->cpu_data(); //[label,x,y,w,h]
-  if (diff_.width() != bottom[0]->width()) {
+  if (diff_.width() != side_w_ || diff_.height() != side_h_) {
     diff_.ReshapeLike(*bottom[0]);
   }
   Dtype *diff = diff_.mutable_cpu_data();
-  caffe_set(diff_.count(), Dtype(0.0), diff);
+  caffe_set<Dtype>(diff_.count(), 0.0, diff);
 
-  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0), recall(0.0), recall75(0.0), loss(0.0),
-      avg_iou_loss(0.0);
+  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0), avg_iou_loss(0.0),
+      recall(0.0), recall75(0.0), loss(0.0);
   int count = 0;
 
   const Dtype *input_data = bottom[0]->cpu_data();
@@ -883,7 +879,6 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                 diff[index2] = diff[index2 + 0];
               } else {
                 diff[index2] = diff[index2 + 0] * logistic_gradient(top_data[index2 + 0]);
-
               }
             }
           }
