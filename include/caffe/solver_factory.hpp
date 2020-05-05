@@ -47,26 +47,26 @@
 
 namespace caffe {
 
-template <typename Dtype>
+template<typename Dtype>
 class Solver;
 
-template <typename Dtype>
+template<typename Dtype>
 class SolverRegistry {
- public:
-  typedef Solver<Dtype>* (*Creator)(const SolverParameter&);
+public:
+  typedef Solver<Dtype> *(*Creator)(const SolverParameter &);
   typedef std::map<string, Creator> CreatorRegistry;
 
-  static CreatorRegistry& Registry();
+  static CreatorRegistry &Registry();
 
   // Adds a creator.
-  static void AddCreator(const string& type, Creator creator);
+  static void AddCreator(const string &type, Creator creator);
 
   // Get a solver using a SolverParameter.
-  static Solver<Dtype>* CreateSolver(const SolverParameter& param);
+  static Solver<Dtype> *CreateSolver(const SolverParameter &param);
 
-  static vector<string> SolverTypeList();
+  static vector <string> SolverTypeList();
 
- private:
+private:
   // Solver registry should never be instantiated - everything is done with its
   // static variables.
   SolverRegistry();  // {}
@@ -74,14 +74,12 @@ class SolverRegistry {
   static string SolverTypeListString();
 };
 
-
-template <typename Dtype>
+template<typename Dtype>
 class SolverRegisterer {
- public:
-  SolverRegisterer(const string& type,
-                   Solver<Dtype>* (*creator)(const SolverParameter&));
+public:
+  SolverRegisterer(const string &type,
+                   Solver<Dtype> *(*creator)(const SolverParameter &));
 };
-
 
 #define REGISTER_SOLVER_CREATOR(type, creator)                                 \
   static SolverRegisterer<float> g_creator_f_##type(#type, creator<float>);    \

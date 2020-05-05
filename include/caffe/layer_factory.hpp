@@ -49,26 +49,26 @@
 
 namespace caffe {
 
-template <typename Dtype>
+template<typename Dtype>
 class Layer;
 
-template <typename Dtype>
+template<typename Dtype>
 class LayerRegistry {
- public:
-  typedef shared_ptr<Layer<Dtype> > (*Creator)(const LayerParameter&);
+public:
+  typedef shared_ptr<Layer<Dtype> > (*Creator)(const LayerParameter &);
   typedef std::map<string, Creator> CreatorRegistry;
 
-  static CreatorRegistry& Registry();
+  static CreatorRegistry &Registry();
 
   // Adds a creator.
-  static void AddCreator(const string& type, Creator creator);
+  static void AddCreator(const string &type, Creator creator);
 
   // Get a layer using a LayerParameter.
-  static shared_ptr<Layer<Dtype> > CreateLayer(const LayerParameter& param);
+  static shared_ptr <Layer<Dtype>> CreateLayer(const LayerParameter &param);
 
-  static vector<string> LayerTypeList();
+  static vector <string> LayerTypeList();
 
- private:
+private:
   // Layer registry should never be instantiated - everything is done with its
   // static variables.
   LayerRegistry();
@@ -76,11 +76,11 @@ class LayerRegistry {
   static string LayerTypeListString();
 };
 
-template <typename Dtype>
+template<typename Dtype>
 class LayerRegisterer {
- public:
-  LayerRegisterer(const string& type,
-                  shared_ptr<Layer<Dtype> > (*creator)(const LayerParameter&));
+public:
+  LayerRegisterer(const string &type,
+                  shared_ptr<Layer<Dtype> > (*creator)(const LayerParameter &));
 };
 
 #define REGISTER_LAYER_CREATOR(type, creator)                                  \

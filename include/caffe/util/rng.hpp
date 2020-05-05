@@ -13,14 +13,14 @@ namespace caffe {
 
 typedef boost::mt19937 rng_t;
 
-inline rng_t* caffe_rng() {
-  return static_cast<caffe::rng_t*>(Caffe::rng_stream().generator());
+inline rng_t *caffe_rng() {
+  return static_cast<caffe::rng_t *>(Caffe::rng_stream().generator());
 }
 
 // Fisher–Yates algorithm
-template <class RandomAccessIterator, class RandomGenerator>
+template<class RandomAccessIterator, class RandomGenerator>
 inline void shuffle(RandomAccessIterator begin, RandomAccessIterator end,
-                    RandomGenerator* gen) {
+                    RandomGenerator *gen) {
   typedef typename std::iterator_traits<RandomAccessIterator>::difference_type
       difference_type;
   typedef typename boost::uniform_int<difference_type> dist_type;
@@ -34,7 +34,7 @@ inline void shuffle(RandomAccessIterator begin, RandomAccessIterator end,
   }
 }
 
-template <class RandomAccessIterator>
+template<class RandomAccessIterator>
 inline void shuffle(RandomAccessIterator begin, RandomAccessIterator end) {
   shuffle(begin, end, caffe_rng());
 }

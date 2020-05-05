@@ -21,27 +21,27 @@ namespace caffe {
  * inputs. Caffe + cuDNN further speeds up the computation through forward
  * parallelism across groups and backward parallelism across gradients.
 */
-template <typename Dtype>
+template<typename Dtype>
 class CuDNNDeconvolutionLayer : public DeconvolutionLayer<Dtype> {
- public:
-  explicit CuDNNDeconvolutionLayer(const LayerParameter& param)
-    : DeconvolutionLayer<Dtype>(param), handles_setup_(false) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-                          const vector<Blob<Dtype>*>& top);
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-                       const vector<Blob<Dtype>*>& top);
+public:
+  explicit CuDNNDeconvolutionLayer(const LayerParameter &param)
+      : DeconvolutionLayer<Dtype>(param), handles_setup_(false) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
   virtual ~CuDNNDeconvolutionLayer();
 
- protected:
-  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-                           const vector<Blob<Dtype>*>& top);
-  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-                            const vector<bool>& propagate_down,
-                            const vector<Blob<Dtype>*>& bottom);
+protected:
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   bool handles_setup_;
-  cudnnHandle_t* handle_;
-  cudaStream_t*  stream_;
+  cudnnHandle_t *handle_;
+  cudaStream_t *stream_;
 
   // algorithms for forward and backwards convolutions
   cudnnConvolutionFwdAlgo_t *fwd_algo_;

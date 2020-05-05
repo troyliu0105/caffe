@@ -8,7 +8,7 @@
 namespace caffe {
 
 class Timer {
- public:
+public:
   Timer();
   virtual ~Timer();
   virtual void Start();
@@ -21,7 +21,7 @@ class Timer {
   inline bool running() { return running_; }
   inline bool has_run_at_least_once() { return has_run_at_least_once_; }
 
- protected:
+protected:
   void Init();
 
   bool initted_;
@@ -38,7 +38,7 @@ class Timer {
 };
 
 class CPUTimer : public Timer {
- public:
+public:
   explicit CPUTimer();
   virtual ~CPUTimer() {}
   virtual void Start();
