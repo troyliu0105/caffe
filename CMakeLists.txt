@@ -16,7 +16,9 @@ endif ()
 
 # ---[ Caffe project
 project(Caffe LANGUAGES C CXX)
-set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")  # Reset.
+set(CMAKE_CUDA_STANDARD 14)
 
 # ---[ Caffe version
 set(CAFFE_TARGET_VERSION "1.0.0" CACHE STRING "Caffe logical version")
