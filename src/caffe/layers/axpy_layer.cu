@@ -9,19 +9,19 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void AxpyForward(const int count, const int spatial_dim,
-                            const Dtype *scale_data, const Dtype *x_data, const Dtype *y_data,
-                            Dtype *out_data) {
+                            const Dtype *scale_data, const Dtype *x_data,
+                            const Dtype *y_data, Dtype *out_data) {
   CUDA_KERNEL_LOOP(index, count) {
-    out_data[index] = scale_data[index / spatial_dim] * x_data[index]
-        + y_data[index];
+    out_data[index] =
+        scale_data[index / spatial_dim] * x_data[index] + y_data[index];
   }
 }
 
-template<typename Dtype>
-void AxpyLayer<Dtype>::Forward_gpu(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void AxpyLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                                   const vector<Blob<Dtype> *> &top) {
   const Dtype *scale_data = bottom[0]->gpu_data();
   const Dtype *x_data = bottom[1]->gpu_data();
   const Dtype *y_data = bottom[2]->gpu_data();
@@ -31,9 +31,10 @@ void AxpyLayer<Dtype>::Forward_gpu(
       count, bottom[1]->count(2), scale_data, x_data, y_data, out_data);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void AxpyBackwardScale(const int outer_num, const int spatial_dim,
-                                  const Dtype *x_data, const Dtype *top_diff, Dtype *scale_diff) {
+                                  const Dtype *x_data, const Dtype *top_diff,
+                                  Dtype *scale_diff) {
   __shared__ Dtype buffer[CAFFE_CUDA_NUM_THREADS];
   unsigned int tid = threadIdx.x;
   buffer[tid] = 0;
@@ -57,30 +58,30 @@ __global__ void AxpyBackwardScale(const int outer_num, const int spatial_dim,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void AxpyBackwardX(const int count, const int spatial_dim,
-                              const Dtype *scale_data, const Dtype *top_diff, Dtype *out) {
+                              const Dtype *scale_data, const Dtype *top_diff,
+                              Dtype *out) {
   CUDA_KERNEL_LOOP(index, count) {
     out[index] = scale_data[index / spatial_dim] * top_diff[index];
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void AxpyLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                    const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                    const vector<bool> &propagate_down,
+                                    const vector<Blob<Dtype> *> &bottom) {
   const int count = top[0]->count();
   const Dtype *top_diff = top[0]->gpu_diff();
   if (propagate_down[0]) {
     int outer_num = bottom[1]->count(0, 2);
     AxpyBackwardScale<Dtype><<<outer_num, CAFFE_CUDA_NUM_THREADS>>>(
-        outer_num, bottom[1]->count(2),
-        bottom[1]->gpu_data(), top_diff,
+        outer_num, bottom[1]->count(2), bottom[1]->gpu_data(), top_diff,
         bottom[0]->mutable_gpu_diff());
   }
   if (propagate_down[1]) {
     AxpyBackwardX<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-        count, top[0]->count(2),
-        bottom[0]->gpu_data(), top_diff,
+        count, top[0]->count(2), bottom[0]->gpu_data(), top_diff,
         bottom[1]->mutable_gpu_diff());
   }
   if (propagate_down[2]) {
@@ -91,4 +92,4 @@ void AxpyLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(AxpyLayer);
 
-}  // namespace caffe
+} // namespace caffe

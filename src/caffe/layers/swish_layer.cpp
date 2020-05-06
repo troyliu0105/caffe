@@ -6,7 +6,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void SwishLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   NeuronLayer<Dtype>::LayerSetUp(bottom, top);
@@ -17,7 +17,7 @@ void SwishLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   sigmoid_layer_->SetUp(sigmoid_bottom_vec_, sigmoid_top_vec_);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SwishLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                 const vector<Blob<Dtype> *> &top) {
   NeuronLayer<Dtype>::Reshape(bottom, top);
@@ -25,7 +25,7 @@ void SwishLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   sigmoid_layer_->Reshape(sigmoid_bottom_vec_, sigmoid_top_vec_);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SwishLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -39,7 +39,7 @@ void SwishLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   caffe_mul(count, bottom_data, sigmoid_output_->cpu_data(), top_data);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SwishLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                      const vector<bool> &propagate_down,
                                      const vector<Blob<Dtype> *> &bottom) {
@@ -52,8 +52,9 @@ void SwishLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype beta = this->layer_param_.swish_param().beta();
     for (int i = 0; i < count; ++i) {
       const Dtype swish_x = top_data[i];
-      bottom_diff[i] = top_diff[i] * (beta * swish_x + sigmoid_output_data[i]
-          * (1. - beta * swish_x));
+      bottom_diff[i] =
+          top_diff[i] *
+          (beta * swish_x + sigmoid_output_data[i] * (1. - beta * swish_x));
     }
   }
 }
@@ -65,4 +66,4 @@ STUB_GPU(SwishLayer);
 INSTANTIATE_CLASS(SwishLayer);
 REGISTER_LAYER_CLASS(Swish);
 
-}  // namespace caffe
+} // namespace caffe

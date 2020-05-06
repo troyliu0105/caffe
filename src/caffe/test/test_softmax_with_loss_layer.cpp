@@ -16,7 +16,7 @@ using boost::scoped_ptr;
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class SoftmaxWithLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -66,7 +66,7 @@ TYPED_TEST(SoftmaxWithLossLayerTest, TestForwardIgnoreLabel) {
   LayerParameter layer_param;
   layer_param.mutable_loss_param()->set_normalize(false);
   // First, compute the loss with all labels
-  scoped_ptr<SoftmaxWithLossLayer<Dtype> > layer(
+  scoped_ptr<SoftmaxWithLossLayer<Dtype>> layer(
       new SoftmaxWithLossLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -105,4 +105,4 @@ TYPED_TEST(SoftmaxWithLossLayerTest, TestGradientUnnormalized) {
                                   this->blob_top_vec_, 0);
 }
 
-}  // namespace caffe
+} // namespace caffe

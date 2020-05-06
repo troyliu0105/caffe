@@ -17,9 +17,10 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class SoftmaxLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
   SoftmaxLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 10, 2, 3)),
@@ -67,10 +68,10 @@ TYPED_TEST(SoftmaxLayerTest, TestForward) {
         for (int j = 0; j < this->blob_bottom_->channels(); ++j) {
           EXPECT_GE(this->blob_top_->data_at(i, j, k, l) + 1e-4,
                     exp(this->blob_bottom_->data_at(i, j, k, l)) / scale)
-                  << "debug: " << i << " " << j;
+              << "debug: " << i << " " << j;
           EXPECT_LE(this->blob_top_->data_at(i, j, k, l) - 1e-4,
                     exp(this->blob_bottom_->data_at(i, j, k, l)) / scale)
-                  << "debug: " << i << " " << j;
+              << "debug: " << i << " " << j;
         }
       }
     }
@@ -87,7 +88,7 @@ TYPED_TEST(SoftmaxLayerTest, TestGradient) {
 }
 
 #ifdef USE_CUDNN
-template<typename Dtype>
+template <typename Dtype>
 class CuDNNSoftmaxLayerTest : public GPUDeviceTest<Dtype> {
 protected:
   CuDNNSoftmaxLayerTest()
@@ -135,10 +136,10 @@ TYPED_TEST(CuDNNSoftmaxLayerTest, TestForwardCuDNN) {
         for (int j = 0; j < this->blob_bottom_->channels(); ++j) {
           EXPECT_GE(this->blob_top_->data_at(i, j, k, l) + 1e-4,
                     exp(this->blob_bottom_->data_at(i, j, k, l)) / scale)
-                  << "debug: " << i << " " << j;
+              << "debug: " << i << " " << j;
           EXPECT_LE(this->blob_top_->data_at(i, j, k, l) - 1e-4,
                     exp(this->blob_bottom_->data_at(i, j, k, l)) / scale)
-                  << "debug: " << i << " " << j;
+              << "debug: " << i << " " << j;
         }
       }
     }
@@ -155,4 +156,4 @@ TYPED_TEST(CuDNNSoftmaxLayerTest, TestGradientCuDNN) {
 
 #endif
 
-}  // namespace caffe
+} // namespace caffe

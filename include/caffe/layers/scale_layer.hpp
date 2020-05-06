@@ -22,11 +22,9 @@ namespace caffe {
  * The latter, scale input may be omitted, in which case it's learned as
  * parameter of the layer (as is the bias, if it is included).
  */
-template<typename Dtype>
-class ScaleLayer : public Layer<Dtype> {
+template <typename Dtype> class ScaleLayer : public Layer<Dtype> {
 public:
-  explicit ScaleLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit ScaleLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -63,11 +61,13 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
-  shared_ptr<Layer<Dtype> > bias_layer_;
+  shared_ptr<Layer<Dtype>> bias_layer_;
   vector<Blob<Dtype> *> bias_bottom_vec_;
   vector<bool> bias_propagate_down_;
   int bias_param_id_;
@@ -79,6 +79,6 @@ protected:
   int outer_dim_, scale_dim_, inner_dim_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SCALE_LAYER_HPP_
+#endif // CAFFE_SCALE_LAYER_HPP_

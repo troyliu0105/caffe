@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ReLU6Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -13,12 +13,14 @@ void ReLU6Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const int count = bottom[0]->count();
   Dtype negative_slope = this->layer_param_.relu6_param().negative_slope();
   for (int i = 0; i < count; ++i) {
-    top_data[i] = std::min(std::max(bottom_data[i], Dtype(0))
-                               + negative_slope * std::min(bottom_data[i], Dtype(0)), Dtype(6.));
+    top_data[i] =
+        std::min(std::max(bottom_data[i], Dtype(0)) +
+                     negative_slope * std::min(bottom_data[i], Dtype(0)),
+                 Dtype(6.));
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ReLU6Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                      const vector<bool> &propagate_down,
                                      const vector<Blob<Dtype> *> &bottom) {
@@ -29,8 +31,10 @@ void ReLU6Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     const int count = bottom[0]->count();
     Dtype negative_slope = this->layer_param_.relu6_param().negative_slope();
     for (int i = 0; i < count; ++i) {
-      bottom_diff[i] = (top_diff[i] * ((bottom_data[i] > 0)
-          + negative_slope * (bottom_data[i] <= 0))) * (bottom_data[i] < Dtype(6.));
+      bottom_diff[i] =
+          (top_diff[i] *
+           ((bottom_data[i] > 0) + negative_slope * (bottom_data[i] <= 0))) *
+          (bottom_data[i] < Dtype(6.));
     }
   }
 }
@@ -41,5 +45,4 @@ STUB_GPU(ReLU6Layer);
 
 INSTANTIATE_CLASS(ReLU6Layer);
 REGISTER_LAYER_CLASS(ReLU6);
-}  // namespace caffe
-
+} // namespace caffe

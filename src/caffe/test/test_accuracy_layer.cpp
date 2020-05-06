@@ -13,17 +13,15 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class AccuracyLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   AccuracyLayerTest()
       : blob_bottom_data_(new Blob<Dtype>()),
-        blob_bottom_label_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()),
-        blob_top_per_class_(new Blob<Dtype>()),
-        top_k_(3) {
+        blob_bottom_label_(new Blob<Dtype>()), blob_top_(new Blob<Dtype>()),
+        blob_top_per_class_(new Blob<Dtype>()), top_k_(3) {
     vector<int> shape(2);
     shape[0] = 100;
     shape[1] = 10;
@@ -47,8 +45,7 @@ protected:
 
     const unsigned int prefetch_rng_seed = caffe_rng_rand();
     shared_ptr<Caffe::RNG> rng(new Caffe::RNG(prefetch_rng_seed));
-    caffe::rng_t *prefetch_rng =
-        static_cast<caffe::rng_t *>(rng->generator());
+    caffe::rng_t *prefetch_rng = static_cast<caffe::rng_t *>(rng->generator());
     Dtype *label_data = blob_bottom_label_->mutable_cpu_data();
     for (int i = 0; i < blob_bottom_label_->count(); ++i) {
       label_data[i] = (*prefetch_rng)() % 10;
@@ -87,8 +84,7 @@ TYPED_TEST(AccuracyLayerTest, TestSetup) {
 TYPED_TEST(AccuracyLayerTest, TestSetupTopK) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  AccuracyParameter *accuracy_param =
-      layer_param.mutable_accuracy_param();
+  AccuracyParameter *accuracy_param = layer_param.mutable_accuracy_param();
   accuracy_param->set_top_k(5);
   AccuracyLayer<Dtype> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -233,7 +229,7 @@ TYPED_TEST(AccuracyLayerTest, TestForwardIgnoreLabel) {
         ++num_correct_labels;
       }
     }
-    EXPECT_EQ(count, 97);  // We set 3 out of 100 labels to kIgnoreLabelValue.
+    EXPECT_EQ(count, 97); // We set 3 out of 100 labels to kIgnoreLabelValue.
     EXPECT_NEAR(this->blob_top_->data_at(0, 0, 0, 0),
                 num_correct_labels / Dtype(count), 1e-4);
   }
@@ -308,8 +304,10 @@ TYPED_TEST(AccuracyLayerTest, TestForwardPerClass) {
     EXPECT_NEAR(this->blob_top_->data_at(0, 0, 0, 0),
                 num_correct_labels / 100.0, 1e-4);
     for (int i = 0; i < num_class; ++i) {
-      Dtype accuracy_per_class = (num_per_class[i] > 0 ?
-                                  static_cast<Dtype>(correct_per_class[i]) / num_per_class[i] : 0);
+      Dtype accuracy_per_class =
+          (num_per_class[i] > 0
+               ? static_cast<Dtype>(correct_per_class[i]) / num_per_class[i]
+               : 0);
       EXPECT_NEAR(this->blob_top_per_class_->data_at(i, 0, 0, 0),
                   accuracy_per_class, 1e-4);
     }
@@ -362,12 +360,14 @@ TYPED_TEST(AccuracyLayerTest, TestForwardPerClassWithIgnoreLabel) {
     EXPECT_NEAR(this->blob_top_->data_at(0, 0, 0, 0),
                 num_correct_labels / Dtype(count), 1e-4);
     for (int i = 0; i < 10; ++i) {
-      Dtype accuracy_per_class = (num_per_class[i] > 0 ?
-                                  static_cast<Dtype>(correct_per_class[i]) / num_per_class[i] : 0);
+      Dtype accuracy_per_class =
+          (num_per_class[i] > 0
+               ? static_cast<Dtype>(correct_per_class[i]) / num_per_class[i]
+               : 0);
       EXPECT_NEAR(this->blob_top_per_class_->data_at(i, 0, 0, 0),
                   accuracy_per_class, 1e-4);
     }
   }
 }
 
-}  // namespace caffe
+} // namespace caffe

@@ -47,6 +47,6 @@ public:
   virtual float MicroSeconds();
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif   // CAFFE_UTIL_BENCHMARK_H_
+#endif // CAFFE_UTIL_BENCHMARK_H_

@@ -4,7 +4,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                           const vector<Blob<Dtype> *> &top) {
   const Dtype *weight = this->blobs_[0]->gpu_data();
@@ -22,9 +22,10 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-void ConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                           const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+template <typename Dtype>
+void ConvolutionLayer<Dtype>::Backward_gpu(
+    const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
+    const vector<Blob<Dtype> *> &bottom) {
   const Dtype *weight = this->blobs_[0]->gpu_data();
   Dtype *weight_diff = this->blobs_[0]->mutable_gpu_diff();
   for (int i = 0; i < top.size(); ++i) {
@@ -57,4 +58,4 @@ void ConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(ConvolutionLayer);
 
-}  // namespace caffe
+} // namespace caffe

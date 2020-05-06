@@ -7,7 +7,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   const PriorBoxParameter &prior_box_param =
@@ -42,7 +42,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
     for (int i = 0; i < prior_box_param.max_size_size(); ++i) {
       max_sizes_.push_back(prior_box_param.max_size(i));
       CHECK_GT(max_sizes_[i], min_sizes_[i])
-        << "max_size must be greater than min_size.";
+          << "max_size must be greater than min_size.";
       num_priors_ += 1;
     }
   }
@@ -64,7 +64,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 
   if (prior_box_param.has_img_h() || prior_box_param.has_img_w()) {
     CHECK(!prior_box_param.has_img_size())
-            << "Either img_size or img_h/img_w should be specified; not both.";
+        << "Either img_size or img_h/img_w should be specified; not both.";
     img_h_ = prior_box_param.img_h();
     CHECK_GT(img_h_, 0) << "img_h should be larger than 0.";
     img_w_ = prior_box_param.img_w();
@@ -81,7 +81,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 
   if (prior_box_param.has_step_h() || prior_box_param.has_step_w()) {
     CHECK(!prior_box_param.has_step())
-            << "Either step or step_h/step_w should be specified; not both.";
+        << "Either step or step_h/step_w should be specified; not both.";
     step_h_ = prior_box_param.step_h();
     CHECK_GT(step_h_, 0.) << "step_h should be larger than 0.";
     step_w_ = prior_box_param.step_w();
@@ -99,7 +99,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   offset_ = prior_box_param.offset();
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PriorBoxLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   const int layer_width = bottom[0]->width();
@@ -116,7 +116,7 @@ void PriorBoxLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   top[0]->Reshape(top_shape);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                        const vector<Blob<Dtype> *> &top) {
   const int layer_width = bottom[0]->width();
@@ -221,4 +221,4 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 INSTANTIATE_CLASS(PriorBoxLayer);
 REGISTER_LAYER_CLASS(PriorBox);
 
-}  // namespace caffe
+} // namespace caffe

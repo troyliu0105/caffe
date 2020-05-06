@@ -4,15 +4,13 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void ThresholdForward(const int n, const Dtype threshold,
                                  const Dtype *in, Dtype *out) {
-  CUDA_KERNEL_LOOP(index, n) {
-    out[index] = in[index] > threshold ? 1 : 0;
-  }
+  CUDA_KERNEL_LOOP(index, n) { out[index] = in[index] > threshold ? 1 : 0; }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ThresholdLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                         const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -26,4 +24,4 @@ void ThresholdLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
 
 INSTANTIATE_LAYER_GPU_FORWARD(ThresholdLayer);
 
-}  // namespace caffe
+} // namespace caffe

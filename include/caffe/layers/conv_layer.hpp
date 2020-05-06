@@ -27,7 +27,7 @@ namespace caffe {
  *   be filtered. col2im restores the output spatial structure by rolling up
  *   the output channel N' columns of the output matrix.
  */
-template<typename Dtype>
+template <typename Dtype>
 class ConvolutionLayer : public BaseConvolutionLayer<Dtype> {
 public:
   /**
@@ -49,11 +49,11 @@ public:
    *  dilation. By default the convolution has dilation 1.
    *  - group (\b optional, default 1). The number of filter groups. Group
    *  convolution is a method for reducing parameterization by selectively
-   *  connecting input and output channels. The input and output channel dimensions must be divisible
-   *  by the number of groups. For group @f$ \geq 1 @f$, the
-   *  convolutional filters' input and output channels are separated s.t. each
-   *  group takes 1 / group of the input channels and makes 1 / group of the
-   *  output channels. Concretely 4 input channels, 8 output channels, and
+   *  connecting input and output channels. The input and output channel
+   * dimensions must be divisible by the number of groups. For group @f$ \geq 1
+   * @f$, the convolutional filters' input and output channels are separated
+   * s.t. each group takes 1 / group of the input channels and makes 1 / group
+   * of the output channels. Concretely 4 input channels, 8 output channels, and
    *  2 groups separate input channels 1-2 and output channels 1-4 into the
    *  first group and input channels 3-4 and output channels 5-8 into the second
    *  group.
@@ -72,13 +72,15 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual inline bool reverse_dimensions() { return false; }
   virtual void compute_output_shape();
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_CONV_LAYER_HPP_
+#endif // CAFFE_CONV_LAYER_HPP_

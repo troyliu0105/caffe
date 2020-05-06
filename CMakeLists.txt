@@ -16,7 +16,8 @@ endif ()
 
 # ---[ Caffe project
 project(Caffe LANGUAGES C CXX)
-set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CUDA_STANDARD 14)
 
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
     add_definitions(-DDEBUG=1)

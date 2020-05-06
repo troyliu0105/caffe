@@ -12,11 +12,9 @@ namespace caffe {
 /**
  * @brief Copy a Blob along specified dimensions.
  */
-template<typename Dtype>
-class TileLayer : public Layer<Dtype> {
+template <typename Dtype> class TileLayer : public Layer<Dtype> {
 public:
-  explicit TileLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit TileLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
                        const vector<Blob<Dtype> *> &top);
 
@@ -31,13 +29,15 @@ protected:
                            const vector<Blob<Dtype> *> &top);
 
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   unsigned int axis_, tiles_, outer_dim_, inner_dim_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_TILE_LAYER_HPP_
+#endif // CAFFE_TILE_LAYER_HPP_

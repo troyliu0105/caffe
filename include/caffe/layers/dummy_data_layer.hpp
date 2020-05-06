@@ -15,11 +15,9 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward and proto params.
  */
-template<typename Dtype>
-class DummyDataLayer : public Layer<Dtype> {
+template <typename Dtype> class DummyDataLayer : public Layer<Dtype> {
 public:
-  explicit DummyDataLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit DummyDataLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   // Data layers have no bottoms, so reshaping is trivial.
@@ -34,14 +32,16 @@ protected:
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {}
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {}
 
-  vector<shared_ptr<Filler<Dtype> > > fillers_;
+  vector<shared_ptr<Filler<Dtype>>> fillers_;
   vector<bool> refill_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DUMMY_DATA_LAYER_HPP_
+#endif // CAFFE_DUMMY_DATA_LAYER_HPP_

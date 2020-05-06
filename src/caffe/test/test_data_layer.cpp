@@ -19,16 +19,14 @@ namespace caffe {
 
 using boost::scoped_ptr;
 
-template<typename TypeParam>
+template <typename TypeParam>
 class DataLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   DataLayerTest()
-      : backend_(DataParameter_DB_LEVELDB),
-        blob_top_data_(new Blob<Dtype>()),
-        blob_top_label_(new Blob<Dtype>()),
-        seed_(1701) {}
+      : backend_(DataParameter_DB_LEVELDB), blob_top_data_(new Blob<Dtype>()),
+        blob_top_label_(new Blob<Dtype>()), seed_(1701) {}
   virtual void SetUp() {
     filename_.reset(new string());
     MakeTempDir(filename_.get());
@@ -76,8 +74,7 @@ protected:
     data_param->set_source(filename_->c_str());
     data_param->set_backend(backend_);
 
-    TransformationParameter *transform_param =
-        param.mutable_transform_param();
+    TransformationParameter *transform_param = param.mutable_transform_param();
     transform_param->set_scale(scale);
 
     DataLayer<Dtype> layer(param);
@@ -99,7 +96,7 @@ protected:
       for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 24; ++j) {
           EXPECT_EQ(scale * i, blob_top_data_->cpu_data()[i * 24 + j])
-                  << "debug: iter " << iter << " i " << i << " j " << j;
+              << "debug: iter " << iter << " i " << i << " j " << j;
         }
       }
     }
@@ -188,8 +185,8 @@ protected:
           for (int w = 0; w < width; ++w) {
             const int idx = (c * height + h) * width + w;
             EXPECT_EQ(idx, static_cast<int>(blob_top_data_->cpu_data()[idx]))
-                    << "debug: iter " << iter << " c " << c
-                    << " h " << h << " w " << w;
+                << "debug: iter " << iter << " c " << c << " h " << h << " w "
+                << w;
           }
         }
       }
@@ -207,8 +204,7 @@ protected:
     data_param->set_source(filename_->c_str());
     data_param->set_backend(backend_);
 
-    TransformationParameter *transform_param =
-        param.mutable_transform_param();
+    TransformationParameter *transform_param = param.mutable_transform_param();
     transform_param->set_scale(scale);
     transform_param->set_crop_size(1);
 
@@ -237,7 +233,7 @@ protected:
           // At TEST time, check that we always get center value.
           if (phase == caffe::TEST) {
             EXPECT_EQ(center_value, this->blob_top_data_->cpu_data()[i * 2 + j])
-                    << "debug: iter " << iter << " i " << i << " j " << j;
+                << "debug: iter " << iter << " i " << i << " j " << j;
           }
         }
       }
@@ -258,14 +254,13 @@ protected:
     data_param->set_source(filename_->c_str());
     data_param->set_backend(backend_);
 
-    TransformationParameter *transform_param =
-        param.mutable_transform_param();
+    TransformationParameter *transform_param = param.mutable_transform_param();
     transform_param->set_crop_size(1);
     transform_param->set_mirror(true);
 
     // Get crop sequence with Caffe seed 1701.
     Caffe::set_random_seed(seed_);
-    vector<vector<Dtype> > crop_sequence;
+    vector<vector<Dtype>> crop_sequence;
     {
       DataLayer<Dtype> layer1(param);
       layer1.SetUp(blob_bottom_vec_, blob_top_vec_);
@@ -277,13 +272,12 @@ protected:
         vector<Dtype> iter_crop_sequence;
         for (int i = 0; i < 5; ++i) {
           for (int j = 0; j < 2; ++j) {
-            iter_crop_sequence.push_back(
-                blob_top_data_->cpu_data()[i * 2 + j]);
+            iter_crop_sequence.push_back(blob_top_data_->cpu_data()[i * 2 + j]);
           }
         }
         crop_sequence.push_back(iter_crop_sequence);
       }
-    }  // destroy 1st data layer and unlock the db
+    } // destroy 1st data layer and unlock the db
 
     // Get crop sequence after reseeding Caffe with 1701.
     // Check that the sequence is the same as the original.
@@ -299,7 +293,7 @@ protected:
         for (int j = 0; j < 2; ++j) {
           EXPECT_EQ(crop_sequence[iter][i * 2 + j],
                     blob_top_data_->cpu_data()[i * 2 + j])
-                  << "debug: iter " << iter << " i " << i << " j " << j;
+              << "debug: iter " << iter << " i " << i << " j " << j;
         }
       }
     }
@@ -313,15 +307,14 @@ protected:
     data_param->set_source(filename_->c_str());
     data_param->set_backend(backend_);
 
-    TransformationParameter *transform_param =
-        param.mutable_transform_param();
+    TransformationParameter *transform_param = param.mutable_transform_param();
     transform_param->set_crop_size(1);
     transform_param->set_mirror(true);
 
     // Get crop sequence with Caffe seed 1701, srand seed 1701.
     Caffe::set_random_seed(seed_);
     srand(seed_);
-    vector<vector<Dtype> > crop_sequence;
+    vector<vector<Dtype>> crop_sequence;
     {
       DataLayer<Dtype> layer1(param);
       layer1.SetUp(blob_bottom_vec_, blob_top_vec_);
@@ -333,13 +326,12 @@ protected:
         vector<Dtype> iter_crop_sequence;
         for (int i = 0; i < 5; ++i) {
           for (int j = 0; j < 2; ++j) {
-            iter_crop_sequence.push_back(
-                blob_top_data_->cpu_data()[i * 2 + j]);
+            iter_crop_sequence.push_back(blob_top_data_->cpu_data()[i * 2 + j]);
           }
         }
         crop_sequence.push_back(iter_crop_sequence);
       }
-    }  // destroy 1st data layer and unlock the db
+    } // destroy 1st data layer and unlock the db
 
     // Get crop sequence continuing from previous Caffe RNG state; reseed
     // srand with 1701. Check that the sequence differs from the original.
@@ -355,7 +347,7 @@ protected:
       for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 2; ++j) {
           num_sequence_matches += (crop_sequence[iter][i * 2 + j] ==
-              blob_top_data_->cpu_data()[i * 2 + j]);
+                                   blob_top_data_->cpu_data()[i * 2 + j]);
         }
       }
       EXPECT_LT(num_sequence_matches, 10);
@@ -380,7 +372,7 @@ TYPED_TEST_CASE(DataLayerTest, TestDtypesAndDevices);
 
 #ifdef USE_LEVELDB
 TYPED_TEST(DataLayerTest, TestReadLevelDB) {
-  const bool unique_pixels = false;  // all pixels the same; images different
+  const bool unique_pixels = false; // all pixels the same; images different
   this->Fill(unique_pixels, DataParameter_DB_LEVELDB);
   this->TestRead();
 }
@@ -395,7 +387,7 @@ TYPED_TEST(DataLayerTest, TestReshapeLevelDB) {
 }
 
 TYPED_TEST(DataLayerTest, TestReadCropTrainLevelDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LEVELDB);
   this->TestReadCrop(TRAIN);
 }
@@ -403,7 +395,7 @@ TYPED_TEST(DataLayerTest, TestReadCropTrainLevelDB) {
 // Test that the sequence of random crops is consistent when using
 // Caffe::set_random_seed.
 TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceSeededLevelDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LEVELDB);
   this->TestReadCropTrainSequenceSeeded();
 }
@@ -411,21 +403,21 @@ TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceSeededLevelDB) {
 // Test that the sequence of random crops differs across iterations when
 // Caffe::set_random_seed isn't called (and seeds from srand are ignored).
 TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceUnseededLevelDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LEVELDB);
   this->TestReadCropTrainSequenceUnseeded();
 }
 
 TYPED_TEST(DataLayerTest, TestReadCropTestLevelDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LEVELDB);
   this->TestReadCrop(TEST);
 }
-#endif  // USE_LEVELDB
+#endif // USE_LEVELDB
 
 #ifdef USE_LMDB
 TYPED_TEST(DataLayerTest, TestReadLMDB) {
-  const bool unique_pixels = false;  // all pixels the same; images different
+  const bool unique_pixels = false; // all pixels the same; images different
   this->Fill(unique_pixels, DataParameter_DB_LMDB);
   this->TestRead();
 }
@@ -440,7 +432,7 @@ TYPED_TEST(DataLayerTest, TestReshapeLMDB) {
 }
 
 TYPED_TEST(DataLayerTest, TestReadCropTrainLMDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LMDB);
   this->TestReadCrop(TRAIN);
 }
@@ -448,7 +440,7 @@ TYPED_TEST(DataLayerTest, TestReadCropTrainLMDB) {
 // Test that the sequence of random crops is consistent when using
 // Caffe::set_random_seed.
 TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceSeededLMDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LMDB);
   this->TestReadCropTrainSequenceSeeded();
 }
@@ -456,17 +448,17 @@ TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceSeededLMDB) {
 // Test that the sequence of random crops differs across iterations when
 // Caffe::set_random_seed isn't called (and seeds from srand are ignored).
 TYPED_TEST(DataLayerTest, TestReadCropTrainSequenceUnseededLMDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LMDB);
   this->TestReadCropTrainSequenceUnseeded();
 }
 
 TYPED_TEST(DataLayerTest, TestReadCropTestLMDB) {
-  const bool unique_pixels = true;  // all images the same; pixels different
+  const bool unique_pixels = true; // all images the same; pixels different
   this->Fill(unique_pixels, DataParameter_DB_LMDB);
   this->TestReadCrop(TEST);
 }
 
-#endif  // USE_LMDB
-}  // namespace caffe
-#endif  // USE_OPENCV
+#endif // USE_LMDB
+} // namespace caffe
+#endif // USE_OPENCV

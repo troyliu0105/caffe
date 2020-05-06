@@ -1,6 +1,6 @@
-#include <stdint.h>  // for uint32_t & uint64_t
+#include <cmath>    // for std::fabs
+#include <stdint.h> // for uint32_t & uint64_t
 #include <time.h>
-#include <cmath>  // for std::fabs
 
 #include "gtest/gtest.h"
 
@@ -13,15 +13,13 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class MathFunctionsTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   MathFunctionsTest()
-      : blob_bottom_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()) {
-  }
+      : blob_bottom_(new Blob<Dtype>()), blob_top_(new Blob<Dtype>()) {}
 
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
@@ -43,10 +41,8 @@ protected:
   Blob<Dtype> *const blob_top_;
 };
 
-template<typename Dtype>
-class CPUMathFunctionsTest
-    : public MathFunctionsTest<CPUDevice<Dtype> > {
-};
+template <typename Dtype>
+class CPUMathFunctionsTest : public MathFunctionsTest<CPUDevice<Dtype>> {};
 
 TYPED_TEST_CASE(CPUMathFunctionsTest, TestDtypes);
 
@@ -98,8 +94,9 @@ TYPED_TEST(CPUMathFunctionsTest, TestFabs) {
 
 TYPED_TEST(CPUMathFunctionsTest, TestScale) {
   int n = this->blob_bottom_->count();
-  TypeParam alpha = this->blob_bottom_->cpu_diff()[caffe_rng_rand() %
-      this->blob_bottom_->count()];
+  TypeParam alpha =
+      this->blob_bottom_
+          ->cpu_diff()[caffe_rng_rand() % this->blob_bottom_->count()];
   caffe_cpu_scale<TypeParam>(n, alpha, this->blob_bottom_->cpu_data(),
                              this->blob_bottom_->mutable_cpu_diff());
   const TypeParam *scaled = this->blob_bottom_->cpu_diff();
@@ -121,9 +118,8 @@ TYPED_TEST(CPUMathFunctionsTest, TestCopy) {
 
 #ifndef CPU_ONLY
 
-template<typename Dtype>
-class GPUMathFunctionsTest : public MathFunctionsTest<GPUDevice<Dtype> > {
-};
+template <typename Dtype>
+class GPUMathFunctionsTest : public MathFunctionsTest<GPUDevice<Dtype>> {};
 
 TYPED_TEST_CASE(GPUMathFunctionsTest, TestDtypes);
 
@@ -174,8 +170,9 @@ TYPED_TEST(GPUMathFunctionsTest, TestFabs) {
 
 TYPED_TEST(GPUMathFunctionsTest, TestScale) {
   int n = this->blob_bottom_->count();
-  TypeParam alpha = this->blob_bottom_->cpu_diff()[caffe_rng_rand() %
-      this->blob_bottom_->count()];
+  TypeParam alpha =
+      this->blob_bottom_
+          ->cpu_diff()[caffe_rng_rand() % this->blob_bottom_->count()];
   caffe_gpu_scale<TypeParam>(n, alpha, this->blob_bottom_->gpu_data(),
                              this->blob_bottom_->mutable_gpu_diff());
   const TypeParam *scaled = this->blob_bottom_->cpu_diff();
@@ -199,4 +196,4 @@ TYPED_TEST(GPUMathFunctionsTest, TestCopy) {
 
 #endif
 
-}  // namespace caffe
+} // namespace caffe

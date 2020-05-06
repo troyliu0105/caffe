@@ -17,8 +17,7 @@ namespace caffe {
  * batch.  The second blob is cast to int and treated as an index into the
  * first axis of the first blob.
  */
-template<typename Dtype>
-class BatchReindexLayer : public Layer<Dtype> {
+template <typename Dtype> class BatchReindexLayer : public Layer<Dtype> {
 public:
   explicit BatchReindexLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
@@ -63,9 +62,11 @@ protected:
    *     false.
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
 private:
   struct pair_sort_first {
@@ -78,6 +79,6 @@ private:
                            const Dtype *ridx_data);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_BATCHREINDEX_LAYER_HPP_
+#endif // CAFFE_BATCHREINDEX_LAYER_HPP_

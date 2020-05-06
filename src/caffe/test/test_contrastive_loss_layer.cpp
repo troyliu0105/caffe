@@ -14,7 +14,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class ContrastiveLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -27,14 +27,14 @@ protected:
     // fill the values
     FillerParameter filler_param;
     filler_param.set_min(-1.0);
-    filler_param.set_max(1.0);  // distances~=1.0 to test both sides of margin
+    filler_param.set_max(1.0); // distances~=1.0 to test both sides of margin
     UniformFiller<Dtype> filler(filler_param);
     filler.Fill(this->blob_bottom_data_i_);
     blob_bottom_vec_.push_back(blob_bottom_data_i_);
     filler.Fill(this->blob_bottom_data_j_);
     blob_bottom_vec_.push_back(blob_bottom_data_j_);
     for (int i = 0; i < blob_bottom_y_->count(); ++i) {
-      blob_bottom_y_->mutable_cpu_data()[i] = caffe_rng_rand() % 2;  // 0 or 1
+      blob_bottom_y_->mutable_cpu_data()[i] = caffe_rng_rand() % 2; // 0 or 1
     }
     blob_bottom_vec_.push_back(blob_bottom_y_);
     blob_top_vec_.push_back(blob_top_loss_);
@@ -71,10 +71,10 @@ TYPED_TEST(ContrastiveLossLayerTest, TestForward) {
     Dtype dist_sq(0);
     for (int j = 0; j < channels; ++j) {
       Dtype diff = this->blob_bottom_data_i_->cpu_data()[i * channels + j] -
-          this->blob_bottom_data_j_->cpu_data()[i * channels + j];
+                   this->blob_bottom_data_j_->cpu_data()[i * channels + j];
       dist_sq += diff * diff;
     }
-    if (this->blob_bottom_y_->cpu_data()[i]) {  // similar pairs
+    if (this->blob_bottom_y_->cpu_data()[i]) { // similar pairs
       loss += dist_sq;
     } else {
       Dtype dist = std::max<Dtype>(margin - sqrt(dist_sq), 0.0);
@@ -114,10 +114,10 @@ TYPED_TEST(ContrastiveLossLayerTest, TestForwardLegacy) {
     Dtype dist_sq(0);
     for (int j = 0; j < channels; ++j) {
       Dtype diff = this->blob_bottom_data_i_->cpu_data()[i * channels + j] -
-          this->blob_bottom_data_j_->cpu_data()[i * channels + j];
+                   this->blob_bottom_data_j_->cpu_data()[i * channels + j];
       dist_sq += diff * diff;
     }
-    if (this->blob_bottom_y_->cpu_data()[i]) {  // similar pairs
+    if (this->blob_bottom_y_->cpu_data()[i]) { // similar pairs
       loss += dist_sq;
     } else {
       loss += std::max(margin - dist_sq, Dtype(0.0));
@@ -141,4 +141,4 @@ TYPED_TEST(ContrastiveLossLayerTest, TestGradientLegacy) {
                                   this->blob_top_vec_, 1);
 }
 
-}  // namespace caffe
+} // namespace caffe

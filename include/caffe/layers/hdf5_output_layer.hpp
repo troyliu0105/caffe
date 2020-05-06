@@ -20,8 +20,7 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward and proto params.
  */
-template<typename Dtype>
-class HDF5OutputLayer : public Layer<Dtype> {
+template <typename Dtype> class HDF5OutputLayer : public Layer<Dtype> {
 public:
   explicit HDF5OutputLayer(const LayerParameter &param)
       : Layer<Dtype>(param), file_opened_(false) {}
@@ -45,9 +44,11 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void SaveBlobs();
 
   bool file_opened_;
@@ -57,6 +58,6 @@ protected:
   Blob<Dtype> label_blob_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_HDF5_OUTPUT_LAYER_HPP_
+#endif // CAFFE_HDF5_OUTPUT_LAYER_HPP_

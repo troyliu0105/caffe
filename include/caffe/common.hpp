@@ -8,12 +8,12 @@
 #include <climits>
 #include <cmath>
 #include <fstream>  // NOLINT(readability/streams)
-#include <iostream>  // NOLINT(readability/streams)
+#include <iostream> // NOLINT(readability/streams)
 #include <map>
 #include <set>
 #include <sstream>
 #include <string>
-#include <utility>  // pair
+#include <utility> // pair
 #include <vector>
 
 #ifdef CMAKE_WINDOWS_BUILD
@@ -25,9 +25,14 @@
 #include "caffe/nnpack_pool.hpp"
 #endif
 
+#ifdef USE_OMP
+#include <omp.h>
+#endif
+
 #include <boost/progress.hpp>
-#define MAKE_PROGRESSBAR(count, msg) boost::shared_ptr<boost::progress_display> \
-  pbar(new boost::progress_display(count, std::cout, msg));
+#define MAKE_PROGRESSBAR(count, msg)                                           \
+  boost::shared_ptr<boost::progress_display> pbar(                             \
+      new boost::progress_display(count, std::cout, msg));
 #define INC_PROGRESSBAR ++(*pbar);
 
 // Convert macro to string
@@ -41,40 +46,40 @@
 // remove the following hack.
 #ifndef GFLAGS_GFLAGS_H_
 namespace gflags = google;
-#endif  // GFLAGS_GFLAGS_H_
+#endif // GFLAGS_GFLAGS_H_
 
 // Disable the copy and assignment operator for a class.
-#define DISABLE_COPY_AND_ASSIGN(classname) \
-private:\
-  classname(const classname&);\
-  classname& operator=(const classname&)
+#define DISABLE_COPY_AND_ASSIGN(classname)                                     \
+private:                                                                       \
+  classname(const classname &);                                                \
+  classname &operator=(const classname &)
 
 // Instantiate a class with float and double specifications.
-#define INSTANTIATE_CLASS(classname) \
-  char gInstantiationGuard##classname; \
-  template class classname<float>; \
+#define INSTANTIATE_CLASS(classname)                                           \
+  char gInstantiationGuard##classname;                                         \
+  template class classname<float>;                                             \
   template class classname<double>
 
-#define INSTANTIATE_LAYER_GPU_FORWARD(classname) \
-  template void classname<float>::Forward_gpu( \
-      const std::vector<Blob<float>*>& bottom, \
-      const std::vector<Blob<float>*>& top); \
-  template void classname<double>::Forward_gpu( \
-      const std::vector<Blob<double>*>& bottom, \
-      const std::vector<Blob<double>*>& top);
+#define INSTANTIATE_LAYER_GPU_FORWARD(classname)                               \
+  template void classname<float>::Forward_gpu(                                 \
+      const std::vector<Blob<float> *> &bottom,                                \
+      const std::vector<Blob<float> *> &top);                                  \
+  template void classname<double>::Forward_gpu(                                \
+      const std::vector<Blob<double> *> &bottom,                               \
+      const std::vector<Blob<double> *> &top);
 
-#define INSTANTIATE_LAYER_GPU_BACKWARD(classname) \
-  template void classname<float>::Backward_gpu( \
-      const std::vector<Blob<float>*>& top, \
-      const std::vector<bool>& propagate_down, \
-      const std::vector<Blob<float>*>& bottom); \
-  template void classname<double>::Backward_gpu( \
-      const std::vector<Blob<double>*>& top, \
-      const std::vector<bool>& propagate_down, \
-      const std::vector<Blob<double>*>& bottom)
+#define INSTANTIATE_LAYER_GPU_BACKWARD(classname)                              \
+  template void classname<float>::Backward_gpu(                                \
+      const std::vector<Blob<float> *> &top,                                   \
+      const std::vector<bool> &propagate_down,                                 \
+      const std::vector<Blob<float> *> &bottom);                               \
+  template void classname<double>::Backward_gpu(                               \
+      const std::vector<Blob<double> *> &top,                                  \
+      const std::vector<bool> &propagate_down,                                 \
+      const std::vector<Blob<double> *> &bottom)
 
-#define INSTANTIATE_LAYER_GPU_FUNCS(classname) \
-  INSTANTIATE_LAYER_GPU_FORWARD(classname); \
+#define INSTANTIATE_LAYER_GPU_FUNCS(classname)                                 \
+  INSTANTIATE_LAYER_GPU_FORWARD(classname);                                    \
   INSTANTIATE_LAYER_GPU_BACKWARD(classname)
 
 // A simple macro to mark codes that are not implemented, so that when the code
@@ -86,7 +91,9 @@ private:\
 #define CV_LOAD_IMAGE_GRAYSCALE cv::IMREAD_GRAYSCALE
 #endif
 // See PR #1236
-namespace cv { class Mat; }
+namespace cv {
+class Mat;
+}
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -101,8 +108,8 @@ using boost::shared_ptr;
 // Common functions and classes from std that caffe often uses.
 using std::fstream;
 using std::ios;
-using std::isnan;
 using std::isinf;
+using std::isnan;
 using std::iterator;
 using std::make_pair;
 using std::map;
@@ -139,6 +146,7 @@ public:
     explicit RNG(const RNG &);
     RNG &operator=(const RNG &);
     void *generator();
+
   private:
     class Generator;
     shared_ptr<Generator> generator_;
@@ -188,7 +196,7 @@ public:
   inline static bool root_solver() { return Get().solver_rank_ == 0; }
 
 #ifdef USE_NNPACK
-  template<typename Dtype> static bool nnpack_supported();
+  template <typename Dtype> static bool nnpack_supported();
   inline static pthreadpool_t nnpack_threadpool() {
     return Get().nnpack_threadpool_.pool();
   }
@@ -215,9 +223,9 @@ private:
   // The private constructor to avoid duplicate instantiation.
   Caffe();
 
-DISABLE_COPY_AND_ASSIGN(Caffe);
+  DISABLE_COPY_AND_ASSIGN(Caffe);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_COMMON_HPP_
+#endif // CAFFE_COMMON_HPP_

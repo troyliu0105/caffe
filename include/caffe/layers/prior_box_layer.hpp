@@ -17,8 +17,7 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template<typename Dtype>
-class PriorBoxLayer : public Layer<Dtype> {
+template <typename Dtype> class PriorBoxLayer : public Layer<Dtype> {
 public:
   /**
    * @param param provides PriorBoxParameter prior_box_param,
@@ -30,8 +29,7 @@ public:
    *   - flip (\b optional bool, default true).
    *     if set, flip the aspect ratio.
    */
-  explicit PriorBoxLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit PriorBoxLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -59,7 +57,8 @@ protected:
                            const vector<Blob<Dtype> *> &top);
   /// @brief Not implemented
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     return;
   }
 
@@ -79,6 +78,6 @@ protected:
   float offset_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_PRIORBOX_LAYER_HPP_
+#endif // CAFFE_PRIORBOX_LAYER_HPP_

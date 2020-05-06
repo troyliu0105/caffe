@@ -20,11 +20,9 @@ namespace caffe {
  *
  * TODO(dox): more thorough description.
  */
-template<typename Dtype>
-class Blob {
+template <typename Dtype> class Blob {
 public:
-  Blob()
-      : data_(), diff_(), count_(0), capacity_(0) {}
+  Blob() : data_(), diff_(), count_(0), capacity_(0) {}
 
   /// @brief Deprecated; use <code>Blob(const vector<int>& shape)</code>.
   explicit Blob(const int num, const int channels, const int height,
@@ -117,11 +115,11 @@ public:
    */
   inline int CanonicalAxisIndex(int axis_index) const {
     CHECK_GE(axis_index, -num_axes())
-      << "axis " << axis_index << " out of range for " << num_axes()
-      << "-D Blob with shape " << shape_string();
+        << "axis " << axis_index << " out of range for " << num_axes()
+        << "-D Blob with shape " << shape_string();
     CHECK_LT(axis_index, num_axes())
-      << "axis " << axis_index << " out of range for " << num_axes()
-      << "-D Blob with shape " << shape_string();
+        << "axis " << axis_index << " out of range for " << num_axes()
+        << "-D Blob with shape " << shape_string();
     if (axis_index < 0) {
       return axis_index + num_axes();
     }
@@ -138,7 +136,7 @@ public:
   inline int width() const { return LegacyShape(3); }
   inline int LegacyShape(int index) const {
     CHECK_LE(num_axes(), 4)
-      << "Cannot use legacy accessors on Blobs with > 4 axes.";
+        << "Cannot use legacy accessors on Blobs with > 4 axes.";
     CHECK_LT(index, 4);
     CHECK_GE(index, -4);
     if (index >= num_axes() || index < -num_axes()) {
@@ -274,9 +272,9 @@ protected:
   int count_;
   int capacity_;
 
-DISABLE_COPY_AND_ASSIGN(Blob);
-};  // class Blob
+  DISABLE_COPY_AND_ASSIGN(Blob);
+}; // class Blob
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_BLOB_HPP_
+#endif // CAFFE_BLOB_HPP_

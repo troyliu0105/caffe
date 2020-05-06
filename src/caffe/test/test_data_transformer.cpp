@@ -29,12 +29,9 @@ void FillDatum(const int label, const int channels, const int height,
   }
 }
 
-template<typename Dtype>
-class DataTransformTest : public ::testing::Test {
+template <typename Dtype> class DataTransformTest : public ::testing::Test {
 protected:
-  DataTransformTest()
-      : seed_(1701),
-        num_iter_(10) {}
+  DataTransformTest() : seed_(1701), num_iter_(10) {}
 
   int NumSequenceMatches(const TransformationParameter transform_param,
                          const Datum &datum, Phase phase) {
@@ -48,7 +45,7 @@ protected:
       blob.Reshape(1, datum.channels(), crop_size, crop_size);
     }
 
-    vector<vector<Dtype> > crop_sequence;
+    vector<vector<Dtype>> crop_sequence;
     for (int iter = 0; iter < this->num_iter_; ++iter) {
       vector<Dtype> iter_crop_sequence;
       transformer.Transform(datum, &blob);
@@ -77,7 +74,7 @@ TYPED_TEST_CASE(DataTransformTest, TestDtypes);
 
 TYPED_TEST(DataTransformTest, TestEmptyTransform) {
   TransformationParameter transform_param;
-  const bool unique_pixels = false;  // all pixels the same equal to label
+  const bool unique_pixels = false; // all pixels the same equal to label
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -100,7 +97,7 @@ TYPED_TEST(DataTransformTest, TestEmptyTransform) {
 
 TYPED_TEST(DataTransformTest, TestEmptyTransformUniquePixels) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -123,7 +120,7 @@ TYPED_TEST(DataTransformTest, TestEmptyTransformUniquePixels) {
 
 TYPED_TEST(DataTransformTest, TestCropSize) {
   TransformationParameter transform_param;
-  const bool unique_pixels = false;  // all pixels the same equal to label
+  const bool unique_pixels = false; // all pixels the same equal to label
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -150,7 +147,7 @@ TYPED_TEST(DataTransformTest, TestCropSize) {
 
 TYPED_TEST(DataTransformTest, TestCropTrain) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -167,7 +164,7 @@ TYPED_TEST(DataTransformTest, TestCropTrain) {
 
 TYPED_TEST(DataTransformTest, TestCropTest) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -184,7 +181,7 @@ TYPED_TEST(DataTransformTest, TestCropTest) {
 
 TYPED_TEST(DataTransformTest, TestMirrorTrain) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -200,7 +197,7 @@ TYPED_TEST(DataTransformTest, TestMirrorTrain) {
 
 TYPED_TEST(DataTransformTest, TestMirrorTest) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -216,7 +213,7 @@ TYPED_TEST(DataTransformTest, TestMirrorTest) {
 
 TYPED_TEST(DataTransformTest, TestCropMirrorTrain) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -226,8 +223,8 @@ TYPED_TEST(DataTransformTest, TestCropMirrorTrain) {
   Datum datum;
   FillDatum(label, channels, height, width, unique_pixels, &datum);
   transform_param.set_crop_size(crop_size);
-  int num_matches_crop = this->NumSequenceMatches(
-      transform_param, datum, TRAIN);
+  int num_matches_crop =
+      this->NumSequenceMatches(transform_param, datum, TRAIN);
 
   transform_param.set_mirror(true);
   int num_matches_crop_mirror =
@@ -238,7 +235,7 @@ TYPED_TEST(DataTransformTest, TestCropMirrorTrain) {
 
 TYPED_TEST(DataTransformTest, TestCropMirrorTest) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -259,7 +256,7 @@ TYPED_TEST(DataTransformTest, TestCropMirrorTest) {
 
 TYPED_TEST(DataTransformTest, TestMeanValue) {
   TransformationParameter transform_param;
-  const bool unique_pixels = false;  // pixels are equal to label
+  const bool unique_pixels = false; // pixels are equal to label
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -280,7 +277,7 @@ TYPED_TEST(DataTransformTest, TestMeanValue) {
 
 TYPED_TEST(DataTransformTest, TestMeanValues) {
   TransformationParameter transform_param;
-  const bool unique_pixels = false;  // pixels are equal to label
+  const bool unique_pixels = false; // pixels are equal to label
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -304,7 +301,7 @@ TYPED_TEST(DataTransformTest, TestMeanValues) {
 
 TYPED_TEST(DataTransformTest, TestMeanFile) {
   TransformationParameter transform_param;
-  const bool unique_pixels = true;  // pixels are consecutive ints [0,size]
+  const bool unique_pixels = true; // pixels are consecutive ints [0,size]
   const int label = 0;
   const int channels = 3;
   const int height = 4;
@@ -339,5 +336,5 @@ TYPED_TEST(DataTransformTest, TestMeanFile) {
   }
 }
 
-}  // namespace caffe
-#endif  // USE_OPENCV
+} // namespace caffe
+#endif // USE_OPENCV

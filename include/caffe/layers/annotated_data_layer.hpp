@@ -15,7 +15,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 class AnnotatedDataLayer : public BasePrefetchingDataLayer<Dtype> {
 public:
   explicit AnnotatedDataLayer(const LayerParameter &param);
@@ -41,7 +41,7 @@ protected:
   bool train_diffcult_;
   int iters_;
   int policy_num_;
-  bool single_class_; //for yolo segementation
+  bool single_class_; // for yolo segementation
   YoloSegLabel label_map_;
   int seg_label_maxima_;
   int seg_scales_;
@@ -49,6 +49,6 @@ protected:
   int seg_resize_height_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DATA_LAYER_HPP_
+#endif // CAFFE_DATA_LAYER_HPP_

@@ -2,8 +2,8 @@
 
 #include <cuda_runtime.h>
 #include <glog/logging.h>
-#include <stdio.h>
 #include <sstream>
+#include <stdio.h>
 #include <string>
 #include <vector>
 
@@ -13,40 +13,34 @@
 
 namespace caffe {
 
-enum Op {
-  copy,
-  replace_cpu,
-  replace_gpu,
-  replace_cpu_diff,
-  replace_gpu_diff
-};
+enum Op { copy, replace_cpu, replace_gpu, replace_cpu_diff, replace_gpu_diff };
 
-template<typename Dtype>
-static void apply_buffers(const vector<Blob<Dtype>*>& blobs,
-                          Dtype* buffer, size_t total_size, Op op) {
-  Dtype* ptr = buffer;
+template <typename Dtype>
+static void apply_buffers(const vector<Blob<Dtype> *> &blobs, Dtype *buffer,
+                          size_t total_size, Op op) {
+  Dtype *ptr = buffer;
   for (int i = 0; i < blobs.size(); ++i) {
     int size = blobs[i]->count();
     switch (op) {
-      case copy: {
-        // Init buffer to current values of blobs
-        caffe_copy(size,
-                   reinterpret_cast<const Dtype*>(blobs[i]->data()->cpu_data()),
-                   ptr);
-        break;
-      }
-      case replace_cpu:
-        blobs[i]->data()->set_cpu_data(ptr);
-        break;
-      case replace_gpu:
-        blobs[i]->data()->set_gpu_data(ptr);
-        break;
-      case replace_cpu_diff:
-        blobs[i]->diff()->set_cpu_data(ptr);
-        break;
-      case replace_gpu_diff:
-        blobs[i]->diff()->set_gpu_data(ptr);
-        break;
+    case copy: {
+      // Init buffer to current values of blobs
+      caffe_copy(size,
+                 reinterpret_cast<const Dtype *>(blobs[i]->data()->cpu_data()),
+                 ptr);
+      break;
+    }
+    case replace_cpu:
+      blobs[i]->data()->set_cpu_data(ptr);
+      break;
+    case replace_gpu:
+      blobs[i]->data()->set_gpu_data(ptr);
+      break;
+    case replace_cpu_diff:
+      blobs[i]->diff()->set_cpu_data(ptr);
+      break;
+    case replace_gpu_diff:
+      blobs[i]->diff()->set_gpu_data(ptr);
+      break;
     }
     ptr += size;
   }
@@ -55,8 +49,8 @@ static void apply_buffers(const vector<Blob<Dtype>*>& blobs,
 }
 
 // Buffer size necessary to store given blobs
-template<typename Dtype>
-static size_t total_size(const vector<Blob<Dtype>*>& params) {
+template <typename Dtype>
+static size_t total_size(const vector<Blob<Dtype> *> &params) {
   size_t size = 0;
   for (int i = 0; i < params.size(); ++i)
     size += params[i]->count();
@@ -65,16 +59,14 @@ static size_t total_size(const vector<Blob<Dtype>*>& params) {
   return (size > 0) ? size : 1;
 }
 
-template<typename Dtype>
-Params<Dtype>::Params(shared_ptr<Solver<Dtype> > root_solver)
-  : size_(total_size<Dtype>(root_solver->net()->learnable_params())),
-    data_(),
-    diff_() {
-}
+template <typename Dtype>
+Params<Dtype>::Params(shared_ptr<Solver<Dtype>> root_solver)
+    : size_(total_size<Dtype>(root_solver->net()->learnable_params())), data_(),
+      diff_() {}
 
-template<typename Dtype>
-GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
-  : Params<Dtype>(root_solver) {
+template <typename Dtype>
+GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype>> root_solver, int device)
+    : Params<Dtype>(root_solver) {
   int initial_device;
   CUDA_CHECK(cudaGetDevice(&initial_device));
 
@@ -83,8 +75,7 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
   CUDA_CHECK(cudaMalloc(&data_, size_ * sizeof(Dtype)));
 
   // Copy blob values
-  const vector<Blob<Dtype>*>& net =
-    root_solver->net()->learnable_params();
+  const vector<Blob<Dtype> *> &net = root_solver->net()->learnable_params();
   apply_buffers(net, data_, size_, copy);
 
   CUDA_CHECK(cudaMalloc(&diff_, size_ * sizeof(Dtype)));
@@ -93,16 +84,14 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
   CUDA_CHECK(cudaSetDevice(initial_device));
 }
 
-template<typename Dtype>
-GPUParams<Dtype>::~GPUParams() {
+template <typename Dtype> GPUParams<Dtype>::~GPUParams() {
   CUDA_CHECK(cudaFree(data_));
   CUDA_CHECK(cudaFree(diff_));
 }
 
-template<typename Dtype>
-void GPUParams<Dtype>::Configure(Solver<Dtype>* solver) const {
-  const vector<Blob<Dtype>*>& net =
-    solver->net()->learnable_params();
+template <typename Dtype>
+void GPUParams<Dtype>::Configure(Solver<Dtype> *solver) const {
+  const vector<Blob<Dtype> *> &net = solver->net()->learnable_params();
   apply_buffers(net, data_, size_, replace_gpu);
   apply_buffers(net, diff_, size_, replace_gpu_diff);
 }
@@ -113,38 +102,33 @@ static int getDevice() {
   return device;
 }
 
-template<typename Dtype>
-NCCL<Dtype>::NCCL(shared_ptr<Solver<Dtype> > solver)
-  : GPUParams<Dtype>(solver, getDevice()),
-    comm_(), solver_(solver), barrier_() {
+template <typename Dtype>
+NCCL<Dtype>::NCCL(shared_ptr<Solver<Dtype>> solver)
+    : GPUParams<Dtype>(solver, getDevice()), comm_(), solver_(solver),
+      barrier_() {
   this->Configure(solver.get());
   Init();
 }
 
-template<typename Dtype>
-NCCL<Dtype>::NCCL(shared_ptr<Solver<Dtype> > solver, const string& uid)
-  : GPUParams<Dtype>(solver, getDevice()),
-    solver_(solver), barrier_() {
+template <typename Dtype>
+NCCL<Dtype>::NCCL(shared_ptr<Solver<Dtype>> solver, const string &uid)
+    : GPUParams<Dtype>(solver, getDevice()), solver_(solver), barrier_() {
   this->Configure(solver.get());
   Caffe::set_multiprocess(true);
   ncclUniqueId nccl_uid;
-  memcpy(&nccl_uid, &uid[0], NCCL_UNIQUE_ID_BYTES);  // NOLINT(caffe/alt_fn)
-  NCCL_CHECK(ncclCommInitRank(&comm_,
-                              Caffe::solver_count(),
-                              nccl_uid,
+  memcpy(&nccl_uid, &uid[0], NCCL_UNIQUE_ID_BYTES); // NOLINT(caffe/alt_fn)
+  NCCL_CHECK(ncclCommInitRank(&comm_, Caffe::solver_count(), nccl_uid,
                               Caffe::solver_rank()));
   Init();
 }
 
-template<typename Dtype>
-void NCCL<Dtype>::Init() {
+template <typename Dtype> void NCCL<Dtype>::Init() {
   if (solver_->param().layer_wise_reduce()) {
     CUDA_CHECK(cudaStreamCreateWithFlags(&stream_, cudaStreamNonBlocking));
   }
 }
 
-template<typename Dtype>
-NCCL<Dtype>::~NCCL() {
+template <typename Dtype> NCCL<Dtype>::~NCCL() {
   if (solver_->param().layer_wise_reduce()) {
     CUDA_CHECK(cudaStreamDestroy(stream_));
   }
@@ -153,19 +137,17 @@ NCCL<Dtype>::~NCCL() {
   }
 }
 
-template<typename Dtype>
-boost::barrier* NCCL<Dtype>::barrier() {
+template <typename Dtype> boost::barrier *NCCL<Dtype>::barrier() {
   return barrier_;
 }
-template<typename Dtype>
-void NCCL<Dtype>::set_barrier(boost::barrier* value) {
+template <typename Dtype> void NCCL<Dtype>::set_barrier(boost::barrier *value) {
   barrier_ = value;
 }
 
-template<typename Dtype>
-void NCCL<Dtype>::InitSingleProcess(vector<NCCL<Dtype>*>* nccls) {
-  ncclComm_t* comms = new ncclComm_t[nccls->size()];
-  int* gpu_list = new int[nccls->size()];
+template <typename Dtype>
+void NCCL<Dtype>::InitSingleProcess(vector<NCCL<Dtype> *> *nccls) {
+  ncclComm_t *comms = new ncclComm_t[nccls->size()];
+  int *gpu_list = new int[nccls->size()];
   for (int i = 0; i < nccls->size(); ++i) {
     gpu_list[i] = (*nccls)[i]->solver_->param().device_id();
   }
@@ -175,34 +157,31 @@ void NCCL<Dtype>::InitSingleProcess(vector<NCCL<Dtype>*>* nccls) {
   }
 }
 
-template<typename Dtype>
-string NCCL<Dtype>::new_uid() {
+template <typename Dtype> string NCCL<Dtype>::new_uid() {
   string uid;
   uid.resize(NCCL_UNIQUE_ID_BYTES);
   ncclUniqueId nccl_uid;
   NCCL_CHECK(ncclGetUniqueId(&nccl_uid));
-  memcpy(&uid[0], &nccl_uid, NCCL_UNIQUE_ID_BYTES);  // NOLINT(caffe/alt_fn)
+  memcpy(&uid[0], &nccl_uid, NCCL_UNIQUE_ID_BYTES); // NOLINT(caffe/alt_fn)
   return uid;
 }
 
-template<typename Dtype>
-void NCCL<Dtype>::Broadcast() {
-  if (barrier_) {  // NULL in multi process case
+template <typename Dtype> void NCCL<Dtype>::Broadcast() {
+  if (barrier_) { // NULL in multi process case
     barrier_->wait();
   }
   NCCL_CHECK(ncclBcast(data_, static_cast<int>(size_),
-                       nccl::dataType<Dtype>::type, 0,
-                       comm_, cudaStreamDefault));
+                       nccl::dataType<Dtype>::type, 0, comm_,
+                       cudaStreamDefault));
   if (barrier_) {
     barrier_->wait();
   }
 }
 
-template<typename Dtype>
-void NCCL<Dtype>::run(int layer) {
+template <typename Dtype> void NCCL<Dtype>::run(int layer) {
   CHECK(solver_->param().layer_wise_reduce());
-  vector<shared_ptr<Blob<Dtype> > >& blobs =
-    solver_->net()->layers()[layer]->blobs();
+  vector<shared_ptr<Blob<Dtype>>> &blobs =
+      solver_->net()->layers()[layer]->blobs();
 #ifdef DEBUG
   // Assert blobs are contiguous to reduce in one step (e.g. bias often small)
   for (int i = 1; i < blobs.size(); ++i) {
@@ -221,52 +200,47 @@ void NCCL<Dtype>::run(int layer) {
     for (int i = 0; i < blobs.size(); ++i) {
       size += blobs[i]->count();
     }
-    if (barrier_) {  // NULL in multi process case
+    if (barrier_) { // NULL in multi process case
       barrier_->wait();
     }
-    NCCL_CHECK(ncclAllReduce(blobs[0]->mutable_gpu_diff(),
-                             blobs[0]->mutable_gpu_diff(),
-                             size,
-                             nccl::dataType<Dtype>::type,
-                             ncclSum, comm_, stream_));
-    caffe_gpu_scal(size, (Dtype) 1.0 / Caffe::solver_count(),
+    NCCL_CHECK(ncclAllReduce(
+        blobs[0]->mutable_gpu_diff(), blobs[0]->mutable_gpu_diff(), size,
+        nccl::dataType<Dtype>::type, ncclSum, comm_, stream_));
+    caffe_gpu_scal(size, (Dtype)1.0 / Caffe::solver_count(),
                    blobs[0]->mutable_gpu_diff(), stream_);
   }
 }
 
-template<typename Dtype>
-void NCCL<Dtype>::on_gradients_ready() {
+template <typename Dtype> void NCCL<Dtype>::on_gradients_ready() {
   if (solver_->param().layer_wise_reduce()) {
     CHECK_EQ(solver_->net()->params().size(),
              solver_->net()->learnable_params().size())
-      << "Layer-wise reduce is not supported for nets with shared weights.";
+        << "Layer-wise reduce is not supported for nets with shared weights.";
 
     // Make sure reduction is done before applying gradients
     CUDA_CHECK(cudaStreamSynchronize(stream_));
   } else {
-    if (barrier_) {  // NULL in multi process case
+    if (barrier_) { // NULL in multi process case
       barrier_->wait();
     }
     NCCL_CHECK(ncclAllReduce(diff_, diff_, static_cast<int>(size_),
                              nccl::dataType<Dtype>::type, ncclSum, comm_,
                              cudaStreamDefault));
-    caffe_gpu_scal(static_cast<int>(size_),
-                   (Dtype) 1.0 / Caffe::solver_count(), diff_);
+    caffe_gpu_scal(static_cast<int>(size_), (Dtype)1.0 / Caffe::solver_count(),
+                   diff_);
   }
 }
 
-template<typename Dtype>
-class Worker : public InternalThread {
- public:
-  explicit Worker(shared_ptr<Solver<Dtype> > rank0, int device,
-                  boost::barrier* barrier, vector<NCCL<Dtype>*>* nccls,
-                  const char* restore)
-    : rank0_(rank0), device_(device), barrier_(barrier),
-      nccls_(nccls), restore_(restore) {
-  }
+template <typename Dtype> class Worker : public InternalThread {
+public:
+  explicit Worker(shared_ptr<Solver<Dtype>> rank0, int device,
+                  boost::barrier *barrier, vector<NCCL<Dtype> *> *nccls,
+                  const char *restore)
+      : rank0_(rank0), device_(device), barrier_(barrier), nccls_(nccls),
+        restore_(restore) {}
   virtual ~Worker() {}
 
- protected:
+protected:
   void InternalThreadEntry() {
     // Create solver and install callbacks
     SolverParameter param(rank0_->param());
@@ -277,7 +251,7 @@ class Worker : public InternalThread {
     CHECK_EQ(device, device_);
 #endif
     param.set_type(rank0_->type());
-    shared_ptr<Solver<Dtype> > s(SolverRegistry<Dtype>::CreateSolver(param));
+    shared_ptr<Solver<Dtype>> s(SolverRegistry<Dtype>::CreateSolver(param));
     CHECK_EQ(s->type(), rank0_->type());
     if (restore_) {
       // Could not make NCCL broadcast solver state, it seems to crash
@@ -303,13 +277,13 @@ class Worker : public InternalThread {
     barrier_->wait();
 #ifdef DEBUG
     // Check all solvers have same state
-    SGDSolver<Dtype>* sa = static_cast<SGDSolver<Dtype>*>(rank0_.get());
-    SGDSolver<Dtype>* sb = static_cast<SGDSolver<Dtype>*>(s.get());
+    SGDSolver<Dtype> *sa = static_cast<SGDSolver<Dtype> *>(rank0_.get());
+    SGDSolver<Dtype> *sb = static_cast<SGDSolver<Dtype> *>(s.get());
     for (int h = 0; h < sa->history().size(); ++h) {
       CUDA_CHECK(cudaSetDevice(sa->param().device_id()));
-      const Dtype* a = sa->history()[h]->cpu_data();
+      const Dtype *a = sa->history()[h]->cpu_data();
       CUDA_CHECK(cudaSetDevice(sb->param().device_id()));
-      const Dtype* b = sb->history()[h]->cpu_data();
+      const Dtype *b = sb->history()[h]->cpu_data();
       for (int v = 0; v < sa->history()[h]->count(); ++v) {
         CHECK_DOUBLE_EQ(a[v], b[v]);
       }
@@ -317,24 +291,24 @@ class Worker : public InternalThread {
 #endif
   }
 
-  shared_ptr<Solver<Dtype> > rank0_;
+  shared_ptr<Solver<Dtype>> rank0_;
   int device_;
-  boost::barrier* barrier_;
-  vector<NCCL<Dtype>*>* nccls_;
-  const char* restore_;
+  boost::barrier *barrier_;
+  vector<NCCL<Dtype> *> *nccls_;
+  const char *restore_;
 };
 
-template<typename Dtype>
-void NCCL<Dtype>::Run(const vector<int>& gpus, const char* restore) {
+template <typename Dtype>
+void NCCL<Dtype>::Run(const vector<int> &gpus, const char *restore) {
   boost::barrier barrier(static_cast<int>(gpus.size()));
-  vector<NCCL<Dtype>*> nccls(gpus.size());
+  vector<NCCL<Dtype> *> nccls(gpus.size());
   // Create workers
-  vector<shared_ptr<Worker<Dtype> > > workers(gpus.size());
+  vector<shared_ptr<Worker<Dtype>>> workers(gpus.size());
   for (int i = 1; i < gpus.size(); ++i) {
     CUDA_CHECK(cudaSetDevice(gpus[i]));
     Caffe::set_solver_rank(i);
-    Worker<Dtype>* w = new Worker<Dtype>(solver_, gpus[i], &barrier,
-                                         &nccls, restore);
+    Worker<Dtype> *w =
+        new Worker<Dtype>(solver_, gpus[i], &barrier, &nccls, restore);
     w->StartInternalThread();
     workers[i].reset(w);
   }
@@ -354,7 +328,7 @@ void NCCL<Dtype>::Run(const vector<int>& gpus, const char* restore) {
   // Run first solver on current thread
   Broadcast();
   solver_->Solve();
-  barrier.wait();  // Hangs without it when running tests
+  barrier.wait(); // Hangs without it when running tests
   // Wait for shutdown
   for (int i = 1; i < gpus.size(); ++i) {
     workers[i]->StopInternalThread();
@@ -366,6 +340,6 @@ INSTANTIATE_CLASS(GPUParams);
 INSTANTIATE_CLASS(Worker);
 INSTANTIATE_CLASS(NCCL);
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // USE_NCCL
+#endif // USE_NCCL

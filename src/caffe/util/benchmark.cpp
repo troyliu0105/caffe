@@ -6,9 +6,7 @@
 namespace caffe {
 
 Timer::Timer()
-    : initted_(false),
-      running_(false),
-      has_run_at_least_once_(false) {
+    : initted_(false), running_(false), has_run_at_least_once_(false) {
   Init();
 }
 
@@ -65,8 +63,8 @@ float Timer::MicroSeconds() {
   if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
     CUDA_CHECK(cudaEventSynchronize(stop_gpu_));
-    CUDA_CHECK(cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
-                                    stop_gpu_));
+    CUDA_CHECK(
+        cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_, stop_gpu_));
     // Cuda only measure milliseconds
     elapsed_microseconds_ = elapsed_milliseconds_ * 1000;
 #else
@@ -89,8 +87,8 @@ float Timer::MilliSeconds() {
   if (Caffe::mode() == Caffe::GPU) {
 #ifndef CPU_ONLY
     CUDA_CHECK(cudaEventSynchronize(stop_gpu_));
-    CUDA_CHECK(cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_,
-                                    stop_gpu_));
+    CUDA_CHECK(
+        cudaEventElapsedTime(&elapsed_milliseconds_, start_gpu_, stop_gpu_));
 #else
     NO_GPU;
 #endif
@@ -100,9 +98,7 @@ float Timer::MilliSeconds() {
   return elapsed_milliseconds_;
 }
 
-float Timer::Seconds() {
-  return MilliSeconds() / 1000.;
-}
+float Timer::Seconds() { return MilliSeconds() / 1000.; }
 
 void Timer::Init() {
   if (!initted()) {
@@ -147,8 +143,8 @@ float CPUTimer::MilliSeconds() {
   if (running()) {
     Stop();
   }
-  this->elapsed_milliseconds_ = (this->stop_cpu_ -
-      this->start_cpu_).total_milliseconds();
+  this->elapsed_milliseconds_ =
+      (this->stop_cpu_ - this->start_cpu_).total_milliseconds();
   return this->elapsed_milliseconds_;
 }
 
@@ -160,9 +156,9 @@ float CPUTimer::MicroSeconds() {
   if (running()) {
     Stop();
   }
-  this->elapsed_microseconds_ = (this->stop_cpu_ -
-      this->start_cpu_).total_microseconds();
+  this->elapsed_microseconds_ =
+      (this->stop_cpu_ - this->start_cpu_).total_microseconds();
   return this->elapsed_microseconds_;
 }
 
-}  // namespace caffe
+} // namespace caffe

@@ -6,10 +6,10 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void MaxForward(const int nthreads, const Dtype *bottom_data_a,
-                           const Dtype *bottom_data_b, const int blob_idx, Dtype *top_data,
-                           int *mask) {
+                           const Dtype *bottom_data_b, const int blob_idx,
+                           Dtype *top_data, int *mask) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     Dtype maxval = -FLT_MAX;
     int maxidx = -1;
@@ -30,7 +30,7 @@ __global__ void MaxForward(const int nthreads, const Dtype *bottom_data_a,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void EltwiseLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   int *mask = NULL;
@@ -54,7 +54,7 @@ void EltwiseLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   case EltwiseParameter_EltwiseOp_MAX:
     mask = max_idx_.mutable_gpu_data();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    MaxForward<Dtype> <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+    MaxForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
         count, bottom[0]->gpu_data(), bottom[1]->gpu_data(), 0, top_data, mask);
     for (int i = 2; i < bottom.size(); ++i) {
       // NOLINT_NEXT_LINE(whitespace/operators)
@@ -67,9 +67,10 @@ void EltwiseLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void MaxBackward(const int nthreads, const Dtype *top_diff,
-                            const int blob_idx, const int *mask, Dtype *bottom_diff) {
+                            const int blob_idx, const int *mask,
+                            Dtype *bottom_diff) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     Dtype gradient = 0;
     if (mask[index] == blob_idx) {
@@ -79,9 +80,10 @@ __global__ void MaxBackward(const int nthreads, const Dtype *top_diff,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void EltwiseLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                       const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                       const vector<bool> &propagate_down,
+                                       const vector<Blob<Dtype> *> &bottom) {
   const int *mask = NULL;
   const int count = top[0]->count();
   const Dtype *top_data = top[0]->gpu_data();
@@ -95,7 +97,9 @@ void EltwiseLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
         if (stable_prod_grad_) {
           bool initialized = false;
           for (int j = 0; j < bottom.size(); ++j) {
-            if (i == j) { continue; }
+            if (i == j) {
+              continue;
+            }
             if (!initialized) {
               caffe_copy(count, bottom[j]->gpu_data(), bottom_diff);
               initialized = true;
@@ -118,9 +122,9 @@ void EltwiseLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
         break;
       case EltwiseParameter_EltwiseOp_MAX:
         mask = max_idx_.gpu_data();
-        MaxBackward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-            count, top_diff, i, mask, bottom_diff);
+        MaxBackward<Dtype> // NOLINT_NEXT_LINE(whitespace/operators)
+            <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+                count, top_diff, i, mask, bottom_diff);
         break;
       default:
         LOG(FATAL) << "Unknown elementwise operation.";
@@ -131,4 +135,4 @@ void EltwiseLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(EltwiseLayer);
 
-}  // namespace caffe
+} // namespace caffe

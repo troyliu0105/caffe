@@ -12,9 +12,10 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class MVNLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
   MVNLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 4, 5)),
@@ -172,4 +173,4 @@ TYPED_TEST(MVNLayerTest, TestGradientAcrossChannels) {
                                   this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

@@ -7,7 +7,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void TanHLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -18,7 +18,7 @@ void TanHLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void TanHLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                     const vector<bool> &propagate_down,
                                     const vector<Blob<Dtype> *> &bottom) {
@@ -41,4 +41,4 @@ STUB_GPU(TanHLayer);
 
 INSTANTIATE_CLASS(TanHLayer);
 
-}  // namespace caffe
+} // namespace caffe

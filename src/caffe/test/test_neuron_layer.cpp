@@ -34,7 +34,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class NeuronLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -135,8 +135,8 @@ protected:
     for (int i = 0; i < this->blob_bottom_->count(); ++i) {
       int c = channel_shared ? 0 : (i / hw) % channels;
       EXPECT_EQ(top_data[i],
-                std::max(bottom_data[i], (Dtype) (0))
-                    + slope_data[c] * std::min(bottom_data[i], (Dtype) (0)));
+                std::max(bottom_data[i], (Dtype)(0)) +
+                    slope_data[c] * std::min(bottom_data[i], (Dtype)(0)));
     }
   }
 
@@ -288,8 +288,8 @@ TYPED_TEST(NeuronLayerTest, TestELU) {
 TYPED_TEST(NeuronLayerTest, TestELUasReLU) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  CHECK(google::protobuf::TextFormat::ParseFromString(
-      "elu_param { alpha: 0 }", &layer_param));
+  CHECK(google::protobuf::TextFormat::ParseFromString("elu_param { alpha: 0 }",
+                                                      &layer_param));
   ELULayer<Dtype> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -314,8 +314,8 @@ TYPED_TEST(NeuronLayerTest, TestELUGradient) {
 TYPED_TEST(NeuronLayerTest, TestELUasReLUGradient) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  CHECK(google::protobuf::TextFormat::ParseFromString(
-      "elu_param { alpha: 0 }", &layer_param));
+  CHECK(google::protobuf::TextFormat::ParseFromString("elu_param { alpha: 0 }",
+                                                      &layer_param));
   ELULayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-3, 1701, 0., 0.01);
   checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
@@ -374,8 +374,8 @@ TYPED_TEST(NeuronLayerTest, TestSwishWithBeta) {
   const Dtype *bottom_data = this->blob_bottom_->cpu_data();
   const Dtype *top_data = this->blob_top_->cpu_data();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
-    EXPECT_FLOAT_EQ(top_data[i], bottom_data[i] / (1. + exp(-1.5 *
-        bottom_data[i])));
+    EXPECT_FLOAT_EQ(top_data[i],
+                    bottom_data[i] / (1. + exp(-1.5 * bottom_data[i])));
   }
 }
 
@@ -779,8 +779,8 @@ TYPED_TEST(NeuronLayerTest, TestPReLUConsistencyReLU) {
   // Set up blobs
   vector<Blob<Dtype> *> blob_bottom_vec_2;
   vector<Blob<Dtype> *> blob_top_vec_2;
-  shared_ptr<Blob<Dtype> > blob_bottom_2(new Blob<Dtype>());
-  shared_ptr<Blob<Dtype> > blob_top_2(new Blob<Dtype>());
+  shared_ptr<Blob<Dtype>> blob_bottom_2(new Blob<Dtype>());
+  shared_ptr<Blob<Dtype>> blob_top_2(new Blob<Dtype>());
   blob_bottom_vec_2.push_back(blob_bottom_2.get());
   blob_top_vec_2.push_back(blob_top_2.get());
   blob_bottom_2->CopyFrom(*this->blob_bottom_, false, true);
@@ -794,7 +794,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUConsistencyReLU) {
     EXPECT_EQ(this->blob_top_->cpu_data()[s], blob_top_2->cpu_data()[s]);
   }
   // Check backward
-  shared_ptr<Blob<Dtype> > tmp_blob(new Blob<Dtype>());
+  shared_ptr<Blob<Dtype>> tmp_blob(new Blob<Dtype>());
   tmp_blob->ReshapeLike(*blob_top_2.get());
   FillerParameter filler_param;
   GaussianFiller<Dtype> filler(filler_param);
@@ -829,9 +829,9 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
   vector<Blob<Dtype> *> blob_bottom_vec_2;
   vector<Blob<Dtype> *> blob_middle_vec_2;
   vector<Blob<Dtype> *> blob_top_vec_2;
-  shared_ptr<Blob<Dtype> > blob_bottom_2(new Blob<Dtype>());
-  shared_ptr<Blob<Dtype> > blob_middle_2(new Blob<Dtype>());
-  shared_ptr<Blob<Dtype> > blob_top_2(new Blob<Dtype>());
+  shared_ptr<Blob<Dtype>> blob_bottom_2(new Blob<Dtype>());
+  shared_ptr<Blob<Dtype>> blob_middle_2(new Blob<Dtype>());
+  shared_ptr<Blob<Dtype>> blob_top_2(new Blob<Dtype>());
   blob_bottom_vec_2.push_back(blob_bottom_2.get());
   blob_middle_vec_2.push_back(blob_middle_2.get());
   blob_top_vec_2.push_back(blob_top_2.get());
@@ -854,7 +854,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
     EXPECT_EQ(this->blob_top_->cpu_data()[s], blob_top_2->cpu_data()[s]);
   }
   // Fill top diff with random numbers
-  shared_ptr<Blob<Dtype> > tmp_blob(new Blob<Dtype>());
+  shared_ptr<Blob<Dtype>> tmp_blob(new Blob<Dtype>());
   tmp_blob->ReshapeLike(*blob_top_2.get());
   FillerParameter filler_param;
   GaussianFiller<Dtype> filler(filler_param);
@@ -891,7 +891,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
 }
 
 #ifdef USE_CUDNN
-template<typename Dtype>
+template <typename Dtype>
 class CuDNNNeuronLayerTest : public GPUDeviceTest<Dtype> {
 protected:
   CuDNNNeuronLayerTest()
@@ -1023,4 +1023,4 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestTanHGradientCuDNN) {
 }
 #endif
 
-}  // namespace caffe
+} // namespace caffe

@@ -13,13 +13,13 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class MaxPoolingDropoutTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
   MaxPoolingDropoutTest()
-      : blob_bottom_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()) {}
+      : blob_bottom_(new Blob<Dtype>()), blob_top_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1703);
     blob_bottom_->Reshape(2, 3, 6, 5);
@@ -102,8 +102,7 @@ TYPED_TEST(MaxPoolingDropoutTest, TestBackward) {
     this->blob_top_->mutable_cpu_diff()[i] = 1.;
   }
   vector<bool> propagate_down(this->blob_bottom_vec_.size(), true);
-  layer.Backward(this->blob_top_vec_, propagate_down,
-                 this->blob_bottom_vec_);
+  layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
   const Dtype *bottom_diff = this->blob_bottom_->cpu_diff();
   Dtype sum = 0.;
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
@@ -116,8 +115,7 @@ TYPED_TEST(MaxPoolingDropoutTest, TestBackward) {
   dropout_layer.Forward(this->blob_top_vec_, this->blob_top_vec_);
   dropout_layer.Backward(this->blob_top_vec_, propagate_down,
                          this->blob_top_vec_);
-  layer.Backward(this->blob_top_vec_, propagate_down,
-                 this->blob_bottom_vec_);
+  layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
   Dtype sum_with_dropout = 0.;
   bottom_diff = this->blob_bottom_->cpu_diff();
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
@@ -126,4 +124,4 @@ TYPED_TEST(MaxPoolingDropoutTest, TestBackward) {
   EXPECT_GE(sum_with_dropout, sum);
 }
 
-}  // namespace caffe
+} // namespace caffe

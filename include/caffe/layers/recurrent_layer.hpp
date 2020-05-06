@@ -14,7 +14,7 @@
 
 namespace caffe {
 
-template<typename Dtype> class RecurrentLayer;
+template <typename Dtype> class RecurrentLayer;
 
 /**
  * @brief An abstract class for implementing recurrent behavior inside of an
@@ -22,11 +22,9 @@ template<typename Dtype> class RecurrentLayer;
  *        you should use one of its implementations which defines the recurrent
  *        architecture, such as RNNLayer or LSTMLayer.
  */
-template<typename Dtype>
-class RecurrentLayer : public Layer<Dtype> {
+template <typename Dtype> class RecurrentLayer : public Layer<Dtype> {
 public:
-  explicit RecurrentLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit RecurrentLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -145,10 +143,11 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   /// @brief A Net to implement the Recurrent functionality.
-  shared_ptr<Net<Dtype> > unrolled_net_;
+  shared_ptr<Net<Dtype>> unrolled_net_;
 
   /// @brief The number of independent streams to process simultaneously.
   int N_;
@@ -182,6 +181,6 @@ protected:
   Blob<Dtype> *cont_input_blob_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_RECURRENT_LAYER_HPP_
+#endif // CAFFE_RECURRENT_LAYER_HPP_

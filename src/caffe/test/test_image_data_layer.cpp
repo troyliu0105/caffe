@@ -16,14 +16,13 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class ImageDataLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   ImageDataLayerTest()
-      : seed_(1701),
-        blob_top_data_(new Blob<Dtype>()),
+      : seed_(1701), blob_top_data_(new Blob<Dtype>()),
         blob_top_label_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     blob_top_vec_.push_back(blob_top_data_);
@@ -215,5 +214,5 @@ TYPED_TEST(ImageDataLayerTest, TestSpace) {
   EXPECT_EQ(this->blob_top_label_->cpu_data()[0], 1);
 }
 
-}  // namespace caffe
-#endif  // USE_OPENCV
+} // namespace caffe
+#endif // USE_OPENCV

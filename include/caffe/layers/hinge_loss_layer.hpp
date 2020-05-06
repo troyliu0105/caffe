@@ -54,8 +54,7 @@ namespace caffe {
  * outside the InnerProductLayer and no other losses outside the
  * HingeLossLayer).
  */
-template<typename Dtype>
-class HingeLossLayer : public LossLayer<Dtype> {
+template <typename Dtype> class HingeLossLayer : public LossLayer<Dtype> {
 public:
   explicit HingeLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param) {}
@@ -95,9 +94,10 @@ protected:
    *      the labels -- ignored as we can't compute their error gradients
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_HINGE_LOSS_LAYER_HPP_
+#endif // CAFFE_HINGE_LOSS_LAYER_HPP_

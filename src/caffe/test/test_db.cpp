@@ -15,12 +15,11 @@ namespace caffe {
 
 using boost::scoped_ptr;
 
-template <typename TypeParam>
-class DBTest : public ::testing::Test {
- protected:
+template <typename TypeParam> class DBTest : public ::testing::Test {
+protected:
   DBTest()
       : backend_(TypeParam::backend),
-      root_images_(string(EXAMPLES_SOURCE_DIR) + string("images/")) {}
+        root_images_(string(EXAMPLES_SOURCE_DIR) + string("images/")) {}
 
   virtual void SetUp() {
     MakeTempDir(&source_);
@@ -40,7 +39,7 @@ class DBTest : public ::testing::Test {
     txn->Commit();
   }
 
-  virtual ~DBTest() { }
+  virtual ~DBTest() {}
 
   DataParameter_DB backend_;
   string source_;
@@ -132,5 +131,5 @@ TYPED_TEST(DBTest, TestWrite) {
   txn->Commit();
 }
 
-}  // namespace caffe
-#endif  // USE_LEVELDB, USE_LMDB and USE_OPENCV
+} // namespace caffe
+#endif // USE_LEVELDB, USE_LMDB and USE_OPENCV

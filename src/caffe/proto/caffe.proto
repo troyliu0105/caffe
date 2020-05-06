@@ -2157,7 +2157,7 @@ message NNPACKConvolutionParameter {
 }
 
 message UpsampleParameter {
-                            optional int32 scale = 1 [default = 1]; //old: nothing
+    optional int32 scale = 1 [default = 1]; //old: nothing
 }
 
 message ShuffleChannelParameter {

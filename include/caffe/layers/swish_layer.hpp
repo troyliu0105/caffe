@@ -19,8 +19,7 @@ namespace caffe {
  * [1] Prajit Ramachandran, Barret Zoph, Quoc V. Le. "Searching for
  *     Activation Functions". arXiv preprint arXiv:1710.05941v2 (2017).
  */
-template<typename Dtype>
-class SwishLayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class SwishLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides SwishParameter swish_param,
@@ -31,8 +30,7 @@ public:
   explicit SwishLayer(const LayerParameter &param)
       : NeuronLayer<Dtype>(param),
         sigmoid_layer_(new SigmoidLayer<Dtype>(param)),
-        sigmoid_input_(new Blob<Dtype>()),
-        sigmoid_output_(new Blob<Dtype>()) {}
+        sigmoid_input_(new Blob<Dtype>()), sigmoid_output_(new Blob<Dtype>()) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -75,22 +73,24 @@ protected:
    *      @f$ if propagate_down[0]
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   /// The internal SigmoidLayer
-  shared_ptr<SigmoidLayer<Dtype> > sigmoid_layer_;
+  shared_ptr<SigmoidLayer<Dtype>> sigmoid_layer_;
   /// sigmoid_input_ stores the input of the SigmoidLayer.
-  shared_ptr<Blob<Dtype> > sigmoid_input_;
+  shared_ptr<Blob<Dtype>> sigmoid_input_;
   /// sigmoid_output_ stores the output of the SigmoidLayer.
-  shared_ptr<Blob<Dtype> > sigmoid_output_;
+  shared_ptr<Blob<Dtype>> sigmoid_output_;
   /// bottom vector holder to call the underlying SigmoidLayer::Forward
   vector<Blob<Dtype> *> sigmoid_bottom_vec_;
   /// top vector holder to call the underlying SigmoidLayer::Forward
   vector<Blob<Dtype> *> sigmoid_top_vec_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SWISH_LAYER_HPP_
+#endif // CAFFE_SWISH_LAYER_HPP_

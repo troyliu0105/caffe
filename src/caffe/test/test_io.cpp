@@ -18,10 +18,10 @@ namespace caffe {
 class IOTest : public ::testing::Test {};
 
 bool ReadImageToDatumReference(const string &filename, const int label,
-                               const int height, const int width, const bool is_color, Datum *datum) {
+                               const int height, const int width,
+                               const bool is_color, Datum *datum) {
   cv::Mat cv_img;
-  int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR :
-                      CV_LOAD_IMAGE_GRAYSCALE);
+  int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR : CV_LOAD_IMAGE_GRAYSCALE);
 
   cv::Mat cv_img_origin = cv::imread(filename, cv_read_flag);
   if (!cv_img_origin.data) {
@@ -51,11 +51,10 @@ bool ReadImageToDatumReference(const string &filename, const int label,
         }
       }
     }
-  } else {  // Faster than repeatedly testing is_color for each pixel w/i loop
+  } else { // Faster than repeatedly testing is_color for each pixel w/i loop
     for (int h = 0; h < cv_img.rows; ++h) {
       for (int w = 0; w < cv_img.cols; ++w) {
-        datum_string->push_back(
-            static_cast<char>(cv_img.at<uchar>(h, w)));
+        datum_string->push_back(static_cast<char>(cv_img.at<uchar>(h, w)));
       }
     }
   }
@@ -122,7 +121,7 @@ TEST_F(IOTest, TestReadImageToDatumContent) {
     for (int h = 0; h < datum.height(); ++h) {
       for (int w = 0; w < datum.width(); ++w) {
         EXPECT_TRUE(data[index++] ==
-            static_cast<char>(cv_img.at<cv::Vec3b>(h, w)[c]));
+                    static_cast<char>(cv_img.at<cv::Vec3b>(h, w)[c]));
       }
     }
   }
@@ -332,7 +331,7 @@ TEST_F(IOTest, TestDecodeDatumToCVMatContent) {
     for (int h = 0; h < datum.height(); ++h) {
       for (int w = 0; w < datum.width(); ++w) {
         EXPECT_TRUE(cv_img.at<cv::Vec3b>(h, w)[c] ==
-            cv_img_ref.at<cv::Vec3b>(h, w)[c]);
+                    cv_img_ref.at<cv::Vec3b>(h, w)[c]);
       }
     }
   }
@@ -412,11 +411,11 @@ TEST_F(IOTest, TestDecodeDatumToCVMatContentNative) {
     for (int h = 0; h < datum.height(); ++h) {
       for (int w = 0; w < datum.width(); ++w) {
         EXPECT_TRUE(cv_img.at<cv::Vec3b>(h, w)[c] ==
-            cv_img_ref.at<cv::Vec3b>(h, w)[c]);
+                    cv_img_ref.at<cv::Vec3b>(h, w)[c]);
       }
     }
   }
 }
 
-}  // namespace caffe
-#endif  // USE_OPENCV
+} // namespace caffe
+#endif // USE_OPENCV

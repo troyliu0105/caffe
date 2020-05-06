@@ -6,7 +6,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void BiasLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                   const vector<Blob<Dtype> *> &top) {
   if (bottom.size() == 1 && this->blobs_.size() > 0) {
@@ -20,8 +20,8 @@ void BiasLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                            << "or -1 to extend to the end of bottom[0]";
     if (num_axes >= 0) {
       CHECK_GE(bottom[0]->num_axes(), axis + num_axes)
-        << "bias blob's shape extends past bottom[0]'s shape when applied "
-        << "starting with bottom[0] axis = " << axis;
+          << "bias blob's shape extends past bottom[0]'s shape when applied "
+          << "starting with bottom[0] axis = " << axis;
     }
     this->blobs_.resize(1);
     const vector<int>::const_iterator &shape_start =
@@ -30,13 +30,13 @@ void BiasLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
         (num_axes == -1) ? bottom[0]->shape().end() : (shape_start + num_axes);
     vector<int> bias_shape(shape_start, shape_end);
     this->blobs_[0].reset(new Blob<Dtype>(bias_shape));
-    shared_ptr<Filler<Dtype> > filler(GetFiller<Dtype>(param.filler()));
+    shared_ptr<Filler<Dtype>> filler(GetFiller<Dtype>(param.filler()));
     filler->Fill(this->blobs_[0].get());
   }
   this->param_propagate_down_.resize(this->blobs_.size(), true);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BiasLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                const vector<Blob<Dtype> *> &top) {
   const BiasParameter &param = this->layer_param_.bias_param();
@@ -45,15 +45,15 @@ void BiasLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   // (num_axes == 0). Mathematically equivalent for any choice of axis, so the
   // actual setting can be safely ignored; and computation is most efficient
   // with axis == 0 and (therefore) outer_dim_ == 1.
-  const int axis = (bias->num_axes() == 0) ?
-                   0 : bottom[0]->CanonicalAxisIndex(param.axis());
+  const int axis =
+      (bias->num_axes() == 0) ? 0 : bottom[0]->CanonicalAxisIndex(param.axis());
   CHECK_GE(bottom[0]->num_axes(), axis + bias->num_axes())
-    << "bias blob's shape extends past bottom[0]'s shape when applied "
-    << "starting with bottom[0] axis = " << axis;
+      << "bias blob's shape extends past bottom[0]'s shape when applied "
+      << "starting with bottom[0] axis = " << axis;
   for (int i = 0; i < bias->num_axes(); ++i) {
     CHECK_EQ(bottom[0]->shape(axis + i), bias->shape(i))
-      << "dimension mismatch between bottom[0]->shape(" << axis + i
-      << ") and bias->shape(" << i << ")";
+        << "dimension mismatch between bottom[0]->shape(" << axis + i
+        << ") and bias->shape(" << i << ")";
   }
   outer_dim_ = bottom[0]->count(0, axis);
   bias_dim_ = bias->count();
@@ -68,7 +68,7 @@ void BiasLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BiasLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   const Dtype *bias_data =
@@ -79,16 +79,17 @@ void BiasLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     caffe_copy(bottom[0]->count(), bottom_data, top_data);
   }
   for (int n = 0; n < outer_dim_; ++n) {
-    caffe_cpu_gemm(CblasNoTrans, CblasNoTrans, bias_dim_,
-                   inner_dim_, 1, Dtype(1), bias_data,
-                   bias_multiplier_.cpu_data(), Dtype(1), top_data);
+    caffe_cpu_gemm(CblasNoTrans, CblasNoTrans, bias_dim_, inner_dim_, 1,
+                   Dtype(1), bias_data, bias_multiplier_.cpu_data(), Dtype(1),
+                   top_data);
     top_data += dim_;
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BiasLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                    const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                    const vector<bool> &propagate_down,
+                                    const vector<Blob<Dtype> *> &bottom) {
   if (propagate_down[0] && bottom[0] != top[0]) {
     const Dtype *top_diff = top[0]->cpu_diff();
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
@@ -99,12 +100,12 @@ void BiasLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   if ((!bias_param && propagate_down[1]) ||
       (bias_param && this->param_propagate_down_[0])) {
     const Dtype *top_diff = top[0]->cpu_diff();
-    Dtype *bias_diff = (bias_param ? this->blobs_[0].get() : bottom[1])
-        ->mutable_cpu_diff();
+    Dtype *bias_diff =
+        (bias_param ? this->blobs_[0].get() : bottom[1])->mutable_cpu_diff();
     bool accum = bias_param;
     for (int n = 0; n < outer_dim_; ++n) {
-      caffe_cpu_gemv(CblasNoTrans, bias_dim_, inner_dim_, Dtype(1),
-                     top_diff, bias_multiplier_.cpu_data(), Dtype(accum), bias_diff);
+      caffe_cpu_gemv(CblasNoTrans, bias_dim_, inner_dim_, Dtype(1), top_diff,
+                     bias_multiplier_.cpu_data(), Dtype(accum), bias_diff);
       top_diff += dim_;
       accum = true;
     }
@@ -118,4 +119,4 @@ STUB_GPU(BiasLayer);
 INSTANTIATE_CLASS(BiasLayer);
 REGISTER_LAYER_CLASS(Bias);
 
-}  // namespace caffe
+} // namespace caffe

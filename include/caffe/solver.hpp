@@ -11,19 +11,19 @@
 namespace caffe {
 
 /**
-  * @brief Enumeration of actions that a client of the Solver may request by
-  * implementing the Solver's action request function, which a
-  * client may optionally provide in order to request early termination
-  * or saving a snapshot without exiting. In the executable caffe, this
-  * mechanism is used to allow the snapshot to be saved when stopping
-  * execution with a SIGINT (Ctrl-C).
-  */
+ * @brief Enumeration of actions that a client of the Solver may request by
+ * implementing the Solver's action request function, which a
+ * client may optionally provide in order to request early termination
+ * or saving a snapshot without exiting. In the executable caffe, this
+ * mechanism is used to allow the snapshot to be saved when stopping
+ * execution with a SIGINT (Ctrl-C).
+ */
 namespace SolverAction {
 enum Enum {
-  NONE = 0,  // Take no special action.
-  STOP = 1,  // Stop training. snapshot_after_train controls whether a
+  NONE = 0, // Take no special action.
+  STOP = 1, // Stop training. snapshot_after_train controls whether a
   // snapshot is created.
-  SNAPSHOT = 2  // Take a snapshot, and keep training.
+  SNAPSHOT = 2 // Take a snapshot, and keep training.
 };
 }
 
@@ -38,8 +38,7 @@ typedef boost::function<SolverAction::Enum()> ActionCallback;
  * Requires implementation of ApplyUpdate to compute a parameter update
  * given the current state of the Net parameters.
  */
-template<typename Dtype>
-class Solver {
+template <typename Dtype> class Solver {
 public:
   explicit Solver(const SolverParameter &param);
   explicit Solver(const string &param_file);
@@ -68,8 +67,8 @@ public:
   void Snapshot();
   virtual ~Solver() {}
   inline const SolverParameter &param() const { return param_; }
-  inline shared_ptr<Net<Dtype> > net() { return net_; }
-  inline const vector<shared_ptr<Net<Dtype> > > &test_nets() {
+  inline shared_ptr<Net<Dtype>> net() { return net_; }
+  inline const vector<shared_ptr<Net<Dtype>>> &test_nets() {
     return test_nets_;
   }
   int iter() const { return iter_; }
@@ -80,13 +79,10 @@ public:
     virtual void on_start() = 0;
     virtual void on_gradients_ready() = 0;
 
-    template<typename T>
-    friend class Solver;
+    template <typename T> friend class Solver;
   };
   const vector<Callback *> &callbacks() const { return callbacks_; }
-  void add_callback(Callback *value) {
-    callbacks_.push_back(value);
-  }
+  void add_callback(Callback *value) { callbacks_.push_back(value); }
 
   void CheckSnapshotWritePermissions();
   /**
@@ -117,8 +113,8 @@ protected:
   SolverParameter param_;
   int iter_;
   int current_step_;
-  shared_ptr<Net<Dtype> > net_;
-  vector<shared_ptr<Net<Dtype> > > test_nets_;
+  shared_ptr<Net<Dtype>> net_;
+  vector<shared_ptr<Net<Dtype>>> test_nets_;
   vector<Callback *> callbacks_;
   vector<Dtype> losses_;
   Dtype smoothed_loss_;
@@ -134,9 +130,9 @@ protected:
   Timer iteration_timer_;
   float iterations_last_;
 
-DISABLE_COPY_AND_ASSIGN(Solver);
+  DISABLE_COPY_AND_ASSIGN(Solver);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SOLVER_HPP_
+#endif // CAFFE_SOLVER_HPP_

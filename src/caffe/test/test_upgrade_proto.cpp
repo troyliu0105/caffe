@@ -18,14 +18,14 @@ namespace caffe {
 
 class PaddingLayerUpgradeTest : public ::testing::Test {
 protected:
-  void RunPaddingUpgradeTest(
-      const string &input_param_string, const string &output_param_string) {
+  void RunPaddingUpgradeTest(const string &input_param_string,
+                             const string &output_param_string) {
     // Test that UpgradeV0PaddingLayers called on the proto specified by
     // input_param_string results in the proto specified by
     // output_param_string.
     NetParameter input_param;
-    CHECK(google::protobuf::TextFormat::ParseFromString(
-        input_param_string, &input_param));
+    CHECK(google::protobuf::TextFormat::ParseFromString(input_param_string,
+                                                        &input_param));
     NetParameter expected_output_param;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         output_param_string, &expected_output_param));
@@ -1088,14 +1088,14 @@ TEST_F(PaddingLayerUpgradeTest, TestImageNet) {
 
 class NetUpgradeTest : public ::testing::Test {
 protected:
-  void RunV0UpgradeTest(
-      const string &input_param_string, const string &output_param_string) {
+  void RunV0UpgradeTest(const string &input_param_string,
+                        const string &output_param_string) {
     // Test that UpgradeV0Net called on the NetParameter proto specified by
     // input_param_string results in the NetParameter proto specified by
     // output_param_string.
     NetParameter input_param;
-    CHECK(google::protobuf::TextFormat::ParseFromString(
-        input_param_string, &input_param));
+    CHECK(google::protobuf::TextFormat::ParseFromString(input_param_string,
+                                                        &input_param));
     NetParameter expected_output_param;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         output_param_string, &expected_output_param));
@@ -1105,14 +1105,14 @@ protected:
               actual_output_param.DebugString());
   }
 
-  void RunV1UpgradeTest(
-      const string &input_param_string, const string &output_param_string) {
+  void RunV1UpgradeTest(const string &input_param_string,
+                        const string &output_param_string) {
     // Test that UpgradeV0Net called on the NetParameter proto specified by
     // input_param_string results in the NetParameter proto specified by
     // output_param_string.
     NetParameter input_param;
-    CHECK(google::protobuf::TextFormat::ParseFromString(
-        input_param_string, &input_param));
+    CHECK(google::protobuf::TextFormat::ParseFromString(input_param_string,
+                                                        &input_param));
     NetParameter expected_output_param;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         output_param_string, &expected_output_param));
@@ -2889,18 +2889,18 @@ TEST_F(NetUpgradeTest, TestImageNet) {
       "  bottom: 'label' "
       "} ";
   this->RunV1UpgradeTest(expected_v1_proto, expected_v2_proto);
-}  // NOLINT(readability/fn_size)
+} // NOLINT(readability/fn_size)
 
 TEST_F(NetUpgradeTest, TestUpgradeV1LayerType) {
   LayerParameter layer_param;
-  shared_ptr<Layer<float> > layer;
+  shared_ptr<Layer<float>> layer;
   for (int i = 0; i < V1LayerParameter_LayerType_LayerType_ARRAYSIZE; ++i) {
     ASSERT_TRUE(V1LayerParameter_LayerType_IsValid(i));
     V1LayerParameter_LayerType v1_type = V1LayerParameter_LayerType(i);
     string v2_layer_type(UpgradeV1LayerType(v1_type));
     if (v2_layer_type == "") {
       EXPECT_EQ(V1LayerParameter_LayerType_NONE, v1_type);
-      continue;  // Empty string isn't actually a valid layer type.
+      continue; // Empty string isn't actually a valid layer type.
     }
     layer_param.set_type(v2_layer_type);
     // Data layers expect a DB
@@ -2914,13 +2914,13 @@ TEST_F(NetUpgradeTest, TestUpgradeV1LayerType) {
       layer_param.mutable_data_param()->set_source(tmp);
 #else
       continue;
-#endif  // USE_LEVELDB
+#endif // USE_LEVELDB
     }
 #ifndef USE_OPENCV
     if (v2_layer_type == "ImageData" || v2_layer_type == "WindowData") {
-     continue;
+      continue;
     }
-#endif  // !USE_OPENCV
+#endif // !USE_OPENCV
     layer = LayerRegistry<float>::CreateLayer(layer_param);
     EXPECT_EQ(v2_layer_type, layer->type());
   }
@@ -2928,12 +2928,12 @@ TEST_F(NetUpgradeTest, TestUpgradeV1LayerType) {
 
 class SolverTypeUpgradeTest : public ::testing::Test {
 protected:
-  void RunSolverTypeUpgradeTest(
-      const string &input_param_string, const string &output_param_string) {
+  void RunSolverTypeUpgradeTest(const string &input_param_string,
+                                const string &output_param_string) {
     // Test upgrading old solver_type field (enum) to new type field (string)
     SolverParameter input_param;
-    CHECK(google::protobuf::TextFormat::ParseFromString(
-        input_param_string, &input_param));
+    CHECK(google::protobuf::TextFormat::ParseFromString(input_param_string,
+                                                        &input_param));
     SolverParameter expected_output_param;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         output_param_string, &expected_output_param));
@@ -2945,10 +2945,10 @@ protected:
 };
 
 TEST_F(SolverTypeUpgradeTest, TestSimple) {
-  const char *old_type_vec[6] = {"SGD", "ADAGRAD", "NESTEROV", "RMSPROP",
-                                 "ADADELTA", "ADAM"};
-  const char *new_type_vec[6] = {"SGD", "AdaGrad", "Nesterov", "RMSProp",
-                                 "AdaDelta", "Adam"};
+  const char *old_type_vec[6] = {"SGD",     "ADAGRAD",  "NESTEROV",
+                                 "RMSPROP", "ADADELTA", "ADAM"};
+  const char *new_type_vec[6] = {"SGD",     "AdaGrad",  "Nesterov",
+                                 "RMSProp", "AdaDelta", "Adam"};
   for (int i = 0; i < 6; ++i) {
     const string &input_proto =
         "net: 'examples/mnist/lenet_train_test.prototxt' "
@@ -2967,7 +2967,8 @@ TEST_F(SolverTypeUpgradeTest, TestSimple) {
         "snapshot: 5000 "
         "snapshot_prefix: 'examples/mnist/lenet_rmsprop' "
         "solver_mode: GPU "
-        "solver_type: " + std::string(old_type_vec[i]) + " ";
+        "solver_type: " +
+        std::string(old_type_vec[i]) + " ";
     const string &expected_output_proto =
         "net: 'examples/mnist/lenet_train_test.prototxt' "
         "weights: 'examples/mnist/lenet_train_test1.caffemodel' "
@@ -2985,9 +2986,10 @@ TEST_F(SolverTypeUpgradeTest, TestSimple) {
         "snapshot: 5000 "
         "snapshot_prefix: 'examples/mnist/lenet_rmsprop' "
         "solver_mode: GPU "
-        "type: '" + std::string(new_type_vec[i]) + "' ";
+        "type: '" +
+        std::string(new_type_vec[i]) + "' ";
     this->RunSolverTypeUpgradeTest(input_proto, expected_output_proto);
   }
 }
 
-}  // NOLINT(readability/fn_size)  // namespace caffe
+} // namespace caffe

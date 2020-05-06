@@ -5,14 +5,14 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void FilterLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   CHECK_EQ(top.size(), bottom.size() - 1);
   first_reshape_ = true;
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void FilterLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                  const vector<Blob<Dtype> *> &top) {
   // bottom[0...k-1] are the blobs to filter
@@ -20,11 +20,12 @@ void FilterLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   int selector_index = bottom.size() - 1;
   for (int i = 1; i < bottom[selector_index]->num_axes(); ++i) {
     CHECK_EQ(bottom[selector_index]->shape(i), 1)
-      << "Selector blob dimensions must be singletons (1), except the first";
+        << "Selector blob dimensions must be singletons (1), except the first";
   }
   for (int i = 0; i < bottom.size() - 1; ++i) {
-    CHECK_EQ(bottom[selector_index]->shape(0), bottom[i]->shape(0)) <<
-                                                                    "Each bottom should have the same 0th dimension as the selector blob";
+    CHECK_EQ(bottom[selector_index]->shape(0), bottom[i]->shape(0))
+        << "Each bottom should have the same 0th dimension as the selector "
+           "blob";
   }
 
   const Dtype *bottom_data_selector = bottom[selector_index]->cpu_data();
@@ -57,7 +58,7 @@ void FilterLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void FilterLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
   int new_tops_num = indices_to_forward_.size();
@@ -75,9 +76,10 @@ void FilterLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void FilterLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                      const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                      const vector<bool> &propagate_down,
+                                      const vector<Blob<Dtype> *> &bottom) {
   if (propagate_down[bottom.size() - 1]) {
     LOG(FATAL) << this->type()
                << "Layer cannot backpropagate to filter index inputs";
@@ -100,12 +102,12 @@ void FilterLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                     bottom[i]->mutable_cpu_diff() + data_offset_bottom);
         } else {
           batch_offset = indices_to_forward_[next_to_backward_offset];
-          if (n != batch_offset) {  // this data was not been forwarded
+          if (n != batch_offset) { // this data was not been forwarded
             caffe_set(dim, Dtype(0),
                       bottom[i]->mutable_cpu_diff() + data_offset_bottom);
-          } else {  // this data was been forwarded
+          } else { // this data was been forwarded
             data_offset_top = next_to_backward_offset * dim;
-            next_to_backward_offset++;  // point to next forwarded item index
+            next_to_backward_offset++; // point to next forwarded item index
             caffe_copy(dim, top[i]->mutable_cpu_diff() + data_offset_top,
                        bottom[i]->mutable_cpu_diff() + data_offset_bottom);
           }
@@ -122,4 +124,4 @@ STUB_GPU(FilterLayer);
 INSTANTIATE_CLASS(FilterLayer);
 REGISTER_LAYER_CLASS(Filter);
 
-}  // namespace caffe
+} // namespace caffe

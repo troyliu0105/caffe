@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class LSTMLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -126,7 +126,7 @@ TYPED_TEST(LSTMLayerTest, TestForward) {
   GaussianFiller<Dtype> sequence_filler(filler_param);
   Caffe::set_random_seed(1);
   sequence_filler.Fill(&this->blob_bottom_);
-  shared_ptr<LSTMLayer<Dtype> > layer(new LSTMLayer<Dtype>(this->layer_param_));
+  shared_ptr<LSTMLayer<Dtype>> layer(new LSTMLayer<Dtype>(this->layer_param_));
   Caffe::set_random_seed(1701);
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   LOG(INFO) << "Calling forward for full sequence LSTM";
@@ -159,7 +159,7 @@ TYPED_TEST(LSTMLayerTest, TestForward) {
       ASSERT_LT(t * top_count + i, top_copy.count());
       EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i], kEpsilon)
-              << "t = " << t << "; i = " << i;
+          << "t = " << t << "; i = " << i;
     }
   }
 
@@ -180,11 +180,11 @@ TYPED_TEST(LSTMLayerTest, TestForward) {
       if (t == 0) {
         EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                     top_copy.cpu_data()[t * top_count + i], kEpsilon)
-                << "t = " << t << "; i = " << i;
+            << "t = " << t << "; i = " << i;
       } else {
         EXPECT_NE(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i])
-                << "t = " << t << "; i = " << i;
+            << "t = " << t << "; i = " << i;
       }
     }
   }
@@ -289,4 +289,4 @@ TYPED_TEST(LSTMLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
                                   this->blob_top_vec_, 2);
 }
 
-}  // namespace caffe
+} // namespace caffe

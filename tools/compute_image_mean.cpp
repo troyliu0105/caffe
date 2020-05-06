@@ -1,5 +1,5 @@
-#include <stdint.h>
 #include <algorithm>
+#include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -12,16 +12,16 @@
 #include "caffe/util/db.hpp"
 #include "caffe/util/io.hpp"
 
-using namespace caffe;  // NOLINT(build/namespaces)
+using namespace caffe; // NOLINT(build/namespaces)
 
+using boost::scoped_ptr;
 using std::max;
 using std::pair;
-using boost::scoped_ptr;
 
 DEFINE_string(backend, "lmdb",
-        "The backend {leveldb, lmdb} containing the images");
+              "The backend {leveldb, lmdb} containing the images");
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 #ifdef USE_OPENCV
   ::google::InitGoogleLogging(argv[0]);
   // Print output to stderr (while still logging)
@@ -31,10 +31,11 @@ int main(int argc, char** argv) {
   namespace gflags = google;
 #endif
 
-  gflags::SetUsageMessage("Compute the mean_image of a set of images given by"
-        " a leveldb/lmdb\n"
-        "Usage:\n"
-        "    compute_image_mean [FLAGS] INPUT_DB [OUTPUT_FILE]\n");
+  gflags::SetUsageMessage(
+      "Compute the mean_image of a set of images given by"
+      " a leveldb/lmdb\n"
+      "Usage:\n"
+      "    compute_image_mean [FLAGS] INPUT_DB [OUTPUT_FILE]\n");
 
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
@@ -62,22 +63,21 @@ int main(int argc, char** argv) {
   sum_blob.set_height(datum.height());
   sum_blob.set_width(datum.width());
   const int data_size = datum.channels() * datum.height() * datum.width();
-  int size_in_datum = std::max<int>(datum.data().size(),
-                                    datum.float_data_size());
+  int size_in_datum =
+      std::max<int>(datum.data().size(), datum.float_data_size());
   for (int i = 0; i < size_in_datum; ++i) {
     sum_blob.add_data(0.);
   }
   LOG(INFO) << "Starting iteration";
   while (cursor->valid()) {
-//    Datum datum;
+    //    Datum datum;
     datum.ParseFromString(cursor->value());
     DecodeDatumNative(&datum);
 
-    const std::string& data = datum.data();
-    size_in_datum = std::max<int>(datum.data().size(),
-        datum.float_data_size());
-    CHECK_EQ(size_in_datum, data_size) << "Incorrect data field size " <<
-        size_in_datum;
+    const std::string &data = datum.data();
+    size_in_datum = std::max<int>(datum.data().size(), datum.float_data_size());
+    CHECK_EQ(size_in_datum, data_size)
+        << "Incorrect data field size " << size_in_datum;
     if (!data.empty()) {
       CHECK_EQ(data.size(), size_in_datum);
       for (int i = 0; i < size_in_datum; ++i) {
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
       CHECK_EQ(datum.float_data_size(), size_in_datum);
       for (int i = 0; i < size_in_datum; ++i) {
         sum_blob.set_data(i, sum_blob.data(i) +
-            static_cast<float>(datum.float_data(i)));
+                                 static_cast<float>(datum.float_data(i)));
       }
     }
     ++count;
@@ -120,6 +120,6 @@ int main(int argc, char** argv) {
   }
 #else
   LOG(FATAL) << "This tool requires OpenCV; compile with USE_OPENCV.";
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
   return 0;
 }

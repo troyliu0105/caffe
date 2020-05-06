@@ -5,21 +5,20 @@
 
 namespace caffe {
 
-template<typename Dtype>
-__global__ void AccuracyForwardGPU(const int nthreads,
-                                   const Dtype *bottom_data, const Dtype *label, Dtype *acc,
-                                   const int num, const int dim, const int spatial_dim,
-                                   const int num_labels, const int top_k,
-                                   const bool has_ignore_label_, const int ignore_label_,
-                                   Dtype *counts) {
+template <typename Dtype>
+__global__ void
+AccuracyForwardGPU(const int nthreads, const Dtype *bottom_data,
+                   const Dtype *label, Dtype *acc, const int num, const int dim,
+                   const int spatial_dim, const int num_labels, const int top_k,
+                   const bool has_ignore_label_, const int ignore_label_,
+                   Dtype *counts) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int n = index / spatial_dim;
     const int s = index % spatial_dim;
     const int label_value = static_cast<int>(label[n * spatial_dim + s]);
-    const Dtype prob_of_true_class = bottom_data[n * dim
-        + label_value * spatial_dim
-        + s];
-    int num_better_predictions = -1;  // true_class also counts as "better"
+    const Dtype prob_of_true_class =
+        bottom_data[n * dim + label_value * spatial_dim + s];
+    int num_better_predictions = -1; // true_class also counts as "better"
     if (has_ignore_label_ && label_value == ignore_label_) {
       acc[index] = 0;
       counts[index] = 0;
@@ -34,24 +33,22 @@ __global__ void AccuracyForwardGPU(const int nthreads,
   }
 }
 
-template<typename Dtype>
-__global__ void AccuracyForwardWithPerClassGPU(const int nthreads,
-                                               const Dtype *bottom_data, const Dtype *label,
-                                               Dtype *acc, Dtype *counts,
-                                               const int num, const int dim, const int spatial_dim,
-                                               const int num_labels, const int top_k,
-                                               const bool has_ignore_label_, const int ignore_label_) {
+template <typename Dtype>
+__global__ void AccuracyForwardWithPerClassGPU(
+    const int nthreads, const Dtype *bottom_data, const Dtype *label,
+    Dtype *acc, Dtype *counts, const int num, const int dim,
+    const int spatial_dim, const int num_labels, const int top_k,
+    const bool has_ignore_label_, const int ignore_label_) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int n = index / spatial_dim;
     const int s = index % spatial_dim;
     const int label_value = static_cast<int>(label[n * spatial_dim + s]);
-    const Dtype prob_of_true_class = bottom_data[n * dim
-        + label_value * spatial_dim
-        + s];
+    const Dtype prob_of_true_class =
+        bottom_data[n * dim + label_value * spatial_dim + s];
     if (has_ignore_label_ && label_value == ignore_label_) {
       // nothing to be done.
     } else {
-      int num_better_predictions = -1;  // true_class also counts as "better"
+      int num_better_predictions = -1; // true_class also counts as "better"
       for (int k = 0; k < num_labels & num_better_predictions < top_k; k++) {
         num_better_predictions +=
             (bottom_data[n * dim + k * spatial_dim + s] >= prob_of_true_class);
@@ -62,9 +59,9 @@ __global__ void AccuracyForwardWithPerClassGPU(const int nthreads,
   }
 }
 
-template<typename Dtype>
-void AccuracyLayer<Dtype>::Forward_gpu(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void AccuracyLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                                       const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
   const Dtype *bottom_label = bottom[1]->gpu_data();
   const int dim = bottom[0]->count() / outer_num_;
@@ -80,10 +77,11 @@ void AccuracyLayer<Dtype>::Forward_gpu(
     // to avoid having to allocate additional GPU memory.
     Dtype *counts = bottom[1]->mutable_gpu_diff();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    AccuracyForwardGPU<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
-    CAFFE_CUDA_NUM_THREADS>>>(nthreads, bottom_data, bottom_label,
-                              acc_data, outer_num_, dim, inner_num_, num_labels, top_k_,
-                              has_ignore_label_, ignore_label_, counts);
+    AccuracyForwardGPU<Dtype>
+        <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+            nthreads, bottom_data, bottom_label, acc_data, outer_num_, dim,
+            inner_num_, num_labels, top_k_, has_ignore_label_, ignore_label_,
+            counts);
     Dtype acc;
     caffe_gpu_asum(nthreads, acc_data, &acc);
     Dtype valid_count;
@@ -104,10 +102,11 @@ void AccuracyLayer<Dtype>::Forward_gpu(
     caffe_gpu_set(nums_buffer_.count(), Dtype(0), counts);
 
     // NOLINT_NEXT_LINE(whitespace/operators)
-    AccuracyForwardWithPerClassGPU<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
-    CAFFE_CUDA_NUM_THREADS>>>(nthreads, bottom_data, bottom_label,
-                              acc_data, counts, outer_num_, dim, inner_num_, num_labels, top_k_,
-                              has_ignore_label_, ignore_label_);
+    AccuracyForwardWithPerClassGPU<Dtype>
+        <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+            nthreads, bottom_data, bottom_label, acc_data, counts, outer_num_,
+            dim, inner_num_, num_labels, top_k_, has_ignore_label_,
+            ignore_label_);
 
     // get the overall accuracy
     Dtype acc;
@@ -136,11 +135,14 @@ void AccuracyLayer<Dtype>::Forward_gpu(
   caffe_gpu_set(bottom[0]->count(), Dtype(0), bottom[0]->mutable_gpu_diff());
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void AccuracyLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                        const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
-  if (propagate_down[1]) { NOT_IMPLEMENTED; }
+                                        const vector<bool> &propagate_down,
+                                        const vector<Blob<Dtype> *> &bottom) {
+  if (propagate_down[1]) {
+    NOT_IMPLEMENTED;
+  }
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(AccuracyLayer);
-}  // namespace caffe
+} // namespace caffe

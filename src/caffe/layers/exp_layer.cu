@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ExpLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                   const vector<Blob<Dtype> *> &top) {
   const int count = bottom[0]->count();
@@ -22,10 +22,13 @@ void ExpLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ExpLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                   const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
-  if (!propagate_down[0]) { return; }
+                                   const vector<bool> &propagate_down,
+                                   const vector<Blob<Dtype> *> &bottom) {
+  if (!propagate_down[0]) {
+    return;
+  }
   const int count = bottom[0]->count();
   const Dtype *top_data = top[0]->gpu_data();
   const Dtype *top_diff = top[0]->gpu_diff();
@@ -38,4 +41,4 @@ void ExpLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(ExpLayer);
 
-}  // namespace caffe
+} // namespace caffe

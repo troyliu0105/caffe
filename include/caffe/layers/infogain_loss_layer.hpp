@@ -14,8 +14,8 @@ namespace caffe {
 
 /**
  * @brief A generalization of SoftmaxWithLossLayer that takes an
- *        "information gain" (infogain) matrix specifying the "value" of all label
- *        pairs.
+ *        "information gain" (infogain) matrix specifying the "value" of all
+ * label pairs.
  *
  * Equivalent to the SoftmaxWithLossLayer if the infogain matrix is the
  * identity.
@@ -45,8 +45,7 @@ namespace caffe {
  *        \log(\hat{p}_{n,k})
  *      @f$, where @f$ H_{l_n} @f$ denotes row @f$l_n@f$ of @f$H@f$.
  */
-template<typename Dtype>
-class InfogainLossLayer : public LossLayer<Dtype> {
+template <typename Dtype> class InfogainLossLayer : public LossLayer<Dtype> {
 public:
   explicit InfogainLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), infogain_() {}
@@ -108,19 +107,21 @@ protected:
    *      gradient computation is not implemented.
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   /// Read the normalization mode parameter and compute the normalizer based
   /// on the blob size.  If normalization_mode is VALID, the count of valid
   /// outputs will be read from valid_count, unless it is -1 in which case
   /// all outputs are assumed to be valid.
-  virtual Dtype get_normalizer(
-      LossParameter_NormalizationMode normalization_mode, int valid_count);
+  virtual Dtype
+  get_normalizer(LossParameter_NormalizationMode normalization_mode,
+                 int valid_count);
   /// fill sum_rows_H_ according to matrix H
   virtual void sum_rows_of_H(const Blob<Dtype> *H);
 
   /// The internal SoftmaxLayer used to map predictions to a distribution.
-  shared_ptr<Layer<Dtype> > softmax_layer_;
+  shared_ptr<Layer<Dtype>> softmax_layer_;
   /// prob stores the output probability predictions from the SoftmaxLayer.
   Blob<Dtype> prob_;
   /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
@@ -129,7 +130,7 @@ protected:
   vector<Blob<Dtype> *> softmax_top_vec_;
 
   Blob<Dtype> infogain_;
-  Blob<Dtype> sum_rows_H_;  // cache the row sums of H.
+  Blob<Dtype> sum_rows_H_; // cache the row sums of H.
 
   /// Whether to ignore instances with a certain label.
   bool has_ignore_label_;
@@ -141,6 +142,6 @@ protected:
   int infogain_axis_, outer_num_, inner_num_, num_labels_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_INFOGAIN_LOSS_LAYER_HPP_
+#endif // CAFFE_INFOGAIN_LOSS_LAYER_HPP_

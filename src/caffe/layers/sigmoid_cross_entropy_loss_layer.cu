@@ -5,11 +5,12 @@
 
 namespace caffe {
 
-template<typename Dtype>
-__global__ void SigmoidCrossEntropyLossForwardGPU(const int nthreads,
-                                                  const Dtype *input_data, const Dtype *target, Dtype *loss,
-                                                  const bool has_ignore_label_, const int ignore_label_,
-                                                  Dtype *counts) {
+template <typename Dtype>
+__global__ void
+SigmoidCrossEntropyLossForwardGPU(const int nthreads, const Dtype *input_data,
+                                  const Dtype *target, Dtype *loss,
+                                  const bool has_ignore_label_,
+                                  const int ignore_label_, Dtype *counts) {
   CUDA_KERNEL_LOOP(i, nthreads) {
     const int target_value = static_cast<int>(target[i]);
     if (has_ignore_label_ && target_value == ignore_label_) {
@@ -17,16 +18,17 @@ __global__ void SigmoidCrossEntropyLossForwardGPU(const int nthreads,
       counts[i] = 0;
     } else {
       loss[i] = input_data[i] * (target[i] - (input_data[i] >= 0)) -
-          log(1 + exp(input_data[i] - 2 * input_data[i] *
-              (input_data[i] >= 0)));
+                log(1 + exp(input_data[i] -
+                            2 * input_data[i] * (input_data[i] >= 0)));
       counts[i] = 1;
     }
   }
 }
 
-template<typename Dtype>
-__global__ void SigmoidCrossEntropyLossIgnoreDiffGPU(const int count,
-                                                     const int ignore_label, const Dtype *target, Dtype *diff) {
+template <typename Dtype>
+__global__ void
+SigmoidCrossEntropyLossIgnoreDiffGPU(const int count, const int ignore_label,
+                                     const Dtype *target, Dtype *diff) {
   CUDA_KERNEL_LOOP(i, count) {
     const int target_value = static_cast<int>(target[i]);
     if (target_value == ignore_label) {
@@ -35,7 +37,7 @@ __global__ void SigmoidCrossEntropyLossIgnoreDiffGPU(const int count,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SigmoidCrossEntropyLossLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   // The forward pass computes the sigmoid outputs.
@@ -52,9 +54,10 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Forward_gpu(
   Dtype *count_data = bottom[1]->mutable_gpu_diff();
   Dtype valid_count;
   // NOLINT_NEXT_LINE(whitespace/operators)
-  SigmoidCrossEntropyLossForwardGPU<Dtype><<<CAFFE_GET_BLOCKS(count),
-  CAFFE_CUDA_NUM_THREADS>>>(count, input_data, target, loss_data,
-                            has_ignore_label_, ignore_label_, count_data);
+  SigmoidCrossEntropyLossForwardGPU<Dtype>
+      <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+          count, input_data, target, loss_data, has_ignore_label_,
+          ignore_label_, count_data);
   // Only launch another CUDA kernel if we actually need the valid count.
   if (normalization_ == LossParameter_NormalizationMode_VALID &&
       has_ignore_label_) {
@@ -72,7 +75,7 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Forward_gpu(
   caffe_gpu_set(bottom[1]->count(), Dtype(0), bottom[1]->mutable_gpu_diff());
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SigmoidCrossEntropyLossLayer<Dtype>::Backward_gpu(
     const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
     const vector<Blob<Dtype> *> &bottom) {
@@ -91,8 +94,9 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Backward_gpu(
     // Zero out gradient of ignored targets.
     if (has_ignore_label_) {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      SigmoidCrossEntropyLossIgnoreDiffGPU<Dtype><<<CAFFE_GET_BLOCKS(count),
-      CAFFE_CUDA_NUM_THREADS>>>(count, ignore_label_, target, bottom_diff);
+      SigmoidCrossEntropyLossIgnoreDiffGPU<Dtype>
+          <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+              count, ignore_label_, target, bottom_diff);
     }
     // Scale down gradient
     Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer_;
@@ -102,4 +106,4 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Backward_gpu(
 
 INSTANTIATE_LAYER_GPU_FUNCS(SigmoidCrossEntropyLossLayer);
 
-}  // namespace caffe
+} // namespace caffe

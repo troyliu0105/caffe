@@ -13,8 +13,8 @@ void InsertSplits(const NetParameter &param, NetParameter *param_split) {
   // Initialize by copying from the input NetParameter.
   param_split->CopyFrom(param);
   param_split->clear_layer();
-  map<string, pair<int, int> > blob_name_to_last_top_idx;
-  map<pair<int, int>, pair<int, int> > bottom_idx_to_source_top_idx;
+  map<string, pair<int, int>> blob_name_to_last_top_idx;
+  map<pair<int, int>, pair<int, int>> bottom_idx_to_source_top_idx;
   map<pair<int, int>, int> top_idx_to_bottom_count;
   map<pair<int, int>, float> top_idx_to_loss_weight;
   map<pair<int, int>, int> top_idx_to_bottom_split_idx;
@@ -62,8 +62,9 @@ void InsertSplits(const NetParameter &param, NetParameter *param_split) {
       if (split_count > 1) {
         const string &layer_name = layer_idx_to_layer_name[top_idx.first];
         const string &blob_name = layer_param->bottom(j);
-        layer_param->set_bottom(j, SplitBlobName(layer_name,
-                                                 blob_name, top_idx.second, top_idx_to_bottom_split_idx[top_idx]++));
+        layer_param->set_bottom(
+            j, SplitBlobName(layer_name, blob_name, top_idx.second,
+                             top_idx_to_bottom_split_idx[top_idx]++));
       }
     }
     // Create split layer for any top blobs used by other layer as bottom
@@ -76,8 +77,8 @@ void InsertSplits(const NetParameter &param, NetParameter *param_split) {
         const string &blob_name = layer_param->top(j);
         LayerParameter *split_layer_param = param_split->add_layer();
         const float loss_weight = top_idx_to_loss_weight[top_idx];
-        ConfigureSplitLayer(layer_name, blob_name, j, split_count,
-                            loss_weight, split_layer_param);
+        ConfigureSplitLayer(layer_name, blob_name, j, split_count, loss_weight,
+                            split_layer_param);
         if (loss_weight) {
           layer_param->clear_loss_weight();
           top_idx_to_bottom_split_idx[top_idx]++;
@@ -88,7 +89,8 @@ void InsertSplits(const NetParameter &param, NetParameter *param_split) {
 }
 
 void ConfigureSplitLayer(const string &layer_name, const string &blob_name,
-                         const int blob_idx, const int split_count, const float loss_weight,
+                         const int blob_idx, const int split_count,
+                         const float loss_weight,
                          LayerParameter *split_layer_param) {
   split_layer_param->Clear();
   split_layer_param->add_bottom(blob_name);
@@ -123,4 +125,4 @@ string SplitBlobName(const string &layer_name, const string &blob_name,
   return split_blob_name.str();
 }
 
-}  // namespace caffe
+} // namespace caffe

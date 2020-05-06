@@ -18,8 +18,7 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template<typename Dtype>
-class DetectionEvaluateLayer : public Layer<Dtype> {
+template <typename Dtype> class DetectionEvaluateLayer : public Layer<Dtype> {
 public:
   explicit DetectionEvaluateLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
@@ -50,7 +49,8 @@ protected:
                            const vector<Blob<Dtype> *> &top);
   /// @brief Not implemented
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     NOT_IMPLEMENTED;
   }
 
@@ -58,7 +58,7 @@ protected:
   int background_label_id_;
   float overlap_threshold_;
   bool evaluate_difficult_gt_;
-  vector<pair<int, int> > sizes_;
+  vector<pair<int, int>> sizes_;
   int count_;
   bool use_normalized_bbox_;
 
@@ -66,6 +66,6 @@ protected:
   ResizeParameter resize_param_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DETECTION_EVALUATE_LAYER_HPP_
+#endif // CAFFE_DETECTION_EVALUATE_LAYER_HPP_

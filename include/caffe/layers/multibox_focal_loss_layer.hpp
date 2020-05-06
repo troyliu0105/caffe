@@ -22,7 +22,7 @@ namespace caffe {
  *  - use matched boxes and confidences to compute loss.
  *
  */
-template<typename Dtype>
+template <typename Dtype>
 class MultiBoxFocalLossLayer : public LossLayer<Dtype> {
 public:
   explicit MultiBoxFocalLossLayer(const LayerParameter &param)
@@ -44,10 +44,11 @@ protected:
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   // The internal localization loss layer.
-  shared_ptr<Layer<Dtype> > loc_loss_layer_;
+  shared_ptr<Layer<Dtype>> loc_loss_layer_;
   LocLossType loc_loss_type_;
   float loc_weight_;
   // bottom vector holder used in Forward function.
@@ -62,7 +63,7 @@ protected:
   Blob<Dtype> loc_loss_;
 
   // The internal confidence loss layer.
-  shared_ptr<Layer<Dtype> > conf_loss_layer_;
+  shared_ptr<Layer<Dtype>> conf_loss_layer_;
   ConfLossType conf_loss_type_;
   // bottom vector holder used in Forward function.
   vector<Blob<Dtype> *> conf_bottom_vec_;
@@ -100,8 +101,8 @@ protected:
 
   int num_matches_;
   int num_conf_;
-  vector<map<int, vector<int> > > all_match_indices_;
-  vector<vector<int> > all_neg_indices_;
+  vector<map<int, vector<int>>> all_match_indices_;
+  vector<vector<int>> all_neg_indices_;
   float alpha_;
   float gamma_;
 
@@ -109,6 +110,6 @@ protected:
   LossParameter_NormalizationMode normalization_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_MULTIBOX_LOSS_LAYER_HPP_
+#endif // CAFFE_MULTIBOX_LOSS_LAYER_HPP_

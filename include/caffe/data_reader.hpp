@@ -20,18 +20,13 @@ namespace caffe {
  * subset of the database. Data is distributed to solvers in a round-robin
  * way to keep parallel training deterministic.
  */
-template<typename T>
-class DataReader {
+template <typename T> class DataReader {
 public:
   explicit DataReader(const LayerParameter &param);
   ~DataReader();
 
-  inline BlockingQueue<T *> &free() const {
-    return queue_pair_->free_;
-  }
-  inline BlockingQueue<T *> &full() const {
-    return queue_pair_->full_;
-  }
+  inline BlockingQueue<T *> &free() const { return queue_pair_->free_; }
+  inline BlockingQueue<T *> &full() const { return queue_pair_->full_; }
 
 protected:
   // Queue pairs are shared between a body and its readers
@@ -43,7 +38,7 @@ protected:
     BlockingQueue<T *> free_;
     BlockingQueue<T *> full_;
 
-  DISABLE_COPY_AND_ASSIGN(QueuePair);
+    DISABLE_COPY_AND_ASSIGN(QueuePair);
   };
 
   // A single body is created per source
@@ -57,11 +52,11 @@ protected:
     void read_one(db::Cursor *cursor, QueuePair *qp);
 
     const LayerParameter param_;
-    BlockingQueue<shared_ptr<QueuePair> > new_queue_pairs_;
+    BlockingQueue<shared_ptr<QueuePair>> new_queue_pairs_;
 
     friend class DataReader;
 
-  DISABLE_COPY_AND_ASSIGN(Body);
+    DISABLE_COPY_AND_ASSIGN(Body);
   };
 
   // A source is uniquely identified by its layer name + path, in case
@@ -73,11 +68,11 @@ protected:
   const shared_ptr<QueuePair> queue_pair_;
   shared_ptr<Body> body_;
 
-  static map<const string, boost::weak_ptr<Body> > bodies_;
+  static map<const string, boost::weak_ptr<Body>> bodies_;
 
-DISABLE_COPY_AND_ASSIGN(DataReader);
+  DISABLE_COPY_AND_ASSIGN(DataReader);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DATA_READER_HPP_
+#endif // CAFFE_DATA_READER_HPP_

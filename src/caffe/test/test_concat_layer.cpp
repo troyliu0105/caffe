@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class ConcatLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -24,7 +24,7 @@ protected:
         blob_top_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     // fill the values
-    shared_ptr<ConstantFiller<Dtype> > filler;
+    shared_ptr<ConstantFiller<Dtype>> filler;
     FillerParameter filler_param;
     filler_param.set_value(1.);
     filler.reset(new ConstantFiller<Dtype>(filler_param));
@@ -78,8 +78,8 @@ TYPED_TEST(ConcatLayerTest, TestSetupChannels) {
   ConcatLayer<Dtype> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_0_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_->num(), this->blob_bottom_0_->num());
-  EXPECT_EQ(this->blob_top_->channels(),
-            this->blob_bottom_0_->channels() + this->blob_bottom_1_->channels());
+  EXPECT_EQ(this->blob_top_->channels(), this->blob_bottom_0_->channels() +
+                                             this->blob_bottom_1_->channels());
   EXPECT_EQ(this->blob_top_->height(), this->blob_bottom_0_->height());
   EXPECT_EQ(this->blob_top_->width(), this->blob_bottom_0_->width());
 }
@@ -94,8 +94,8 @@ TYPED_TEST(ConcatLayerTest, TestSetupChannelsNegativeIndexing) {
   layer_param.mutable_concat_param()->set_axis(-3);
   layer.SetUp(this->blob_bottom_vec_0_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_->num(), this->blob_bottom_0_->num());
-  EXPECT_EQ(this->blob_top_->channels(),
-            this->blob_bottom_0_->channels() + this->blob_bottom_1_->channels());
+  EXPECT_EQ(this->blob_top_->channels(), this->blob_bottom_0_->channels() +
+                                             this->blob_bottom_1_->channels());
   EXPECT_EQ(this->blob_top_->height(), this->blob_bottom_0_->height());
   EXPECT_EQ(this->blob_top_->width(), this->blob_bottom_0_->width());
 }
@@ -184,8 +184,7 @@ TYPED_TEST(ConcatLayerTest, TestGradientNum) {
   layer_param.mutable_concat_param()->set_axis(0);
   ConcatLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2);
-  checker.CheckGradient(&layer, this->blob_bottom_vec_1_,
-                        this->blob_top_vec_);
+  checker.CheckGradient(&layer, this->blob_bottom_vec_1_, this->blob_top_vec_);
 }
 
 TYPED_TEST(ConcatLayerTest, TestGradientChannels) {
@@ -193,8 +192,7 @@ TYPED_TEST(ConcatLayerTest, TestGradientChannels) {
   LayerParameter layer_param;
   ConcatLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2);
-  checker.CheckGradient(&layer, this->blob_bottom_vec_0_,
-                        this->blob_top_vec_);
+  checker.CheckGradient(&layer, this->blob_bottom_vec_0_, this->blob_top_vec_);
 }
 
 TYPED_TEST(ConcatLayerTest, TestGradientChannelsBottomOneOnly) {
@@ -202,8 +200,8 @@ TYPED_TEST(ConcatLayerTest, TestGradientChannelsBottomOneOnly) {
   LayerParameter layer_param;
   ConcatLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2);
-  checker.CheckGradient(&layer, this->blob_bottom_vec_0_,
-                        this->blob_top_vec_, 1);
+  checker.CheckGradient(&layer, this->blob_bottom_vec_0_, this->blob_top_vec_,
+                        1);
 }
 
-}  // namespace caffe
+} // namespace caffe

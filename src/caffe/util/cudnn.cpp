@@ -18,6 +18,6 @@ const void *dataType<double>::one =
 const void *dataType<double>::zero =
     static_cast<void *>(&dataType<double>::zeroval);
 
-}  // namespace cudnn
-}  // namespace caffe
+} // namespace cudnn
+} // namespace caffe
 #endif

@@ -12,9 +12,10 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class ReshapeLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
   ReshapeLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 6, 5)),
@@ -279,4 +280,4 @@ TYPED_TEST(ReshapeLayerTest, TestGradient) {
                                this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

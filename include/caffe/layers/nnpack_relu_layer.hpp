@@ -11,21 +11,18 @@
 
 namespace caffe {
 #ifdef USE_NNPACK
-template<typename Dtype>
-class NNPackReLULayer : public ReLULayer<Dtype> {
+template <typename Dtype> class NNPackReLULayer : public ReLULayer<Dtype> {
 public:
   explicit NNPackReLULayer(const LayerParameter &param)
       : ReLULayer<Dtype>(param) {}
-  virtual inline const char *type() const {
-    return "NNPackReLU";
-  }
-  virtual void Forward_cpu(
-      const vector<Blob<Dtype> *> &bottom,
-      const vector<Blob<Dtype> *> &top);
+  virtual inline const char *type() const { return "NNPackReLU"; }
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 };
 #endif
-}
+} // namespace caffe
 
-#endif //CAFFE_INCLUDE_CAFFE_LAYERS_NNPACK_RELU_LAYER_HPP
+#endif // CAFFE_INCLUDE_CAFFE_LAYERS_NNPACK_RELU_LAYER_HPP

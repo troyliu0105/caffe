@@ -15,7 +15,7 @@
 #define CV_HSV2BGR cv::COLOR_HSV2BGR
 #define CV_BGR2Lab cv::COLOR_BGR2Lab
 #endif
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
 
 #include <algorithm>
 #include <numeric>
@@ -36,13 +36,12 @@ int roll_weighted_die(const vector<float> &probabilities) {
   caffe_rng_uniform(1, static_cast<float>(0), cumulative.back(), &val);
 
   // Find the position within the sequence and add 1
-  return (std::lower_bound(cumulative.begin(), cumulative.end(), val)
-      - cumulative.begin());
+  return (std::lower_bound(cumulative.begin(), cumulative.end(), val) -
+          cumulative.begin());
 }
 
-void UpdateBBoxByResizePolicy(const ResizeParameter &param,
-                              const int old_width, const int old_height,
-                              NormalizedBBox *bbox) {
+void UpdateBBoxByResizePolicy(const ResizeParameter &param, const int old_width,
+                              const int old_height, NormalizedBBox *bbox) {
   float new_height = param.height();
   float new_width = param.width();
   float orig_aspect = static_cast<float>(old_width) / old_height;
@@ -99,9 +98,8 @@ void UpdateBBoxByResizePolicy(const ResizeParameter &param,
   bbox->set_ymax(y_max / new_height);
 }
 
-void InferNewSize(const ResizeParameter &resize_param,
-                  const int old_width, const int old_height,
-                  int *new_width, int *new_height) {
+void InferNewSize(const ResizeParameter &resize_param, const int old_width,
+                  const int old_height, int *new_width, int *new_height) {
   int height = resize_param.height();
   int width = resize_param.width();
   float orig_aspect = static_cast<float>(old_width) / old_height;
@@ -127,8 +125,7 @@ void InferNewSize(const ResizeParameter &resize_param,
 }
 
 #ifdef USE_OPENCV
-template<typename T>
-bool is_border(const cv::Mat &edge, T color) {
+template <typename T> bool is_border(const cv::Mat &edge, T color) {
   cv::Mat im = edge.clone().reshape(0, 1);
   bool res = true;
   for (int i = 0; i < im.cols; ++i) {
@@ -137,10 +134,9 @@ bool is_border(const cv::Mat &edge, T color) {
   return res;
 }
 
-template
-bool is_border(const cv::Mat &edge, uchar color);
+template bool is_border(const cv::Mat &edge, uchar color);
 
-template<typename T>
+template <typename T>
 cv::Rect CropMask(const cv::Mat &src, T point, int padding) {
   cv::Rect win(0, 0, src.cols, src.rows);
 
@@ -214,8 +210,7 @@ cv::Rect CropMask(const cv::Mat &src, T point, int padding) {
   return win;
 }
 
-template
-cv::Rect CropMask(const cv::Mat &src, uchar point, int padding);
+template cv::Rect CropMask(const cv::Mat &src, uchar point, int padding);
 
 cv::Mat colorReduce(const cv::Mat &image, int div) {
   cv::Mat out_img;
@@ -250,8 +245,7 @@ void CenterObjectAndFillBg(const cv::Mat &in_img, const bool fill_bg,
     cv::threshold(in_img_gray, mask, 0, 255,
                   CV_THRESH_BINARY_INV | CV_THRESH_OTSU);
   } else {
-    cv::threshold(in_img, mask, 0, 255,
-                  CV_THRESH_BINARY_INV | CV_THRESH_OTSU);
+    cv::threshold(in_img, mask, 0, 255, CV_THRESH_BINARY_INV | CV_THRESH_OTSU);
   }
   cv::Rect crop_rect = CropMask(mask, mask.at<uchar>(0, 0), 2);
 
@@ -266,9 +260,9 @@ void CenterObjectAndFillBg(const cv::Mat &in_img, const bool fill_bg,
   }
 }
 
-cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img,
-                                  const int new_width, const int new_height,
-                                  const int pad_type, const cv::Scalar pad_val,
+cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img, const int new_width,
+                                  const int new_height, const int pad_type,
+                                  const cv::Scalar pad_val,
                                   const int interp_mode) {
   cv::Mat img_resized;
   float orig_aspect = static_cast<float>(in_img.cols) / in_img.rows;
@@ -281,8 +275,8 @@ cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img,
     cv::Size resSize = img_resized.size();
     int padding = floor((new_height - resSize.height) / 2.0);
     cv::copyMakeBorder(img_resized, img_resized, padding,
-                       new_height - resSize.height - padding, 0, 0,
-                       pad_type, pad_val);
+                       new_height - resSize.height - padding, 0, 0, pad_type,
+                       pad_val);
   } else {
     int width = floor(orig_aspect * new_height);
     cv::resize(in_img, img_resized, cv::Size(width, new_height), 0, 0,
@@ -290,19 +284,17 @@ cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img,
     cv::Size resSize = img_resized.size();
     int padding = floor((new_width - resSize.width) / 2.0);
     cv::copyMakeBorder(img_resized, img_resized, 0, 0, padding,
-                       new_width - resSize.width - padding,
-                       pad_type, pad_val);
+                       new_width - resSize.width - padding, pad_type, pad_val);
   }
   return img_resized;
 }
 
-cv::Mat AspectKeepingResizeBySmall(const cv::Mat &in_img,
-                                   const int new_width,
+cv::Mat AspectKeepingResizeBySmall(const cv::Mat &in_img, const int new_width,
                                    const int new_height,
                                    const int interp_mode) {
   cv::Mat img_resized;
   float orig_aspect = static_cast<float>(in_img.cols) / in_img.rows;
-  float new_aspect = static_cast<float> (new_width) / new_height;
+  float new_aspect = static_cast<float>(new_width) / new_height;
 
   if (orig_aspect < new_aspect) {
     int height = floor(static_cast<float>(new_width) / orig_aspect);
@@ -327,7 +319,7 @@ void constantNoise(const int n, const vector<uchar> &val, cv::Mat *image) {
       uchar *ptr = image->ptr<uchar>(j);
       ptr[i] = val[0];
     }
-  } else if (image->channels() == 3) {  // color image
+  } else if (image->channels() == 3) { // color image
     for (int k = 0; k < n; ++k) {
       const int i = caffe_rng_rand() % cols;
       const int j = caffe_rng_rand() % rows;
@@ -389,9 +381,9 @@ cv::Mat ApplyResize(const cv::Mat &in_img, const ResizeParameter &param) {
   cv::Scalar pad_val = cv::Scalar(0, 0, 0);
   const int img_channels = in_img.channels();
   if (param.pad_value_size() > 0) {
-    CHECK(param.pad_value_size() == 1 ||
-        param.pad_value_size() == img_channels) <<
-                                                "Specify either 1 pad_value or as many as channels: " << img_channels;
+    CHECK(param.pad_value_size() == 1 || param.pad_value_size() == img_channels)
+        << "Specify either 1 pad_value or as many as channels: "
+        << img_channels;
     vector<float> pad_values;
     for (int i = 0; i < param.pad_value_size(); ++i) {
       pad_values.push_back(param.pad_value(i));
@@ -411,12 +403,12 @@ cv::Mat ApplyResize(const cv::Mat &in_img, const ResizeParameter &param) {
                interp_mode);
     break;
   case ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD:
-    out_img = AspectKeepingResizeAndPad(in_img, new_width, new_height,
-                                        pad_mode, pad_val, interp_mode);
+    out_img = AspectKeepingResizeAndPad(in_img, new_width, new_height, pad_mode,
+                                        pad_val, interp_mode);
     break;
   case ResizeParameter_Resize_mode_FIT_SMALL_SIZE:
-    out_img = AspectKeepingResizeBySmall(in_img, new_width, new_height,
-                                         interp_mode);
+    out_img =
+        AspectKeepingResizeBySmall(in_img, new_width, new_height, interp_mode);
     break;
   default:
     LOG(INFO) << "Unknown resize mode.";
@@ -495,8 +487,8 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
   }
 
   if (param.erode()) {
-    cv::Mat element = cv::getStructuringElement(
-        2, cv::Size(3, 3), cv::Point(1, 1));
+    cv::Mat element =
+        cv::getStructuringElement(2, cv::Size(3, 3), cv::Point(1, 1));
     cv::erode(out_img, out_img, element);
   }
 
@@ -514,16 +506,15 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
 
   vector<uchar> noise_values;
   if (param.saltpepper_param().value_size() > 0) {
-    CHECK(param.saltpepper_param().value_size() == 1
-              || param.saltpepper_param().value_size() == out_img.channels())
-            << "Specify either 1 pad_value or as many as channels: "
-            << out_img.channels();
+    CHECK(param.saltpepper_param().value_size() == 1 ||
+          param.saltpepper_param().value_size() == out_img.channels())
+        << "Specify either 1 pad_value or as many as channels: "
+        << out_img.channels();
 
     for (int i = 0; i < param.saltpepper_param().value_size(); i++) {
       noise_values.push_back(uchar(param.saltpepper_param().value(i)));
     }
-    if (out_img.channels() > 1
-        && param.saltpepper_param().value_size() == 1) {
+    if (out_img.channels() > 1 && param.saltpepper_param().value_size() == 1) {
       // Replicate the pad_value for simplicity
       for (int c = 1; c < out_img.channels(); ++c) {
         noise_values.push_back(uchar(noise_values[0]));
@@ -531,9 +522,8 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
     }
   }
   if (param.saltpepper()) {
-    const int noise_pixels_num =
-        floor(param.saltpepper_param().fraction()
-                  * out_img.cols * out_img.rows);
+    const int noise_pixels_num = floor(param.saltpepper_param().fraction() *
+                                       out_img.cols * out_img.rows);
     constantNoise(noise_pixels_num, noise_values, &out_img);
   }
 
@@ -552,7 +542,8 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
 }
 
 void RandomBrightness(const cv::Mat &in_img, cv::Mat *out_img,
-                      const float brightness_prob, const float brightness_delta) {
+                      const float brightness_prob,
+                      const float brightness_delta) {
   float prob;
   caffe_rng_uniform(1, 0.f, 1.f, &prob);
   if (prob < brightness_prob) {
@@ -575,7 +566,8 @@ void AdjustBrightness(const cv::Mat &in_img, const float delta,
 }
 
 void RandomContrast(const cv::Mat &in_img, cv::Mat *out_img,
-                    const float contrast_prob, const float lower, const float upper) {
+                    const float contrast_prob, const float lower,
+                    const float upper) {
   float prob;
   caffe_rng_uniform(1, 0.f, 1.f, &prob);
   if (prob < contrast_prob) {
@@ -599,7 +591,8 @@ void AdjustContrast(const cv::Mat &in_img, const float delta,
 }
 
 void RandomSaturation(const cv::Mat &in_img, cv::Mat *out_img,
-                      const float saturation_prob, const float lower, const float upper) {
+                      const float saturation_prob, const float lower,
+                      const float upper) {
   float prob;
   caffe_rng_uniform(1, 0.f, 1.f, &prob);
   if (prob < saturation_prob) {
@@ -634,8 +627,8 @@ void AdjustSaturation(const cv::Mat &in_img, const float delta,
   }
 }
 
-void RandomHue(const cv::Mat &in_img, cv::Mat *out_img,
-               const float hue_prob, const float hue_delta) {
+void RandomHue(const cv::Mat &in_img, cv::Mat *out_img, const float hue_prob,
+               const float hue_delta) {
   float prob;
   caffe_rng_uniform(1, 0.f, 1.f, &prob);
   if (prob < hue_prob) {
@@ -731,6 +724,6 @@ cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param) {
 
   return out_img;
 }
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
 
-}  // namespace caffe
+} // namespace caffe

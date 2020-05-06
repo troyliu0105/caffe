@@ -27,7 +27,7 @@ double tanh_naive(double x) {
   }
 }
 
-template<typename TypeParam>
+template <typename TypeParam>
 class TanHLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -61,8 +61,8 @@ protected:
     const Dtype min_precision = 1e-5;
     for (int i = 0; i < this->blob_bottom_->count(); ++i) {
       Dtype expected_value = tanh_naive(bottom_data[i]);
-      Dtype precision = std::max(
-          Dtype(std::abs(expected_value * Dtype(1e-4))), min_precision);
+      Dtype precision = std::max(Dtype(std::abs(expected_value * Dtype(1e-4))),
+                                 min_precision);
       EXPECT_NEAR(expected_value, top_data[i], precision);
     }
   }
@@ -88,17 +88,13 @@ protected:
 
 TYPED_TEST_CASE(TanHLayerTest, TestDtypesAndDevices);
 
-TYPED_TEST(TanHLayerTest, TestTanH) {
-  this->TestForward(1.0);
-}
+TYPED_TEST(TanHLayerTest, TestTanH) { this->TestForward(1.0); }
 
 TYPED_TEST(TanHLayerTest, TestTanHOverflow) {
   // this will fail if tanh overflow is not properly handled
   this->TestForward(10000.0);
 }
 
-TYPED_TEST(TanHLayerTest, TestTanHGradient) {
-  this->TestBackward(1.0);
-}
+TYPED_TEST(TanHLayerTest, TestTanHGradient) { this->TestBackward(1.0); }
 
-}  // namespace caffe
+} // namespace caffe

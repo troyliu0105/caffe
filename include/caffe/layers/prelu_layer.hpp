@@ -19,8 +19,7 @@ namespace caffe {
  *        channels. The number of axes of input blob should be greater than or
  *        equal to 2. The 1st axis (0-based) is seen as channels.
  */
-template<typename Dtype>
-class PReLULayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class PReLULayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides PReLUParameter prelu_param,
@@ -33,13 +32,11 @@ public:
   explicit PReLULayer(const LayerParameter &param)
       : NeuronLayer<Dtype>(param) {}
 
-  virtual void LayerSetUp(const vector<Blob < Dtype> *
-  >& bottom,
-  const vector<Blob < Dtype>*>& top);
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
 
-  virtual void Reshape(const vector<Blob < Dtype> *
-  >& bottom,
-  const vector<Blob < Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
   virtual inline const char *type() const { return "PReLU"; }
 
@@ -54,12 +51,10 @@ protected:
    *        y_i = \max(0, x_i) + a_i \min(0, x_i)
    *      @f$.
    */
-  virtual void Forward_cpu(const vector<Blob < Dtype> *
-  >& bottom,
-  const vector<Blob < Dtype>*>& top);
-  virtual void Forward_gpu(const vector<Blob < Dtype> *
-  >& bottom,
-  const vector<Blob < Dtype>*>& top);
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
+  virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 
   /**
    * @brief Computes the error gradient w.r.t. the PReLU inputs.
@@ -76,34 +71,31 @@ protected:
    *      diff with gradients @f$
    *        \frac{\partial E}{\partial x_i} = \left\{
    *        \begin{array}{lr}
-   *            a_i \frac{\partial E}{\partial y_i} & \mathrm{if} \; x_i \le 0 \\
-   *            \frac{\partial E}{\partial y_i} & \mathrm{if} \; x_i > 0
-   *        \end{array} \right.
+   *            a_i \frac{\partial E}{\partial y_i} & \mathrm{if} \; x_i \le 0
+   * \\ \frac{\partial E}{\partial y_i} & \mathrm{if} \; x_i > 0 \end{array}
+   * \right.
    *      @f$.
    *      If param_propagate_down_[0] is true, it fills the diff with gradients
    *      @f$
    *        \frac{\partial E}{\partial a_i} = \left\{
    *        \begin{array}{lr}
-   *            \sum_{x_i} x_i \frac{\partial E}{\partial y_i} & \mathrm{if} \; x_i \le 0 \\
-   *            0 & \mathrm{if} \; x_i > 0
-   *        \end{array} \right.
+   *            \sum_{x_i} x_i \frac{\partial E}{\partial y_i} & \mathrm{if} \;
+   * x_i \le 0 \\ 0 & \mathrm{if} \; x_i > 0 \end{array} \right.
    *      @f$.
    */
-  virtual void Backward_cpu(const vector<Blob < Dtype> *
-  >& top,
-  const vector<bool> &propagate_down,
-  const vector<Blob < Dtype>*>& bottom);
-  virtual void Backward_gpu(const vector<Blob < Dtype> *
-  >& top,
-  const vector<bool> &propagate_down,
-  const vector<Blob < Dtype>*>& bottom);
+  virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   bool channel_shared_;
-  Blob <Dtype> multiplier_;  // dot multiplier for backward computation of params
-  Blob <Dtype> backward_buff_;  // temporary buffer for backward computation
-  Blob <Dtype> bottom_memory_;  // memory for in-place computation
+  Blob<Dtype> multiplier_; // dot multiplier for backward computation of params
+  Blob<Dtype> backward_buff_; // temporary buffer for backward computation
+  Blob<Dtype> bottom_memory_; // memory for in-place computation
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_PRELU_LAYER_HPP_
+#endif // CAFFE_PRELU_LAYER_HPP_

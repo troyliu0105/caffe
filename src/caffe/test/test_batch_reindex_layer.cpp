@@ -12,16 +12,14 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class BatchReindexLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   BatchReindexLayerTest()
       : blob_bottom_(new Blob<Dtype>()),
-        blob_bottom_permute_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()) {
-  }
+        blob_bottom_permute_(new Blob<Dtype>()), blob_top_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
     vector<int> sz;
@@ -92,19 +90,16 @@ protected:
     for (int i = 0; i < blob_top_->count(); ++i) {
       int n = i / (channels * width * height);
       int inner_idx = (i % (channels * width * height));
-      EXPECT_EQ(
-          blob_top_->cpu_data()[i],
-          blob_bottom_->cpu_data()[perm[n] * channels * width * height
-              + inner_idx]);
+      EXPECT_EQ(blob_top_->cpu_data()[i],
+                blob_bottom_->cpu_data()[perm[n] * channels * width * height +
+                                         inner_idx]);
     }
   }
 };
 
 TYPED_TEST_CASE(BatchReindexLayerTest, TestDtypesAndDevices);
 
-TYPED_TEST(BatchReindexLayerTest, TestForward) {
-  this->TestForward();
-}
+TYPED_TEST(BatchReindexLayerTest, TestForward) { this->TestForward(); }
 
 TYPED_TEST(BatchReindexLayerTest, TestGradient) {
   typedef typename TypeParam::Dtype Dtype;
@@ -115,4 +110,4 @@ TYPED_TEST(BatchReindexLayerTest, TestGradient) {
                                   this->blob_top_vec_, 0);
 }
 
-}  // namespace caffe
+} // namespace caffe

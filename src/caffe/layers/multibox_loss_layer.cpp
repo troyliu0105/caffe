@@ -8,7 +8,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                           const vector<Blob<Dtype> *> &top) {
   LossLayer<Dtype>::LayerSetUp(bottom, top);
@@ -43,16 +43,16 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 
   if (!this->layer_param_.loss_param().has_normalization() &&
       this->layer_param_.loss_param().has_normalize()) {
-    normalization_ = this->layer_param_.loss_param().normalize() ?
-                     LossParameter_NormalizationMode_VALID :
-                     LossParameter_NormalizationMode_BATCH_SIZE;
+    normalization_ = this->layer_param_.loss_param().normalize()
+                         ? LossParameter_NormalizationMode_VALID
+                         : LossParameter_NormalizationMode_BATCH_SIZE;
   } else {
     normalization_ = this->layer_param_.loss_param().normalization();
   }
 
   if (do_neg_mining_) {
     CHECK(share_location_)
-            << "Currently only support negative mining if share_location is true.";
+        << "Currently only support negative mining if share_location is true.";
   }
 
   vector<int> loss_shape(1, 1);
@@ -93,9 +93,9 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   conf_top_vec_.push_back(&conf_loss_);
   if (conf_loss_type_ == MultiBoxLossParameter_ConfLossType_SOFTMAX) {
     CHECK_GE(background_label_id_, 0)
-      << "background_label_id should be within [0, num_classes) for Softmax.";
+        << "background_label_id should be within [0, num_classes) for Softmax.";
     CHECK_LT(background_label_id_, num_classes_)
-      << "background_label_id should be within [0, num_classes) for Softmax.";
+        << "background_label_id should be within [0, num_classes) for Softmax.";
     LayerParameter layer_param;
     layer_param.set_name(this->layer_param_.name() + "_softmax_conf");
     layer_param.set_type("SoftmaxWithLoss");
@@ -128,7 +128,7 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void MultiBoxLossLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                        const vector<Blob<Dtype> *> &top) {
   LossLayer<Dtype>::Reshape(bottom, top);
@@ -137,12 +137,12 @@ void MultiBoxLossLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   num_gt_ = bottom[3]->height();
   CHECK_EQ(bottom[0]->num(), bottom[1]->num());
   CHECK_EQ(num_priors_ * loc_classes_ * 4, bottom[0]->channels())
-    << "Number of priors must match number of location predictions.";
+      << "Number of priors must match number of location predictions.";
   CHECK_EQ(num_priors_ * num_classes_, bottom[1]->channels())
-    << "Number of priors must match number of confidence predictions.";
+      << "Number of priors must match number of confidence predictions.";
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                            const vector<Blob<Dtype> *> &top) {
   const Dtype *loc_data = bottom[0]->cpu_data();
@@ -151,14 +151,14 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const Dtype *gt_data = bottom[3]->cpu_data();
 
   // Retrieve all ground truth.
-  map<int, vector<NormalizedBBox> > all_gt_bboxes;
+  map<int, vector<NormalizedBBox>> all_gt_bboxes;
   GetGroundTruth(gt_data, num_gt_, background_label_id_, use_difficult_gt_,
                  &all_gt_bboxes);
 
   // Retrieve all prior bboxes. It is same within a batch since we assume all
   // images in a batch are of same dimension.
   vector<NormalizedBBox> prior_bboxes;
-  vector<vector<float> > prior_variances;
+  vector<vector<float>> prior_variances;
   GetPriorBBoxes(prior_data, num_priors_, &prior_bboxes, &prior_variances);
 
   // Retrieve all predictions.
@@ -167,7 +167,7 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                     &all_loc_preds);
 
   // Find matches between source bboxes and ground truth bboxes.
-  vector<map<int, vector<float> > > all_match_overlaps;
+  vector<map<int, vector<float>>> all_match_overlaps;
   FindMatches(all_loc_preds, all_gt_bboxes, prior_bboxes, prior_variances,
               multibox_loss_param_, &all_match_overlaps, &all_match_indices_);
 
@@ -252,10 +252,10 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-void MultiBoxLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                            const vector<bool> &propagate_down,
-                                            const vector<Blob<Dtype> *> &bottom) {
+template <typename Dtype>
+void MultiBoxLossLayer<Dtype>::Backward_cpu(
+    const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
+    const vector<Blob<Dtype> *> &bottom) {
 
   if (propagate_down[2]) {
     LOG(FATAL) << this->type()
@@ -286,8 +286,7 @@ void MultiBoxLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
       const Dtype *loc_pred_diff = loc_pred_.cpu_diff();
       int count = 0;
       for (int i = 0; i < num_; ++i) {
-        for (map<int, vector<int> >::iterator it =
-            all_match_indices_[i].begin();
+        for (map<int, vector<int>>::iterator it = all_match_indices_[i].begin();
              it != all_match_indices_[i].end(); ++it) {
           const int label = share_location_ ? 0 : it->first;
           const vector<int> &match_index = it->second;
@@ -330,9 +329,9 @@ void MultiBoxLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
         int count = 0;
         for (int i = 0; i < num_; ++i) {
           // Copy matched (positive) bboxes scores' diff.
-          const map<int, vector<int> > &match_indices = all_match_indices_[i];
-          for (map<int, vector<int> >::const_iterator it =
-              match_indices.begin(); it != match_indices.end(); ++it) {
+          const map<int, vector<int>> &match_indices = all_match_indices_[i];
+          for (map<int, vector<int>>::const_iterator it = match_indices.begin();
+               it != match_indices.end(); ++it) {
             const vector<int> &match_index = it->second;
             CHECK_EQ(match_index.size(), num_priors_);
             for (int j = 0; j < num_priors_; ++j) {
@@ -372,4 +371,4 @@ void MultiBoxLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 INSTANTIATE_CLASS(MultiBoxLossLayer);
 REGISTER_LAYER_CLASS(MultiBoxLoss);
 
-}  // namespace caffe
+} // namespace caffe

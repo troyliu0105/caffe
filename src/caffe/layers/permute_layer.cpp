@@ -5,10 +5,10 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void Permute(const int count, Dtype *bottom_data, const bool forward,
-             const int *permute_order, const int *old_steps, const int *new_steps,
-             const int num_axes, Dtype *top_data) {
+             const int *permute_order, const int *old_steps,
+             const int *new_steps, const int num_axes, Dtype *top_data) {
   for (int i = 0; i < count; ++i) {
     int old_idx = 0;
     int idx = i;
@@ -25,7 +25,7 @@ void Permute(const int count, Dtype *bottom_data, const bool forward,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PermuteLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
   PermuteParameter permute_param = this->layer_param_.permute_param();
@@ -36,7 +36,7 @@ void PermuteLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   for (int i = 0; i < permute_param.order_size(); ++i) {
     int order = permute_param.order(i);
     CHECK_LT(order, num_axes_)
-      << "order should be less than the input dimension.";
+        << "order should be less than the input dimension.";
     if (std::find(orders.begin(), orders.end(), order) != orders.end()) {
       LOG(FATAL) << "there are duplicate orders";
     }
@@ -71,7 +71,7 @@ void PermuteLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   top[0]->Reshape(top_shape);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PermuteLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                   const vector<Blob<Dtype> *> &top) {
   vector<int> top_shape;
@@ -94,7 +94,7 @@ void PermuteLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PermuteLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   if (need_permute_) {
@@ -113,9 +113,10 @@ void PermuteLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PermuteLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                       const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                       const vector<bool> &propagate_down,
+                                       const vector<Blob<Dtype> *> &bottom) {
   if (need_permute_) {
     Dtype *top_diff = top[0]->mutable_cpu_diff();
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
@@ -139,4 +140,4 @@ STUB_GPU(PermuteLayer);
 INSTANTIATE_CLASS(PermuteLayer);
 REGISTER_LAYER_CLASS(Permute);
 
-}  // namespace caffe
+} // namespace caffe

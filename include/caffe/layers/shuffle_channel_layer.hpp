@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename Dtype> class ShuffleChannelLayer : public Layer<Dtype> {
+template <typename Dtype> class ShuffleChannelLayer : public Layer<Dtype> {
 public:
   explicit ShuffleChannelLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}

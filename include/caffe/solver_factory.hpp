@@ -47,11 +47,9 @@
 
 namespace caffe {
 
-template<typename Dtype>
-class Solver;
+template <typename Dtype> class Solver;
 
-template<typename Dtype>
-class SolverRegistry {
+template <typename Dtype> class SolverRegistry {
 public:
   typedef Solver<Dtype> *(*Creator)(const SolverParameter &);
   typedef std::map<string, Creator> CreatorRegistry;
@@ -64,18 +62,17 @@ public:
   // Get a solver using a SolverParameter.
   static Solver<Dtype> *CreateSolver(const SolverParameter &param);
 
-  static vector <string> SolverTypeList();
+  static vector<string> SolverTypeList();
 
 private:
   // Solver registry should never be instantiated - everything is done with its
   // static variables.
-  SolverRegistry();  // {}
+  SolverRegistry(); // {}
 
   static string SolverTypeListString();
 };
 
-template<typename Dtype>
-class SolverRegisterer {
+template <typename Dtype> class SolverRegisterer {
 public:
   SolverRegisterer(const string &type,
                    Solver<Dtype> *(*creator)(const SolverParameter &));
@@ -83,17 +80,15 @@ public:
 
 #define REGISTER_SOLVER_CREATOR(type, creator)                                 \
   static SolverRegisterer<float> g_creator_f_##type(#type, creator<float>);    \
-  static SolverRegisterer<double> g_creator_d_##type(#type, creator<double>)   \
+  static SolverRegisterer<double> g_creator_d_##type(#type, creator<double>)
 
 #define REGISTER_SOLVER_CLASS(type)                                            \
   template <typename Dtype>                                                    \
-  Solver<Dtype>* Creator_##type##Solver(                                       \
-      const SolverParameter& param)                                            \
-  {                                                                            \
+  Solver<Dtype> *Creator_##type##Solver(const SolverParameter &param) {        \
     return new type##Solver<Dtype>(param);                                     \
   }                                                                            \
   REGISTER_SOLVER_CREATOR(type, Creator_##type##Solver)
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SOLVER_FACTORY_H_
+#endif // CAFFE_SOLVER_FACTORY_H_

@@ -17,8 +17,7 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward and proto params.
  */
-template<typename Dtype>
-class BaseDataLayer : public Layer<Dtype> {
+template <typename Dtype> class BaseDataLayer : public Layer<Dtype> {
 public:
   explicit BaseDataLayer(const LayerParameter &param);
   // LayerSetUp: implements common data layer setup functionality, and calls
@@ -35,26 +34,27 @@ public:
                        const vector<Blob<Dtype> *> &top) {}
 
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {}
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {}
 
 protected:
   TransformationParameter transform_param_;
-  shared_ptr<DataTransformer<Dtype> > data_transformer_;
+  shared_ptr<DataTransformer<Dtype>> data_transformer_;
   bool output_labels_;
   bool output_seg_labels_;
 };
 
-template<typename Dtype>
-class Batch {
+template <typename Dtype> class Batch {
 public:
   Blob<Dtype> data_, label_, seg_label_;
 };
 
-template<typename Dtype>
-class BasePrefetchingDataLayer :
-    public BaseDataLayer<Dtype>, public InternalThread {
+template <typename Dtype>
+class BasePrefetchingDataLayer : public BaseDataLayer<Dtype>,
+                                 public InternalThread {
 public:
   explicit BasePrefetchingDataLayer(const LayerParameter &param);
   // LayerSetUp: implements common data layer setup functionality, and calls
@@ -72,7 +72,7 @@ protected:
   virtual void InternalThreadEntry();
   virtual void load_batch(Batch<Dtype> *batch) = 0;
 
-  vector<shared_ptr<Batch<Dtype> > > prefetch_;
+  vector<shared_ptr<Batch<Dtype>>> prefetch_;
   BlockingQueue<Batch<Dtype> *> prefetch_free_;
   BlockingQueue<Batch<Dtype> *> prefetch_full_;
   Batch<Dtype> *prefetch_current_;
@@ -81,6 +81,6 @@ protected:
   Blob<Dtype> transformed_label_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DATA_LAYERS_HPP_
+#endif // CAFFE_DATA_LAYERS_HPP_

@@ -1,19 +1,18 @@
 #ifndef CAFFE_YOLOV3_LAYER_HPP_
 #define CAFFE_YOLOV3_LAYER_HPP_
 
-#include <vector>
 #include "caffe/blob.hpp"
 #include "caffe/layer.hpp"
-#include "caffe/proto/caffe.pb.h"
-#include <string>
 #include "caffe/layers/loss_layer.hpp"
 #include "caffe/layers/region_loss_layer.hpp"
-#include <map>
+#include "caffe/proto/caffe.pb.h"
 #include "caffe/util/bbox_util.hpp"
+#include <map>
+#include <string>
+#include <vector>
 namespace caffe {
 
-template<typename Dtype>
-class Yolov3Layer : public LossLayer<Dtype> {
+template <typename Dtype> class Yolov3Layer : public LossLayer<Dtype> {
 public:
   explicit Yolov3Layer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}
@@ -43,9 +42,11 @@ protected:
                            const vector<Blob<Dtype> *> &top);
 
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   int iter_;
   int side_w_;
   int side_h_;
@@ -75,6 +76,6 @@ protected:
   bool accumulate_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_REGION_LOSS_LAYER_HPP_
+#endif // CAFFE_REGION_LOSS_LAYER_HPP_

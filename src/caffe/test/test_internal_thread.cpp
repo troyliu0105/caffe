@@ -20,15 +20,11 @@ TEST_F(InternalThreadTest, TestStartAndExit) {
 }
 
 class TestThreadA : public InternalThread {
-  void InternalThreadEntry() {
-    EXPECT_EQ(4244559767, caffe_rng_rand());
-  }
+  void InternalThreadEntry() { EXPECT_EQ(4244559767, caffe_rng_rand()); }
 };
 
 class TestThreadB : public InternalThread {
-  void InternalThreadEntry() {
-    EXPECT_EQ(1726478280, caffe_rng_rand());
-  }
+  void InternalThreadEntry() { EXPECT_EQ(1726478280, caffe_rng_rand()); }
 };
 
 TEST_F(InternalThreadTest, TestRandomSeed) {
@@ -48,5 +44,4 @@ TEST_F(InternalThreadTest, TestRandomSeed) {
   t3.StopInternalThread();
 }
 
-}  // namespace caffe
-
+} // namespace caffe

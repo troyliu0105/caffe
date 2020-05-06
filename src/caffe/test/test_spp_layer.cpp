@@ -16,16 +16,14 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class SPPLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   SPPLayerTest()
-      : blob_bottom_(new Blob<Dtype>()),
-        blob_bottom_2_(new Blob<Dtype>()),
-        blob_bottom_3_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()) {}
+      : blob_bottom_(new Blob<Dtype>()), blob_bottom_2_(new Blob<Dtype>()),
+        blob_bottom_3_(new Blob<Dtype>()), blob_top_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
     blob_bottom_->Reshape(2, 3, 9, 8);
@@ -116,8 +114,7 @@ TYPED_TEST(SPPLayerTest, TestForwardBackward) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   vector<bool> propagate_down(this->blob_bottom_vec_.size(), true);
-  layer.Backward(this->blob_top_vec_, propagate_down,
-                 this->blob_bottom_vec_);
+  layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
 }
 
 TYPED_TEST(SPPLayerTest, TestGradient) {
@@ -132,4 +129,4 @@ TYPED_TEST(SPPLayerTest, TestGradient) {
                                   this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

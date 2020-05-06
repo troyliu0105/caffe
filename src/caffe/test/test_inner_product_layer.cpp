@@ -16,9 +16,10 @@ namespace caffe {
 extern cudaDeviceProp CAFFE_TEST_CUDA_PROP;
 #endif
 
-template<typename TypeParam>
+template <typename TypeParam>
 class InnerProductLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
   InnerProductLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 4, 5)),
@@ -51,7 +52,7 @@ TYPED_TEST(InnerProductLayerTest, TestSetUp) {
   InnerProductParameter *inner_product_param =
       layer_param.mutable_inner_product_param();
   inner_product_param->set_num_output(10);
-  shared_ptr<InnerProductLayer<Dtype> > layer(
+  shared_ptr<InnerProductLayer<Dtype>> layer(
       new InnerProductLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_->num(), 2);
@@ -70,7 +71,7 @@ TYPED_TEST(InnerProductLayerTest, TestSetUpTransposeFalse) {
       layer_param.mutable_inner_product_param();
   inner_product_param->set_num_output(10);
   inner_product_param->set_transpose(false);
-  shared_ptr<InnerProductLayer<Dtype> > layer(
+  shared_ptr<InnerProductLayer<Dtype>> layer(
       new InnerProductLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(2, this->blob_top_->num());
@@ -92,7 +93,7 @@ TYPED_TEST(InnerProductLayerTest, TestSetUpTransposeTrue) {
       layer_param.mutable_inner_product_param();
   inner_product_param->set_num_output(10);
   inner_product_param->set_transpose(true);
-  shared_ptr<InnerProductLayer<Dtype> > layer(
+  shared_ptr<InnerProductLayer<Dtype>> layer(
       new InnerProductLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(2, this->blob_top_->num());
@@ -111,8 +112,7 @@ TYPED_TEST(InnerProductLayerTest, TestForward) {
 #ifndef CPU_ONLY
   IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
 #endif
-  if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+  if (Caffe::mode() == Caffe::CPU || sizeof(Dtype) == 4 || IS_VALID_CUDA) {
     LayerParameter layer_param;
     InnerProductParameter *inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -121,7 +121,7 @@ TYPED_TEST(InnerProductLayerTest, TestForward) {
     inner_product_param->mutable_bias_filler()->set_type("uniform");
     inner_product_param->mutable_bias_filler()->set_min(1);
     inner_product_param->mutable_bias_filler()->set_max(2);
-    shared_ptr<InnerProductLayer<Dtype> > layer(
+    shared_ptr<InnerProductLayer<Dtype>> layer(
         new InnerProductLayer<Dtype>(layer_param));
     layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -149,8 +149,7 @@ TYPED_TEST(InnerProductLayerTest, TestForwardTranspose) {
 #ifndef CPU_ONLY
   IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
 #endif
-  if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+  if (Caffe::mode() == Caffe::CPU || sizeof(Dtype) == 4 || IS_VALID_CUDA) {
     LayerParameter layer_param;
     InnerProductParameter *inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -160,7 +159,7 @@ TYPED_TEST(InnerProductLayerTest, TestForwardTranspose) {
     inner_product_param->mutable_bias_filler()->set_min(1);
     inner_product_param->mutable_bias_filler()->set_max(2);
     inner_product_param->set_transpose(false);
-    shared_ptr<InnerProductLayer<Dtype> > layer(
+    shared_ptr<InnerProductLayer<Dtype>> layer(
         new InnerProductLayer<Dtype>(layer_param));
     layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -171,7 +170,7 @@ TYPED_TEST(InnerProductLayerTest, TestForwardTranspose) {
     this->blob_top_vec_.clear();
     this->blob_top_vec_.push_back(new Blob<Dtype>());
     inner_product_param->set_transpose(true);
-    shared_ptr<InnerProductLayer<Dtype> > ip_t(
+    shared_ptr<InnerProductLayer<Dtype>> ip_t(
         new InnerProductLayer<Dtype>(layer_param));
     ip_t->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     const int count_w = layer->blobs()[0]->count();
@@ -184,7 +183,7 @@ TYPED_TEST(InnerProductLayerTest, TestForwardTranspose) {
     for (int i = 0; i < count_w; ++i) {
       int r = i / width;
       int c = i % width;
-      w_t[c * width_t + r] = w[r * width + c];  // copy while transposing
+      w_t[c * width_t + r] = w[r * width + c]; // copy while transposing
     }
     // copy bias from 1st IP layer to 2nd IP layer
     ASSERT_EQ(layer->blobs()[1]->count(), ip_t->blobs()[1]->count());
@@ -192,11 +191,10 @@ TYPED_TEST(InnerProductLayerTest, TestForwardTranspose) {
                ip_t->blobs()[1]->mutable_cpu_data());
     ip_t->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
     EXPECT_EQ(count, this->blob_top_->count())
-            << "Invalid count for top blob for IP with transpose.";
-    Blob<Dtype> *const top_t = new Blob<Dtype>();\
+        << "Invalid count for top blob for IP with transpose.";
+    Blob<Dtype> *const top_t = new Blob<Dtype>();
     top_t->ReshapeLike(*this->blob_top_vec_[0]);
-    caffe_copy(count,
-               this->blob_top_vec_[0]->cpu_data(),
+    caffe_copy(count, this->blob_top_vec_[0]->cpu_data(),
                top_t->mutable_cpu_data());
     const Dtype *data = top->cpu_data();
     const Dtype *data_t = top_t->cpu_data();
@@ -215,8 +213,7 @@ TYPED_TEST(InnerProductLayerTest, TestForwardNoBatch) {
 #ifndef CPU_ONLY
   IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
 #endif
-  if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+  if (Caffe::mode() == Caffe::CPU || sizeof(Dtype) == 4 || IS_VALID_CUDA) {
     LayerParameter layer_param;
     InnerProductParameter *inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -225,7 +222,7 @@ TYPED_TEST(InnerProductLayerTest, TestForwardNoBatch) {
     inner_product_param->mutable_bias_filler()->set_type("uniform");
     inner_product_param->mutable_bias_filler()->set_min(1);
     inner_product_param->mutable_bias_filler()->set_max(2);
-    shared_ptr<InnerProductLayer<Dtype> > layer(
+    shared_ptr<InnerProductLayer<Dtype>> layer(
         new InnerProductLayer<Dtype>(layer_param));
     layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -246,8 +243,7 @@ TYPED_TEST(InnerProductLayerTest, TestGradient) {
 #ifndef CPU_ONLY
   IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
 #endif
-  if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+  if (Caffe::mode() == Caffe::CPU || sizeof(Dtype) == 4 || IS_VALID_CUDA) {
     LayerParameter layer_param;
     InnerProductParameter *inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -272,8 +268,7 @@ TYPED_TEST(InnerProductLayerTest, TestGradientTranspose) {
 #ifndef CPU_ONLY
   IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
 #endif
-  if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+  if (Caffe::mode() == Caffe::CPU || sizeof(Dtype) == 4 || IS_VALID_CUDA) {
     LayerParameter layer_param;
     InnerProductParameter *inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -299,8 +294,7 @@ TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
 #ifndef CPU_ONLY
   IS_VALID_CUDA = CAFFE_TEST_CUDA_PROP.major >= 2;
 #endif
-  if (Caffe::mode() == Caffe::CPU ||
-      sizeof(Dtype) == 4 || IS_VALID_CUDA) {
+  if (Caffe::mode() == Caffe::CPU || sizeof(Dtype) == 4 || IS_VALID_CUDA) {
     LayerParameter layer_param;
     InnerProductParameter *inner_product_param =
         layer_param.mutable_inner_product_param();
@@ -310,7 +304,7 @@ TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
     inner_product_param->mutable_bias_filler()->set_min(1);
     inner_product_param->mutable_bias_filler()->set_max(2);
     inner_product_param->set_transpose(false);
-    shared_ptr<InnerProductLayer<Dtype> > layer(
+    shared_ptr<InnerProductLayer<Dtype>> layer(
         new InnerProductLayer<Dtype>(layer_param));
     layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -325,12 +319,10 @@ TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
       UniformFiller<Dtype> filler(filler_param);
       filler.Fill(diff);
     }
-    caffe_copy(this->blob_top_vec_[0]->count(),
-               diff->cpu_data(),
+    caffe_copy(this->blob_top_vec_[0]->count(), diff->cpu_data(),
                this->blob_top_vec_[0]->mutable_cpu_diff());
     vector<bool> propagate_down(1, true);
-    layer->Backward(this->blob_top_vec_,
-                    propagate_down,
+    layer->Backward(this->blob_top_vec_, propagate_down,
                     this->blob_bottom_vec_);
     // copy first ip's weights and their diffs
     Blob<Dtype> *const w = new Blob<Dtype>();
@@ -343,7 +335,7 @@ TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
     this->blob_top_vec_.clear();
     this->blob_top_vec_.push_back(new Blob<Dtype>());
     inner_product_param->set_transpose(true);
-    shared_ptr<InnerProductLayer<Dtype> > ip_t(
+    shared_ptr<InnerProductLayer<Dtype>> ip_t(
         new InnerProductLayer<Dtype>(layer_param));
     ip_t->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     // manually copy and transpose the weights from 1st IP layer into 2nd
@@ -355,7 +347,7 @@ TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
       for (int i = 0; i < layer->blobs()[0]->count(); ++i) {
         int r = i / width;
         int c = i % width;
-        w_t[c * width_t + r] = w_src[r * width + c];  // copy while transposing
+        w_t[c * width_t + r] = w_src[r * width + c]; // copy while transposing
       }
       // copy bias from 1st IP layer to 2nd IP layer
       ASSERT_EQ(layer->blobs()[1]->count(), ip_t->blobs()[1]->count());
@@ -363,8 +355,7 @@ TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
                  ip_t->blobs()[1]->mutable_cpu_data());
     }
     ip_t->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-    caffe_copy(this->blob_top_vec_[0]->count(),
-               diff->cpu_data(),
+    caffe_copy(this->blob_top_vec_[0]->count(), diff->cpu_data(),
                this->blob_top_vec_[0]->mutable_cpu_diff());
     ip_t->Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
     const Dtype *data = w->cpu_diff();
@@ -388,4 +379,4 @@ TYPED_TEST(InnerProductLayerTest, TestBackwardTranspose) {
   }
 }
 
-}  // namespace caffe
+} // namespace caffe

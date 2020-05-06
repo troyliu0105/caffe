@@ -7,7 +7,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void CuDNNSoftmaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                           const vector<Blob<Dtype> *> &top) {
   SoftmaxLayer<Dtype>::LayerSetUp(bottom, top);
@@ -18,7 +18,7 @@ void CuDNNSoftmaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   handles_setup_ = true;
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void CuDNNSoftmaxLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                        const vector<Blob<Dtype> *> &top) {
   SoftmaxLayer<Dtype>::Reshape(bottom, top);
@@ -30,10 +30,11 @@ void CuDNNSoftmaxLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   cudnn::setTensor4dDesc<Dtype>(&top_desc_, N, K, H, W);
 }
 
-template<typename Dtype>
-CuDNNSoftmaxLayer<Dtype>::~CuDNNSoftmaxLayer() {
+template <typename Dtype> CuDNNSoftmaxLayer<Dtype>::~CuDNNSoftmaxLayer() {
   // Check that handles have been setup before destroying.
-  if (!handles_setup_) { return; }
+  if (!handles_setup_) {
+    return;
+  }
 
   cudnnDestroyTensorDescriptor(bottom_desc_);
   cudnnDestroyTensorDescriptor(top_desc_);
@@ -42,5 +43,5 @@ CuDNNSoftmaxLayer<Dtype>::~CuDNNSoftmaxLayer() {
 
 INSTANTIATE_CLASS(CuDNNSoftmaxLayer);
 
-}  // namespace caffe
+} // namespace caffe
 #endif

@@ -14,7 +14,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
   float l1 = x1 - w1 / 2;
   float l2 = x2 - w2 / 2;
@@ -24,27 +24,25 @@ Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
   float right = r1 < r2 ? r1 : r2;
   return right - left;
 }
-template<typename Dtype>
+template <typename Dtype>
 Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float w = overlap(a[0], a[2], b[0], b[2]);
   float h = overlap(a[1], a[3], b[1], b[3]);
-  if (w < 0 || h < 0) return 0;
+  if (w < 0 || h < 0)
+    return 0;
   float area = w * h;
   return area;
 }
-template<typename Dtype>
-Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype> Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-template<typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype> Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
 }
 
-template<typename Dtype>
-boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype> boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = {0};
   ba.top = fmin(a[1] - a[3] / 2, b[1] - b[3] / 2);
   ba.bot = fmax(a[1] + a[3] / 2, b[1] + b[3] / 2);
@@ -54,8 +52,7 @@ boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
 }
 
 // representation from x, y, w, h to top, left, bottom, right
-template<typename Dtype>
-boxabs to_tblr(vector<Dtype> a) {
+template <typename Dtype> boxabs to_tblr(vector<Dtype> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
@@ -67,8 +64,7 @@ boxabs to_tblr(vector<Dtype> a) {
   tblr.right = r;
   return tblr;
 }
-template<>
-boxabs to_tblr(vector<float> a) {
+template <> boxabs to_tblr(vector<float> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
@@ -80,8 +76,7 @@ boxabs to_tblr(vector<float> a) {
   tblr.right = r;
   return tblr;
 }
-template<>
-boxabs to_tblr(vector<double> a) {
+template <> boxabs to_tblr(vector<double> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
@@ -93,8 +88,7 @@ boxabs to_tblr(vector<double> a) {
   tblr.right = r;
   return tblr;
 }
-template<typename Dtype>
-Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype> Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -109,8 +103,7 @@ Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
   return iou - giou_term;
 }
 
-template<>
-float box_giou(vector<float> a, vector<float> b) {
+template <> float box_giou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -124,8 +117,7 @@ float box_giou(vector<float> a, vector<float> b) {
 
   return iou - giou_term;
 }
-template<>
-double box_giou(vector<double> a, vector<double> b) {
+template <> double box_giou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
   double h = ba.bot - ba.top;
@@ -141,8 +133,7 @@ double box_giou(vector<double> a, vector<double> b) {
 }
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
-template<typename Dtype>
-Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype> Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
   Dtype h = ba.bot - ba.top;
@@ -157,8 +148,7 @@ Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
 
   return iou - diou_term;
 }
-template<>
-float box_diou(vector<float> a, vector<float> b) {
+template <> float box_diou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -173,8 +163,7 @@ float box_diou(vector<float> a, vector<float> b) {
 
   return iou - diou_term;
 }
-template<>
-double box_diou(vector<double> a, vector<double> b) {
+template <> double box_diou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
   double h = ba.bot - ba.top;
@@ -208,8 +197,7 @@ float box_diounms(vector<float> a, vector<float> b, float beta1) {
 }
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
-template<typename Dtype>
-Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype> Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
   Dtype h = ba.bot - ba.top;
@@ -222,13 +210,13 @@ Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   Dtype d = u / c;
   Dtype ar_gt = b[2] / b[3];
   Dtype ar_pred = a[2] / a[3];
-  Dtype ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * (atan(ar_gt) - atan(ar_pred));
+  Dtype ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
+                  (atan(ar_gt) - atan(ar_pred));
   Dtype alpha = ar_loss / (1 - iou + ar_loss + 0.000001);
-  Dtype ciou_term = d + alpha * ar_loss;                   //ciou
+  Dtype ciou_term = d + alpha * ar_loss; // ciou
   return iou - ciou_term;
 }
-template<>
-float box_ciou(vector<float> a, vector<float> b) {
+template <> float box_ciou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -241,14 +229,13 @@ float box_ciou(vector<float> a, vector<float> b) {
   float d = u / c;
   float ar_gt = b[2] / b[3];
   float ar_pred = a[2] / a[3];
-  float ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * (atan(ar_gt) - atan(ar_pred));
+  float ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
+                  (atan(ar_gt) - atan(ar_pred));
   float alpha = ar_loss / (1 - iou + ar_loss + 0.000001);
-  float ciou_term = d + alpha * ar_loss;                   //ciou
+  float ciou_term = d + alpha * ar_loss; // ciou
   return iou - ciou_term;
-
 }
-template<>
-double box_ciou(vector<double> a, vector<double> b) {
+template <> double box_ciou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
   double h = ba.bot - ba.top;
@@ -261,13 +248,13 @@ double box_ciou(vector<double> a, vector<double> b) {
   double d = u / c;
   double ar_gt = b[2] / b[3];
   double ar_pred = a[2] / a[3];
-  double ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * (atan(ar_gt) - atan(ar_pred));
+  double ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
+                   (atan(ar_gt) - atan(ar_pred));
   double alpha = ar_loss / (1 - iou + ar_loss + 0.000001);
-  double ciou_term = d + alpha * ar_loss;                   //ciou
+  double ciou_term = d + alpha * ar_loss; // ciou
   return iou - ciou_term;
-
 }
-template<typename Dtype>
+template <typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
   Dtype iou;
   if (type == GIOU) {
@@ -281,8 +268,7 @@ Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
   }
   return iou;
 }
-template<>
-float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
+template <> float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
   float iou;
   if (type == GIOU) {
     iou = box_giou(a, b);
@@ -295,8 +281,7 @@ float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
   }
   return iou;
 }
-template<>
-double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
+template <> double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
   double iou;
   if (type == GIOU) {
     iou = box_giou(a, b);
@@ -309,19 +294,10 @@ double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
   }
   return iou;
 }
-template<typename Dtype>
-void get_gaussian_yolo_box(vector<Dtype> &b,
-                           Dtype *x,
-                           vector<Dtype> biases,
-                           int n,
-                           int index,
-                           int i,
-                           int j,
-                           int lw,
-                           int lh,
-                           int w,
-                           int h,
-                           int stride) {
+template <typename Dtype>
+void get_gaussian_yolo_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases,
+                           int n, int index, int i, int j, int lw, int lh,
+                           int w, int h, int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -329,18 +305,10 @@ void get_gaussian_yolo_box(vector<Dtype> &b,
   b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
 }
-template<>
-void get_gaussian_yolo_box<float>(vector<float> &b,
-                                  float *x,
-                                  vector<float> biases,
-                                  int n,
-                                  int index,
-                                  int i,
-                                  int j,
-                                  int lw,
-                                  int lh,
-                                  int w,
-                                  int h,
+template <>
+void get_gaussian_yolo_box<float>(vector<float> &b, float *x,
+                                  vector<float> biases, int n, int index, int i,
+                                  int j, int lw, int lh, int w, int h,
                                   int stride) {
 
   b.clear();
@@ -349,18 +317,10 @@ void get_gaussian_yolo_box<float>(vector<float> &b,
   b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
 }
-template<>
-void get_gaussian_yolo_box<double>(vector<double> &b,
-                                   double *x,
-                                   vector<double> biases,
-                                   int n,
-                                   int index,
-                                   int i,
-                                   int j,
-                                   int lw,
-                                   int lh,
-                                   int w,
-                                   int h,
+template <>
+void get_gaussian_yolo_box<double>(vector<double> &b, double *x,
+                                   vector<double> biases, int n, int index,
+                                   int i, int j, int lw, int lh, int w, int h,
                                    int stride) {
 
   b.clear();
@@ -370,37 +330,18 @@ void get_gaussian_yolo_box<double>(vector<double> &b,
   b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
 }
 
-template<typename Dtype>
-void get_region_box(box &b,
-                    Dtype *x,
-                    vector<Dtype> biases,
-                    int n,
-                    int index,
-                    int i,
-                    int j,
-                    int lw,
-                    int lh,
-                    int w,
-                    int h,
-                    int stride) {
+template <typename Dtype>
+void get_region_box(box &b, Dtype *x, vector<Dtype> biases, int n, int index,
+                    int i, int j, int lw, int lh, int w, int h, int stride) {
   b.x = ((i + (x[index + 0 * stride])) / lw);
   b.y = ((j + (x[index + 1 * stride])) / lh);
   b.w = (exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.h = (exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
 
-template<typename Dtype>
-void get_region_box(vector<Dtype> &b,
-                    Dtype *x,
-                    vector<Dtype> biases,
-                    int n,
-                    int index,
-                    int i,
-                    int j,
-                    int lw,
-                    int lh,
-                    int w,
-                    int h,
+template <typename Dtype>
+void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n,
+                    int index, int i, int j, int lw, int lh, int w, int h,
                     int stride) {
 
   b.clear();
@@ -409,19 +350,10 @@ void get_region_box(vector<Dtype> &b,
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
-template<>
-void get_region_box<float>(vector<float> &b,
-                           float *x,
-                           vector<float> biases,
-                           int n,
-                           int index,
-                           int i,
-                           int j,
-                           int lw,
-                           int lh,
-                           int w,
-                           int h,
-                           int stride) {
+template <>
+void get_region_box<float>(vector<float> &b, float *x, vector<float> biases,
+                           int n, int index, int i, int j, int lw, int lh,
+                           int w, int h, int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -429,19 +361,10 @@ void get_region_box<float>(vector<float> &b,
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
-template<>
-void get_region_box<double>(vector<double> &b,
-                            double *x,
-                            vector<double> biases,
-                            int n,
-                            int index,
-                            int i,
-                            int j,
-                            int lw,
-                            int lh,
-                            int w,
-                            int h,
-                            int stride) {
+template <>
+void get_region_box<double>(vector<double> &b, double *x, vector<double> biases,
+                            int n, int index, int i, int j, int lw, int lh,
+                            int w, int h, int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -457,7 +380,7 @@ bool SortBBoxDescend(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2) {
   return bbox1.score() > bbox2.score();
 }
 
-template<typename T>
+template <typename T>
 bool SortScorePairAscend(const pair<float, T> &pair1,
                          const pair<float, T> &pair2) {
   return pair1.first < pair2.first;
@@ -466,10 +389,10 @@ bool SortScorePairAscend(const pair<float, T> &pair1,
 // Explicit initialization.
 template bool SortScorePairAscend(const pair<float, int> &pair1,
                                   const pair<float, int> &pair2);
-template bool SortScorePairAscend(const pair<float, pair<int, int> > &pair1,
-                                  const pair<float, pair<int, int> > &pair2);
+template bool SortScorePairAscend(const pair<float, pair<int, int>> &pair1,
+                                  const pair<float, pair<int, int>> &pair2);
 
-template<typename T>
+template <typename T>
 bool SortScorePairDescend(const pair<float, T> &pair1,
                           const pair<float, T> &pair2) {
   return pair1.first > pair2.first;
@@ -478,8 +401,8 @@ bool SortScorePairDescend(const pair<float, T> &pair1,
 // Explicit initialization.
 template bool SortScorePairDescend(const pair<float, int> &pair1,
                                    const pair<float, int> &pair2);
-template bool SortScorePairDescend(const pair<float, pair<int, int> > &pair1,
-                                   const pair<float, pair<int, int> > &pair2);
+template bool SortScorePairDescend(const pair<float, pair<int, int>> &pair1,
+                                   const pair<float, pair<int, int>> &pair2);
 
 NormalizedBBox UnitBBox() {
   NormalizedBBox unit_bbox;
@@ -491,10 +414,9 @@ NormalizedBBox UnitBBox() {
 }
 
 bool IsCrossBoundaryBBox(const NormalizedBBox &bbox) {
-  return bbox.xmin() < 0 || bbox.xmin() > 1 ||
-      bbox.ymin() < 0 || bbox.ymin() > 1 ||
-      bbox.xmax() < 0 || bbox.xmax() > 1 ||
-      bbox.ymax() < 0 || bbox.ymax() > 1;
+  return bbox.xmin() < 0 || bbox.xmin() > 1 || bbox.ymin() < 0 ||
+         bbox.ymin() > 1 || bbox.xmax() < 0 || bbox.xmax() > 1 ||
+         bbox.ymax() < 0 || bbox.ymax() > 1;
 }
 
 void IntersectBBox(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2,
@@ -534,7 +456,7 @@ float BBoxSize(const NormalizedBBox &bbox, const bool normalized) {
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 Dtype BBoxSize(const Dtype *bbox, const bool normalized) {
   if (bbox[2] < bbox[0] || bbox[3] < bbox[1]) {
     // If bbox is invalid (e.g. xmax < xmin or ymax < ymin), return 0.
@@ -681,7 +603,8 @@ bool ProjectBBox(const NormalizedBBox &src_bbox, const NormalizedBBox &bbox,
 }
 
 void ExtrapolateBBox(const ResizeParameter &param, const int height,
-                     const int width, const NormalizedBBox &crop_bbox, NormalizedBBox *bbox) {
+                     const int width, const NormalizedBBox &crop_bbox,
+                     NormalizedBBox *bbox) {
   float height_scale = param.height_scale();
   float width_scale = param.width_scale();
   if (height_scale > 0 && width_scale > 0 &&
@@ -728,10 +651,10 @@ float JaccardOverlap(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 Dtype JaccardOverlap(const Dtype *bbox1, const Dtype *bbox2) {
-  if (bbox2[0] > bbox1[2] || bbox2[2] < bbox1[0] ||
-      bbox2[1] > bbox1[3] || bbox2[3] < bbox1[1]) {
+  if (bbox2[0] > bbox1[2] || bbox2[2] < bbox1[0] || bbox2[1] > bbox1[3] ||
+      bbox2[3] < bbox1[1]) {
     return Dtype(0.);
   } else {
     const Dtype inter_xmin = std::max(bbox1[0], bbox2[0]);
@@ -787,10 +710,10 @@ bool MeetEmitConstraint(const NormalizedBBox &src_bbox,
   }
 }
 
-void EncodeBBox(
-    const NormalizedBBox &prior_bbox, const vector<float> &prior_variance,
-    const CodeType code_type, const bool encode_variance_in_target,
-    const NormalizedBBox &bbox, NormalizedBBox *encode_bbox) {
+void EncodeBBox(const NormalizedBBox &prior_bbox,
+                const vector<float> &prior_variance, const CodeType code_type,
+                const bool encode_variance_in_target,
+                const NormalizedBBox &bbox, NormalizedBBox *encode_bbox) {
   if (code_type == PriorBoxParameter_CodeType_CORNER) {
     if (encode_variance_in_target) {
       encode_bbox->set_xmin(bbox.xmin() - prior_bbox.xmin());
@@ -803,14 +726,14 @@ void EncodeBBox(
       for (int i = 0; i < prior_variance.size(); ++i) {
         CHECK_GT(prior_variance[i], 0);
       }
-      encode_bbox->set_xmin(
-          (bbox.xmin() - prior_bbox.xmin()) / prior_variance[0]);
-      encode_bbox->set_ymin(
-          (bbox.ymin() - prior_bbox.ymin()) / prior_variance[1]);
-      encode_bbox->set_xmax(
-          (bbox.xmax() - prior_bbox.xmax()) / prior_variance[2]);
-      encode_bbox->set_ymax(
-          (bbox.ymax() - prior_bbox.ymax()) / prior_variance[3]);
+      encode_bbox->set_xmin((bbox.xmin() - prior_bbox.xmin()) /
+                            prior_variance[0]);
+      encode_bbox->set_ymin((bbox.ymin() - prior_bbox.ymin()) /
+                            prior_variance[1]);
+      encode_bbox->set_xmax((bbox.xmax() - prior_bbox.xmax()) /
+                            prior_variance[2]);
+      encode_bbox->set_ymax((bbox.ymax() - prior_bbox.ymax()) /
+                            prior_variance[3]);
     }
   } else if (code_type == PriorBoxParameter_CodeType_CENTER_SIZE) {
     float prior_width = prior_bbox.xmax() - prior_bbox.xmin();
@@ -834,14 +757,13 @@ void EncodeBBox(
       encode_bbox->set_ymax(log(bbox_height / prior_height));
     } else {
       // Encode variance in bbox.
-      encode_bbox->set_xmin(
-          (bbox_center_x - prior_center_x) / prior_width / prior_variance[0]);
-      encode_bbox->set_ymin(
-          (bbox_center_y - prior_center_y) / prior_height / prior_variance[1]);
-      encode_bbox->set_xmax(
-          log(bbox_width / prior_width) / prior_variance[2]);
-      encode_bbox->set_ymax(
-          log(bbox_height / prior_height) / prior_variance[3]);
+      encode_bbox->set_xmin((bbox_center_x - prior_center_x) / prior_width /
+                            prior_variance[0]);
+      encode_bbox->set_ymin((bbox_center_y - prior_center_y) / prior_height /
+                            prior_variance[1]);
+      encode_bbox->set_xmax(log(bbox_width / prior_width) / prior_variance[2]);
+      encode_bbox->set_ymax(log(bbox_height / prior_height) /
+                            prior_variance[3]);
     }
   } else if (code_type == PriorBoxParameter_CodeType_CORNER_SIZE) {
     float prior_width = prior_bbox.xmax() - prior_bbox.xmin();
@@ -859,25 +781,24 @@ void EncodeBBox(
       for (int i = 0; i < prior_variance.size(); ++i) {
         CHECK_GT(prior_variance[i], 0);
       }
-      encode_bbox->set_xmin(
-          (bbox.xmin() - prior_bbox.xmin()) / prior_width / prior_variance[0]);
-      encode_bbox->set_ymin(
-          (bbox.ymin() - prior_bbox.ymin()) / prior_height / prior_variance[1]);
-      encode_bbox->set_xmax(
-          (bbox.xmax() - prior_bbox.xmax()) / prior_width / prior_variance[2]);
-      encode_bbox->set_ymax(
-          (bbox.ymax() - prior_bbox.ymax()) / prior_height / prior_variance[3]);
+      encode_bbox->set_xmin((bbox.xmin() - prior_bbox.xmin()) / prior_width /
+                            prior_variance[0]);
+      encode_bbox->set_ymin((bbox.ymin() - prior_bbox.ymin()) / prior_height /
+                            prior_variance[1]);
+      encode_bbox->set_xmax((bbox.xmax() - prior_bbox.xmax()) / prior_width /
+                            prior_variance[2]);
+      encode_bbox->set_ymax((bbox.ymax() - prior_bbox.ymax()) / prior_height /
+                            prior_variance[3]);
     }
   } else {
     LOG(FATAL) << "Unknown LocLossType.";
   }
 }
 
-void DecodeBBox(
-    const NormalizedBBox &prior_bbox, const vector<float> &prior_variance,
-    const CodeType code_type, const bool variance_encoded_in_target,
-    const bool clip_bbox, const NormalizedBBox &bbox,
-    NormalizedBBox *decode_bbox) {
+void DecodeBBox(const NormalizedBBox &prior_bbox,
+                const vector<float> &prior_variance, const CodeType code_type,
+                const bool variance_encoded_in_target, const bool clip_bbox,
+                const NormalizedBBox &bbox, NormalizedBBox *decode_bbox) {
   if (code_type == PriorBoxParameter_CodeType_CORNER) {
     if (variance_encoded_in_target) {
       // variance is encoded in target, we simply need to add the offset
@@ -888,14 +809,14 @@ void DecodeBBox(
       decode_bbox->set_ymax(prior_bbox.ymax() + bbox.ymax());
     } else {
       // variance is encoded in bbox, we need to scale the offset accordingly.
-      decode_bbox->set_xmin(
-          prior_bbox.xmin() + prior_variance[0] * bbox.xmin());
-      decode_bbox->set_ymin(
-          prior_bbox.ymin() + prior_variance[1] * bbox.ymin());
-      decode_bbox->set_xmax(
-          prior_bbox.xmax() + prior_variance[2] * bbox.xmax());
-      decode_bbox->set_ymax(
-          prior_bbox.ymax() + prior_variance[3] * bbox.ymax());
+      decode_bbox->set_xmin(prior_bbox.xmin() +
+                            prior_variance[0] * bbox.xmin());
+      decode_bbox->set_ymin(prior_bbox.ymin() +
+                            prior_variance[1] * bbox.ymin());
+      decode_bbox->set_xmax(prior_bbox.xmax() +
+                            prior_variance[2] * bbox.xmax());
+      decode_bbox->set_ymax(prior_bbox.ymax() +
+                            prior_variance[3] * bbox.ymax());
     }
   } else if (code_type == PriorBoxParameter_CodeType_CENTER_SIZE) {
     float prior_width = prior_bbox.xmax() - prior_bbox.xmin();
@@ -920,10 +841,8 @@ void DecodeBBox(
           prior_variance[0] * bbox.xmin() * prior_width + prior_center_x;
       decode_bbox_center_y =
           prior_variance[1] * bbox.ymin() * prior_height + prior_center_y;
-      decode_bbox_width =
-          exp(prior_variance[2] * bbox.xmax()) * prior_width;
-      decode_bbox_height =
-          exp(prior_variance[3] * bbox.ymax()) * prior_height;
+      decode_bbox_width = exp(prior_variance[2] * bbox.xmax()) * prior_width;
+      decode_bbox_height = exp(prior_variance[3] * bbox.ymax()) * prior_height;
     }
 
     decode_bbox->set_xmin(decode_bbox_center_x - decode_bbox_width / 2.);
@@ -944,14 +863,14 @@ void DecodeBBox(
       decode_bbox->set_ymax(prior_bbox.ymax() + bbox.ymax() * prior_height);
     } else {
       // variance is encoded in bbox, we need to scale the offset accordingly.
-      decode_bbox->set_xmin(
-          prior_bbox.xmin() + prior_variance[0] * bbox.xmin() * prior_width);
-      decode_bbox->set_ymin(
-          prior_bbox.ymin() + prior_variance[1] * bbox.ymin() * prior_height);
-      decode_bbox->set_xmax(
-          prior_bbox.xmax() + prior_variance[2] * bbox.xmax() * prior_width);
-      decode_bbox->set_ymax(
-          prior_bbox.ymax() + prior_variance[3] * bbox.ymax() * prior_height);
+      decode_bbox->set_xmin(prior_bbox.xmin() +
+                            prior_variance[0] * bbox.xmin() * prior_width);
+      decode_bbox->set_ymin(prior_bbox.ymin() +
+                            prior_variance[1] * bbox.ymin() * prior_height);
+      decode_bbox->set_xmax(prior_bbox.xmax() +
+                            prior_variance[2] * bbox.xmax() * prior_width);
+      decode_bbox->set_ymax(prior_bbox.ymax() +
+                            prior_variance[3] * bbox.ymax() * prior_height);
     }
   } else {
     LOG(FATAL) << "Unknown LocLossType.";
@@ -963,12 +882,12 @@ void DecodeBBox(
   }
 }
 
-void DecodeBBoxes(
-    const vector<NormalizedBBox> &prior_bboxes,
-    const vector<vector<float> > &prior_variances,
-    const CodeType code_type, const bool variance_encoded_in_target,
-    const bool clip_bbox, const vector<NormalizedBBox> &bboxes,
-    vector<NormalizedBBox> *decode_bboxes) {
+void DecodeBBoxes(const vector<NormalizedBBox> &prior_bboxes,
+                  const vector<vector<float>> &prior_variances,
+                  const CodeType code_type,
+                  const bool variance_encoded_in_target, const bool clip_bbox,
+                  const vector<NormalizedBBox> &bboxes,
+                  vector<NormalizedBBox> *decode_bboxes) {
   CHECK_EQ(prior_bboxes.size(), prior_variances.size());
   CHECK_EQ(prior_bboxes.size(), bboxes.size());
   int num_bboxes = prior_bboxes.size();
@@ -986,11 +905,12 @@ void DecodeBBoxes(
 
 void DecodeBBoxesAll(const vector<LabelBBox> &all_loc_preds,
                      const vector<NormalizedBBox> &prior_bboxes,
-                     const vector<vector<float> > &prior_variances,
+                     const vector<vector<float>> &prior_variances,
                      const int num, const bool share_location,
                      const int num_loc_classes, const int background_label_id,
-                     const CodeType code_type, const bool variance_encoded_in_target,
-                     const bool clip, vector<LabelBBox> *all_decode_bboxes) {
+                     const CodeType code_type,
+                     const bool variance_encoded_in_target, const bool clip,
+                     vector<LabelBBox> *all_decode_bboxes) {
   CHECK_EQ(all_loc_preds.size(), num);
   all_decode_bboxes->clear();
   all_decode_bboxes->resize(num);
@@ -1009,9 +929,9 @@ void DecodeBBoxesAll(const vector<LabelBBox> &all_loc_preds,
       }
       const vector<NormalizedBBox> &label_loc_preds =
           all_loc_preds[i].find(label)->second;
-      DecodeBBoxes(prior_bboxes, prior_variances,
-                   code_type, variance_encoded_in_target, clip,
-                   label_loc_preds, &(decode_bboxes[label]));
+      DecodeBBoxes(prior_bboxes, prior_variances, code_type,
+                   variance_encoded_in_target, clip, label_loc_preds,
+                   &(decode_bboxes[label]));
     }
   }
 }
@@ -1049,7 +969,7 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
   }
 
   // Store the positive overlap between predictions and ground truth.
-  map<int, map<int, float> > overlaps;
+  map<int, map<int, float>> overlaps;
   for (int i = 0; i < num_pred; ++i) {
     if (ignore_cross_boundary_bbox && IsCrossBoundaryBBox(pred_bboxes[i])) {
       (*match_indices)[i] = -2;
@@ -1074,7 +994,7 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
     int max_idx = -1;
     int max_gt_idx = -1;
     float max_overlap = -1;
-    for (map<int, map<int, float> >::iterator it = overlaps.begin();
+    for (map<int, map<int, float>>::iterator it = overlaps.begin();
          it != overlaps.end(); ++it) {
       int i = it->first;
       if ((*match_indices)[i] != -1) {
@@ -1115,7 +1035,7 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
     break;
   case MultiBoxLossParameter_MatchType_PER_PREDICTION:
     // Get most overlaped for the rest prediction bboxes.
-    for (map<int, map<int, float> >::iterator it = overlaps.begin();
+    for (map<int, map<int, float>>::iterator it = overlaps.begin();
          it != overlaps.end(); ++it) {
       int i = it->first;
       if ((*match_indices)[i] != -1) {
@@ -1155,12 +1075,12 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
 }
 
 void FindMatches(const vector<LabelBBox> &all_loc_preds,
-                 const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
+                 const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
                  const vector<NormalizedBBox> &prior_bboxes,
-                 const vector<vector<float> > &prior_variances,
+                 const vector<vector<float>> &prior_variances,
                  const MultiBoxLossParameter &multibox_loss_param,
-                 vector<map<int, vector<float> > > *all_match_overlaps,
-                 vector<map<int, vector<int> > > *all_match_indices) {
+                 vector<map<int, vector<float>>> *all_match_overlaps,
+                 vector<map<int, vector<int>>> *all_match_indices) {
   // all_match_overlaps->clear();
   // all_match_indices->clear();
   // Get parameters.
@@ -1182,8 +1102,8 @@ void FindMatches(const vector<LabelBBox> &all_loc_preds,
   // Find the matches.
   int num = all_loc_preds.size();
   for (int i = 0; i < num; ++i) {
-    map<int, vector<int> > match_indices;
-    map<int, vector<float> > match_overlaps;
+    map<int, vector<int>> match_indices;
+    map<int, vector<float>> match_overlaps;
     // Check if there is ground truth for current image.
     if (all_gt_bboxes.find(i) == all_gt_bboxes.end()) {
       // There is no gt for current image. All predictions are negative.
@@ -1203,12 +1123,12 @@ void FindMatches(const vector<LabelBBox> &all_loc_preds,
         // Decode the prediction into bbox first.
         vector<NormalizedBBox> loc_bboxes;
         bool clip_bbox = false;
-        DecodeBBoxes(prior_bboxes, prior_variances,
-                     code_type, encode_variance_in_target, clip_bbox,
+        DecodeBBoxes(prior_bboxes, prior_variances, code_type,
+                     encode_variance_in_target, clip_bbox,
                      all_loc_preds[i].find(label)->second, &loc_bboxes);
-        MatchBBox(gt_bboxes, loc_bboxes, label, match_type,
-                  overlap_threshold, ignore_cross_boundary_bbox,
-                  &match_indices[label], &match_overlaps[label]);
+        MatchBBox(gt_bboxes, loc_bboxes, label, match_type, overlap_threshold,
+                  ignore_cross_boundary_bbox, &match_indices[label],
+                  &match_overlaps[label]);
       }
     } else {
       // Use prior bboxes to match against all ground truth.
@@ -1252,12 +1172,12 @@ void FindMatches(const vector<LabelBBox> &all_loc_preds,
   }
 }
 
-int CountNumMatches(const vector<map<int, vector<int> > > &all_match_indices,
+int CountNumMatches(const vector<map<int, vector<int>>> &all_match_indices,
                     const int num) {
   int num_matches = 0;
   for (int i = 0; i < num; ++i) {
-    const map<int, vector<int> > &match_indices = all_match_indices[i];
-    for (map<int, vector<int> >::const_iterator it = match_indices.begin();
+    const map<int, vector<int>> &match_indices = all_match_indices[i];
+    for (map<int, vector<int>>::const_iterator it = match_indices.begin();
          it != match_indices.end(); ++it) {
       const vector<int> &match_index = it->second;
       for (int m = 0; m < match_index.size(); ++m) {
@@ -1271,7 +1191,8 @@ int CountNumMatches(const vector<map<int, vector<int> > > &all_match_indices,
 }
 
 inline bool IsEligibleMining(const MiningType mining_type, const int match_idx,
-                             const float match_overlap, const float neg_overlap) {
+                             const float match_overlap,
+                             const float neg_overlap) {
   if (mining_type == MultiBoxLossParameter_MiningType_MAX_NEGATIVE) {
     return match_idx == -1 && match_overlap < neg_overlap;
   } else if (mining_type == MultiBoxLossParameter_MiningType_HARD_EXAMPLE) {
@@ -1281,17 +1202,17 @@ inline bool IsEligibleMining(const MiningType mining_type, const int match_idx,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void MineHardExamples(const Blob<Dtype> &conf_blob,
                       const vector<LabelBBox> &all_loc_preds,
-                      const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
+                      const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
                       const vector<NormalizedBBox> &prior_bboxes,
-                      const vector<vector<float> > &prior_variances,
-                      const vector<map<int, vector<float> > > &all_match_overlaps,
+                      const vector<vector<float>> &prior_variances,
+                      const vector<map<int, vector<float>>> &all_match_overlaps,
                       const MultiBoxLossParameter &multibox_loss_param,
                       int *num_matches, int *num_negs,
-                      vector<map<int, vector<int> > > *all_match_indices,
-                      vector<vector<int> > *all_neg_indices) {
+                      vector<map<int, vector<int>>> *all_match_indices,
+                      vector<vector<int>> *all_neg_indices) {
   int num = all_loc_preds.size();
   // CHECK_EQ(num, all_match_overlaps.size());
   // CHECK_EQ(num, all_match_indices->size());
@@ -1326,17 +1247,17 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
   }
   const int sample_size = multibox_loss_param.sample_size();
   // Compute confidence losses based on matching results.
-  vector<vector<float> > all_conf_loss;
+  vector<vector<float>> all_conf_loss;
 #ifdef CPU_ONLY
   ComputeConfLoss(conf_blob.cpu_data(), num, num_priors, num_classes,
-                  background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
-                  &all_conf_loss);
+                  background_label_id, conf_loss_type, *all_match_indices,
+                  all_gt_bboxes, &all_conf_loss);
 #else
   ComputeConfLossGPU(conf_blob, num, num_priors, num_classes,
-                     background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
-                     &all_conf_loss);
+                     background_label_id, conf_loss_type, *all_match_indices,
+                     all_gt_bboxes, &all_conf_loss);
 #endif
-  vector<vector<float> > all_loc_loss;
+  vector<vector<float>> all_loc_loss;
   if (mining_type == MultiBoxLossParameter_MiningType_HARD_EXAMPLE) {
     // Compute localization losses based on matching results.
     Blob<Dtype> loc_pred, loc_gt;
@@ -1351,8 +1272,8 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
                           prior_bboxes, prior_variances, multibox_loss_param,
                           loc_pred_data, loc_gt_data);
     }
-    ComputeLocLoss(loc_pred, loc_gt, *all_match_indices, num,
-                   num_priors, loc_loss_type, &all_loc_loss);
+    ComputeLocLoss(loc_pred, loc_gt, *all_match_indices, num, num_priors,
+                   loc_loss_type, &all_loc_loss);
   } else {
     // No localization loss.
     for (int i = 0; i < num; ++i) {
@@ -1361,8 +1282,8 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
     }
   }
   for (int i = 0; i < num; ++i) {
-    map<int, vector<int> > &match_indices = (*all_match_indices)[i];
-    const map<int, vector<float> > &match_overlaps = all_match_overlaps[i];
+    map<int, vector<int>> &match_indices = (*all_match_indices)[i];
+    const map<int, vector<float>> &match_overlaps = all_match_overlaps[i];
     // loc + conf loss.
     const vector<float> &conf_loss = all_conf_loss[i];
     const vector<float> &loc_loss = all_loc_loss[i];
@@ -1372,15 +1293,16 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
     // Pick negatives or hard examples based on loss.
     set<int> sel_indices;
     vector<int> neg_indices;
-    for (map<int, vector<int> >::iterator it = match_indices.begin();
+    for (map<int, vector<int>>::iterator it = match_indices.begin();
          it != match_indices.end(); ++it) {
       const int label = it->first;
       int num_sel = 0;
       // Get potential indices and loss pairs.
-      vector<pair<float, int> > loss_indices;
+      vector<pair<float, int>> loss_indices;
       for (int m = 0; m < match_indices[label].size(); ++m) {
         if (IsEligibleMining(mining_type, match_indices[label][m],
-                             match_overlaps.find(label)->second[m], neg_overlap)) {
+                             match_overlaps.find(label)->second[m],
+                             neg_overlap)) {
           loss_indices.push_back(std::make_pair(loss[m], m));
           ++num_sel;
         }
@@ -1405,7 +1327,8 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
         if (use_prior_for_nms) {
           for (int m = 0; m < match_indices[label].size(); ++m) {
             if (IsEligibleMining(mining_type, match_indices[label][m],
-                                 match_overlaps.find(label)->second[m], neg_overlap)) {
+                                 match_overlaps.find(label)->second[m],
+                                 neg_overlap)) {
               sel_loss.push_back(loss[m]);
               sel_bboxes.push_back(prior_bboxes[m]);
             }
@@ -1414,12 +1337,13 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
           // Decode the prediction into bbox first.
           vector<NormalizedBBox> loc_bboxes;
           bool clip_bbox = false;
-          DecodeBBoxes(prior_bboxes, prior_variances,
-                       code_type, encode_variance_in_target, clip_bbox,
+          DecodeBBoxes(prior_bboxes, prior_variances, code_type,
+                       encode_variance_in_target, clip_bbox,
                        all_loc_preds[i].find(label)->second, &loc_bboxes);
           for (int m = 0; m < match_indices[label].size(); ++m) {
             if (IsEligibleMining(mining_type, match_indices[label][m],
-                                 match_overlaps.find(label)->second[m], neg_overlap)) {
+                                 match_overlaps.find(label)->second[m],
+                                 neg_overlap)) {
               sel_loss.push_back(loss[m]);
               sel_bboxes.push_back(loc_bboxes[m]);
             }
@@ -1465,31 +1389,29 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
 }
 
 // Explicite initialization.
-template void MineHardExamples(const Blob<float> &conf_blob,
-                               const vector<LabelBBox> &all_loc_preds,
-                               const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                               const vector<NormalizedBBox> &prior_bboxes,
-                               const vector<vector<float> > &prior_variances,
-                               const vector<map<int, vector<float> > > &all_match_overlaps,
-                               const MultiBoxLossParameter &multibox_loss_param,
-                               int *num_matches, int *num_negs,
-                               vector<map<int, vector<int> > > *all_match_indices,
-                               vector<vector<int> > *all_neg_indices);
-template void MineHardExamples(const Blob<double> &conf_blob,
-                               const vector<LabelBBox> &all_loc_preds,
-                               const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                               const vector<NormalizedBBox> &prior_bboxes,
-                               const vector<vector<float> > &prior_variances,
-                               const vector<map<int, vector<float> > > &all_match_overlaps,
-                               const MultiBoxLossParameter &multibox_loss_param,
-                               int *num_matches, int *num_negs,
-                               vector<map<int, vector<int> > > *all_match_indices,
-                               vector<vector<int> > *all_neg_indices);
+template void MineHardExamples(
+    const Blob<float> &conf_blob, const vector<LabelBBox> &all_loc_preds,
+    const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+    const vector<NormalizedBBox> &prior_bboxes,
+    const vector<vector<float>> &prior_variances,
+    const vector<map<int, vector<float>>> &all_match_overlaps,
+    const MultiBoxLossParameter &multibox_loss_param, int *num_matches,
+    int *num_negs, vector<map<int, vector<int>>> *all_match_indices,
+    vector<vector<int>> *all_neg_indices);
+template void MineHardExamples(
+    const Blob<double> &conf_blob, const vector<LabelBBox> &all_loc_preds,
+    const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+    const vector<NormalizedBBox> &prior_bboxes,
+    const vector<vector<float>> &prior_variances,
+    const vector<map<int, vector<float>>> &all_match_overlaps,
+    const MultiBoxLossParameter &multibox_loss_param, int *num_matches,
+    int *num_negs, vector<map<int, vector<int>>> *all_match_indices,
+    vector<vector<int>> *all_neg_indices);
 
-template<typename Dtype>
+template <typename Dtype>
 void GetGroundTruth(const Dtype *gt_data, const int num_gt,
                     const int background_label_id, const bool use_difficult_gt,
-                    map<int, vector<NormalizedBBox> > *all_gt_bboxes) {
+                    map<int, vector<NormalizedBBox>> *all_gt_bboxes) {
   all_gt_bboxes->clear();
   for (int i = 0; i < num_gt; ++i) {
     int start_idx = i * 8;
@@ -1499,7 +1421,7 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
     }
     int label = gt_data[start_idx + 1];
     CHECK_NE(background_label_id, label)
-      << "Found background label in the dataset.";
+        << "Found background label in the dataset.";
     bool difficult = static_cast<bool>(gt_data[start_idx + 7]);
     if (!use_difficult_gt && difficult) {
       // Skip reading difficult ground truth.
@@ -1520,13 +1442,15 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
 
 // Explicit initialization.
 template void GetGroundTruth(const float *gt_data, const int num_gt,
-                             const int background_label_id, const bool use_difficult_gt,
-                             map<int, vector<NormalizedBBox> > *all_gt_bboxes);
+                             const int background_label_id,
+                             const bool use_difficult_gt,
+                             map<int, vector<NormalizedBBox>> *all_gt_bboxes);
 template void GetGroundTruth(const double *gt_data, const int num_gt,
-                             const int background_label_id, const bool use_difficult_gt,
-                             map<int, vector<NormalizedBBox> > *all_gt_bboxes);
+                             const int background_label_id,
+                             const bool use_difficult_gt,
+                             map<int, vector<NormalizedBBox>> *all_gt_bboxes);
 
-template<typename Dtype>
+template <typename Dtype>
 void GetGroundTruth(const Dtype *gt_data, const int num_gt,
                     const int background_label_id, const bool use_difficult_gt,
                     map<int, LabelBBox> *all_gt_bboxes) {
@@ -1540,7 +1464,7 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
     NormalizedBBox bbox;
     int label = gt_data[start_idx + 1];
     CHECK_NE(background_label_id, label)
-      << "Found background label in the dataset.";
+        << "Found background label in the dataset.";
     bool difficult = static_cast<bool>(gt_data[start_idx + 7]);
     if (!use_difficult_gt && difficult) {
       // Skip reading difficult ground truth.
@@ -1559,16 +1483,19 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
 
 // Explicit initialization.
 template void GetGroundTruth(const float *gt_data, const int num_gt,
-                             const int background_label_id, const bool use_difficult_gt,
+                             const int background_label_id,
+                             const bool use_difficult_gt,
                              map<int, LabelBBox> *all_gt_bboxes);
 template void GetGroundTruth(const double *gt_data, const int num_gt,
-                             const int background_label_id, const bool use_difficult_gt,
+                             const int background_label_id,
+                             const bool use_difficult_gt,
                              map<int, LabelBBox> *all_gt_bboxes);
 
-template<typename Dtype>
+template <typename Dtype>
 void GetLocPredictions(const Dtype *loc_data, const int num,
                        const int num_preds_per_class, const int num_loc_classes,
-                       const bool share_location, vector<LabelBBox> *loc_preds) {
+                       const bool share_location,
+                       vector<LabelBBox> *loc_preds) {
   loc_preds->clear();
   if (share_location) {
     CHECK_EQ(num_loc_classes, 1);
@@ -1595,18 +1522,22 @@ void GetLocPredictions(const Dtype *loc_data, const int num,
 
 // Explicit initialization.
 template void GetLocPredictions(const float *loc_data, const int num,
-                                const int num_preds_per_class, const int num_loc_classes,
-                                const bool share_location, vector<LabelBBox> *loc_preds);
+                                const int num_preds_per_class,
+                                const int num_loc_classes,
+                                const bool share_location,
+                                vector<LabelBBox> *loc_preds);
 template void GetLocPredictions(const double *loc_data, const int num,
-                                const int num_preds_per_class, const int num_loc_classes,
-                                const bool share_location, vector<LabelBBox> *loc_preds);
+                                const int num_preds_per_class,
+                                const int num_loc_classes,
+                                const bool share_location,
+                                vector<LabelBBox> *loc_preds);
 
-template<typename Dtype>
+template <typename Dtype>
 void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
-                         const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                         const vector<map<int, vector<int> > > &all_match_indices,
+                         const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                         const vector<map<int, vector<int>>> &all_match_indices,
                          const vector<NormalizedBBox> &prior_bboxes,
-                         const vector<vector<float> > &prior_variances,
+                         const vector<vector<float>> &prior_variances,
                          const MultiBoxLossParameter &multibox_loss_param,
                          Dtype *loc_pred_data, Dtype *loc_gt_data) {
   int num = all_loc_preds.size();
@@ -1620,8 +1551,8 @@ void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
       multibox_loss_param.use_prior_for_matching();
   int count = 0;
   for (int i = 0; i < num; ++i) {
-    for (map<int, vector<int> >::const_iterator
-             it = all_match_indices[i].begin();
+    for (map<int, vector<int>>::const_iterator it =
+             all_match_indices[i].begin();
          it != all_match_indices[i].end(); ++it) {
       const int label = it->first;
       const vector<int> &match_index = it->second;
@@ -1658,17 +1589,21 @@ void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
           // When a dimension of match_bbox is outside of image region, use
           // gt_encode to simulate zero gradient.
           loc_pred_data[count * 4] =
-              (match_bbox.xmin() < 0 || match_bbox.xmin() > 1) ?
-              gt_encode.xmin() : loc_pred[j].xmin();
+              (match_bbox.xmin() < 0 || match_bbox.xmin() > 1)
+                  ? gt_encode.xmin()
+                  : loc_pred[j].xmin();
           loc_pred_data[count * 4 + 1] =
-              (match_bbox.ymin() < 0 || match_bbox.ymin() > 1) ?
-              gt_encode.ymin() : loc_pred[j].ymin();
+              (match_bbox.ymin() < 0 || match_bbox.ymin() > 1)
+                  ? gt_encode.ymin()
+                  : loc_pred[j].ymin();
           loc_pred_data[count * 4 + 2] =
-              (match_bbox.xmax() < 0 || match_bbox.xmax() > 1) ?
-              gt_encode.xmax() : loc_pred[j].xmax();
+              (match_bbox.xmax() < 0 || match_bbox.xmax() > 1)
+                  ? gt_encode.xmax()
+                  : loc_pred[j].xmax();
           loc_pred_data[count * 4 + 3] =
-              (match_bbox.ymax() < 0 || match_bbox.ymax() > 1) ?
-              gt_encode.ymax() : loc_pred[j].ymax();
+              (match_bbox.ymax() < 0 || match_bbox.ymax() > 1)
+                  ? gt_encode.ymax()
+                  : loc_pred[j].ymax();
         } else {
           loc_pred_data[count * 4] = loc_pred[j].xmin();
           loc_pred_data[count * 4 + 1] = loc_pred[j].ymin();
@@ -1689,26 +1624,29 @@ void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
 }
 
 // Explicit initialization.
-template void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
-                                  const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                                  const vector<map<int, vector<int> > > &all_match_indices,
-                                  const vector<NormalizedBBox> &prior_bboxes,
-                                  const vector<vector<float> > &prior_variances,
-                                  const MultiBoxLossParameter &multibox_loss_param,
-                                  float *loc_pred_data, float *loc_gt_data);
-template void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
-                                  const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                                  const vector<map<int, vector<int> > > &all_match_indices,
-                                  const vector<NormalizedBBox> &prior_bboxes,
-                                  const vector<vector<float> > &prior_variances,
-                                  const MultiBoxLossParameter &multibox_loss_param,
-                                  double *loc_pred_data, double *loc_gt_data);
+template void
+EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
+                    const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                    const vector<map<int, vector<int>>> &all_match_indices,
+                    const vector<NormalizedBBox> &prior_bboxes,
+                    const vector<vector<float>> &prior_variances,
+                    const MultiBoxLossParameter &multibox_loss_param,
+                    float *loc_pred_data, float *loc_gt_data);
+template void
+EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
+                    const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                    const vector<map<int, vector<int>>> &all_match_indices,
+                    const vector<NormalizedBBox> &prior_bboxes,
+                    const vector<vector<float>> &prior_variances,
+                    const MultiBoxLossParameter &multibox_loss_param,
+                    double *loc_pred_data, double *loc_gt_data);
 
-template<typename Dtype>
+template <typename Dtype>
 void ComputeLocLoss(const Blob<Dtype> &loc_pred, const Blob<Dtype> &loc_gt,
-                    const vector<map<int, vector<int> > > &all_match_indices,
-                    const int num, const int num_priors, const LocLossType loc_loss_type,
-                    vector<vector<float> > *all_loc_loss) {
+                    const vector<map<int, vector<int>>> &all_match_indices,
+                    const int num, const int num_priors,
+                    const LocLossType loc_loss_type,
+                    vector<vector<float>> *all_loc_loss) {
   int loc_count = loc_pred.count();
   CHECK_EQ(loc_count, loc_gt.count());
   Blob<Dtype> diff;
@@ -1722,8 +1660,8 @@ void ComputeLocLoss(const Blob<Dtype> &loc_pred, const Blob<Dtype> &loc_gt,
   int count = 0;
   for (int i = 0; i < num; ++i) {
     vector<float> loc_loss(num_priors, 0.f);
-    for (map<int, vector<int> >::const_iterator
-             it = all_match_indices[i].begin();
+    for (map<int, vector<int>>::const_iterator it =
+             all_match_indices[i].begin();
          it != all_match_indices[i].end(); ++it) {
       const vector<int> &match_index = it->second;
       CHECK_EQ(num_priors, match_index.size());
@@ -1756,25 +1694,27 @@ void ComputeLocLoss(const Blob<Dtype> &loc_pred, const Blob<Dtype> &loc_gt,
 }
 
 // Explicit initialization.
-template void ComputeLocLoss(const Blob<float> &loc_pred,
-                             const Blob<float> &loc_gt,
-                             const vector<map<int, vector<int> > > &all_match_indices,
-                             const int num, const int num_priors, const LocLossType loc_loss_type,
-                             vector<vector<float> > *all_loc_loss);
-template void ComputeLocLoss(const Blob<double> &loc_pred,
-                             const Blob<double> &loc_gt,
-                             const vector<map<int, vector<int> > > &all_match_indices,
-                             const int num, const int num_priors, const LocLossType loc_loss_type,
-                             vector<vector<float> > *all_loc_loss);
+template void
+ComputeLocLoss(const Blob<float> &loc_pred, const Blob<float> &loc_gt,
+               const vector<map<int, vector<int>>> &all_match_indices,
+               const int num, const int num_priors,
+               const LocLossType loc_loss_type,
+               vector<vector<float>> *all_loc_loss);
+template void
+ComputeLocLoss(const Blob<double> &loc_pred, const Blob<double> &loc_gt,
+               const vector<map<int, vector<int>>> &all_match_indices,
+               const int num, const int num_priors,
+               const LocLossType loc_loss_type,
+               vector<vector<float>> *all_loc_loss);
 
-template<typename Dtype>
+template <typename Dtype>
 void GetConfidenceScores(const Dtype *conf_data, const int num,
                          const int num_preds_per_class, const int num_classes,
-                         vector<map<int, vector<float> > > *conf_preds) {
+                         vector<map<int, vector<float>>> *conf_preds) {
   conf_preds->clear();
   conf_preds->resize(num);
   for (int i = 0; i < num; ++i) {
-    map<int, vector<float> > &label_scores = (*conf_preds)[i];
+    map<int, vector<float>> &label_scores = (*conf_preds)[i];
     for (int p = 0; p < num_preds_per_class; ++p) {
       int start_idx = p * num_classes;
       for (int c = 0; c < num_classes; ++c) {
@@ -1787,20 +1727,23 @@ void GetConfidenceScores(const Dtype *conf_data, const int num,
 
 // Explicit initialization.
 template void GetConfidenceScores(const float *conf_data, const int num,
-                                  const int num_preds_per_class, const int num_classes,
-                                  vector<map<int, vector<float> > > *conf_preds);
+                                  const int num_preds_per_class,
+                                  const int num_classes,
+                                  vector<map<int, vector<float>>> *conf_preds);
 template void GetConfidenceScores(const double *conf_data, const int num,
-                                  const int num_preds_per_class, const int num_classes,
-                                  vector<map<int, vector<float> > > *conf_preds);
+                                  const int num_preds_per_class,
+                                  const int num_classes,
+                                  vector<map<int, vector<float>>> *conf_preds);
 
-template<typename Dtype>
+template <typename Dtype>
 void GetConfidenceScores(const Dtype *conf_data, const int num,
                          const int num_preds_per_class, const int num_classes,
-                         const bool class_major, vector<map<int, vector<float> > > *conf_preds) {
+                         const bool class_major,
+                         vector<map<int, vector<float>>> *conf_preds) {
   conf_preds->clear();
   conf_preds->resize(num);
   for (int i = 0; i < num; ++i) {
-    map<int, vector<float> > &label_scores = (*conf_preds)[i];
+    map<int, vector<float>> &label_scores = (*conf_preds)[i];
     if (class_major) {
       for (int c = 0; c < num_classes; ++c) {
         label_scores[c].assign(conf_data, conf_data + num_preds_per_class);
@@ -1820,17 +1763,20 @@ void GetConfidenceScores(const Dtype *conf_data, const int num,
 
 // Explicit initialization.
 template void GetConfidenceScores(const float *conf_data, const int num,
-                                  const int num_preds_per_class, const int num_classes,
-                                  const bool class_major, vector<map<int, vector<float> > > *conf_preds);
+                                  const int num_preds_per_class,
+                                  const int num_classes, const bool class_major,
+                                  vector<map<int, vector<float>>> *conf_preds);
 template void GetConfidenceScores(const double *conf_data, const int num,
-                                  const int num_preds_per_class, const int num_classes,
-                                  const bool class_major, vector<map<int, vector<float> > > *conf_preds);
+                                  const int num_preds_per_class,
+                                  const int num_classes, const bool class_major,
+                                  vector<map<int, vector<float>>> *conf_preds);
 
-template<typename Dtype>
+template <typename Dtype>
 void ComputeConfLoss(const Dtype *conf_data, const int num,
                      const int num_preds_per_class, const int num_classes,
-                     const int background_label_id, const ConfLossType loss_type,
-                     vector<vector<float> > *all_conf_loss) {
+                     const int background_label_id,
+                     const ConfLossType loss_type,
+                     vector<vector<float>> *all_conf_loss) {
   all_conf_loss->clear();
   for (int i = 0; i < num; ++i) {
     vector<float> conf_loss;
@@ -1863,7 +1809,7 @@ void ComputeConfLoss(const Dtype *conf_data, const int num,
           }
           Dtype input = conf_data[start_idx + c];
           loss -= input * (target - (input >= 0)) -
-              log(1 + exp(input - 2 * input * (input >= 0)));
+                  log(1 + exp(input - 2 * input * (input >= 0)));
         }
       } else {
         LOG(FATAL) << "Unknown conf loss type.";
@@ -1877,33 +1823,38 @@ void ComputeConfLoss(const Dtype *conf_data, const int num,
 
 // Explicit initialization.
 template void ComputeConfLoss(const float *conf_data, const int num,
-                              const int num_preds_per_class, const int num_classes,
-                              const int background_label_id, const ConfLossType loss_type,
-                              vector<vector<float> > *all_conf_loss);
+                              const int num_preds_per_class,
+                              const int num_classes,
+                              const int background_label_id,
+                              const ConfLossType loss_type,
+                              vector<vector<float>> *all_conf_loss);
 template void ComputeConfLoss(const double *conf_data, const int num,
-                              const int num_preds_per_class, const int num_classes,
-                              const int background_label_id, const ConfLossType loss_type,
-                              vector<vector<float> > *all_conf_loss);
+                              const int num_preds_per_class,
+                              const int num_classes,
+                              const int background_label_id,
+                              const ConfLossType loss_type,
+                              vector<vector<float>> *all_conf_loss);
 
-template<typename Dtype>
+template <typename Dtype>
 void ComputeConfLoss(const Dtype *conf_data, const int num,
                      const int num_preds_per_class, const int num_classes,
-                     const int background_label_id, const ConfLossType loss_type,
-                     const vector<map<int, vector<int> > > &all_match_indices,
-                     const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                     vector<vector<float> > *all_conf_loss) {
+                     const int background_label_id,
+                     const ConfLossType loss_type,
+                     const vector<map<int, vector<int>>> &all_match_indices,
+                     const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                     vector<vector<float>> *all_conf_loss) {
   CHECK_LT(background_label_id, num_classes);
   // CHECK_EQ(num, all_match_indices.size());
   all_conf_loss->clear();
   for (int i = 0; i < num; ++i) {
     vector<float> conf_loss;
-    const map<int, vector<int> > &match_indices = all_match_indices[i];
+    const map<int, vector<int>> &match_indices = all_match_indices[i];
     for (int p = 0; p < num_preds_per_class; ++p) {
       int start_idx = p * num_classes;
       // Get the label index.
       int label = background_label_id;
-      for (map<int, vector<int> >::const_iterator it =
-          match_indices.begin(); it != match_indices.end(); ++it) {
+      for (map<int, vector<int>>::const_iterator it = match_indices.begin();
+           it != match_indices.end(); ++it) {
         const vector<int> &match_index = it->second;
         CHECK_EQ(match_index.size(), num_preds_per_class);
         if (match_index[p] > -1) {
@@ -1945,7 +1896,7 @@ void ComputeConfLoss(const Dtype *conf_data, const int num,
           }
           Dtype input = conf_data[start_idx + c];
           loss -= input * (target - (input >= 0)) -
-              log(1 + exp(input - 2 * input * (input >= 0)));
+                  log(1 + exp(input - 2 * input * (input >= 0)));
         }
       } else {
         LOG(FATAL) << "Unknown conf loss type.";
@@ -1958,26 +1909,29 @@ void ComputeConfLoss(const Dtype *conf_data, const int num,
 }
 
 // Explicit initialization.
-template void ComputeConfLoss(const float *conf_data, const int num,
-                              const int num_preds_per_class, const int num_classes,
-                              const int background_label_id, const ConfLossType loss_type,
-                              const vector<map<int, vector<int> > > &all_match_indices,
-                              const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                              vector<vector<float> > *all_conf_loss);
-template void ComputeConfLoss(const double *conf_data, const int num,
-                              const int num_preds_per_class, const int num_classes,
-                              const int background_label_id, const ConfLossType loss_type,
-                              const vector<map<int, vector<int> > > &all_match_indices,
-                              const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                              vector<vector<float> > *all_conf_loss);
+template void
+ComputeConfLoss(const float *conf_data, const int num,
+                const int num_preds_per_class, const int num_classes,
+                const int background_label_id, const ConfLossType loss_type,
+                const vector<map<int, vector<int>>> &all_match_indices,
+                const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                vector<vector<float>> *all_conf_loss);
+template void
+ComputeConfLoss(const double *conf_data, const int num,
+                const int num_preds_per_class, const int num_classes,
+                const int background_label_id, const ConfLossType loss_type,
+                const vector<map<int, vector<int>>> &all_match_indices,
+                const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                vector<vector<float>> *all_conf_loss);
 
-template<typename Dtype>
-void EncodeConfPrediction(const Dtype *conf_data, const int num,
-                          const int num_priors, const MultiBoxLossParameter &multibox_loss_param,
-                          const vector<map<int, vector<int> > > &all_match_indices,
-                          const vector<vector<int> > &all_neg_indices,
-                          const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                          Dtype *conf_pred_data, Dtype *conf_gt_data) {
+template <typename Dtype>
+void EncodeConfPrediction(
+    const Dtype *conf_data, const int num, const int num_priors,
+    const MultiBoxLossParameter &multibox_loss_param,
+    const vector<map<int, vector<int>>> &all_match_indices,
+    const vector<vector<int>> &all_neg_indices,
+    const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+    Dtype *conf_pred_data, Dtype *conf_gt_data) {
   // CHECK_EQ(num, all_match_indices.size());
   // CHECK_EQ(num, all_neg_indices.size());
   // Retrieve parameters.
@@ -2008,18 +1962,19 @@ void EncodeConfPrediction(const Dtype *conf_data, const int num,
   for (int i = 0; i < num; ++i) {
     if (all_gt_bboxes.find(i) != all_gt_bboxes.end()) {
       // Save matched (positive) bboxes scores and labels.
-      const map<int, vector<int> > &match_indices = all_match_indices[i];
-      for (map<int, vector<int> >::const_iterator it =
-          match_indices.begin(); it != match_indices.end(); ++it) {
+      const map<int, vector<int>> &match_indices = all_match_indices[i];
+      for (map<int, vector<int>>::const_iterator it = match_indices.begin();
+           it != match_indices.end(); ++it) {
         const vector<int> &match_index = it->second;
         CHECK_EQ(match_index.size(), num_priors);
         for (int j = 0; j < num_priors; ++j) {
           if (match_index[j] <= -1) {
             continue;
           }
-          const int gt_label = map_object_to_agnostic ?
-                               background_label_id + 1 :
-                               all_gt_bboxes.find(i)->second[match_index[j]].label();
+          const int gt_label =
+              map_object_to_agnostic
+                  ? background_label_id + 1
+                  : all_gt_bboxes.find(i)->second[match_index[j]].label();
           int idx = do_neg_mining ? count : j;
           switch (conf_loss_type) {
           case MultiBoxLossParameter_ConfLossType_SOFTMAX:
@@ -2052,8 +2007,7 @@ void EncodeConfPrediction(const Dtype *conf_data, const int num,
             conf_gt_data[count] = background_label_id;
             break;
           case MultiBoxLossParameter_ConfLossType_LOGISTIC:
-            if (background_label_id >= 0 &&
-                background_label_id < num_classes) {
+            if (background_label_id >= 0 && background_label_id < num_classes) {
               conf_gt_data[count * num_classes + background_label_id] = 1;
             }
             break;
@@ -2073,23 +2027,27 @@ void EncodeConfPrediction(const Dtype *conf_data, const int num,
 }
 
 // Explicite initialization.
-template void EncodeConfPrediction(const float *conf_data, const int num,
-                                   const int num_priors, const MultiBoxLossParameter &multibox_loss_param,
-                                   const vector<map<int, vector<int> > > &all_match_indices,
-                                   const vector<vector<int> > &all_neg_indices,
-                                   const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                                   float *conf_pred_data, float *conf_gt_data);
-template void EncodeConfPrediction(const double *conf_data, const int num,
-                                   const int num_priors, const MultiBoxLossParameter &multibox_loss_param,
-                                   const vector<map<int, vector<int> > > &all_match_indices,
-                                   const vector<vector<int> > &all_neg_indices,
-                                   const map<int, vector<NormalizedBBox> > &all_gt_bboxes,
-                                   double *conf_pred_data, double *conf_gt_data);
+template void
+EncodeConfPrediction(const float *conf_data, const int num,
+                     const int num_priors,
+                     const MultiBoxLossParameter &multibox_loss_param,
+                     const vector<map<int, vector<int>>> &all_match_indices,
+                     const vector<vector<int>> &all_neg_indices,
+                     const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                     float *conf_pred_data, float *conf_gt_data);
+template void
+EncodeConfPrediction(const double *conf_data, const int num,
+                     const int num_priors,
+                     const MultiBoxLossParameter &multibox_loss_param,
+                     const vector<map<int, vector<int>>> &all_match_indices,
+                     const vector<vector<int>> &all_neg_indices,
+                     const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
+                     double *conf_pred_data, double *conf_gt_data);
 
-template<typename Dtype>
+template <typename Dtype>
 void GetPriorBBoxes(const Dtype *prior_data, const int num_priors,
                     vector<NormalizedBBox> *prior_bboxes,
-                    vector<vector<float> > *prior_variances) {
+                    vector<vector<float>> *prior_variances) {
   prior_bboxes->clear();
   prior_variances->clear();
   for (int i = 0; i < num_priors; ++i) {
@@ -2117,15 +2075,15 @@ void GetPriorBBoxes(const Dtype *prior_data, const int num_priors,
 // Explicit initialization.
 template void GetPriorBBoxes(const float *prior_data, const int num_priors,
                              vector<NormalizedBBox> *prior_bboxes,
-                             vector<vector<float> > *prior_variances);
+                             vector<vector<float>> *prior_variances);
 template void GetPriorBBoxes(const double *prior_data, const int num_priors,
                              vector<NormalizedBBox> *prior_bboxes,
-                             vector<vector<float> > *prior_variances);
+                             vector<vector<float>> *prior_variances);
 
-template<typename Dtype>
-void GetDetectionResults(const Dtype *det_data, const int num_det,
-                         const int background_label_id,
-                         map<int, map<int, vector<NormalizedBBox> > > *all_detections) {
+template <typename Dtype>
+void GetDetectionResults(
+    const Dtype *det_data, const int num_det, const int background_label_id,
+    map<int, map<int, vector<NormalizedBBox>>> *all_detections) {
   all_detections->clear();
   for (int i = 0; i < num_det; ++i) {
     int start_idx = i * 7;
@@ -2135,7 +2093,7 @@ void GetDetectionResults(const Dtype *det_data, const int num_det,
     }
     int label = det_data[start_idx + 1];
     CHECK_NE(background_label_id, label)
-      << "Found background label in the detection results.";
+        << "Found background label in the detection results.";
     NormalizedBBox bbox;
     bbox.set_score(det_data[start_idx + 2]);
     bbox.set_xmin(det_data[start_idx + 3]);
@@ -2149,15 +2107,18 @@ void GetDetectionResults(const Dtype *det_data, const int num_det,
 }
 
 // Explicit initialization.
-template void GetDetectionResults(const float *det_data, const int num_det,
-                                  const int background_label_id,
-                                  map<int, map<int, vector<NormalizedBBox> > > *all_detections);
-template void GetDetectionResults(const double *det_data, const int num_det,
-                                  const int background_label_id,
-                                  map<int, map<int, vector<NormalizedBBox> > > *all_detections);
+template void
+GetDetectionResults(const float *det_data, const int num_det,
+                    const int background_label_id,
+                    map<int, map<int, vector<NormalizedBBox>>> *all_detections);
+template void
+GetDetectionResults(const double *det_data, const int num_det,
+                    const int background_label_id,
+                    map<int, map<int, vector<NormalizedBBox>>> *all_detections);
 
 void GetTopKScoreIndex(const vector<float> &scores, const vector<int> &indices,
-                       const int top_k, vector<pair<float, int> > *score_index_vec) {
+                       const int top_k,
+                       vector<pair<float, int>> *score_index_vec) {
   CHECK_EQ(scores.size(), indices.size());
 
   // Generate index score pairs.
@@ -2176,7 +2137,8 @@ void GetTopKScoreIndex(const vector<float> &scores, const vector<int> &indices,
 }
 
 void GetMaxScoreIndex(const vector<float> &scores, const float threshold,
-                      const int top_k, vector<pair<float, int> > *score_index_vec) {
+                      const int top_k,
+                      vector<pair<float, int>> *score_index_vec) {
   // Generate index score pairs.
   for (int i = 0; i < scores.size(); ++i) {
     if (scores[i] > threshold) {
@@ -2194,9 +2156,10 @@ void GetMaxScoreIndex(const vector<float> &scores, const float threshold,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void GetMaxScoreIndex(const Dtype *scores, const int num, const float threshold,
-                      const int top_k, vector<pair<Dtype, int> > *score_index_vec) {
+                      const int top_k,
+                      vector<pair<Dtype, int>> *score_index_vec) {
   // Generate index score pairs.
   for (int i = 0; i < num; ++i) {
     if (scores[i] > threshold) {
@@ -2214,25 +2177,24 @@ void GetMaxScoreIndex(const Dtype *scores, const int num, const float threshold,
   }
 }
 
-template
-void GetMaxScoreIndex(const float *scores, const int num, const float threshold,
-                      const int top_k, vector<pair<float, int> > *score_index_vec);
-template
-void GetMaxScoreIndex(const double *scores, const int num,
-                      const float threshold, const int top_k,
-                      vector<pair<double, int> > *score_index_vec);
+template void GetMaxScoreIndex(const float *scores, const int num,
+                               const float threshold, const int top_k,
+                               vector<pair<float, int>> *score_index_vec);
+template void GetMaxScoreIndex(const double *scores, const int num,
+                               const float threshold, const int top_k,
+                               vector<pair<double, int>> *score_index_vec);
 
 void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
               const float threshold, const int top_k, const bool reuse_overlaps,
-              map<int, map<int, float> > *overlaps, vector<int> *indices) {
+              map<int, map<int, float>> *overlaps, vector<int> *indices) {
   // Sanity check.
   CHECK_EQ(bboxes.size(), scores.size())
-    << "bboxes and scores have different size.";
+      << "bboxes and scores have different size.";
 
   // Get top_k scores (with corresponding indices).
   vector<int> idx(boost::counting_iterator<int>(0),
                   boost::counting_iterator<int>(scores.size()));
-  vector<pair<float, int> > score_index_vec;
+  vector<pair<float, int>> score_index_vec;
   GetTopKScoreIndex(scores, idx, top_k, &score_index_vec);
 
   // Do nms.
@@ -2257,7 +2219,7 @@ void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
 
     // Compute overlap between best_bbox and other remaining bboxes.
     // Remove a bbox if the overlap with best_bbox is larger than nms_threshold.
-    for (vector<pair<float, int> >::iterator it = score_index_vec.begin();
+    for (vector<pair<float, int>>::iterator it = score_index_vec.begin();
          it != score_index_vec.end();) {
       int cur_idx = it->second;
       const NormalizedBBox &cur_bbox = bboxes[cur_idx];
@@ -2274,8 +2236,8 @@ void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
           // Use the computed overlap.
           cur_overlap = (*overlaps)[best_idx][cur_idx];
         } else if (overlaps->find(cur_idx) != overlaps->end() &&
-            overlaps->find(cur_idx)->second.find(best_idx) !=
-                (*overlaps)[cur_idx].end()) {
+                   overlaps->find(cur_idx)->second.find(best_idx) !=
+                       (*overlaps)[cur_idx].end()) {
           // Use the computed overlap.
           cur_overlap = (*overlaps)[cur_idx][best_idx];
         } else {
@@ -2300,7 +2262,7 @@ void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
 void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
               const float threshold, const int top_k, vector<int> *indices) {
   bool reuse_overlap = false;
-  map<int, map<int, float> > overlaps;
+  map<int, map<int, float>> overlaps;
   ApplyNMS(bboxes, scores, threshold, top_k, reuse_overlap, &overlaps, indices);
 }
 
@@ -2339,10 +2301,10 @@ void ApplyNMSFast(const vector<NormalizedBBox> &bboxes,
                   vector<int> *indices) {
   // Sanity check.
   CHECK_EQ(bboxes.size(), scores.size())
-    << "bboxes and scores have different size.";
+      << "bboxes and scores have different size.";
 
   // Get top_k scores (with corresponding indices).
-  vector<pair<float, int> > score_index_vec;
+  vector<pair<float, int>> score_index_vec;
   GetMaxScoreIndex(scores, score_threshold, top_k, &score_index_vec);
 
   // Do nms.
@@ -2370,12 +2332,12 @@ void ApplyNMSFast(const vector<NormalizedBBox> &bboxes,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ApplyNMSFast(const Dtype *bboxes, const Dtype *scores, const int num,
                   const float score_threshold, const float nms_threshold,
                   const float eta, const int top_k, vector<int> *indices) {
   // Get top_k scores (with corresponding indices).
-  vector<pair<Dtype, int> > score_index_vec;
+  vector<pair<Dtype, int>> score_index_vec;
   GetMaxScoreIndex(scores, num, score_threshold, top_k, &score_index_vec);
 
   // Do nms.
@@ -2403,18 +2365,18 @@ void ApplyNMSFast(const Dtype *bboxes, const Dtype *scores, const int num,
   }
 }
 
-template
-void ApplyNMSFast(const float *bboxes, const float *scores, const int num,
-                  const float score_threshold, const float nms_threshold,
-                  const float eta, const int top_k, vector<int> *indices);
-template
-void ApplyNMSFast(const double *bboxes, const double *scores, const int num,
-                  const float score_threshold, const float nms_threshold,
-                  const float eta, const int top_k, vector<int> *indices);
+template void ApplyNMSFast(const float *bboxes, const float *scores,
+                           const int num, const float score_threshold,
+                           const float nms_threshold, const float eta,
+                           const int top_k, vector<int> *indices);
+template void ApplyNMSFast(const double *bboxes, const double *scores,
+                           const int num, const float score_threshold,
+                           const float nms_threshold, const float eta,
+                           const int top_k, vector<int> *indices);
 
-void CumSum(const vector<pair<float, int> > &pairs, vector<int> *cumsum) {
+void CumSum(const vector<pair<float, int>> &pairs, vector<int> *cumsum) {
   // Sort the pairs based on first item of the pair.
-  vector<pair<float, int> > sort_pairs = pairs;
+  vector<pair<float, int>> sort_pairs = pairs;
   std::stable_sort(sort_pairs.begin(), sort_pairs.end(),
                    SortScorePairDescend<int>);
 
@@ -2428,8 +2390,8 @@ void CumSum(const vector<pair<float, int> > &pairs, vector<int> *cumsum) {
   }
 }
 
-void ComputeAP(const vector<pair<float, int> > &tp, const int num_pos,
-               const vector<pair<float, int> > &fp, const string ap_version,
+void ComputeAP(const vector<pair<float, int>> &tp, const int num_pos,
+               const vector<pair<float, int>> &fp, const string ap_version,
                vector<float> *prec, vector<float> *rec, float *ap) {
   const float eps = 1e-6;
   CHECK_EQ(tp.size(), fp.size()) << "tp must have same size as fp.";
@@ -2459,7 +2421,7 @@ void ComputeAP(const vector<pair<float, int> > &tp, const int num_pos,
   // Compute precision.
   for (int i = 0; i < num; ++i) {
     prec->push_back(static_cast<float>(tp_cumsum[i]) /
-        (tp_cumsum[i] + fp_cumsum[i]));
+                    (tp_cumsum[i] + fp_cumsum[i]));
   }
 
   // Compute recall.
@@ -2572,8 +2534,8 @@ vector<cv::Scalar> GetColors(const int n) {
   const float s = 0.3;
   const float v = 0.99;
   for (int i = 0; i < n; ++i) {
-    const float h = std::fmod(rng.uniform(0.f, 1.f) + golden_ratio_conjugate,
-                              1.f);
+    const float h =
+        std::fmod(rng.uniform(0.f, 1.f) + golden_ratio_conjugate, 1.f);
     colors.push_back(HSV2RGB(h, s, v));
   }
   return colors;
@@ -2582,7 +2544,7 @@ vector<cv::Scalar> GetColors(const int n) {
 static clock_t start_clock = clock();
 static cv::VideoWriter cap_out;
 
-template<typename Dtype>
+template <typename Dtype>
 void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
                    const float threshold, const vector<cv::Scalar> &colors,
                    const map<int, string> &label_to_display_name,
@@ -2595,8 +2557,8 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
     return;
   }
   // Comute FPS.
-  float fps = num_img / (static_cast<double>(clock() - start_clock) /
-      CLOCKS_PER_SEC);
+  float fps =
+      num_img / (static_cast<double>(clock() - start_clock) / CLOCKS_PER_SEC);
 
   const Dtype *detections_data = detections->cpu_data();
   const int width = images[0].cols;
@@ -2628,8 +2590,8 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
     cv::Mat image = images[i];
     // Show FPS.
     snprintf(buffer, sizeof(buffer), "FPS: %.2f", fps);
-    cv::Size text = cv::getTextSize(buffer, fontface, scale, thickness,
-                                    &baseline);
+    cv::Size text =
+        cv::getTextSize(buffer, fontface, scale, thickness, &baseline);
     int cvFilled = 0;
 #if (!defined(CV_VERSION_EPOCH) && CV_VERSION_MAJOR >= 3)
     cvFilled = cv::FILLED;
@@ -2643,8 +2605,9 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
     cv::putText(image, buffer, cv::Point(0, text.height + baseline / 2.),
                 fontface, scale, CV_RGB(0, 0, 0), thickness, 8);
     // Draw bboxes.
-    for (map<int, vector<NormalizedBBox> >::iterator it =
-        all_detections[i].begin(); it != all_detections[i].end(); ++it) {
+    for (map<int, vector<NormalizedBBox>>::iterator it =
+             all_detections[i].begin();
+         it != all_detections[i].end(); ++it) {
       int label = it->first;
       string label_name = "Unknown";
       if (label_to_display_name.find(label) != label_to_display_name.end()) {
@@ -2660,12 +2623,12 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
         cv::Point bottom_left_pt(bboxes[j].xmin(), bboxes[j].ymax());
         snprintf(buffer, sizeof(buffer), "%s: %.2f", label_name.c_str(),
                  bboxes[j].score());
-        cv::Size text = cv::getTextSize(buffer, fontface, scale, thickness,
-                                        &baseline);
-        cv::rectangle(
-            image, bottom_left_pt + cv::Point(0, 0),
-            bottom_left_pt + cv::Point(text.width, -text.height - baseline),
-            color, cvFilled);
+        cv::Size text =
+            cv::getTextSize(buffer, fontface, scale, thickness, &baseline);
+        cv::rectangle(image, bottom_left_pt + cv::Point(0, 0),
+                      bottom_left_pt +
+                          cv::Point(text.width, -text.height - baseline),
+                      color, cvFilled);
         cv::putText(image, buffer, bottom_left_pt - cv::Point(0, baseline),
                     fontface, scale, CV_RGB(0, 0, 0), thickness, 8);
       }
@@ -2675,11 +2638,12 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
       if (!cap_out.isOpened()) {
         cv::Size size(image.size().width, image.size().height);
 #if (!defined(CV_VERSION_EPOCH) && CV_VERSION_MAJOR >= 3)
-        cv::VideoWriter outputVideo(save_file, cv::VideoWriter::fourcc('D', 'I', 'V', 'X'),
+        cv::VideoWriter outputVideo(save_file,
+                                    cv::VideoWriter::fourcc('D', 'I', 'V', 'X'),
                                     30, size, true);
 #else
         cv::VideoWriter outputVideo(save_file, CV_FOURCC('D', 'I', 'V', 'X'),
-            30, size, true);
+                                    30, size, true);
 #endif
         cap_out = outputVideo;
       }
@@ -2693,19 +2657,19 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
   start_clock = clock();
 }
 
-template
-void VisualizeBBox(const vector<cv::Mat> &images,
-                   const Blob<float> *detections,
-                   const float threshold, const vector<cv::Scalar> &colors,
-                   const map<int, string> &label_to_display_name,
-                   const string &save_file);
-template
-void VisualizeBBox(const vector<cv::Mat> &images,
-                   const Blob<double> *detections,
-                   const float threshold, const vector<cv::Scalar> &colors,
-                   const map<int, string> &label_to_display_name,
-                   const string &save_file);
+template void VisualizeBBox(const vector<cv::Mat> &images,
+                            const Blob<float> *detections,
+                            const float threshold,
+                            const vector<cv::Scalar> &colors,
+                            const map<int, string> &label_to_display_name,
+                            const string &save_file);
+template void VisualizeBBox(const vector<cv::Mat> &images,
+                            const Blob<double> *detections,
+                            const float threshold,
+                            const vector<cv::Scalar> &colors,
+                            const map<int, string> &label_to_display_name,
+                            const string &save_file);
 
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
 
-}  // namespace caffe
+} // namespace caffe

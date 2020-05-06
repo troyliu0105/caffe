@@ -14,8 +14,7 @@ namespace caffe {
 /**
  * @brief Clip: @f$ y = \max(min, \min(max, x)) @f$.
  */
-template<typename Dtype>
-class ClipLayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class ClipLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides ClipParameter clip_param,
@@ -23,8 +22,7 @@ public:
    *   - min
    *   - max
    */
-  explicit ClipLayer(const LayerParameter &param)
-      : NeuronLayer<Dtype>(param) {}
+  explicit ClipLayer(const LayerParameter &param) : NeuronLayer<Dtype>(param) {}
 
   virtual inline const char *type() const { return "Clip"; }
 
@@ -60,16 +58,18 @@ protected:
    *        \frac{\partial E}{\partial x} = \left\{
    *        \begin{array}{lr}
    *            0 & \mathrm{if} \; x < min \vee x > max \\
-   *            \frac{\partial E}{\partial y} & \mathrm{if} \; x \ge min \wedge x \le max
-   *        \end{array} \right.
+   *            \frac{\partial E}{\partial y} & \mathrm{if} \; x \ge min \wedge
+   * x \le max \end{array} \right.
    *      @f$
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_CLIP_LAYER_HPP_
+#endif // CAFFE_CLIP_LAYER_HPP_

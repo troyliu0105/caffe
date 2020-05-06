@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class RNNLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -96,7 +96,7 @@ TYPED_TEST(RNNLayerTest, TestForward) {
   filler_param.set_std(1);
   GaussianFiller<Dtype> sequence_filler(filler_param);
   sequence_filler.Fill(&this->blob_bottom_);
-  shared_ptr<RNNLayer<Dtype> > layer(new RNNLayer<Dtype>(this->layer_param_));
+  shared_ptr<RNNLayer<Dtype>> layer(new RNNLayer<Dtype>(this->layer_param_));
   Caffe::set_random_seed(1701);
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   LOG(INFO) << "Calling forward for full sequence RNN";
@@ -129,7 +129,7 @@ TYPED_TEST(RNNLayerTest, TestForward) {
       ASSERT_LT(t * top_count + i, top_copy.count());
       EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i], kEpsilon)
-              << "t = " << t << "; i = " << i;
+          << "t = " << t << "; i = " << i;
     }
   }
 
@@ -150,11 +150,11 @@ TYPED_TEST(RNNLayerTest, TestForward) {
       if (t == 0) {
         EXPECT_NEAR(this->blob_top_.cpu_data()[i],
                     top_copy.cpu_data()[t * top_count + i], kEpsilon)
-                << "t = " << t << "; i = " << i;
+            << "t = " << t << "; i = " << i;
       } else {
         EXPECT_NE(this->blob_top_.cpu_data()[i],
                   top_copy.cpu_data()[t * top_count + i])
-                << "t = " << t << "; i = " << i;
+            << "t = " << t << "; i = " << i;
       }
     }
   }
@@ -214,4 +214,4 @@ TYPED_TEST(RNNLayerTest, TestGradientNonZeroContBufferSize2WithStaticInput) {
                                   this->blob_top_vec_, 2);
 }
 
-}  // namespace caffe
+} // namespace caffe

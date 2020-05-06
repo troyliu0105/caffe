@@ -16,8 +16,7 @@ namespace caffe {
  *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
  *        and power @f$ \gamma @f$.
  */
-template<typename Dtype>
-class PowerLayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class PowerLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides PowerParameter power_param,
@@ -70,9 +69,11 @@ protected:
    *      @f$ if propagate_down[0]
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   /// @brief @f$ \gamma @f$ from layer_param_.power_param()
   Dtype power_;
@@ -84,6 +85,6 @@ protected:
   Dtype diff_scale_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_POWER_LAYER_HPP_
+#endif // CAFFE_POWER_LAYER_HPP_

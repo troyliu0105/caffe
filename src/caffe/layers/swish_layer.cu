@@ -6,7 +6,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void SwishLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -20,18 +20,20 @@ void SwishLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   caffe_gpu_mul(count, bottom_data, sigmoid_output_->gpu_data(), top_data);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void SwishBackward(const int n, const Dtype *in_diff,
-                              const Dtype *out_data, const Dtype *sigmoid_output_data, Dtype *out_diff,
+                              const Dtype *out_data,
+                              const Dtype *sigmoid_output_data, Dtype *out_diff,
                               const Dtype beta) {
   CUDA_KERNEL_LOOP(index, n) {
     const Dtype swish_x = out_data[index];
-    out_diff[index] = in_diff[index] * (beta * swish_x
-        + sigmoid_output_data[index] * (1 - beta * swish_x));
+    out_diff[index] =
+        in_diff[index] *
+        (beta * swish_x + sigmoid_output_data[index] * (1 - beta * swish_x));
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SwishLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
                                      const vector<bool> &propagate_down,
                                      const vector<Blob<Dtype> *> &bottom) {
@@ -51,4 +53,4 @@ void SwishLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(SwishLayer);
 
-}  // namespace caffe
+} // namespace caffe

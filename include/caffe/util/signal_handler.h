@@ -13,12 +13,13 @@ public:
                 SolverAction::Enum SIGHUP_action);
   ~SignalHandler();
   ActionCallback GetActionFunction();
+
 private:
   SolverAction::Enum CheckForSignals() const;
   SolverAction::Enum SIGINT_action_;
   SolverAction::Enum SIGHUP_action_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // INCLUDE_CAFFE_UTIL_SIGNAL_HANDLER_H_
+#endif // INCLUDE_CAFFE_UTIL_SIGNAL_HANDLER_H_

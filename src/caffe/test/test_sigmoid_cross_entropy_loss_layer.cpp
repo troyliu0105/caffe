@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class SigmoidCrossEntropyLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -83,10 +83,10 @@ protected:
       const int count = this->blob_bottom_data_->count();
       const int num = this->blob_bottom_data_->num();
       const Dtype *blob_bottom_data = this->blob_bottom_data_->cpu_data();
-      const Dtype *blob_bottom_targets =
-          this->blob_bottom_targets_->cpu_data();
-      Dtype reference_loss = kLossWeight * SigmoidCrossEntropyLossReference(
-          count, num, blob_bottom_data, blob_bottom_targets);
+      const Dtype *blob_bottom_targets = this->blob_bottom_targets_->cpu_data();
+      Dtype reference_loss =
+          kLossWeight * SigmoidCrossEntropyLossReference(
+                            count, num, blob_bottom_data, blob_bottom_targets);
       EXPECT_NEAR(reference_loss, layer_loss, eps) << "debug: trial #" << i;
     }
   }
@@ -144,4 +144,4 @@ TYPED_TEST(SigmoidCrossEntropyLossLayerTest, TestIgnoreGradient) {
   }
 }
 
-}  // namespace caffe
+} // namespace caffe

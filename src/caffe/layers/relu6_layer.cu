@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void ReLU6Forward(const int n, const Dtype *in, Dtype *out,
                              Dtype negative_slope) {
   CUDA_KERNEL_LOOP(index, n) {
@@ -14,7 +14,7 @@ __global__ void ReLU6Forward(const int n, const Dtype *in, Dtype *out,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ReLU6Layer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -32,16 +32,19 @@ void ReLU6Layer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   //     << " threads: " << CAFFE_CUDA_NUM_THREADS;
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void ReLU6Backward(const int n, const Dtype *in_diff,
-                              const Dtype *in_data, Dtype *out_diff, Dtype negative_slope) {
+                              const Dtype *in_data, Dtype *out_diff,
+                              Dtype negative_slope) {
   CUDA_KERNEL_LOOP(index, n) {
-    out_diff[index] = in_diff[index] * ((in_data[index] > 0)
-        + (in_data[index] <= 0) * negative_slope) * (in_data[index] < Dtype(6.));
+    out_diff[index] =
+        in_diff[index] *
+        ((in_data[index] > 0) + (in_data[index] <= 0) * negative_slope) *
+        (in_data[index] < Dtype(6.));
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ReLU6Layer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
                                      const vector<bool> &propagate_down,
                                      const vector<Blob<Dtype> *> &bottom) {
@@ -60,5 +63,4 @@ void ReLU6Layer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(ReLU6Layer);
 
-}  // namespace caffe
-
+} // namespace caffe

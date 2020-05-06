@@ -1,13 +1,13 @@
 #pragma once
-#include<string>
-#include<map>
-#include<vector>
-#include<iostream>
-#include <boost/shared_ptr.hpp>
+#include "caffe/blob.hpp"
+#include "caffe/proto/caffe.pb.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include "caffe/proto/caffe.pb.h"
-#include "caffe/blob.hpp"
+#include <boost/shared_ptr.hpp>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 typedef google::protobuf::int64 int_64;
 typedef std::pair<int, double> atom;
@@ -16,7 +16,7 @@ typedef atom *Patom;
 class Utility {
 public:
   Utility() = default;
-  ~Utility() {};
+  ~Utility(){};
   inline std::string doubleToString(double num) {
     char str[256];
     sprintf(str, "%lf", num);
@@ -28,9 +28,11 @@ public:
     stream << i;
     return stream.str();
   };
-  inline std::vector<std::string> split(const std::string &str, const std::string &devide) {
+  inline std::vector<std::string> split(const std::string &str,
+                                        const std::string &devide) {
     std::vector<std::string> res;
-    if ("" == str) return res;
+    if ("" == str)
+      return res;
     char *strs = new char[str.length() + 1];
     strcpy(strs, str.c_str());
     char *d = new char[devide.length() + 1];
@@ -87,13 +89,19 @@ public:
     }
   };
   inline bool isNonLinear(std::string layerType) {
-    return layerType == _RELU_ || layerType == _PRELU_ || layerType == _SIGMOID_ || layerType == _TANH_ ? true : false;
+    return layerType == _RELU_ || layerType == _PRELU_ ||
+                   layerType == _SIGMOID_ || layerType == _TANH_
+               ? true
+               : false;
   }
-  std::pair<std::vector<std::string>, std::vector<std::string>> eltwiseTravel(const std::string eltwiseName);
-  std::vector<std::string> findUpChannels(const std::vector<std::string> *eltwiseLayers,
-                                          const std::vector<std::string> *splitLayers);
-  std::vector<std::string> findUpFilters(const std::vector<std::string> *eltwiseLayers,
-                                         const std::vector<std::string> *splitLayers);
+  std::pair<std::vector<std::string>, std::vector<std::string>>
+  eltwiseTravel(const std::string eltwiseName);
+  std::vector<std::string>
+  findUpChannels(const std::vector<std::string> *eltwiseLayers,
+                 const std::vector<std::string> *splitLayers);
+  std::vector<std::string>
+  findUpFilters(const std::vector<std::string> *eltwiseLayers,
+                const std::vector<std::string> *splitLayers);
   std::string findDown(const std::string layerName,
                        std::vector<std::string> *eltwiseLayers,
                        std::vector<std::string> *splitLayers);
@@ -102,44 +110,33 @@ public:
                      std::vector<std::string> *splitLayers);
   bool CheckIsEltwiseFilter(const std::string layerName);
   bool CheckIsEltwiseChannel(const std::string layerName);
-  void eltwiseCaculate(const peltwiserecord r, std::vector<int> *channelNeedPrune);
+  void eltwiseCaculate(const peltwiserecord r,
+                       std::vector<int> *channelNeedPrune);
   bool checkIsConv(const std::string layerName);
   std::string hasBottom(const std::string layerName);
   std::string hasTop(const std::string layerName);
   void pruningByratio(void);
-  void pruningEltwiseByratio(\
-        const peltwiserecord r, \
-        std::vector<int> *channelNeedPrune);
-  \
+  void pruningEltwiseByratio(const peltwiserecord r,
+                             std::vector<int> *channelNeedPrune);
 
-  void pruningConvByratio(\
-        const precord r, \
-        std::vector<int> *channelNeedPrune);
-  \
+  void pruningConvByratio(const precord r, std::vector<int> *channelNeedPrune);
 
-  void pruningBottomByratio(\
-        const precord r, \
-        std::vector<int> *channelNeedPrune);
-  \
+  void pruningBottomByratio(const precord r,
+                            std::vector<int> *channelNeedPrune);
 
-  int writePrototxt(\
-        const std::string prototxt1, \
-        const std::string prototxt2);
-  \
+  int writePrototxt(const std::string prototxt1, const std::string prototxt2);
 
-  void filterPruning(\
-        ::google::protobuf::RepeatedPtrField<caffe::LayerParameter>::iterator iter_, \
-        std::vector<int> *channelNeedPrune) const;
-  \
+  void filterPruning(::google::protobuf::RepeatedPtrField<
+                         caffe::LayerParameter>::iterator iter_,
+                     std::vector<int> *channelNeedPrune) const;
 
-  void channelPruning(\
-        ::google::protobuf::RepeatedPtrField<caffe::LayerParameter>::iterator iter_, \
-        std::vector<int> *channelNeedPrune) const;
-  \
+  void channelPruning(::google::protobuf::RepeatedPtrField<
+                          caffe::LayerParameter>::iterator iter_,
+                      std::vector<int> *channelNeedPrune) const;
 
   void pruningBySize();
   void writeModel();
-  virtual ~Pruner() {};
+  virtual ~Pruner(){};
 
 private:
   std::string xml_Path;
@@ -149,12 +146,8 @@ private:
   std::string pruned_proto_path;
   std::string txt_proto_path;
 
-  enum ConvCalculateMode {
-    Norm = 8, L1 = 11, L2 = 12, Variance = 16
-  };
-  enum PruningMode {
-    ratio = 0, size = 1
-  };
+  enum ConvCalculateMode { Norm = 8, L1 = 11, L2 = 12, Variance = 16 };
+  enum PruningMode { ratio = 0, size = 1 };
   int convCalculateMode;
   int pruningMode;
   boost::shared_ptr<Utility> utility_;
@@ -166,8 +159,6 @@ private:
   std::vector<eltwiseRecord> eltwiseConv;
   convParams convNeedRewriteOnPrototxt;
   ::google::protobuf::RepeatedPtrField<caffe::LayerParameter> *layer;
-  mutable ::google::protobuf::RepeatedPtrField<caffe::LayerParameter>::iterator it;
+  mutable ::google::protobuf::RepeatedPtrField<caffe::LayerParameter>::iterator
+      it;
 };
-
-
-

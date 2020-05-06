@@ -9,7 +9,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void AxpyLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                const vector<Blob<Dtype> *> &top) {
   CHECK_EQ(bottom[0]->shape(0), bottom[1]->shape(0));
@@ -28,7 +28,7 @@ void AxpyLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void AxpyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   int channel_dim = bottom[1]->channels();
@@ -47,9 +47,10 @@ void AxpyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void AxpyLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                    const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                    const vector<bool> &propagate_down,
+                                    const vector<Blob<Dtype> *> &bottom) {
   const int count = top[0]->count();
   const Dtype *top_diff = top[0]->cpu_diff();
   if (propagate_down[0]) {
@@ -60,7 +61,8 @@ void AxpyLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     caffe_mul(count, top_diff, x_data, x_diff);
     caffe_set(bottom[0]->count(), Dtype(0), scale_diff);
     caffe_cpu_gemv(CblasNoTrans, bottom[0]->count(), spatial_dim, Dtype(1),
-                   x_diff, spatial_sum_multiplier_.cpu_data(), Dtype(1), scale_diff);
+                   x_diff, spatial_sum_multiplier_.cpu_data(), Dtype(1),
+                   scale_diff);
     if (!propagate_down[1]) {
       caffe_set(bottom[1]->count(), Dtype(0), x_diff);
     }
@@ -91,4 +93,4 @@ STUB_GPU(AxpyLayer);
 INSTANTIATE_CLASS(AxpyLayer);
 REGISTER_LAYER_CLASS(Axpy);
 
-} // namespace
+} // namespace caffe

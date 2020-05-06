@@ -20,8 +20,7 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template<typename Dtype>
-class ArgMaxLayer : public Layer<Dtype> {
+template <typename Dtype> class ArgMaxLayer : public Layer<Dtype> {
 public:
   /**
    * @param param provides ArgMaxParameter argmax_param,
@@ -29,14 +28,13 @@ public:
    *   - top_k (\b optional uint, default 1).
    *     the number @f$ K @f$ of maximal items to output.
    *   - out_max_val (\b optional bool, default false).
-   *     if set, output a vector of pairs (max_ind, max_val) unless axis is set then
-   *     output max_val along the specified axis.
+   *     if set, output a vector of pairs (max_ind, max_val) unless axis is set
+   * then output max_val along the specified axis.
    *   - axis (\b optional int).
    *     if set, maximise along the specified axis else maximise the flattened
    *     trailing dimensions for each index of the first / num dimension.
    */
-  explicit ArgMaxLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit ArgMaxLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -63,7 +61,8 @@ protected:
                            const vector<Blob<Dtype> *> &top);
   /// @brief Not implemented (non-differentiable function)
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     NOT_IMPLEMENTED;
   }
   bool out_max_val_;
@@ -72,6 +71,6 @@ protected:
   int axis_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_ARGMAX_LAYER_HPP_
+#endif // CAFFE_ARGMAX_LAYER_HPP_

@@ -7,7 +7,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void DropoutLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
   NeuronLayer<Dtype>::LayerSetUp(bottom, top);
@@ -18,7 +18,7 @@ void DropoutLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   uint_thres_ = static_cast<unsigned int>(UINT_MAX * threshold_);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DropoutLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                   const vector<Blob<Dtype> *> &top) {
   NeuronLayer<Dtype>::Reshape(bottom, top);
@@ -27,7 +27,7 @@ void DropoutLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   rand_vec_.Reshape(bottom[0]->shape());
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DropoutLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -45,7 +45,7 @@ void DropoutLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DropoutLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                        const vector<bool> &propagate_down,
                                        const vector<Blob<Dtype> *> &bottom) {
@@ -71,4 +71,4 @@ STUB_GPU(DropoutLayer);
 INSTANTIATE_CLASS(DropoutLayer);
 REGISTER_LAYER_CLASS(Dropout);
 
-}  // namespace caffe
+} // namespace caffe

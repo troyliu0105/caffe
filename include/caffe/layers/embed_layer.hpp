@@ -16,11 +16,9 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward, Backward, and proto params.
  */
-template<typename Dtype>
-class EmbedLayer : public Layer<Dtype> {
+template <typename Dtype> class EmbedLayer : public Layer<Dtype> {
 public:
-  explicit EmbedLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit EmbedLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -36,9 +34,11 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   int M_;
   int K_;
@@ -47,6 +47,6 @@ protected:
   Blob<Dtype> bias_multiplier_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_EMBED_LAYER_HPP_
+#endif // CAFFE_EMBED_LAYER_HPP_

@@ -40,8 +40,7 @@ namespace caffe {
  *        \frac{-1}{N} \sum\limits_{n=1}^N \log(\hat{p}_{n,l_n})
  *      @f$, for softmax output class probabilites @f$ \hat{p} @f$
  */
-template<typename Dtype>
-class SoftmaxWithLossLayer : public LossLayer<Dtype> {
+template <typename Dtype> class SoftmaxWithLossLayer : public LossLayer<Dtype> {
 public:
   /**
    * @param param provides LossParameter loss_param, with options:
@@ -96,19 +95,22 @@ protected:
    *      the labels -- ignored as we can't compute their error gradients
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   /// Read the normalization mode parameter and compute the normalizer based
   /// on the blob size.  If normalization_mode is VALID, the count of valid
   /// outputs will be read from valid_count, unless it is -1 in which case
   /// all outputs are assumed to be valid.
-  virtual Dtype get_normalizer(
-      LossParameter_NormalizationMode normalization_mode, int valid_count);
+  virtual Dtype
+  get_normalizer(LossParameter_NormalizationMode normalization_mode,
+                 int valid_count);
 
   /// The internal SoftmaxLayer used to map predictions to a distribution.
-  shared_ptr<Layer<Dtype> > softmax_layer_;
+  shared_ptr<Layer<Dtype>> softmax_layer_;
   /// prob stores the output probability predictions from the SoftmaxLayer.
   Blob<Dtype> prob_;
   /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
@@ -125,6 +127,6 @@ protected:
   int softmax_axis_, outer_num_, inner_num_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SOFTMAX_WITH_LOSS_LAYER_HPP_
+#endif // CAFFE_SOFTMAX_WITH_LOSS_LAYER_HPP_

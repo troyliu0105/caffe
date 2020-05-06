@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class BiasLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -77,7 +77,7 @@ TYPED_TEST(BiasLayerTest, TestForwardEltwise) {
   this->blob_bottom_vec_.push_back(this->blob_bottom_eltwise_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(0);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -92,13 +92,13 @@ TYPED_TEST(BiasLayerTest, TestForwardEltwise) {
 
 TYPED_TEST(BiasLayerTest, TestForwardEltwiseInPlace) {
   typedef typename TypeParam::Dtype Dtype;
-  this->blob_top_vec_[0] = this->blob_bottom_;  // in-place computation
+  this->blob_top_vec_[0] = this->blob_bottom_; // in-place computation
   Blob<Dtype> orig_bottom(this->blob_bottom_->shape());
   orig_bottom.CopyFrom(*this->blob_bottom_);
   this->blob_bottom_vec_.push_back(this->blob_bottom_eltwise_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(0);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   const Dtype *data = this->blob_bottom_->cpu_data();
@@ -117,7 +117,7 @@ TYPED_TEST(BiasLayerTest, TestBackwardEltwiseInPlace) {
   this->blob_bottom_vec_.push_back(this->blob_bottom_eltwise_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(0);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   Blob<Dtype> top_diff(this->blob_bottom_->shape());
   FillerParameter filler_param;
   filler_param.set_type("gaussian");
@@ -137,11 +137,10 @@ TYPED_TEST(BiasLayerTest, TestBackwardEltwiseInPlace) {
   Blob<Dtype> orig_bottom_diff;
   orig_bottom_diff.CopyFrom(*this->blob_bottom_, kCopyDiff, kReshape);
   Blob<Dtype> orig_bias_diff;
-  orig_bias_diff.CopyFrom(*this->blob_bottom_eltwise_,
-                          kCopyDiff, kReshape);
+  orig_bias_diff.CopyFrom(*this->blob_bottom_eltwise_, kCopyDiff, kReshape);
   // Rerun forward + backward with in-place computation;
   // check that resulting bottom diffs are the same.
-  this->blob_top_vec_[0] = this->blob_bottom_;  // in-place computation
+  this->blob_top_vec_[0] = this->blob_bottom_; // in-place computation
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   caffe_copy(top_diff.count(), top_diff.cpu_data(),
              this->blob_bottom_->mutable_cpu_diff());
@@ -163,7 +162,7 @@ TYPED_TEST(BiasLayerTest, TestForwardEltwiseWithParam) {
   bias_param->set_axis(0);
   bias_param->set_num_axes(-1);
   bias_param->mutable_filler()->set_type("gaussian");
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -181,7 +180,7 @@ TYPED_TEST(BiasLayerTest, TestForwardBroadcastBegin) {
   this->blob_bottom_vec_.push_back(this->blob_bottom_broadcast_0_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(0);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -204,7 +203,7 @@ TYPED_TEST(BiasLayerTest, TestForwardBroadcastMiddle) {
   this->blob_bottom_vec_.push_back(this->blob_bottom_broadcast_1_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(1);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -224,13 +223,13 @@ TYPED_TEST(BiasLayerTest, TestForwardBroadcastMiddle) {
 
 TYPED_TEST(BiasLayerTest, TestForwardBroadcastMiddleInPlace) {
   typedef typename TypeParam::Dtype Dtype;
-  this->blob_top_vec_[0] = this->blob_bottom_;  // in-place computation
+  this->blob_top_vec_[0] = this->blob_bottom_; // in-place computation
   Blob<Dtype> orig_bottom(this->blob_bottom_->shape());
   orig_bottom.CopyFrom(*this->blob_bottom_);
   this->blob_bottom_vec_.push_back(this->blob_bottom_broadcast_1_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(1);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   for (int n = 0; n < this->blob_bottom_->num(); ++n) {
@@ -254,7 +253,7 @@ TYPED_TEST(BiasLayerTest, TestBackwardBroadcastMiddleInPlace) {
   this->blob_bottom_vec_.push_back(this->blob_bottom_broadcast_1_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(1);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   Blob<Dtype> top_diff(this->blob_bottom_->shape());
   FillerParameter filler_param;
   filler_param.set_type("gaussian");
@@ -274,11 +273,10 @@ TYPED_TEST(BiasLayerTest, TestBackwardBroadcastMiddleInPlace) {
   Blob<Dtype> orig_bottom_diff;
   orig_bottom_diff.CopyFrom(*this->blob_bottom_, kCopyDiff, kReshape);
   Blob<Dtype> orig_bias_diff;
-  orig_bias_diff.CopyFrom(*this->blob_bottom_broadcast_1_,
-                          kCopyDiff, kReshape);
+  orig_bias_diff.CopyFrom(*this->blob_bottom_broadcast_1_, kCopyDiff, kReshape);
   // Rerun forward + backward with in-place computation;
   // check that resulting bottom diffs are the same.
-  this->blob_top_vec_[0] = this->blob_bottom_;  // in-place computation
+  this->blob_top_vec_[0] = this->blob_bottom_; // in-place computation
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   caffe_copy(top_diff.count(), top_diff.cpu_data(),
              this->blob_bottom_->mutable_cpu_diff());
@@ -300,7 +298,7 @@ TYPED_TEST(BiasLayerTest, TestForwardBroadcastMiddleWithParam) {
   bias_param->set_axis(1);
   bias_param->set_num_axes(2);
   bias_param->mutable_filler()->set_type("gaussian");
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -310,7 +308,8 @@ TYPED_TEST(BiasLayerTest, TestForwardBroadcastMiddleWithParam) {
         for (int w = 0; w < this->blob_bottom_->width(); ++w) {
           EXPECT_NEAR(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_->data_at(n, c, h, w) +
-                          layer->blobs()[0]->data_at(c, h, 0, 0), 1e-5);
+                          layer->blobs()[0]->data_at(c, h, 0, 0),
+                      1e-5);
         }
       }
     }
@@ -322,7 +321,7 @@ TYPED_TEST(BiasLayerTest, TestForwardBroadcastEnd) {
   this->blob_bottom_vec_.push_back(this->blob_bottom_broadcast_2_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(2);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -344,7 +343,7 @@ TYPED_TEST(BiasLayerTest, TestForwardBias) {
   typedef typename TypeParam::Dtype Dtype;
   this->blob_bottom_vec_.push_back(this->blob_bottom_bias_);
   LayerParameter layer_param;
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -362,7 +361,7 @@ TYPED_TEST(BiasLayerTest, TestForwardBiasAxis2) {
   this->blob_bottom_vec_.push_back(this->blob_bottom_bias_);
   LayerParameter layer_param;
   layer_param.mutable_bias_param()->set_axis(2);
-  shared_ptr<BiasLayer<Dtype> > layer(new BiasLayer<Dtype>(layer_param));
+  shared_ptr<BiasLayer<Dtype>> layer(new BiasLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_bottom_->shape(), this->blob_top_->shape());
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -467,4 +466,4 @@ TYPED_TEST(BiasLayerTest, TestGradientBiasAxis2) {
                                   this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

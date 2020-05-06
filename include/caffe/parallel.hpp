@@ -23,70 +23,61 @@ namespace caffe {
 // Represents a net parameters. Once a net is created, its parameter buffers can
 // be replaced by ones from Params, to allow parallelization. Params ensures
 // parameters are allocated in one consecutive array.
-template<typename Dtype>
-class Params {
- public:
-  explicit Params(shared_ptr<Solver<Dtype> > root_solver);
-  virtual ~Params() {
-  }
+template <typename Dtype> class Params {
+public:
+  explicit Params(shared_ptr<Solver<Dtype>> root_solver);
+  virtual ~Params() {}
 
-  inline size_t size() const {
-    return size_;
-  }
-  inline Dtype* data() const {
-    return data_;
-  }
-  inline Dtype* diff() const {
-    return diff_;
-  }
+  inline size_t size() const { return size_; }
+  inline Dtype *data() const { return data_; }
+  inline Dtype *diff() const { return diff_; }
 
- protected:
-  const size_t size_;           // Size of buffers
-  Dtype* data_;                 // Network parameters
-  Dtype* diff_;                 // Gradient
+protected:
+  const size_t size_; // Size of buffers
+  Dtype *data_;       // Network parameters
+  Dtype *diff_;       // Gradient
 
-DISABLE_COPY_AND_ASSIGN(Params);
+  DISABLE_COPY_AND_ASSIGN(Params);
 };
 
 // Params stored in GPU memory.
-template<typename Dtype>
-class GPUParams : public Params<Dtype> {
- public:
-  GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device);
+template <typename Dtype> class GPUParams : public Params<Dtype> {
+public:
+  GPUParams(shared_ptr<Solver<Dtype>> root_solver, int device);
   virtual ~GPUParams();
 
-  void Configure(Solver<Dtype>* solver) const;
+  void Configure(Solver<Dtype> *solver) const;
 
- protected:
+protected:
   using Params<Dtype>::size_;
   using Params<Dtype>::data_;
   using Params<Dtype>::diff_;
 };
 
-template<typename Dtype>
+template <typename Dtype>
 class NCCL : public GPUParams<Dtype>,
              public Solver<Dtype>::Callback,
              public Net<Dtype>::Callback {
- public:
+public:
   /**
    * Single process version.
    */
-  explicit NCCL(shared_ptr<Solver<Dtype> > solver);
+  explicit NCCL(shared_ptr<Solver<Dtype>> solver);
   /**
    * In multi-process settings, first create a NCCL id (new_uid), then
    * pass it to each process to create connected instances.
    */
-  NCCL(shared_ptr<Solver<Dtype> > solver, const string& uid);
+  NCCL(shared_ptr<Solver<Dtype>> solver, const string &uid);
   ~NCCL();
 
-  boost::barrier* barrier();
-  void set_barrier(boost::barrier* value);
+  boost::barrier *barrier();
+  void set_barrier(boost::barrier *value);
 
   /**
    * In single process settings, create instances without uids and
    * call this to connect them.
    */
-  static void InitSingleProcess(vector<NCCL<Dtype>*>* nccls);
+  static void InitSingleProcess(vector<NCCL<Dtype> *> *nccls);
 
   static string new_uid();
 
@@ -98,26 +89,26 @@ class NCCL : public GPUParams<Dtype>,
   /**
    * Single process multi-GPU.
    */
-  void Run(const vector<int>& gpus, const char* restore);
+  void Run(const vector<int> &gpus, const char *restore);
 
- protected:
+protected:
   void Init();
   void on_start() {}
-  void run(int layer);  // Net callback
+  void run(int layer); // Net callback
   void on_gradients_ready();
 
   ncclComm_t comm_;
   cudaStream_t stream_;
 
-  shared_ptr<Solver<Dtype> > solver_;
+  shared_ptr<Solver<Dtype>> solver_;
   // Should not be necessary, https://github.com/NVIDIA/nccl/issues/37
-  boost::barrier* barrier_;
+  boost::barrier *barrier_;
   using Params<Dtype>::size_;
   using Params<Dtype>::data_;
   using Params<Dtype>::diff_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // USE_NCCL
-#endif  // header
+#endif // USE_NCCL
+#endif // header

@@ -9,7 +9,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void RecurrentLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                         const vector<Blob<Dtype> *> &top) {
   // Hacky fix for test time... reshare all the shared blobs.
@@ -41,4 +41,4 @@ void RecurrentLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
 
 INSTANTIATE_LAYER_GPU_FORWARD(RecurrentLayer);
 
-}  // namespace caffe
+} // namespace caffe

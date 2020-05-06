@@ -4,7 +4,7 @@
 
 #include <cstring>
 #include <fstream>  // NOLINT(readability/streams)
-#include <iostream>  // NOLINT(readability/streams)
+#include <iostream> // NOLINT(readability/streams)
 #include <string>
 
 #include "caffe/caffe.hpp"
@@ -13,13 +13,14 @@
 
 using std::ofstream;
 
-using namespace caffe;  // NOLINT(build/namespaces)
+using namespace caffe; // NOLINT(build/namespaces)
 
-int main(int argc, char** argv) {
-  FLAGS_alsologtostderr = 1;  // Print output to stderr (while still logging)
+int main(int argc, char **argv) {
+  FLAGS_alsologtostderr = 1; // Print output to stderr (while still logging)
   ::google::InitGoogleLogging(argv[0]);
   if (argc != 3) {
-    LOG(ERROR) << "Usage: "
+    LOG(ERROR)
+        << "Usage: "
         << "upgrade_net_proto_text v0_net_proto_file_in net_proto_file_out";
     return 1;
   }

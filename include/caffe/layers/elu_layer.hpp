@@ -18,19 +18,18 @@ namespace caffe {
  *            x                  & \mathrm{if} \; x > 0 \\
  *            \alpha (\exp(x)-1) & \mathrm{if} \; x \le 0
  *        \end{array} \right.
- *      @f$.  
+ *      @f$.
  */
-template<typename Dtype>
-class ELULayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class ELULayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides ELUParameter elu_param,
    *     with ELULayer options:
    *   - alpha (\b optional, default 1).
-   *     the value @f$ \alpha @f$ by which controls saturation for negative inputs.
+   *     the value @f$ \alpha @f$ by which controls saturation for negative
+   * inputs.
    */
-  explicit ELULayer(const LayerParameter &param)
-      : NeuronLayer<Dtype>(param) {}
+  explicit ELULayer(const LayerParameter &param) : NeuronLayer<Dtype>(param) {}
 
   virtual inline const char *type() const { return "ELU"; }
 
@@ -47,7 +46,7 @@ protected:
    *            x                  & \mathrm{if} \; x > 0 \\
    *            \alpha (\exp(x)-1) & \mathrm{if} \; x \le 0
    *        \end{array} \right.
-   *      @f$.  
+   *      @f$.
    */
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
@@ -75,11 +74,13 @@ protected:
    *      @f$ if propagate_down[0].
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_ELU_LAYER_HPP_
+#endif // CAFFE_ELU_LAYER_HPP_

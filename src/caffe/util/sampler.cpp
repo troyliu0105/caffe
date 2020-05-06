@@ -2,8 +2,8 @@
 #include <vector>
 
 #include "caffe/util/bbox_util.hpp"
-#include "caffe/util/sampler.hpp"
 #include "caffe/util/im_transforms.hpp"
+#include "caffe/util/sampler.hpp"
 namespace caffe {
 
 void GroupObjectBBoxes(const AnnotatedDatum &anno_datum,
@@ -22,13 +22,13 @@ bool SatisfySampleConstraint(const NormalizedBBox &sampled_bbox,
                              const vector<NormalizedBBox> &object_bboxes,
                              const SampleConstraint &sample_constraint) {
   bool has_jaccard_overlap = sample_constraint.has_min_jaccard_overlap() ||
-      sample_constraint.has_max_jaccard_overlap();
+                             sample_constraint.has_max_jaccard_overlap();
   bool has_sample_coverage = sample_constraint.has_min_sample_coverage() ||
-      sample_constraint.has_max_sample_coverage();
+                             sample_constraint.has_max_sample_coverage();
   bool has_object_coverage = sample_constraint.has_min_object_coverage() ||
-      sample_constraint.has_max_object_coverage();
-  bool satisfy = !has_jaccard_overlap && !has_sample_coverage &&
-      !has_object_coverage;
+                             sample_constraint.has_max_object_coverage();
+  bool satisfy =
+      !has_jaccard_overlap && !has_sample_coverage && !has_object_coverage;
   if (satisfy) {
     // By default, the sampled_bbox is "positive" if no constraints are defined.
     return true;
@@ -108,8 +108,10 @@ void SampleBBox(const Sampler &sampler, NormalizedBBox *sampled_bbox) {
 
   // Figure out top left coordinates.
   float w_off, h_off;
-  caffe_rng_uniform(1, 0.f, std::max<float>(1 - bbox_width, 0.00000001f), &w_off);
-  caffe_rng_uniform(1, 0.f, std::max<float>(1 - bbox_height, 0.00000001f), &h_off);
+  caffe_rng_uniform(1, 0.f, std::max<float>(1 - bbox_width, 0.00000001f),
+                    &w_off);
+  caffe_rng_uniform(1, 0.f, std::max<float>(1 - bbox_height, 0.00000001f),
+                    &h_off);
 
   sampled_bbox->set_xmin(w_off);
   sampled_bbox->set_ymin(h_off);
@@ -123,8 +125,7 @@ void GenerateSamples(const NormalizedBBox &source_bbox,
                      vector<NormalizedBBox> *sampled_bboxes) {
   int found = 0;
   for (int i = 0; i < batch_sampler.max_trials(); ++i) {
-    if (batch_sampler.has_max_sample() &&
-        found >= batch_sampler.max_sample()) {
+    if (batch_sampler.has_max_sample() && found >= batch_sampler.max_sample()) {
       break;
     }
     // Generate sampled_bbox in the normalized space [0, 1].
@@ -140,7 +141,8 @@ void GenerateSamples(const NormalizedBBox &source_bbox,
     }
   }
 }
-void GenerateJitterSamples(float jitter, vector<NormalizedBBox> *sampled_bboxes, bool keep_aspec_ratio) {
+void GenerateJitterSamples(float jitter, vector<NormalizedBBox> *sampled_bboxes,
+                           bool keep_aspec_ratio) {
   float img_w, img_h, off_x, off_y;
   std::vector<float> probabilities;
   probabilities.push_back(0.2);
@@ -175,7 +177,6 @@ void GenerateJitterSamples(float jitter, vector<NormalizedBBox> *sampled_bboxes,
     sampled_bbox.set_ymax(1);
     sampled_bboxes->push_back(sampled_bbox);
   }
-
 }
 void GenerateBatchSamples(const AnnotatedDatum &anno_datum,
                           const vector<BatchSampler> &batch_samplers,
@@ -196,4 +197,4 @@ void GenerateBatchSamples(const AnnotatedDatum &anno_datum,
   }
 }
 
-}  // namespace caffe
+} // namespace caffe

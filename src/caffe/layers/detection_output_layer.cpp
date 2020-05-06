@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <fstream>  // NOLINT(readability/streams)
+#include <fstream> // NOLINT(readability/streams)
 #include <map>
 #include <string>
 #include <utility>
@@ -9,9 +9,9 @@
 
 namespace caffe {
 
-template<typename Dtype>
-void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
-                                             const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void DetectionOutputLayer<Dtype>::LayerSetUp(
+    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const DetectionOutputParameter &detection_output_param =
       this->layer_param_.detection_output_param();
   CHECK(detection_output_param.has_num_classes()) << "Must specify num_classes";
@@ -23,8 +23,9 @@ void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom
   variance_encoded_in_target_ =
       detection_output_param.variance_encoded_in_target();
   keep_top_k_ = detection_output_param.keep_top_k();
-  confidence_threshold_ = detection_output_param.has_confidence_threshold() ?
-                          detection_output_param.confidence_threshold() : -FLT_MAX;
+  confidence_threshold_ = detection_output_param.has_confidence_threshold()
+                              ? detection_output_param.confidence_threshold()
+                              : -FLT_MAX;
   // Parameters used in nms.
   nms_threshold_ = detection_output_param.nms_param().nms_threshold();
   CHECK_GE(nms_threshold_, 0.) << "nms_threshold must be non negative.";
@@ -51,11 +52,11 @@ void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom
     } else {
       LabelMap label_map;
       CHECK(ReadProtoFromTextFile(label_map_file, &label_map))
-              << "Failed to read label map file: " << label_map_file;
+          << "Failed to read label map file: " << label_map_file;
       CHECK(MapLabelToName(label_map, true, &label_to_name_))
-              << "Failed to convert label to name.";
+          << "Failed to convert label to name.";
       CHECK(MapLabelToDisplayName(label_map, true, &label_to_display_name_))
-              << "Failed to convert label to display name.";
+          << "Failed to convert label to display name.";
     }
   } else {
     need_save_ = false;
@@ -68,8 +69,8 @@ void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom
       need_save_ = false;
     } else {
       std::ifstream infile(name_size_file.c_str());
-      CHECK(infile.good())
-              << "Failed to open name size file: " << name_size_file;
+      CHECK(infile.good()) << "Failed to open name size file: "
+                           << name_size_file;
       // The file is in the following format:
       //    name height width
       //    ...
@@ -101,9 +102,8 @@ void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom
     if (detection_output_param.has_visualize_threshold()) {
       visualize_threshold_ = detection_output_param.visualize_threshold();
     }
-    data_transformer_.reset(
-        new DataTransformer<Dtype>(this->layer_param_.transform_param(),
-                                   this->phase_));
+    data_transformer_.reset(new DataTransformer<Dtype>(
+        this->layer_param_.transform_param(), this->phase_));
     data_transformer_->InitRand();
     save_file_ = detection_output_param.save_file();
   }
@@ -114,7 +114,7 @@ void DetectionOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom
   conf_permute_.ReshapeLike(*(bottom[1]));
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DetectionOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                           const vector<Blob<Dtype> *> &top) {
 
@@ -124,7 +124,7 @@ void DetectionOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
     bbox_preds_.ReshapeLike(*(bottom[0]));
   }
   if (!share_location_ && (bbox_permute_.num() != bottom[0]->num() ||
-      bbox_permute_.count(1) != bottom[0]->count(1))) {
+                           bbox_permute_.count(1) != bottom[0]->count(1))) {
     bbox_permute_.ReshapeLike(*(bottom[0]));
   }
   if (conf_permute_.num() != bottom[1]->num() ||
@@ -133,9 +133,9 @@ void DetectionOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
   num_priors_ = bottom[2]->height() / 4;
   CHECK_EQ(num_priors_ * num_loc_classes_ * 4, bottom[0]->channels())
-    << "Number of priors must match number of location predictions.";
+      << "Number of priors must match number of location predictions.";
   CHECK_EQ(num_priors_ * num_classes_, bottom[1]->channels())
-    << "Number of priors must match number of confidence predictions.";
+      << "Number of priors must match number of confidence predictions.";
   // num() and channels() are 1.
   vector<int> top_shape(2, 1);
   // Since the number of bboxes to be kept is unknown before nms, we manually
@@ -147,7 +147,7 @@ void DetectionOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   top[0]->Reshape(top_shape);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DetectionOutputLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const Dtype *loc_data = bottom[0]->cpu_data();
@@ -161,14 +161,14 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
                     share_location_, &all_loc_preds);
 
   // Retrieve all confidences.
-  vector<map<int, vector<float> > > all_conf_scores;
+  vector<map<int, vector<float>>> all_conf_scores;
   GetConfidenceScores(conf_data, num, num_priors_, num_classes_,
                       &all_conf_scores);
 
   // Retrieve all prior bboxes. It is same within a batch since we assume all
   // images in a batch are of same dimension.
   vector<NormalizedBBox> prior_bboxes;
-  vector<vector<float> > prior_variances;
+  vector<vector<float>> prior_variances;
   GetPriorBBoxes(prior_data, num_priors_, &prior_bboxes, &prior_variances);
 
   // Decode all loc predictions to bboxes.
@@ -180,11 +180,11 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
                   &all_decode_bboxes);
 
   int num_kept = 0;
-  vector<map<int, vector<int> > > all_indices;
+  vector<map<int, vector<int>>> all_indices;
   for (int i = 0; i < num; ++i) {
     const LabelBBox &decode_bboxes = all_decode_bboxes[i];
-    const map<int, vector<float> > &conf_scores = all_conf_scores[i];
-    map<int, vector<int> > indices;
+    const map<int, vector<float>> &conf_scores = all_conf_scores[i];
+    map<int, vector<int>> indices;
     int num_det = 0;
     for (int c = 0; c < num_classes_; ++c) {
       if (c == background_label_id_) {
@@ -208,8 +208,8 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
       num_det += indices[c].size();
     }
     if (keep_top_k_ > -1 && num_det > keep_top_k_) {
-      vector<pair<float, pair<int, int> > > score_index_pairs;
-      for (map<int, vector<int> >::iterator it = indices.begin();
+      vector<pair<float, pair<int, int>>> score_index_pairs;
+      for (map<int, vector<int>>::iterator it = indices.begin();
            it != indices.end(); ++it) {
         int label = it->first;
         const vector<int> &label_indices = it->second;
@@ -222,16 +222,16 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
         for (int j = 0; j < label_indices.size(); ++j) {
           int idx = label_indices[j];
           CHECK_LT(idx, scores.size());
-          score_index_pairs.push_back(std::make_pair(
-              scores[idx], std::make_pair(label, idx)));
+          score_index_pairs.push_back(
+              std::make_pair(scores[idx], std::make_pair(label, idx)));
         }
       }
       // Keep top k results per image.
       std::sort(score_index_pairs.begin(), score_index_pairs.end(),
-                SortScorePairDescend<pair<int, int> >);
+                SortScorePairDescend<pair<int, int>>);
       score_index_pairs.resize(keep_top_k_);
       // Store the new indices.
-      map<int, vector<int> > new_indices;
+      map<int, vector<int>> new_indices;
       for (int j = 0; j < score_index_pairs.size(); ++j) {
         int label = score_index_pairs[j].second.first;
         int idx = score_index_pairs[j].second.second;
@@ -268,9 +268,9 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
   int count = 0;
 
   for (int i = 0; i < num; ++i) {
-    const map<int, vector<float> > &conf_scores = all_conf_scores[i];
+    const map<int, vector<float>> &conf_scores = all_conf_scores[i];
     const LabelBBox &decode_bboxes = all_decode_bboxes[i];
-    for (map<int, vector<int> >::iterator it = all_indices[i].begin();
+    for (map<int, vector<int>>::iterator it = all_indices[i].begin();
          it != all_indices[i].end(); ++it) {
       int label = it->first;
       if (conf_scores.find(label) == conf_scores.end()) {
@@ -290,7 +290,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
       vector<int> &indices = it->second;
       if (need_save_) {
         CHECK(label_to_name_.find(label) != label_to_name_.end())
-                << "Cannot find label: " << label << " in the label map.";
+            << "Cannot find label: " << label << " in the label map.";
         CHECK_LT(name_count_, names_.size());
       }
       for (int j = 0; j < indices.size(); ++j) {
@@ -306,7 +306,6 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
         ++count;
       }
     }
-
   }
   if (visualize_) {
 #ifdef USE_OPENCV
@@ -315,7 +314,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
     vector<cv::Scalar> colors = GetColors(label_to_display_name_.size());
     VisualizeBBox(cv_imgs, top[0], visualize_threshold_, colors,
                   label_to_display_name_, save_file_);
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
   }
 }
 
@@ -326,4 +325,4 @@ STUB_GPU_FORWARD(DetectionOutputLayer, Forward);
 INSTANTIATE_CLASS(DetectionOutputLayer);
 REGISTER_LAYER_CLASS(DetectionOutput);
 
-}  // namespace caffe
+} // namespace caffe

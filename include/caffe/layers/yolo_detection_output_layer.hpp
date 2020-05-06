@@ -15,7 +15,7 @@
 #include "caffe/layer.hpp"
 #include "caffe/proto/caffe.pb.h"
 
-using namespace boost::property_tree;  // NOLINT(build/namespaces)
+using namespace boost::property_tree; // NOLINT(build/namespaces)
 
 namespace caffe {
 
@@ -27,8 +27,7 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template<typename Dtype>
-class YoloDetectionOutputLayer : public Layer<Dtype> {
+template <typename Dtype> class YoloDetectionOutputLayer : public Layer<Dtype> {
 public:
   explicit YoloDetectionOutputLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
@@ -39,7 +38,7 @@ public:
 
   virtual inline const char *type() const { return "DetectionOutput"; }
   virtual inline int MinBottomBlobs() const { return 1; }
-  //virtual inline int MaxBottomBlobs() const { return 4; }
+  // virtual inline int MaxBottomBlobs() const { return 4; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
 protected:
@@ -63,7 +62,8 @@ protected:
 
   /// @brief Not implemented
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     NOT_IMPLEMENTED;
   }
 
@@ -76,9 +76,8 @@ protected:
   vector<Dtype> biases_;
 
   map<int, string> label_to_name_;
-
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DETECTION_OUTPUT_LAYER_HPP_
+#endif // CAFFE_DETECTION_OUTPUT_LAYER_HPP_

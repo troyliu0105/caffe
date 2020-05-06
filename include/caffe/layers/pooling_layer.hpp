@@ -14,11 +14,9 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward, Backward, and proto params.
  */
-template<typename Dtype>
-class PoolingLayer : public Layer<Dtype> {
+template <typename Dtype> class PoolingLayer : public Layer<Dtype> {
 public:
-  explicit PoolingLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit PoolingLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -31,7 +29,9 @@ public:
   // others can only output the pooled inputs.
   virtual inline int MaxTopBlobs() const {
     return (this->layer_param_.pooling_param().pool() ==
-        PoolingParameter_PoolMethod_MAX) ? 2 : 1;
+            PoolingParameter_PoolMethod_MAX)
+               ? 2
+               : 1;
   }
 
 protected:
@@ -40,9 +40,11 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   int kernel_h_, kernel_w_;
   int stride_h_, stride_w_;
@@ -56,6 +58,6 @@ protected:
   Blob<int> max_idx_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_POOLING_LAYER_HPP_
+#endif // CAFFE_POOLING_LAYER_HPP_

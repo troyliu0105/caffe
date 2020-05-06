@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ShuffleChannelLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                             const vector<Blob<Dtype> *> &top) {
   group_ = this->layer_param_.shuffle_channel_param().group();
@@ -14,7 +14,7 @@ void ShuffleChannelLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   top[0]->ReshapeLike(*bottom[0]);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ShuffleChannelLayer<Dtype>::Resize_cpu(Dtype *output, const Dtype *input,
                                             int group_row, int group_column,
                                             int len) {
@@ -30,7 +30,7 @@ void ShuffleChannelLayer<Dtype>::Resize_cpu(Dtype *output, const Dtype *input,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ShuffleChannelLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                          const vector<Blob<Dtype> *> &top) {
   int channels_ = bottom[0]->channels();
@@ -40,7 +40,7 @@ void ShuffleChannelLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   top[0]->Reshape(bottom[0]->num(), channels_, height_, width_);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ShuffleChannelLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -64,7 +64,7 @@ void ShuffleChannelLayer<Dtype>::Forward_cpu(
   // caffe_copy(bottom[0]->count(), temp_blob_.cpu_data(), top_data);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ShuffleChannelLayer<Dtype>::Backward_cpu(
     const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
     const vector<Blob<Dtype> *> &bottom) {

@@ -1,11 +1,11 @@
-#include "caffe/caffe.hpp"
 #include "caffe/test/test_caffe_main.hpp"
+#include "caffe/caffe.hpp"
 
 namespace caffe {
 #ifndef CPU_ONLY
 cudaDeviceProp CAFFE_TEST_CUDA_PROP;
 #endif
-}
+} // namespace caffe
 
 #ifndef CPU_ONLY
 using caffe::CAFFE_TEST_CUDA_PROP;

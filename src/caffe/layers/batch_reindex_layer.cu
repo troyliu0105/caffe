@@ -7,7 +7,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void BRForward(const int count, const int inner_dim, const Dtype *in,
                           const Dtype *permut, Dtype *out) {
   CUDA_KERNEL_LOOP(index, count) {
@@ -17,7 +17,7 @@ __global__ void BRForward(const int count, const int inner_dim, const Dtype *in,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BatchReindexLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                            const vector<Blob<Dtype> *> &top) {
   check_batch_reindex(bottom[0]->shape(0), bottom[1]->count(),
@@ -27,13 +27,13 @@ void BatchReindexLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
   int threads = top[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  BRForward<Dtype> <<<CAFFE_GET_BLOCKS(threads), CAFFE_CUDA_NUM_THREADS>>>(
+  BRForward<Dtype><<<CAFFE_GET_BLOCKS(threads), CAFFE_CUDA_NUM_THREADS>>>(
       top[0]->count(), bottom[0]->count() / bottom[0]->shape(0),
       bottom[0]->gpu_data(), bottom[1]->gpu_data(), top[0]->mutable_gpu_data());
   CUDA_POST_KERNEL_CHECK;
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void BRBackward(const int count, const int inner_dim,
                            const Dtype *in, const Dtype *top_indexes,
                            const Dtype *begins, const Dtype *counts,
@@ -50,7 +50,7 @@ __global__ void BRBackward(const int count, const int inner_dim,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BatchReindexLayer<Dtype>::Backward_gpu(
     const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
     const vector<Blob<Dtype> *> &bottom) {
@@ -59,7 +59,7 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
     return;
   }
 
-  vector<std::pair<int, int> > mapping;
+  vector<std::pair<int, int>> mapping;
   const Dtype *perm = bottom[1]->cpu_data();
   for (int i = 0; i < bottom[1]->count(); ++i) {
     mapping.push_back(pair<int, int>(static_cast<int>(perm[i]), i));
@@ -94,7 +94,7 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
 
   int threads = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  BRBackward<Dtype> <<<CAFFE_GET_BLOCKS(threads), CAFFE_CUDA_NUM_THREADS>>>(
+  BRBackward<Dtype><<<CAFFE_GET_BLOCKS(threads), CAFFE_CUDA_NUM_THREADS>>>(
       bottom[0]->count(), bottom[0]->count() / bottom[0]->shape(0),
       top[0]->gpu_diff(), top_indexes.gpu_data(), begins.gpu_data(),
       counts.gpu_data(), bottom[0]->mutable_gpu_diff());
@@ -103,4 +103,4 @@ void BatchReindexLayer<Dtype>::Backward_gpu(
 
 INSTANTIATE_LAYER_GPU_FUNCS(BatchReindexLayer);
 
-}  // namespace caffe
+} // namespace caffe

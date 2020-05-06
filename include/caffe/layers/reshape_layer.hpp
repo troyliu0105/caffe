@@ -15,11 +15,9 @@ namespace caffe {
  * Note: similarly to FlattenLayer, this layer does not change the input values
  * (see FlattenLayer, Blob::ShareData and Blob::ShareDiff).
  */
-template<typename Dtype>
-class ReshapeLayer : public Layer<Dtype> {
+template <typename Dtype> class ReshapeLayer : public Layer<Dtype> {
 public:
-  explicit ReshapeLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit ReshapeLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -33,11 +31,13 @@ protected:
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top) {}
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {}
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top) {}
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {}
 
   /// @brief vector of axes indices whose dimensions we'll copy from the bottom
   vector<int> copy_axes_;
@@ -47,6 +47,6 @@ protected:
   int constant_count_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_XXX_LAYER_HPP_
+#endif // CAFFE_XXX_LAYER_HPP_

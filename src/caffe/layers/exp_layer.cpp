@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ExpLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                  const vector<Blob<Dtype> *> &top) {
   NeuronLayer<Dtype>::LayerSetUp(bottom, top);
@@ -16,18 +16,20 @@ void ExpLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   // If base == -1, interpret the base as e and set log_base = 1 exactly.
   // Otherwise, calculate its log explicitly.
   const Dtype log_base = (base == Dtype(-1)) ? Dtype(1) : log(base);
-  CHECK(!isnan(log_base))
-          << "NaN result: log(base) = log(" << base << ") = " << log_base;
-  CHECK(!isinf(log_base))
-          << "Inf result: log(base) = log(" << base << ") = " << log_base;
+  CHECK(!isnan(log_base)) << "NaN result: log(base) = log(" << base
+                          << ") = " << log_base;
+  CHECK(!isinf(log_base)) << "Inf result: log(base) = log(" << base
+                          << ") = " << log_base;
   const Dtype input_scale = this->layer_param_.exp_param().scale();
   const Dtype input_shift = this->layer_param_.exp_param().shift();
   inner_scale_ = log_base * input_scale;
-  outer_scale_ = (input_shift == Dtype(0)) ? Dtype(1) :
-                 ((base != Dtype(-1)) ? pow(base, input_shift) : exp(input_shift));
+  outer_scale_ =
+      (input_shift == Dtype(0))
+          ? Dtype(1)
+          : ((base != Dtype(-1)) ? pow(base, input_shift) : exp(input_shift));
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ExpLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                   const vector<Blob<Dtype> *> &top) {
   const int count = bottom[0]->count();
@@ -44,10 +46,13 @@ void ExpLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ExpLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                   const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
-  if (!propagate_down[0]) { return; }
+                                   const vector<bool> &propagate_down,
+                                   const vector<Blob<Dtype> *> &bottom) {
+  if (!propagate_down[0]) {
+    return;
+  }
   const int count = bottom[0]->count();
   const Dtype *top_data = top[0]->cpu_data();
   const Dtype *top_diff = top[0]->cpu_diff();
@@ -65,4 +70,4 @@ STUB_GPU(ExpLayer);
 INSTANTIATE_CLASS(ExpLayer);
 REGISTER_LAYER_CLASS(Exp);
 
-}  // namespace caffe
+} // namespace caffe

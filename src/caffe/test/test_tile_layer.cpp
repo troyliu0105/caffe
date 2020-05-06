@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class TileLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -158,4 +158,4 @@ TYPED_TEST(TileLayerTest, TestGradientChannels) {
                                   this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

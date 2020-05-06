@@ -24,10 +24,8 @@ TEST_F(PlatformTest, TestInitialization) {
          CAFFE_TEST_CUDA_PROP.sharedMemPerBlock);
   printf("Total registers per block:     %d\n",
          CAFFE_TEST_CUDA_PROP.regsPerBlock);
-  printf("Warp size:                     %d\n",
-         CAFFE_TEST_CUDA_PROP.warpSize);
-  printf("Maximum memory pitch:          %lu\n",
-         CAFFE_TEST_CUDA_PROP.memPitch);
+  printf("Warp size:                     %d\n", CAFFE_TEST_CUDA_PROP.warpSize);
+  printf("Maximum memory pitch:          %lu\n", CAFFE_TEST_CUDA_PROP.memPitch);
   printf("Maximum threads per block:     %d\n",
          CAFFE_TEST_CUDA_PROP.maxThreadsPerBlock);
   for (int i = 0; i < 3; ++i)
@@ -52,6 +50,6 @@ TEST_F(PlatformTest, TestInitialization) {
   EXPECT_TRUE(true);
 }
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CPU_ONLY
+#endif // CPU_ONLY

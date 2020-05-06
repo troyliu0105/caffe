@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void PowerLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   NeuronLayer<Dtype>::LayerSetUp(bottom, top);
@@ -16,7 +16,7 @@ void PowerLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 }
 
 // Compute y = (shift + scale * x)^power
-template<typename Dtype>
+template <typename Dtype>
 void PowerLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   Dtype *top_data = top[0]->mutable_cpu_data();
@@ -40,7 +40,7 @@ void PowerLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PowerLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                      const vector<bool> &propagate_down,
                                      const vector<Blob<Dtype> *> &bottom) {
@@ -58,8 +58,8 @@ void PowerLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
         // Special case for y = (shift + scale * x)^2
         //     -> dy/dx = 2 * scale * (shift + scale * x)
         //              = diff_scale * shift + diff_scale * scale * x
-        caffe_cpu_axpby(count, diff_scale_ * scale_, bottom_data,
-                        Dtype(0), bottom_diff);
+        caffe_cpu_axpby(count, diff_scale_ * scale_, bottom_data, Dtype(0),
+                        bottom_diff);
         if (shift_ != Dtype(0)) {
           caffe_add_scalar(count, diff_scale_ * shift_, bottom_diff);
         }
@@ -99,4 +99,4 @@ STUB_GPU(PowerLayer);
 INSTANTIATE_CLASS(PowerLayer);
 REGISTER_LAYER_CLASS(Power);
 
-}  // namespace caffe
+} // namespace caffe

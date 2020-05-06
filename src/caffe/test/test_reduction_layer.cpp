@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class ReductionLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -33,14 +33,18 @@ protected:
     delete blob_top_;
   }
 
-  void TestForward(ReductionParameter_ReductionOp op,
-                   float coeff = 1, int axis = 0) {
+  void TestForward(ReductionParameter_ReductionOp op, float coeff = 1,
+                   int axis = 0) {
     LayerParameter layer_param;
     ReductionParameter *reduction_param = layer_param.mutable_reduction_param();
     reduction_param->set_operation(op);
-    if (coeff != 1.0) { reduction_param->set_coeff(coeff); }
-    if (axis != 0) { reduction_param->set_axis(axis); }
-    shared_ptr<ReductionLayer<Dtype> > layer(
+    if (coeff != 1.0) {
+      reduction_param->set_coeff(coeff);
+    }
+    if (axis != 0) {
+      reduction_param->set_axis(axis);
+    }
+    shared_ptr<ReductionLayer<Dtype>> layer(
         new ReductionLayer<Dtype>(layer_param));
     layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -72,13 +76,13 @@ protected:
       expected_result *= coeff;
       const Dtype computed_result = this->blob_top_->cpu_data()[n];
       EXPECT_FLOAT_EQ(expected_result, computed_result)
-              << "Incorrect result computed with op "
-              << ReductionParameter_ReductionOp_Name(op) << ", coeff " << coeff;
+          << "Incorrect result computed with op "
+          << ReductionParameter_ReductionOp_Name(op) << ", coeff " << coeff;
     }
   }
 
-  void TestGradient(ReductionParameter_ReductionOp op,
-                    float coeff = 1, int axis = 0) {
+  void TestGradient(ReductionParameter_ReductionOp op, float coeff = 1,
+                    int axis = 0) {
     typedef typename TypeParam::Dtype Dtype;
     LayerParameter layer_param;
     ReductionParameter *reduction_param = layer_param.mutable_reduction_param();
@@ -102,7 +106,7 @@ TYPED_TEST_CASE(ReductionLayerTest, TestDtypesAndDevices);
 TYPED_TEST(ReductionLayerTest, TestSetUp) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  shared_ptr<ReductionLayer<Dtype> > layer(
+  shared_ptr<ReductionLayer<Dtype>> layer(
       new ReductionLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_top_->num_axes(), 0);
@@ -112,7 +116,7 @@ TYPED_TEST(ReductionLayerTest, TestSetUpWithAxis1) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   layer_param.mutable_reduction_param()->set_axis(1);
-  shared_ptr<ReductionLayer<Dtype> > layer(
+  shared_ptr<ReductionLayer<Dtype>> layer(
       new ReductionLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_top_->num_axes(), 1);
@@ -123,7 +127,7 @@ TYPED_TEST(ReductionLayerTest, TestSetUpWithAxis2) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   layer_param.mutable_reduction_param()->set_axis(2);
-  shared_ptr<ReductionLayer<Dtype> > layer(
+  shared_ptr<ReductionLayer<Dtype>> layer(
       new ReductionLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   ASSERT_EQ(this->blob_top_->num_axes(), 2);
@@ -293,4 +297,4 @@ TYPED_TEST(ReductionLayerTest, TestSumOfSquaresCoeffAxis1Gradient) {
   this->TestGradient(kOp, kCoeff, kAxis);
 }
 
-}  // namespace caffe
+} // namespace caffe

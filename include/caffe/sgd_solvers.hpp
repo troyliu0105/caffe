@@ -12,16 +12,17 @@ namespace caffe {
  * @brief Optimizes the parameters of a Net using
  *        stochastic gradient descent (SGD) with momentum.
  */
-template<typename Dtype>
-class SGDSolver : public Solver<Dtype> {
+template <typename Dtype> class SGDSolver : public Solver<Dtype> {
 public:
-  explicit SGDSolver(const SolverParameter &param)
-      : Solver<Dtype>(param) { PreSolve(); }
-  explicit SGDSolver(const string &param_file)
-      : Solver<Dtype>(param_file) { PreSolve(); }
+  explicit SGDSolver(const SolverParameter &param) : Solver<Dtype>(param) {
+    PreSolve();
+  }
+  explicit SGDSolver(const string &param_file) : Solver<Dtype>(param_file) {
+    PreSolve();
+  }
   virtual inline const char *type() const { return "SGD"; }
 
-  const vector<shared_ptr<Blob<Dtype> > > &history() { return history_; }
+  const vector<shared_ptr<Blob<Dtype>>> &history() { return history_; }
 
   virtual void ApplyUpdate();
   Dtype GetLearningRate();
@@ -41,13 +42,12 @@ protected:
   // update maintains update related data and is not needed in snapshots.
   // temp maintains other information that might be needed in computation
   //   of gradients/updates and is not needed in snapshots
-  vector<shared_ptr<Blob<Dtype> > > history_, update_, temp_;
+  vector<shared_ptr<Blob<Dtype>>> history_, update_, temp_;
 
-DISABLE_COPY_AND_ASSIGN(SGDSolver);
+  DISABLE_COPY_AND_ASSIGN(SGDSolver);
 };
 
-template<typename Dtype>
-class NesterovSolver : public SGDSolver<Dtype> {
+template <typename Dtype> class NesterovSolver : public SGDSolver<Dtype> {
 public:
   explicit NesterovSolver(const SolverParameter &param)
       : SGDSolver<Dtype>(param) {}
@@ -58,65 +58,74 @@ public:
 protected:
   virtual void ComputeUpdateValue(int param_id, Dtype rate);
 
-DISABLE_COPY_AND_ASSIGN(NesterovSolver);
+  DISABLE_COPY_AND_ASSIGN(NesterovSolver);
 };
 
-template<typename Dtype>
-class AdaGradSolver : public SGDSolver<Dtype> {
+template <typename Dtype> class AdaGradSolver : public SGDSolver<Dtype> {
 public:
   explicit AdaGradSolver(const SolverParameter &param)
-      : SGDSolver<Dtype>(param) { constructor_sanity_check(); }
+      : SGDSolver<Dtype>(param) {
+    constructor_sanity_check();
+  }
   explicit AdaGradSolver(const string &param_file)
-      : SGDSolver<Dtype>(param_file) { constructor_sanity_check(); }
+      : SGDSolver<Dtype>(param_file) {
+    constructor_sanity_check();
+  }
   virtual inline const char *type() const { return "AdaGrad"; }
 
 protected:
   virtual void ComputeUpdateValue(int param_id, Dtype rate);
   void constructor_sanity_check() {
     CHECK_EQ(0, this->param_.momentum())
-      << "Momentum cannot be used with AdaGrad.";
+        << "Momentum cannot be used with AdaGrad.";
   }
 
-DISABLE_COPY_AND_ASSIGN(AdaGradSolver);
+  DISABLE_COPY_AND_ASSIGN(AdaGradSolver);
 };
 
-template<typename Dtype>
-class RMSPropSolver : public SGDSolver<Dtype> {
+template <typename Dtype> class RMSPropSolver : public SGDSolver<Dtype> {
 public:
   explicit RMSPropSolver(const SolverParameter &param)
-      : SGDSolver<Dtype>(param) { constructor_sanity_check(); }
+      : SGDSolver<Dtype>(param) {
+    constructor_sanity_check();
+  }
   explicit RMSPropSolver(const string &param_file)
-      : SGDSolver<Dtype>(param_file) { constructor_sanity_check(); }
+      : SGDSolver<Dtype>(param_file) {
+    constructor_sanity_check();
+  }
   virtual inline const char *type() const { return "RMSProp"; }
 
 protected:
   virtual void ComputeUpdateValue(int param_id, Dtype rate);
   void constructor_sanity_check() {
     CHECK_EQ(0, this->param_.momentum())
-      << "Momentum cannot be used with RMSProp.";
+        << "Momentum cannot be used with RMSProp.";
     CHECK_GE(this->param_.rms_decay(), 0)
-      << "rms_decay should lie between 0 and 1.";
+        << "rms_decay should lie between 0 and 1.";
     CHECK_LT(this->param_.rms_decay(), 1)
-      << "rms_decay should lie between 0 and 1.";
+        << "rms_decay should lie between 0 and 1.";
   }
 
-DISABLE_COPY_AND_ASSIGN(RMSPropSolver);
+  DISABLE_COPY_AND_ASSIGN(RMSPropSolver);
 };
 
-template<typename Dtype>
-class AdaDeltaSolver : public SGDSolver<Dtype> {
+template <typename Dtype> class AdaDeltaSolver : public SGDSolver<Dtype> {
 public:
   explicit AdaDeltaSolver(const SolverParameter &param)
-      : SGDSolver<Dtype>(param) { AdaDeltaPreSolve(); }
+      : SGDSolver<Dtype>(param) {
+    AdaDeltaPreSolve();
+  }
   explicit AdaDeltaSolver(const string &param_file)
-      : SGDSolver<Dtype>(param_file) { AdaDeltaPreSolve(); }
+      : SGDSolver<Dtype>(param_file) {
+    AdaDeltaPreSolve();
+  }
   virtual inline const char *type() const { return "AdaDelta"; }
 
 protected:
   void AdaDeltaPreSolve();
   virtual void ComputeUpdateValue(int param_id, Dtype rate);
 
-DISABLE_COPY_AND_ASSIGN(AdaDeltaSolver);
+  DISABLE_COPY_AND_ASSIGN(AdaDeltaSolver);
 };
 
 /**
@@ -127,22 +136,23 @@ DISABLE_COPY_AND_ASSIGN(AdaDeltaSolver);
  * [1] D. P. Kingma and J. L. Ba, "ADAM: A Method for Stochastic Optimization."
  *     arXiv preprint arXiv:1412.6980v8 (2014).
  */
-template<typename Dtype>
-class AdamSolver : public SGDSolver<Dtype> {
+template <typename Dtype> class AdamSolver : public SGDSolver<Dtype> {
 public:
-  explicit AdamSolver(const SolverParameter &param)
-      : SGDSolver<Dtype>(param) { AdamPreSolve(); }
-  explicit AdamSolver(const string &param_file)
-      : SGDSolver<Dtype>(param_file) { AdamPreSolve(); }
+  explicit AdamSolver(const SolverParameter &param) : SGDSolver<Dtype>(param) {
+    AdamPreSolve();
+  }
+  explicit AdamSolver(const string &param_file) : SGDSolver<Dtype>(param_file) {
+    AdamPreSolve();
+  }
   virtual inline const char *type() const { return "Adam"; }
 
 protected:
   void AdamPreSolve();
   virtual void ComputeUpdateValue(int param_id, Dtype rate);
 
-DISABLE_COPY_AND_ASSIGN(AdamSolver);
+  DISABLE_COPY_AND_ASSIGN(AdamSolver);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SGD_SOLVERS_HPP_
+#endif // CAFFE_SGD_SOLVERS_HPP_

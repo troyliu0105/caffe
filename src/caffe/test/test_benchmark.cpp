@@ -11,7 +11,7 @@ namespace caffe {
 
 const float kMillisecondsThreshold = 30;
 
-template<typename TypeParam>
+template <typename TypeParam>
 class BenchmarkTest : public MultiDeviceTest<TypeParam> {};
 
 TYPED_TEST_CASE(BenchmarkTest, TestDtypesAndDevices);
@@ -87,4 +87,4 @@ TYPED_TEST(BenchmarkTest, TestTimerSeconds) {
   EXPECT_TRUE(timer.has_run_at_least_once());
 }
 
-}  // namespace caffe
+} // namespace caffe

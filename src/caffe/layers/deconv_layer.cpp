@@ -4,7 +4,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void DeconvolutionLayer<Dtype>::compute_output_shape() {
   const int *kernel_shape_data = this->kernel_shape_.cpu_data();
   const int *stride_data = this->stride_.cpu_data();
@@ -15,13 +15,13 @@ void DeconvolutionLayer<Dtype>::compute_output_shape() {
     // i + 1 to skip channel axis
     const int input_dim = this->input_shape(i + 1);
     const int kernel_extent = dilation_data[i] * (kernel_shape_data[i] - 1) + 1;
-    const int output_dim = stride_data[i] * (input_dim - 1)
-        + kernel_extent - 2 * pad_data[i];
+    const int output_dim =
+        stride_data[i] * (input_dim - 1) + kernel_extent - 2 * pad_data[i];
     this->output_shape_.push_back(output_dim);
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DeconvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                             const vector<Blob<Dtype> *> &top) {
   const Dtype *weight = this->blobs_[0]->cpu_data();
@@ -39,9 +39,10 @@ void DeconvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-void DeconvolutionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                             const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+template <typename Dtype>
+void DeconvolutionLayer<Dtype>::Backward_cpu(
+    const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
+    const vector<Blob<Dtype> *> &bottom) {
   const Dtype *weight = this->blobs_[0]->cpu_data();
   Dtype *weight_diff = this->blobs_[0]->mutable_cpu_diff();
   for (int i = 0; i < top.size(); ++i) {
@@ -60,7 +61,8 @@ void DeconvolutionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
         // Gradient w.r.t. weight. Note that we will accumulate diffs.
         if (this->param_propagate_down_[0]) {
           this->weight_cpu_gemm(top_diff + n * this->top_dim_,
-                                bottom_data + n * this->bottom_dim_, weight_diff);
+                                bottom_data + n * this->bottom_dim_,
+                                weight_diff);
         }
         // Gradient w.r.t. bottom data, if necessary, reusing the column buffer
         // we might have just computed above.
@@ -80,4 +82,4 @@ STUB_GPU(DeconvolutionLayer);
 
 INSTANTIATE_CLASS(DeconvolutionLayer);
 
-}  // namespace caffe
+} // namespace caffe

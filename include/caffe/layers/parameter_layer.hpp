@@ -7,11 +7,9 @@
 
 namespace caffe {
 
-template<typename Dtype>
-class ParameterLayer : public Layer<Dtype> {
+template <typename Dtype> class ParameterLayer : public Layer<Dtype> {
 public:
-  explicit ParameterLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit ParameterLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top) {
     if (this->blobs_.size() > 0) {
@@ -36,9 +34,10 @@ protected:
     top[0]->ShareDiff(*(this->blobs_[0]));
   }
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {}
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {}
 };
 
-}  // namespace caffe
+} // namespace caffe
 
 #endif

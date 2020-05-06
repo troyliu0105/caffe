@@ -5,14 +5,12 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void SigmoidForward(const int n, const Dtype *in, Dtype *out) {
-  CUDA_KERNEL_LOOP(index, n) {
-    out[index] = 0.5 * tanh(0.5 * in[index]) + 0.5;
-  }
+  CUDA_KERNEL_LOOP(index, n) { out[index] = 0.5 * tanh(0.5 * in[index]) + 0.5; }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -29,7 +27,7 @@ void SigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   //     << " threads: " << CAFFE_CUDA_NUM_THREADS;
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void SigmoidBackward(const int n, const Dtype *in_diff,
                                 const Dtype *out_data, Dtype *out_diff) {
   CUDA_KERNEL_LOOP(index, n) {
@@ -38,7 +36,7 @@ __global__ void SigmoidBackward(const int n, const Dtype *in_diff,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SigmoidLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
                                        const vector<bool> &propagate_down,
                                        const vector<Blob<Dtype> *> &bottom) {
@@ -56,4 +54,4 @@ void SigmoidLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(SigmoidLayer);
 
-}  // namespace caffe
+} // namespace caffe

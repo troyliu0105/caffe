@@ -25,7 +25,7 @@ inline void CaffeMallocHost(void **ptr, size_t size, bool *use_cuda) {
   }
 #endif
 #ifdef USE_MKL
-  *ptr = mkl_malloc(size ? size:1, 64);
+  *ptr = mkl_malloc(size ? size : 1, 64);
 #else
   *ptr = malloc(size);
 #endif
@@ -86,9 +86,9 @@ private:
   bool own_gpu_data_;
   int device_;
 
-DISABLE_COPY_AND_ASSIGN(SyncedMemory);
-};  // class SyncedMemory
+  DISABLE_COPY_AND_ASSIGN(SyncedMemory);
+}; // class SyncedMemory
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SYNCEDMEM_HPP_
+#endif // CAFFE_SYNCEDMEM_HPP_

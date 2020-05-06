@@ -11,13 +11,11 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 BaseDataLayer<Dtype>::BaseDataLayer(const LayerParameter &param)
-    : Layer<Dtype>(param),
-      transform_param_(param.transform_param()) {
-}
+    : Layer<Dtype>(param), transform_param_(param.transform_param()) {}
 
-template<typename Dtype>
+template <typename Dtype>
 void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   if (top.size() == 1) {
@@ -38,11 +36,10 @@ void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   DataLayerSetUp(bottom, top);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 BasePrefetchingDataLayer<Dtype>::BasePrefetchingDataLayer(
     const LayerParameter &param)
-    : BaseDataLayer<Dtype>(param),
-      prefetch_(param.data_param().prefetch()),
+    : BaseDataLayer<Dtype>(param), prefetch_(param.data_param().prefetch()),
       prefetch_free_(), prefetch_full_(), prefetch_current_() {
   for (int i = 0; i < prefetch_.size(); ++i) {
     prefetch_[i].reset(new Batch<Dtype>());
@@ -50,7 +47,7 @@ BasePrefetchingDataLayer<Dtype>::BasePrefetchingDataLayer(
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   BaseDataLayer<Dtype>::LayerSetUp(bottom, top);
@@ -87,7 +84,7 @@ void BasePrefetchingDataLayer<Dtype>::LayerSetUp(
   DLOG(INFO) << "Prefetch initialized.";
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
 #ifndef CPU_ONLY
   cudaStream_t stream;
@@ -124,7 +121,7 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
 #endif
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   if (prefetch_current_) {
@@ -152,4 +149,4 @@ STUB_GPU_FORWARD(BasePrefetchingDataLayer, Forward);
 INSTANTIATE_CLASS(BaseDataLayer);
 INSTANTIATE_CLASS(BasePrefetchingDataLayer);
 
-}  // namespace caffe
+} // namespace caffe

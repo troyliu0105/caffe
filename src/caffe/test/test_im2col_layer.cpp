@@ -12,9 +12,10 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class Im2colLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
   Im2colLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 6, 5)),
@@ -178,4 +179,4 @@ TYPED_TEST(Im2colLayerTest, TestRectGradient) {
                                   this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

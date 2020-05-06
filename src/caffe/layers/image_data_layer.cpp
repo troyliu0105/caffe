@@ -2,7 +2,7 @@
 #include <opencv2/core/core.hpp>
 
 #include <fstream>  // NOLINT(readability/streams)
-#include <iostream>  // NOLINT(readability/streams)
+#include <iostream> // NOLINT(readability/streams)
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,12 +17,11 @@
 
 namespace caffe {
 
-template<typename Dtype>
-ImageDataLayer<Dtype>::~ImageDataLayer<Dtype>() {
+template <typename Dtype> ImageDataLayer<Dtype>::~ImageDataLayer<Dtype>() {
   this->StopInternalThread();
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                            const vector<Blob<Dtype> *> &top) {
   const int new_height = this->layer_param_.image_data_param().new_height();
@@ -31,8 +30,9 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   string root_folder = this->layer_param_.image_data_param().root_folder();
 
   CHECK((new_height == 0 && new_width == 0) ||
-      (new_height > 0 && new_width > 0)) << "Current implementation requires "
-                                            "new_height and new_width to be set at the same time.";
+        (new_height > 0 && new_width > 0))
+      << "Current implementation requires "
+         "new_height and new_width to be set at the same time.";
   // Read the file with filenames and labels
   const string &source = this->layer_param_.image_data_param().source();
   LOG(INFO) << "Opening file " << source;
@@ -65,8 +65,8 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   lines_id_ = 0;
   // Check if we would need to randomly skip a few data points
   if (this->layer_param_.image_data_param().rand_skip()) {
-    unsigned int skip = caffe_rng_rand() %
-        this->layer_param_.image_data_param().rand_skip();
+    unsigned int skip =
+        caffe_rng_rand() % this->layer_param_.image_data_param().rand_skip();
     LOG(INFO) << "Skipping first " << skip << " data points.";
     CHECK_GT(lines_.size(), skip) << "Not enough points to skip";
     lines_id_ = skip;
@@ -98,15 +98,14 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-void ImageDataLayer<Dtype>::ShuffleImages() {
+template <typename Dtype> void ImageDataLayer<Dtype>::ShuffleImages() {
   caffe::rng_t *prefetch_rng =
       static_cast<caffe::rng_t *>(prefetch_rng_->generator());
   shuffle(lines_.begin(), lines_.end(), prefetch_rng);
 }
 
 // This function is called on prefetch thread
-template<typename Dtype>
+template <typename Dtype>
 void ImageDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   CPUTimer batch_timer;
   batch_timer.Start();
@@ -175,5 +174,5 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
 INSTANTIATE_CLASS(ImageDataLayer);
 REGISTER_LAYER_CLASS(ImageData);
 
-}  // namespace caffe
-#endif  // USE_OPENCV
+} // namespace caffe
+#endif // USE_OPENCV

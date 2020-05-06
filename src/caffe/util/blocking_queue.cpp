@@ -8,28 +8,22 @@
 
 namespace caffe {
 
-template<typename T>
-class BlockingQueue<T>::sync {
+template <typename T> class BlockingQueue<T>::sync {
 public:
   mutable boost::mutex mutex_;
   boost::condition_variable condition_;
 };
 
-template<typename T>
-BlockingQueue<T>::BlockingQueue()
-    : sync_(new sync()) {
-}
+template <typename T> BlockingQueue<T>::BlockingQueue() : sync_(new sync()) {}
 
-template<typename T>
-void BlockingQueue<T>::push(const T &t) {
+template <typename T> void BlockingQueue<T>::push(const T &t) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
   queue_.push(t);
   lock.unlock();
   sync_->condition_.notify_one();
 }
 
-template<typename T>
-bool BlockingQueue<T>::try_pop(T *t) {
+template <typename T> bool BlockingQueue<T>::try_pop(T *t) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
 
   if (queue_.empty()) {
@@ -41,8 +35,7 @@ bool BlockingQueue<T>::try_pop(T *t) {
   return true;
 }
 
-template<typename T>
-T BlockingQueue<T>::pop(const string &log_on_wait) {
+template <typename T> T BlockingQueue<T>::pop(const string &log_on_wait) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
 
   while (queue_.empty()) {
@@ -57,8 +50,7 @@ T BlockingQueue<T>::pop(const string &log_on_wait) {
   return t;
 }
 
-template<typename T>
-bool BlockingQueue<T>::try_peek(T *t) {
+template <typename T> bool BlockingQueue<T>::try_peek(T *t) {
   boost::mutex::scoped_lock lock(sync_->mutex_);
 
   if (queue_.empty()) {
@@ -69,8 +61,7 @@ bool BlockingQueue<T>::try_peek(T *t) {
   return true;
 }
 
-template<typename T>
-T BlockingQueue<T>::peek() {
+template <typename T> T BlockingQueue<T>::peek() {
   boost::mutex::scoped_lock lock(sync_->mutex_);
 
   while (queue_.empty()) {
@@ -80,8 +71,7 @@ T BlockingQueue<T>::peek() {
   return queue_.front();
 }
 
-template<typename T>
-size_t BlockingQueue<T>::size() const {
+template <typename T> size_t BlockingQueue<T>::size() const {
   boost::mutex::scoped_lock lock(sync_->mutex_);
   return queue_.size();
 }
@@ -90,8 +80,7 @@ template class BlockingQueue<Batch<float> *>;
 template class BlockingQueue<Batch<double> *>;
 template class BlockingQueue<Datum *>;
 template class BlockingQueue<AnnotatedDatum *>;
-template class BlockingQueue<shared_ptr<DataReader<Datum>::QueuePair> >;
-template class BlockingQueue<
-    shared_ptr<DataReader<AnnotatedDatum>::QueuePair> >;
+template class BlockingQueue<shared_ptr<DataReader<Datum>::QueuePair>>;
+template class BlockingQueue<shared_ptr<DataReader<AnnotatedDatum>::QueuePair>>;
 
-}  // namespace caffe
+} // namespace caffe

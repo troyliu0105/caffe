@@ -6,9 +6,7 @@
 
 namespace caffe {
 
-InternalThread::~InternalThread() {
-  StopInternalThread();
-}
+InternalThread::~InternalThread() { StopInternalThread(); }
 
 bool InternalThread::is_started() const {
   return thread_ && thread_->joinable();
@@ -33,14 +31,16 @@ void InternalThread::StartInternalThread() {
 
   try {
     thread_.reset(new boost::thread(&InternalThread::entry, this, device, mode,
-                                    rand_seed, solver_count, solver_rank, multiprocess));
+                                    rand_seed, solver_count, solver_rank,
+                                    multiprocess));
   } catch (std::exception &e) {
     LOG(FATAL) << "Thread exception: " << e.what();
   }
 }
 
 void InternalThread::entry(int device, Caffe::Brew mode, int rand_seed,
-                           int solver_count, int solver_rank, bool multiprocess) {
+                           int solver_count, int solver_rank,
+                           bool multiprocess) {
 #ifndef CPU_ONLY
   CUDA_CHECK(cudaSetDevice(device));
 #endif
@@ -65,4 +65,4 @@ void InternalThread::StopInternalThread() {
   }
 }
 
-}  // namespace caffe
+} // namespace caffe

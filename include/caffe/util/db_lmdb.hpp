@@ -29,7 +29,8 @@ public:
   virtual void SeekToFirst() { Seek(MDB_FIRST); }
   virtual void Next() { Seek(MDB_NEXT); }
   virtual string key() {
-    return string(static_cast<const char *>(mdb_key_.mv_data), mdb_key_.mv_size);
+    return string(static_cast<const char *>(mdb_key_.mv_data),
+                  mdb_key_.mv_size);
   }
   virtual string value() {
     return string(static_cast<const char *>(mdb_value_.mv_data),
@@ -56,8 +57,7 @@ private:
 
 class LMDBTransaction : public Transaction {
 public:
-  explicit LMDBTransaction(MDB_env *mdb_env)
-      : mdb_env_(mdb_env) {}
+  explicit LMDBTransaction(MDB_env *mdb_env) : mdb_env_(mdb_env) {}
   virtual void Put(const string &key, const string &value);
   virtual void Commit();
 
@@ -67,7 +67,7 @@ private:
 
   void DoubleMapSize();
 
-DISABLE_COPY_AND_ASSIGN(LMDBTransaction);
+  DISABLE_COPY_AND_ASSIGN(LMDBTransaction);
 };
 
 class LMDB : public DB {
@@ -90,8 +90,8 @@ private:
   MDB_dbi mdb_dbi_;
 };
 
-}  // namespace db
-}  // namespace caffe
+} // namespace db
+} // namespace caffe
 
-#endif  // CAFFE_UTIL_DB_LMDB_HPP
-#endif  // USE_LMDB
+#endif // CAFFE_UTIL_DB_LMDB_HPP
+#endif // USE_LMDB

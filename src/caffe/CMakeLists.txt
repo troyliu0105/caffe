@@ -64,6 +64,7 @@ target_include_directories(caffe ${Caffe_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${Caffe_INCLUDE_DIR}>
         $<INSTALL_INTERFACE:include>)
 target_compile_definitions(caffe ${Caffe_DEFINITIONS})
+target_compile_definitions(caffe PUBLIC HAVE_SNPRINTF)
 if (Caffe_COMPILE_OPTIONS)
     target_compile_options(caffe ${Caffe_COMPILE_OPTIONS})
 endif ()

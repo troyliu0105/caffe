@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class HingeLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -70,4 +70,4 @@ TYPED_TEST(HingeLossLayerTest, TestGradientL2) {
                                   this->blob_top_vec_, 0);
 }
 
-}  // namespace caffe
+} // namespace caffe

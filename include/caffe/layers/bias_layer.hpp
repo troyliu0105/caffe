@@ -18,11 +18,9 @@ namespace caffe {
  * of the layer. Note: in case bias and scaling are desired, both operations can
  * be handled by `ScaleLayer` configured with `bias_term: true`.
  */
-template<typename Dtype>
-class BiasLayer : public Layer<Dtype> {
+template <typename Dtype> class BiasLayer : public Layer<Dtype> {
 public:
-  explicit BiasLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit BiasLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -38,15 +36,17 @@ public:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
 private:
   Blob<Dtype> bias_multiplier_;
   int outer_dim_, bias_dim_, inner_dim_, dim_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_BIAS_LAYER_HPP_
+#endif // CAFFE_BIAS_LAYER_HPP_

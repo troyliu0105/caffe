@@ -15,17 +15,16 @@ inline bool is_a_ge_zero_and_a_lt_b(int a, int b) {
   return static_cast<unsigned>(a) < static_cast<unsigned>(b);
 }
 
-template<typename Dtype>
-void im2col_cpu(const Dtype *data_im, const int channels,
-                const int height, const int width, const int kernel_h, const int kernel_w,
-                const int pad_h, const int pad_w,
-                const int stride_h, const int stride_w,
-                const int dilation_h, const int dilation_w,
+template <typename Dtype>
+void im2col_cpu(const Dtype *data_im, const int channels, const int height,
+                const int width, const int kernel_h, const int kernel_w,
+                const int pad_h, const int pad_w, const int stride_h,
+                const int stride_w, const int dilation_h, const int dilation_w,
                 Dtype *data_col) {
-  const int output_h = (height + 2 * pad_h -
-      (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
-  const int output_w = (width + 2 * pad_w -
-      (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
+  const int output_h =
+      (height + 2 * pad_h - (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
+  const int output_w =
+      (width + 2 * pad_w - (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
   const int channel_size = height * width;
   for (int channel = channels; channel--; data_im += channel_size) {
     for (int kernel_row = 0; kernel_row < kernel_h; kernel_row++) {
@@ -56,20 +55,25 @@ void im2col_cpu(const Dtype *data_im, const int channels,
 
 // Explicit instantiation
 template void im2col_cpu<float>(const float *data_im, const int channels,
-                                const int height, const int width, const int kernel_h, const int kernel_w,
-                                const int pad_h, const int pad_w, const int stride_h,
-                                const int stride_w, const int dilation_h, const int dilation_w,
+                                const int height, const int width,
+                                const int kernel_h, const int kernel_w,
+                                const int pad_h, const int pad_w,
+                                const int stride_h, const int stride_w,
+                                const int dilation_h, const int dilation_w,
                                 float *data_col);
 template void im2col_cpu<double>(const double *data_im, const int channels,
-                                 const int height, const int width, const int kernel_h, const int kernel_w,
-                                 const int pad_h, const int pad_w, const int stride_h,
-                                 const int stride_w, const int dilation_h, const int dilation_w,
+                                 const int height, const int width,
+                                 const int kernel_h, const int kernel_w,
+                                 const int pad_h, const int pad_w,
+                                 const int stride_h, const int stride_w,
+                                 const int dilation_h, const int dilation_w,
                                  double *data_col);
 
-template<typename Dtype>
+template <typename Dtype>
 inline void im2col_nd_core_cpu(const Dtype *data_input, const bool im2col,
-                               const int num_spatial_axes, const int *im_shape, const int *col_shape,
-                               const int *kernel_shape, const int *pad, const int *stride,
+                               const int num_spatial_axes, const int *im_shape,
+                               const int *col_shape, const int *kernel_shape,
+                               const int *pad, const int *stride,
                                const int *dilation, Dtype *data_output) {
   if (!im2col) {
     int im_size = im_shape[0];
@@ -102,8 +106,8 @@ inline void im2col_nd_core_cpu(const Dtype *data_input, const bool im2col,
       bool is_padding = false;
       for (int d_i = 0; d_i < num_spatial_axes; ++d_i) {
         const int d = d_iter[d_i];
-        const int d_im = d * stride[d_i] - pad[d_i] +
-            d_offset[d_i] * dilation[d_i];
+        const int d_im =
+            d * stride[d_i] - pad[d_i] + d_offset[d_i] * dilation[d_i];
         is_padding |= d_im < 0 || d_im >= im_shape[d_i + 1];
         index_col *= col_shape[d_i + 1];
         index_col += d;
@@ -116,7 +120,7 @@ inline void im2col_nd_core_cpu(const Dtype *data_input, const bool im2col,
         } else {
           data_output[index_col] = data_input[index_im];
         }
-      } else if (!is_padding) {  // col2im
+      } else if (!is_padding) { // col2im
         data_output[index_im] += data_input[index_col];
       }
       // Loop over spatial axes in reverse order to choose an index,
@@ -127,17 +131,17 @@ inline void im2col_nd_core_cpu(const Dtype *data_input, const bool im2col,
         DCHECK_LT(d_iter[d_i], d_max);
         if (d_iter[d_i] == d_max - 1) {
           d_iter[d_i] = 0;
-        } else {  // d_iter[d_i] < d_max - 1
+        } else { // d_iter[d_i] < d_max - 1
           ++d_iter[d_i];
           incremented = true;
           break;
         }
       }
-    }  // while(incremented) {
-  }  // for (int c = 0; c < channels_col; ++c) {
+    } // while(incremented) {
+  }   // for (int c = 0; c < channels_col; ++c) {
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void im2col_nd_cpu(const Dtype *data_im, const int num_spatial_axes,
                    const int *im_shape, const int *col_shape,
                    const int *kernel_shape, const int *pad, const int *stride,
@@ -151,26 +155,27 @@ void im2col_nd_cpu(const Dtype *data_im, const int num_spatial_axes,
 template void im2col_nd_cpu<float>(const float *data_im,
                                    const int num_spatial_axes,
                                    const int *im_shape, const int *col_shape,
-                                   const int *kernel_shape, const int *pad, const int *stride,
-                                   const int *dilation, float *data_col);
+                                   const int *kernel_shape, const int *pad,
+                                   const int *stride, const int *dilation,
+                                   float *data_col);
 template void im2col_nd_cpu<double>(const double *data_im,
                                     const int num_spatial_axes,
                                     const int *im_shape, const int *col_shape,
-                                    const int *kernel_shape, const int *pad, const int *stride,
-                                    const int *dilation, double *data_col);
+                                    const int *kernel_shape, const int *pad,
+                                    const int *stride, const int *dilation,
+                                    double *data_col);
 
-template<typename Dtype>
-void col2im_cpu(const Dtype *data_col, const int channels,
-                const int height, const int width, const int kernel_h, const int kernel_w,
-                const int pad_h, const int pad_w,
-                const int stride_h, const int stride_w,
-                const int dilation_h, const int dilation_w,
+template <typename Dtype>
+void col2im_cpu(const Dtype *data_col, const int channels, const int height,
+                const int width, const int kernel_h, const int kernel_w,
+                const int pad_h, const int pad_w, const int stride_h,
+                const int stride_w, const int dilation_h, const int dilation_w,
                 Dtype *data_im) {
   caffe_set(height * width * channels, Dtype(0), data_im);
-  const int output_h = (height + 2 * pad_h -
-      (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
-  const int output_w = (width + 2 * pad_w -
-      (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
+  const int output_h =
+      (height + 2 * pad_h - (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
+  const int output_w =
+      (width + 2 * pad_w - (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
   const int channel_size = height * width;
   for (int channel = channels; channel--; data_im += channel_size) {
     for (int kernel_row = 0; kernel_row < kernel_h; kernel_row++) {
@@ -198,17 +203,21 @@ void col2im_cpu(const Dtype *data_col, const int channels,
 
 // Explicit instantiation
 template void col2im_cpu<float>(const float *data_col, const int channels,
-                                const int height, const int width, const int kernel_h, const int kernel_w,
-                                const int pad_h, const int pad_w, const int stride_h,
-                                const int stride_w, const int dilation_h, const int dilation_w,
+                                const int height, const int width,
+                                const int kernel_h, const int kernel_w,
+                                const int pad_h, const int pad_w,
+                                const int stride_h, const int stride_w,
+                                const int dilation_h, const int dilation_w,
                                 float *data_im);
 template void col2im_cpu<double>(const double *data_col, const int channels,
-                                 const int height, const int width, const int kernel_h, const int kernel_w,
-                                 const int pad_h, const int pad_w, const int stride_h,
-                                 const int stride_w, const int dilation_h, const int dilation_w,
+                                 const int height, const int width,
+                                 const int kernel_h, const int kernel_w,
+                                 const int pad_h, const int pad_w,
+                                 const int stride_h, const int stride_w,
+                                 const int dilation_h, const int dilation_w,
                                  double *data_im);
 
-template<typename Dtype>
+template <typename Dtype>
 void col2im_nd_cpu(const Dtype *data_col, const int num_spatial_axes,
                    const int *im_shape, const int *col_shape,
                    const int *kernel_shape, const int *pad, const int *stride,
@@ -222,12 +231,14 @@ void col2im_nd_cpu(const Dtype *data_col, const int num_spatial_axes,
 template void col2im_nd_cpu<float>(const float *data_col,
                                    const int num_spatial_axes,
                                    const int *im_shape, const int *col_shape,
-                                   const int *kernel_shape, const int *pad, const int *stride,
-                                   const int *dilation, float *data_im);
+                                   const int *kernel_shape, const int *pad,
+                                   const int *stride, const int *dilation,
+                                   float *data_im);
 template void col2im_nd_cpu<double>(const double *data_col,
                                     const int num_spatial_axes,
                                     const int *im_shape, const int *col_shape,
-                                    const int *kernel_shape, const int *pad, const int *stride,
-                                    const int *dilation, double *data_im);
+                                    const int *kernel_shape, const int *pad,
+                                    const int *stride, const int *dilation,
+                                    double *data_im);
 
-}  // namespace caffe
+} // namespace caffe

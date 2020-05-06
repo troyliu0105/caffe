@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void FilterLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
   int new_tops_num = indices_to_forward_.size();
@@ -23,9 +23,10 @@ void FilterLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void FilterLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                      const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                      const vector<bool> &propagate_down,
+                                      const vector<Blob<Dtype> *> &bottom) {
   if (propagate_down[bottom.size() - 1]) {
     LOG(FATAL) << this->type()
                << "Layer cannot backpropagate to filter index inputs";
@@ -49,12 +50,12 @@ void FilterLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
         } else {
           batch_offset = indices_to_forward_[next_to_backward_offset];
           data_offset_bottom = n * dim;
-          if (n != batch_offset) {  // this data was not been forwarded
+          if (n != batch_offset) { // this data was not been forwarded
             caffe_gpu_set(dim, Dtype(0),
                           bottom[i]->mutable_gpu_diff() + data_offset_bottom);
-          } else {  // this data was been forwarded
+          } else { // this data was been forwarded
             data_offset_top = next_to_backward_offset * dim;
-            ++next_to_backward_offset;  // point to next forwarded item index
+            ++next_to_backward_offset; // point to next forwarded item index
             caffe_copy(dim, top[i]->mutable_gpu_diff() + data_offset_top,
                        bottom[i]->mutable_gpu_diff() + data_offset_bottom);
           }
@@ -66,4 +67,4 @@ void FilterLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(FilterLayer);
 
-}  // namespace caffe
+} // namespace caffe

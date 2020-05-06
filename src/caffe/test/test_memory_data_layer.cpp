@@ -1,6 +1,6 @@
 #ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
 
 #include <string>
 #include <vector>
@@ -12,16 +12,14 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class MemoryDataLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   MemoryDataLayerTest()
-      : data_(new Blob<Dtype>()),
-        labels_(new Blob<Dtype>()),
-        data_blob_(new Blob<Dtype>()),
-        label_blob_(new Blob<Dtype>()) {}
+      : data_(new Blob<Dtype>()), labels_(new Blob<Dtype>()),
+        data_blob_(new Blob<Dtype>()), label_blob_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     batch_size_ = 8;
     batches_ = 12;
@@ -72,8 +70,7 @@ TYPED_TEST(MemoryDataLayerTest, TestSetup) {
   md_param->set_channels(this->channels_);
   md_param->set_height(this->height_);
   md_param->set_width(this->width_);
-  shared_ptr<Layer<Dtype> > layer(
-      new MemoryDataLayer<Dtype>(layer_param));
+  shared_ptr<Layer<Dtype>> layer(new MemoryDataLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(this->data_blob_->num(), this->batch_size_);
   EXPECT_EQ(this->data_blob_->channels(), this->channels_);
@@ -95,7 +92,7 @@ TYPED_TEST(MemoryDataLayerTest, TestForward) {
   md_param->set_channels(this->channels_);
   md_param->set_height(this->height_);
   md_param->set_width(this->width_);
-  shared_ptr<MemoryDataLayer<Dtype> > layer(
+  shared_ptr<MemoryDataLayer<Dtype>> layer(
       new MemoryDataLayer<Dtype>(layer_param));
   layer->DataLayerSetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Reset(this->data_->mutable_cpu_data(),
@@ -105,8 +102,9 @@ TYPED_TEST(MemoryDataLayerTest, TestForward) {
     layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
     for (int j = 0; j < this->data_blob_->count(); ++j) {
       EXPECT_EQ(this->data_blob_->cpu_data()[j],
-                this->data_->cpu_data()[
-                    this->data_->offset(1) * this->batch_size_ * batch_num + j]);
+                this->data_->cpu_data()[this->data_->offset(1) *
+                                            this->batch_size_ * batch_num +
+                                        j]);
     }
     for (int j = 0; j < this->label_blob_->count(); ++j) {
       EXPECT_EQ(this->label_blob_->cpu_data()[j],
@@ -205,10 +203,10 @@ TYPED_TEST(MemoryDataLayerTest, AddMatVectorDefaultTransform) {
         int index = 0;
         for (int w = 0; w < this->width_; ++w) {
           for (int c = 0; c < this->channels_; ++c) {
-            data_index = (i * count) + (c * this->height_ + h) * this->width_ + w;
+            data_index =
+                (i * count) + (c * this->height_ + h) * this->width_ + w;
             Dtype pixel = static_cast<Dtype>(ptr_mat[index++]);
-            EXPECT_EQ(static_cast<int>(pixel),
-                      data[data_index]);
+            EXPECT_EQ(static_cast<int>(pixel), data[data_index]);
           }
         }
       }
@@ -250,7 +248,8 @@ TYPED_TEST(MemoryDataLayerTest, TestSetBatchSize) {
         int index = 0;
         for (int w = 0; w < this->width_; ++w) {
           for (int c = 0; c < this->channels_; ++c) {
-            data_index = (i * count) + (c * this->height_ + h) * this->width_ + w;
+            data_index =
+                (i * count) + (c * this->height_ + h) * this->width_ + w;
             Dtype pixel = static_cast<Dtype>(ptr_mat[index++]);
             EXPECT_EQ(static_cast<int>(pixel), data[data_index]);
           }
@@ -286,7 +285,8 @@ TYPED_TEST(MemoryDataLayerTest, TestSetBatchSize) {
         int index = 0;
         for (int w = 0; w < this->width_; ++w) {
           for (int c = 0; c < this->channels_; ++c) {
-            data_index = (i * count) + (c * this->height_ + h) * this->width_ + w;
+            data_index =
+                (i * count) + (c * this->height_ + h) * this->width_ + w;
             Dtype pixel = static_cast<Dtype>(ptr_mat[index++]);
             EXPECT_EQ(static_cast<int>(pixel), data[data_index]);
           }
@@ -295,5 +295,5 @@ TYPED_TEST(MemoryDataLayerTest, TestSetBatchSize) {
     }
   }
 }
-#endif  // USE_OPENCV
-}  // namespace caffe
+#endif // USE_OPENCV
+} // namespace caffe

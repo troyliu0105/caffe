@@ -15,8 +15,7 @@ namespace caffe {
  * @brief Tests whether the input exceeds a threshold: outputs 1 for inputs
  *        above threshold; 0 otherwise.
  */
-template<typename Dtype>
-class ThresholdLayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class ThresholdLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides ThresholdParameter threshold_param,
@@ -52,13 +51,14 @@ protected:
                            const vector<Blob<Dtype> *> &top);
   /// @brief Not implemented (non-differentiable function)
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     NOT_IMPLEMENTED;
   }
 
   Dtype threshold_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_THRESHOLD_LAYER_HPP_
+#endif // CAFFE_THRESHOLD_LAYER_HPP_

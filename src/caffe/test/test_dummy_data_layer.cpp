@@ -12,12 +12,11 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 class DummyDataLayerTest : public CPUDeviceTest<Dtype> {
 protected:
   DummyDataLayerTest()
-      : blob_top_a_(new Blob<Dtype>()),
-        blob_top_b_(new Blob<Dtype>()),
+      : blob_top_a_(new Blob<Dtype>()), blob_top_b_(new Blob<Dtype>()),
         blob_top_c_(new Blob<Dtype>()) {}
 
   virtual void SetUp() {
@@ -190,4 +189,4 @@ TYPED_TEST(DummyDataLayerTest, TestThreeTopConstantGaussianConstant) {
   }
 }
 
-}  // namespace caffe
+} // namespace caffe

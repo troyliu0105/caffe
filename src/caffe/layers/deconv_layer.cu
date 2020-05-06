@@ -4,7 +4,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void DeconvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                             const vector<Blob<Dtype> *> &top) {
   const Dtype *weight = this->blobs_[0]->gpu_data();
@@ -22,9 +22,10 @@ void DeconvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-void DeconvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                             const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+template <typename Dtype>
+void DeconvolutionLayer<Dtype>::Backward_gpu(
+    const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
+    const vector<Blob<Dtype> *> &bottom) {
   const Dtype *weight = this->blobs_[0]->gpu_data();
   Dtype *weight_diff = this->blobs_[0]->mutable_gpu_diff();
   for (int i = 0; i < top.size(); ++i) {
@@ -43,7 +44,8 @@ void DeconvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
         // gradient w.r.t. weight. Note that we will accumulate diffs.
         if (this->param_propagate_down_[0]) {
           this->weight_gpu_gemm(top_diff + n * this->top_dim_,
-                                bottom_data + n * this->bottom_dim_, weight_diff);
+                                bottom_data + n * this->bottom_dim_,
+                                weight_diff);
         }
         // gradient w.r.t. bottom data, if necessary.
         if (propagate_down[i]) {
@@ -58,4 +60,4 @@ void DeconvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(DeconvolutionLayer);
 
-}  // namespace caffe
+} // namespace caffe

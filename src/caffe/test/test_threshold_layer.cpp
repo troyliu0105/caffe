@@ -11,9 +11,10 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class ThresholdLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
   ThresholdLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 6, 5)),
@@ -74,8 +75,7 @@ TYPED_TEST(ThresholdLayerTest, Test) {
 TYPED_TEST(ThresholdLayerTest, Test2) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  ThresholdParameter *threshold_param =
-      layer_param.mutable_threshold_param();
+  ThresholdParameter *threshold_param = layer_param.mutable_threshold_param();
   threshold_param->set_threshold(0.5);
   ThresholdLayer<Dtype> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -97,4 +97,4 @@ TYPED_TEST(ThresholdLayerTest, Test2) {
   }
 }
 
-}  // namespace caffe
+} // namespace caffe

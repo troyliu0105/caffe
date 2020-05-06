@@ -1,8 +1,8 @@
 #include <boost/bind.hpp>
 #include <glog/logging.h>
 
-#include <signal.h>
 #include <csignal>
+#include <signal.h>
 
 #include "caffe/util/signal_handler.h"
 
@@ -14,9 +14,9 @@ static bool already_hooked_up = false;
 void handle_signal(int signal) {
   switch (signal) {
 #ifdef _MSC_VER
-    case SIGBREAK:  // there is no SIGHUP in windows, take SIGBREAK instead.
-      got_sighup = true;
-      break;
+  case SIGBREAK: // there is no SIGHUP in windows, take SIGBREAK instead.
+    got_sighup = true;
+    break;
 #else
   case SIGHUP:
     got_sighup = true;
@@ -104,20 +104,17 @@ bool GotSIGHUP() {
   got_sighup = false;
   return result;
 }
-}  // namespace
+} // namespace
 
 namespace caffe {
 
 SignalHandler::SignalHandler(SolverAction::Enum SIGINT_action,
-                             SolverAction::Enum SIGHUP_action) :
-    SIGINT_action_(SIGINT_action),
-    SIGHUP_action_(SIGHUP_action) {
+                             SolverAction::Enum SIGHUP_action)
+    : SIGINT_action_(SIGINT_action), SIGHUP_action_(SIGHUP_action) {
   HookupHandler();
 }
 
-SignalHandler::~SignalHandler() {
-  UnhookHandler();
-}
+SignalHandler::~SignalHandler() { UnhookHandler(); }
 
 SolverAction::Enum SignalHandler::CheckForSignals() const {
   if (GotSIGHUP()) {
@@ -135,4 +132,4 @@ ActionCallback SignalHandler::GetActionFunction() {
   return boost::bind(&SignalHandler::CheckForSignals, this);
 }
 
-}  // namespace caffe
+} // namespace caffe

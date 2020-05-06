@@ -10,35 +10,35 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void RNNLayer<Dtype>::RecurrentInputBlobNames(vector<string> *names) const {
   names->resize(1);
   (*names)[0] = "h_0";
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void RNNLayer<Dtype>::RecurrentOutputBlobNames(vector<string> *names) const {
   names->resize(1);
   (*names)[0] = "h_" + format_int(this->T_);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void RNNLayer<Dtype>::RecurrentInputShapes(vector<BlobShape> *shapes) const {
   const int num_output = this->layer_param_.recurrent_param().num_output();
   shapes->resize(1);
   (*shapes)[0].Clear();
-  (*shapes)[0].add_dim(1);  // a single timestep
+  (*shapes)[0].add_dim(1); // a single timestep
   (*shapes)[0].add_dim(this->N_);
   (*shapes)[0].add_dim(num_output);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void RNNLayer<Dtype>::OutputBlobNames(vector<string> *names) const {
   names->resize(1);
   (*names)[0] = "o";
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void RNNLayer<Dtype>::FillUnrolledNet(NetParameter *net_param) const {
   const int num_output = this->layer_param_.recurrent_param().num_output();
   CHECK_GT(num_output, 0) << "num_output must be positive";
@@ -54,13 +54,14 @@ void RNNLayer<Dtype>::FillUnrolledNet(NetParameter *net_param) const {
   hidden_param.mutable_inner_product_param()->set_num_output(num_output);
   hidden_param.mutable_inner_product_param()->set_bias_term(false);
   hidden_param.mutable_inner_product_param()->set_axis(2);
-  hidden_param.mutable_inner_product_param()->
-      mutable_weight_filler()->CopyFrom(weight_filler);
+  hidden_param.mutable_inner_product_param()->mutable_weight_filler()->CopyFrom(
+      weight_filler);
 
   LayerParameter biased_hidden_param(hidden_param);
   biased_hidden_param.mutable_inner_product_param()->set_bias_term(true);
-  biased_hidden_param.mutable_inner_product_param()->
-      mutable_bias_filler()->CopyFrom(bias_filler);
+  biased_hidden_param.mutable_inner_product_param()
+      ->mutable_bias_filler()
+      ->CopyFrom(bias_filler);
 
   LayerParameter sum_param;
   sum_param.set_type("Eltwise");
@@ -123,7 +124,7 @@ void RNNLayer<Dtype>::FillUnrolledNet(NetParameter *net_param) const {
     reshape_param->set_type("Reshape");
     BlobShape *new_shape =
         reshape_param->mutable_reshape_param()->mutable_shape();
-    new_shape->add_dim(1);  // One timestep.
+    new_shape->add_dim(1); // One timestep.
     // Should infer this->N as the dimension so we can reshape on batch size.
     new_shape->add_dim(-1);
     new_shape->add_dim(
@@ -225,7 +226,7 @@ void RNNLayer<Dtype>::FillUnrolledNet(NetParameter *net_param) const {
       o_neuron_param->add_top("o_" + ts);
     }
     output_concat_layer.add_bottom("o_" + ts);
-  }  // for (int t = 1; t <= this->T_; ++t)
+  } // for (int t = 1; t <= this->T_; ++t)
 
   net_param->add_layer()->CopyFrom(output_concat_layer);
 }
@@ -233,4 +234,4 @@ void RNNLayer<Dtype>::FillUnrolledNet(NetParameter *net_param) const {
 INSTANTIATE_CLASS(RNNLayer);
 REGISTER_LAYER_CLASS(RNN);
 
-}  // namespace caffe
+} // namespace caffe

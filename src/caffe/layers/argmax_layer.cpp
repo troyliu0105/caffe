@@ -7,7 +7,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ArgMaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   const ArgMaxParameter &argmax_param = this->layer_param_.argmax_param();
@@ -18,22 +18,23 @@ void ArgMaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   if (has_axis_) {
     axis_ = bottom[0]->CanonicalAxisIndex(argmax_param.axis());
     CHECK_GE(axis_, 0) << "axis must not be less than 0.";
-    CHECK_LE(axis_, bottom[0]->num_axes()) <<
-                                           "axis must be less than or equal to the number of axis.";
+    CHECK_LE(axis_, bottom[0]->num_axes())
+        << "axis must be less than or equal to the number of axis.";
     CHECK_LE(top_k_, bottom[0]->shape(axis_))
-      << "top_k must be less than or equal to the dimension of the axis.";
+        << "top_k must be less than or equal to the dimension of the axis.";
   } else {
     CHECK_LE(top_k_, bottom[0]->count(1))
-      << "top_k must be less than or equal to"
-         " the dimension of the flattened bottom blob per instance.";
+        << "top_k must be less than or equal to"
+           " the dimension of the flattened bottom blob per instance.";
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ArgMaxLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                  const vector<Blob<Dtype> *> &top) {
   int num_top_axes = bottom[0]->num_axes();
-  if (num_top_axes < 3) num_top_axes = 3;
+  if (num_top_axes < 3)
+    num_top_axes = 3;
   std::vector<int> shape(num_top_axes, 1);
   if (has_axis_) {
     // Produces max_ind or max_val per axis
@@ -51,7 +52,7 @@ void ArgMaxLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   top[0]->Reshape(shape);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ArgMaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -66,21 +67,22 @@ void ArgMaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     axis_dist = 1;
   }
   int num = bottom[0]->count() / dim;
-  std::vector<std::pair<Dtype, int> > bottom_data_vector(dim);
+  std::vector<std::pair<Dtype, int>> bottom_data_vector(dim);
   for (int i = 0; i < num; ++i) {
     for (int j = 0; j < dim; ++j) {
       bottom_data_vector[j] = std::make_pair(
-          bottom_data[(i / axis_dist * dim + j) * axis_dist + i % axis_dist], j);
+          bottom_data[(i / axis_dist * dim + j) * axis_dist + i % axis_dist],
+          j);
     }
     std::partial_sort(
         bottom_data_vector.begin(), bottom_data_vector.begin() + top_k_,
-        bottom_data_vector.end(), std::greater<std::pair<Dtype, int> >());
+        bottom_data_vector.end(), std::greater<std::pair<Dtype, int>>());
     for (int j = 0; j < top_k_; ++j) {
       if (out_max_val_) {
         if (has_axis_) {
           // Produces max_val per axis
-          top_data[(i / axis_dist * top_k_ + j) * axis_dist + i % axis_dist]
-              = bottom_data_vector[j].first;
+          top_data[(i / axis_dist * top_k_ + j) * axis_dist + i % axis_dist] =
+              bottom_data_vector[j].first;
         } else {
           // Produces max_ind and max_val
           top_data[2 * i * top_k_ + j] = bottom_data_vector[j].second;
@@ -88,8 +90,8 @@ void ArgMaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         }
       } else {
         // Produces max_ind per axis
-        top_data[(i / axis_dist * top_k_ + j) * axis_dist + i % axis_dist]
-            = bottom_data_vector[j].second;
+        top_data[(i / axis_dist * top_k_ + j) * axis_dist + i % axis_dist] =
+            bottom_data_vector[j].second;
       }
     }
   }
@@ -98,4 +100,4 @@ void ArgMaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 INSTANTIATE_CLASS(ArgMaxLayer);
 REGISTER_LAYER_CLASS(ArgMax);
 
-}  // namespace caffe
+} // namespace caffe

@@ -19,17 +19,13 @@ const float kLOG_THRESHOLD = 1e-20;
  * LossLayers are typically only capable of backpropagating to their first input
  * -- the predictions.
  */
-template<typename Dtype>
-class LossLayer : public Layer<Dtype> {
+template <typename Dtype> class LossLayer : public Layer<Dtype> {
 public:
-  explicit LossLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
-  virtual void LayerSetUp(
-      const vector<Blob < Dtype> *
-  > &bottom, const vector<Blob < Dtype> *> &top);
-  virtual void Reshape(
-      const vector<Blob < Dtype> *
-  > &bottom, const vector<Blob < Dtype> *> &top);
+  explicit LossLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                          const vector<Blob<Dtype> *> &top);
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
   /**
    * Read the normalization mode parameter and compute the normalizer based
@@ -37,9 +33,9 @@ public:
    * outputs will be read from valid_count, unless it is -1 in which case
    * all outputs are assumed to be valid.
    */
-  Dtype GetNormalizer(
-      const LossParameter_NormalizationMode normalization_mode,
-      const int outer_num, const int inner_num, const int valid_count);
+  Dtype GetNormalizer(const LossParameter_NormalizationMode normalization_mode,
+                      const int outer_num, const int inner_num,
+                      const int valid_count);
 
   virtual inline int ExactNumBottomBlobs() const { return 2; }
 
@@ -60,6 +56,6 @@ public:
   }
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_LOSS_LAYER_HPP_
+#endif // CAFFE_LOSS_LAYER_HPP_

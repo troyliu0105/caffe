@@ -13,8 +13,7 @@
 #include "caffe/util/bbox_util.hpp"
 
 namespace caffe {
-template<typename Dtype>
-class PredictionResult {
+template <typename Dtype> class PredictionResult {
 public:
   Dtype x;
   Dtype y;
@@ -26,10 +25,10 @@ public:
   int classType;
 };
 
-template<typename Dtype>
+template <typename Dtype>
 bool is_predict_valid(const PredictionResult<Dtype> &predict) {
-  return std::isnormal(predict.x) && std::isnormal(predict.y) \
- && std::isnormal(predict.h) && std::isnormal(predict.w);
+  return std::isnormal(predict.x) && std::isnormal(predict.y) &&
+         std::isnormal(predict.h) && std::isnormal(predict.w);
 }
 
 /**
@@ -40,7 +39,7 @@ bool is_predict_valid(const PredictionResult<Dtype> &predict) {
  *
  * NOTE: does not implement Backwards operation.
  */
-template<typename Dtype>
+template <typename Dtype>
 class Yolov3DetectionOutputLayer : public Layer<Dtype> {
 public:
   explicit Yolov3DetectionOutputLayer(const LayerParameter &param)
@@ -52,9 +51,11 @@ public:
 
   virtual inline const char *type() const { return "DetectionOutput"; }
   virtual inline int MinBottomBlobs() const { return 1; }
-  //virtual inline int MaxBottomBlobs() const { return 4; }
+  // virtual inline int MaxBottomBlobs() const { return 4; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
-  void correct_yolo_boxes(PredictionResult<Dtype> &det, int w, int h, int netw, int neth, int relative);
+  void correct_yolo_boxes(PredictionResult<Dtype> &det, int w, int h, int netw,
+                          int neth, int relative);
+
 protected:
   /**
    * @brief Do non maximum suppression (nms) on prediction results.
@@ -77,9 +78,11 @@ protected:
                            const vector<Blob<Dtype> *> &top);
   /// @brief Not implemented
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   int side_w_;
   int side_h_;
   int num_class_;
@@ -88,7 +91,7 @@ protected:
 
   int mask_group_num_;
   int groups_num_;
-  vector<PredictionResult<Dtype> > predicts_;
+  vector<PredictionResult<Dtype>> predicts_;
   Dtype confidence_threshold_;
   Dtype nms_threshold_;
   vector<Dtype> biases_;
@@ -96,9 +99,8 @@ protected:
   vector<Dtype> mask_;
   Blob<Dtype> swap_;
   bool gaussian_box_;
-
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DETECTION_OUTPUT_LAYER_HPP_
+#endif // CAFFE_DETECTION_OUTPUT_LAYER_HPP_

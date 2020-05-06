@@ -14,7 +14,7 @@
 
 namespace caffe {
 
-template<typename Dtype> class RecurrentLayer;
+template <typename Dtype> class RecurrentLayer;
 
 /**
  * @brief Processes time-varying inputs using a simple recurrent neural network
@@ -26,8 +26,7 @@ template<typename Dtype> class RecurrentLayer;
  *     o_t := \tanh[ W_{ho} h_t + b_o ]
  * @f$.
  */
-template<typename Dtype>
-class RNNLayer : public RecurrentLayer<Dtype> {
+template <typename Dtype> class RNNLayer : public RecurrentLayer<Dtype> {
 public:
   explicit RNNLayer(const LayerParameter &param)
       : RecurrentLayer<Dtype>(param) {}
@@ -42,6 +41,6 @@ protected:
   virtual void OutputBlobNames(vector<string> *names) const;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_RNN_LAYER_HPP_
+#endif // CAFFE_RNN_LAYER_HPP_

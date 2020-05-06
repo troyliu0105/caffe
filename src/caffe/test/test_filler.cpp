@@ -8,12 +8,9 @@
 
 namespace caffe {
 
-template<typename Dtype>
-class ConstantFillerTest : public ::testing::Test {
+template <typename Dtype> class ConstantFillerTest : public ::testing::Test {
 protected:
-  ConstantFillerTest()
-      : blob_(new Blob<Dtype>()),
-        filler_param_() {
+  ConstantFillerTest() : blob_(new Blob<Dtype>()), filler_param_() {
     filler_param_.set_value(10.);
     filler_.reset(new ConstantFiller<Dtype>(filler_param_));
   }
@@ -30,7 +27,7 @@ protected:
   virtual ~ConstantFillerTest() { delete blob_; }
   Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr<ConstantFiller<Dtype> > filler_;
+  shared_ptr<ConstantFiller<Dtype>> filler_;
 };
 
 TYPED_TEST_CASE(ConstantFillerTest, TestDtypes);
@@ -66,12 +63,9 @@ TYPED_TEST(ConstantFillerTest, TestFill5D) {
   this->test_params(blob_shape);
 }
 
-template<typename Dtype>
-class UniformFillerTest : public ::testing::Test {
+template <typename Dtype> class UniformFillerTest : public ::testing::Test {
 protected:
-  UniformFillerTest()
-      : blob_(new Blob<Dtype>()),
-        filler_param_() {
+  UniformFillerTest() : blob_(new Blob<Dtype>()), filler_param_() {
     filler_param_.set_min(1.);
     filler_param_.set_max(2.);
     filler_.reset(new UniformFiller<Dtype>(filler_param_));
@@ -90,7 +84,7 @@ protected:
   virtual ~UniformFillerTest() { delete blob_; }
   Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr<UniformFiller<Dtype> > filler_;
+  shared_ptr<UniformFiller<Dtype>> filler_;
 };
 
 TYPED_TEST_CASE(UniformFillerTest, TestDtypes);
@@ -126,12 +120,10 @@ TYPED_TEST(UniformFillerTest, TestFill5D) {
   this->test_params(blob_shape);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 class PositiveUnitballFillerTest : public ::testing::Test {
 protected:
-  PositiveUnitballFillerTest()
-      : blob_(new Blob<Dtype>()),
-        filler_param_() {
+  PositiveUnitballFillerTest() : blob_(new Blob<Dtype>()), filler_param_() {
     filler_.reset(new PositiveUnitballFiller<Dtype>(filler_param_));
   }
   virtual void test_params(const vector<int> &shape) {
@@ -158,7 +150,7 @@ protected:
   virtual ~PositiveUnitballFillerTest() { delete blob_; }
   Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr<PositiveUnitballFiller<Dtype> > filler_;
+  shared_ptr<PositiveUnitballFiller<Dtype>> filler_;
 };
 
 TYPED_TEST_CASE(PositiveUnitballFillerTest, TestDtypes);
@@ -194,18 +186,16 @@ TYPED_TEST(PositiveUnitballFillerTest, TestFill5D) {
   this->test_params(blob_shape);
 }
 
-template<typename Dtype>
-class GaussianFillerTest : public ::testing::Test {
+template <typename Dtype> class GaussianFillerTest : public ::testing::Test {
 protected:
-  GaussianFillerTest()
-      : blob_(new Blob<Dtype>()),
-        filler_param_() {
+  GaussianFillerTest() : blob_(new Blob<Dtype>()), filler_param_() {
     filler_param_.set_mean(10.);
     filler_param_.set_std(0.1);
     filler_.reset(new GaussianFiller<Dtype>(filler_param_));
   }
   virtual void test_params(const vector<int> &shape,
-                           const Dtype tolerance = Dtype(5), const int repetitions = 100) {
+                           const Dtype tolerance = Dtype(5),
+                           const int repetitions = 100) {
     // Tests for statistical properties should be ran multiple times.
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
@@ -240,7 +230,7 @@ protected:
   virtual ~GaussianFillerTest() { delete blob_; }
   Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr<GaussianFiller<Dtype> > filler_;
+  shared_ptr<GaussianFiller<Dtype>> filler_;
 };
 
 TYPED_TEST_CASE(GaussianFillerTest, TestDtypes);
@@ -251,7 +241,7 @@ TYPED_TEST(GaussianFillerTest, TestFill) {
   blob_shape.push_back(3);
   blob_shape.push_back(4);
   blob_shape.push_back(5);
-  const TypeParam tolerance = TypeParam(3);  // enough for a 120-element blob
+  const TypeParam tolerance = TypeParam(3); // enough for a 120-element blob
   this->test_params(blob_shape, tolerance);
 }
 
@@ -280,15 +270,12 @@ TYPED_TEST(GaussianFillerTest, TestFill5D) {
   this->test_params(blob_shape, tolerance);
 }
 
-template<typename Dtype>
-class XavierFillerTest : public ::testing::Test {
+template <typename Dtype> class XavierFillerTest : public ::testing::Test {
 protected:
-  XavierFillerTest()
-      : blob_(new Blob<Dtype>()),
-        filler_param_() {
-  }
-  virtual void test_params(FillerParameter_VarianceNorm variance_norm,
-                           Dtype n, const vector<int> &shape, const int repetitions = 100) {
+  XavierFillerTest() : blob_(new Blob<Dtype>()), filler_param_() {}
+  virtual void test_params(FillerParameter_VarianceNorm variance_norm, Dtype n,
+                           const vector<int> &shape,
+                           const int repetitions = 100) {
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
     for (int i = 0; i < repetitions; ++i) {
@@ -318,7 +305,7 @@ protected:
   virtual ~XavierFillerTest() { delete blob_; }
   Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr<XavierFiller<Dtype> > filler_;
+  shared_ptr<XavierFiller<Dtype>> filler_;
 };
 
 TYPED_TEST_CASE(XavierFillerTest, TestDtypes);
@@ -388,15 +375,12 @@ TYPED_TEST(XavierFillerTest, TestFill5D) {
   this->filler_->Fill(this->blob_);
 }
 
-template<typename Dtype>
-class MSRAFillerTest : public ::testing::Test {
+template <typename Dtype> class MSRAFillerTest : public ::testing::Test {
 protected:
-  MSRAFillerTest()
-      : blob_(new Blob<Dtype>()),
-        filler_param_() {
-  }
-  virtual void test_params(FillerParameter_VarianceNorm variance_norm,
-                           Dtype n, const vector<int> &shape, const int repetitions = 100) {
+  MSRAFillerTest() : blob_(new Blob<Dtype>()), filler_param_() {}
+  virtual void test_params(FillerParameter_VarianceNorm variance_norm, Dtype n,
+                           const vector<int> &shape,
+                           const int repetitions = 100) {
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
     for (int i = 0; i < repetitions; ++i) {
@@ -426,7 +410,7 @@ protected:
   virtual ~MSRAFillerTest() { delete blob_; }
   Blob<Dtype> *const blob_;
   FillerParameter filler_param_;
-  shared_ptr<MSRAFiller<Dtype> > filler_;
+  shared_ptr<MSRAFiller<Dtype>> filler_;
 };
 
 TYPED_TEST_CASE(MSRAFillerTest, TestDtypes);
@@ -496,13 +480,9 @@ TYPED_TEST(MSRAFillerTest, TestFill5D) {
   this->filler_->Fill(this->blob_);
 }
 
-template<typename Dtype>
-class BilinearFillerTest : public ::testing::Test {
+template <typename Dtype> class BilinearFillerTest : public ::testing::Test {
 protected:
-  BilinearFillerTest()
-      : blob_(new Blob<Dtype>()),
-        filler_param_() {
-  }
+  BilinearFillerTest() : blob_(new Blob<Dtype>()), filler_param_() {}
   virtual void test_params(const vector<int> &shape) {
     EXPECT_TRUE(blob_);
     blob_->Reshape(shape);
@@ -527,7 +507,7 @@ protected:
   virtual ~BilinearFillerTest() { delete blob_; }
   Blob<Dtype> *blob_;
   FillerParameter filler_param_;
-  shared_ptr<BilinearFiller<Dtype> > filler_;
+  shared_ptr<BilinearFiller<Dtype>> filler_;
 };
 
 TYPED_TEST_CASE(BilinearFillerTest, TestDtypes);
@@ -551,4 +531,4 @@ TYPED_TEST(BilinearFillerTest, TestFillEven) {
   this->test_params(blob_shape);
 }
 
-}  // namespace caffe
+} // namespace caffe

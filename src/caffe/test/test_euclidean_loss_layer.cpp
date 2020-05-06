@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class EuclideanLossLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -70,9 +70,7 @@ protected:
 
 TYPED_TEST_CASE(EuclideanLossLayerTest, TestDtypesAndDevices);
 
-TYPED_TEST(EuclideanLossLayerTest, TestForward) {
-  this->TestForward();
-}
+TYPED_TEST(EuclideanLossLayerTest, TestForward) { this->TestForward(); }
 
 TYPED_TEST(EuclideanLossLayerTest, TestGradient) {
   typedef typename TypeParam::Dtype Dtype;
@@ -86,4 +84,4 @@ TYPED_TEST(EuclideanLossLayerTest, TestGradient) {
                                   this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

@@ -26,4 +26,4 @@ TEST_F(ProtoTest, TestSerialization) {
   EXPECT_TRUE(true);
 }
 
-}  // namespace caffe
+} // namespace caffe

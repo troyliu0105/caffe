@@ -7,7 +7,7 @@ TODO:
   :: don't forget to update hdf5_daa_layer.cu accordingly
 - add ability to shuffle filenames if flag is set
 */
-#include <fstream>  // NOLINT(readability/streams)
+#include <fstream> // NOLINT(readability/streams)
 #include <string>
 #include <vector>
 
@@ -20,11 +20,10 @@ TODO:
 
 namespace caffe {
 
-template<typename Dtype>
-HDF5DataLayer<Dtype>::~HDF5DataLayer<Dtype>() {}
+template <typename Dtype> HDF5DataLayer<Dtype>::~HDF5DataLayer<Dtype>() {}
 
 // Load data and label from HDF5 filename into the class property blobs.
-template<typename Dtype>
+template <typename Dtype>
 void HDF5DataLayer<Dtype>::LoadHDF5FileData(const char *filename) {
   DLOG(INFO) << "Loading HDF5 file: " << filename;
   hid_t file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -39,7 +38,7 @@ void HDF5DataLayer<Dtype>::LoadHDF5FileData(const char *filename) {
   const int MAX_DATA_DIM = INT_MAX;
 
   for (int i = 0; i < top_size; ++i) {
-    hdf_blobs_[i] = shared_ptr<Blob<Dtype> >(new Blob<Dtype>());
+    hdf_blobs_[i] = shared_ptr<Blob<Dtype>>(new Blob<Dtype>());
     // Allow reshape here, as we are loading data not params
     hdf5_load_nd_dataset(file_id, this->layer_param_.top(i).c_str(),
                          MIN_DATA_DIM, MAX_DATA_DIM, hdf_blobs_[i].get(), true);
@@ -70,12 +69,12 @@ void HDF5DataLayer<Dtype>::LoadHDF5FileData(const char *filename) {
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void HDF5DataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   // Refuse transformation parameters since HDF5 is totally generic.
-  CHECK(!this->layer_param_.has_transform_param()) <<
-                                                   this->type() << " does not transform data.";
+  CHECK(!this->layer_param_.has_transform_param())
+      << this->type() << " does not transform data.";
   // Read the source to parse the filenames.
   const string &source = this->layer_param_.hdf5_data_param().source();
   LOG(INFO) << "Loading list of HDF5 filenames from: " << source;
@@ -126,18 +125,16 @@ void HDF5DataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-bool HDF5DataLayer<Dtype>::Skip() {
+template <typename Dtype> bool HDF5DataLayer<Dtype>::Skip() {
   int size = Caffe::solver_count();
   int rank = Caffe::solver_rank();
   bool keep = (offset_ % size) == rank ||
-      // In test mode, only rank 0 runs, so avoid skipping
-      this->layer_param_.phase() == TEST;
+              // In test mode, only rank 0 runs, so avoid skipping
+              this->layer_param_.phase() == TEST;
   return !keep;
 }
 
-template<typename Dtype>
-void HDF5DataLayer<Dtype>::Next() {
+template <typename Dtype> void HDF5DataLayer<Dtype>::Next() {
   if (++current_row_ == hdf_blobs_[0]->shape(0)) {
     if (num_files_ > 1) {
       ++current_file_;
@@ -159,7 +156,7 @@ void HDF5DataLayer<Dtype>::Next() {
   offset_++;
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void HDF5DataLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                        const vector<Blob<Dtype> *> &top) {
   const int batch_size = this->layer_param_.hdf5_data_param().batch_size();
@@ -170,8 +167,9 @@ void HDF5DataLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     for (int j = 0; j < this->layer_param_.top_size(); ++j) {
       int data_dim = top[j]->count() / top[j]->shape(0);
       caffe_copy(data_dim,
-                 &hdf_blobs_[j]->cpu_data()[data_permutation_[current_row_]
-                     * data_dim], &top[j]->mutable_cpu_data()[i * data_dim]);
+                 &hdf_blobs_[j]
+                      ->cpu_data()[data_permutation_[current_row_] * data_dim],
+                 &top[j]->mutable_cpu_data()[i * data_dim]);
     }
     Next();
   }
@@ -184,5 +182,5 @@ STUB_GPU_FORWARD(HDF5DataLayer, Forward);
 INSTANTIATE_CLASS(HDF5DataLayer);
 REGISTER_LAYER_CLASS(HDF5Data);
 
-}  // namespace caffe
-#endif  // USE_HDF5
+} // namespace caffe
+#endif // USE_HDF5

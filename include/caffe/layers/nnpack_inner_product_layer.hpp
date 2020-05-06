@@ -11,19 +11,16 @@
 
 namespace caffe {
 #ifdef USE_NNPACK
-template<typename Dtype>
+template <typename Dtype>
 class NNPackInnerProductLayer : public InnerProductLayer<Dtype> {
 public:
   explicit NNPackInnerProductLayer(const LayerParameter &param)
       : InnerProductLayer<Dtype>(param) {}
-  virtual inline const char *type() const {
-    return "NNPackInnerProduct";
-  }
-  virtual void Forward_cpu(
-      const vector<Blob<Dtype> *> &bottom,
-      const vector<Blob<Dtype> *> &top);
+  virtual inline const char *type() const { return "NNPackInnerProduct"; }
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 };
 #endif
-}
+} // namespace caffe
 
-#endif //CAFFE_INCLUDE_CAFFE_LAYERS_NNPACK_INNER_PRODUCT_LAYER_HPP
+#endif // CAFFE_INCLUDE_CAFFE_LAYERS_NNPACK_INNER_PRODUCT_LAYER_HPP

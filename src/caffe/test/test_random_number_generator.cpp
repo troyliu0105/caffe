@@ -10,21 +10,18 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 class RandomNumberGeneratorTest : public ::testing::Test {
 protected:
   RandomNumberGeneratorTest()
-      : mean_bound_multiplier_(3.8),  // ~99.99% confidence for test failure.
-        sample_size_(10000),
-        seed_(1701),
+      : mean_bound_multiplier_(3.8), // ~99.99% confidence for test failure.
+        sample_size_(10000), seed_(1701),
         data_(new SyncedMemory(sample_size_ * sizeof(Dtype))),
         data_2_(new SyncedMemory(sample_size_ * sizeof(Dtype))),
         int_data_(new SyncedMemory(sample_size_ * sizeof(int))),
         int_data_2_(new SyncedMemory(sample_size_ * sizeof(int))) {}
 
-  virtual void SetUp() {
-    Caffe::set_random_seed(this->seed_);
-  }
+  virtual void SetUp() { Caffe::set_random_seed(this->seed_); }
 
   Dtype sample_mean(const Dtype *const seqs, const int sample_size) {
     Dtype sum = 0;
@@ -54,9 +51,7 @@ protected:
     return mean_bound_multiplier_ * std / sqrt(static_cast<Dtype>(sample_size));
   }
 
-  Dtype mean_bound(const Dtype std) {
-    return mean_bound(std, sample_size_);
-  }
+  Dtype mean_bound(const Dtype std) { return mean_bound(std, sample_size_); }
 
   void RngGaussianFill(const Dtype mu, const Dtype sigma, void *cpu_data) {
     Dtype *rng_data = static_cast<Dtype *>(cpu_data);
@@ -70,8 +65,8 @@ protected:
     const Dtype true_std = sigma;
     // Check that sample mean roughly matches true mean.
     const Dtype bound = this->mean_bound(true_std);
-    const Dtype sample_mean = this->sample_mean(
-        static_cast<const Dtype *>(cpu_data));
+    const Dtype sample_mean =
+        this->sample_mean(static_cast<const Dtype *>(cpu_data));
     EXPECT_NEAR(sample_mean, true_mean, bound);
     // Check that roughly half the samples are above the true mean.
     int num_above_mean = 0;
@@ -314,8 +309,7 @@ TYPED_TEST(RandomNumberGeneratorTest, TestRngGaussianTimesBernoulli) {
 
   // Sample from Bernoulli with p = 0.3.
   const TypeParam bernoulli_p = 0.3;
-  int *bernoulli_data =
-      static_cast<int *>(this->int_data_->mutable_cpu_data());
+  int *bernoulli_data = static_cast<int *>(this->int_data_->mutable_cpu_data());
   this->RngBernoulliFill(bernoulli_p, bernoulli_data);
 
   // Multiply Gaussian by Bernoulli.
@@ -338,8 +332,7 @@ TYPED_TEST(RandomNumberGeneratorTest, TestRngUniformTimesBernoulli) {
 
   // Sample from Bernoulli with p = 0.3.
   const TypeParam bernoulli_p = 0.3;
-  int *bernoulli_data =
-      static_cast<int *>(this->int_data_->mutable_cpu_data());
+  int *bernoulli_data = static_cast<int *>(this->int_data_->mutable_cpu_data());
   this->RngBernoulliFill(bernoulli_p, bernoulli_data);
 
   // Multiply Uniform by Bernoulli.
@@ -501,4 +494,4 @@ TYPED_TEST(RandomNumberGeneratorTest, TestRngUniformTimesUniformGPU) {
 
 #endif
 
-}  // namespace caffe
+} // namespace caffe

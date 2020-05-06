@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 class MultinomialLogisticLossLayerTest : public CPUDeviceTest<Dtype> {
 protected:
   MultinomialLogisticLossLayerTest()
@@ -54,4 +54,4 @@ TYPED_TEST(MultinomialLogisticLossLayerTest, TestGradientCPU) {
                                   this->blob_top_vec_, 0);
 }
 
-}  // namespace caffe
+} // namespace caffe

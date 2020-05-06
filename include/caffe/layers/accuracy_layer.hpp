@@ -15,8 +15,7 @@ namespace caffe {
  * @brief Computes the classification accuracy for a one-of-many
  *        classification task.
  */
-template<typename Dtype>
-class AccuracyLayer : public Layer<Dtype> {
+template <typename Dtype> class AccuracyLayer : public Layer<Dtype> {
 public:
   /**
    * @param param provides AccuracyParameter accuracy_param,
@@ -26,8 +25,7 @@ public:
    *     correct.  For example, if @f$ k = 5 @f$, a prediction is counted
    *     correct if the correct label is among the top 5 predicted labels.
    */
-  explicit AccuracyLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit AccuracyLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -73,13 +71,17 @@ protected:
 
   /// @brief Not implemented -- AccuracyLayer cannot be used as a loss.
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     for (int i = 0; i < propagate_down.size(); ++i) {
-      if (propagate_down[i]) { NOT_IMPLEMENTED; }
+      if (propagate_down[i]) {
+        NOT_IMPLEMENTED;
+      }
     }
   }
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   int label_axis_, outer_num_, inner_num_;
 
@@ -93,6 +95,6 @@ protected:
   Blob<Dtype> nums_buffer_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_ACCURACY_LAYER_HPP_
+#endif // CAFFE_ACCURACY_LAYER_HPP_

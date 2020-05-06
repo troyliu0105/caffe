@@ -15,7 +15,7 @@ namespace caffe {
 
 // Since ConvolutionLayerTest checks the shared conv/deconv code in detail,
 // we'll just do a simple forward test and a gradient check.
-template<typename TypeParam>
+template <typename TypeParam>
 class DeconvolutionLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -23,8 +23,7 @@ protected:
   DeconvolutionLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 6, 4)),
         blob_bottom_2_(new Blob<Dtype>(2, 3, 6, 4)),
-        blob_top_(new Blob<Dtype>()),
-        blob_top_2_(new Blob<Dtype>()) {}
+        blob_top_(new Blob<Dtype>()), blob_top_2_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     // fill the values
     FillerParameter filler_param;
@@ -63,8 +62,7 @@ TYPED_TEST(DeconvolutionLayerTest, TestSetup) {
   convolution_param->set_num_output(4);
   this->blob_bottom_vec_.push_back(this->blob_bottom_2_);
   this->blob_top_vec_.push_back(this->blob_top_2_);
-  shared_ptr<Layer<Dtype> > layer(
-      new DeconvolutionLayer<Dtype>(layer_param));
+  shared_ptr<Layer<Dtype>> layer(new DeconvolutionLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_->num(), 2);
   EXPECT_EQ(this->blob_top_->channels(), 4);
@@ -103,8 +101,7 @@ TYPED_TEST(DeconvolutionLayerTest, TestSimpleDeconvolution) {
   convolution_param->mutable_weight_filler()->set_value(1);
   convolution_param->mutable_bias_filler()->set_type("constant");
   convolution_param->mutable_bias_filler()->set_value(0.1);
-  shared_ptr<Layer<Dtype> > layer(
-      new DeconvolutionLayer<Dtype>(layer_param));
+  shared_ptr<Layer<Dtype>> layer(new DeconvolutionLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   // constant-fill the bottom blobs
   FillerParameter filler_param;
@@ -120,17 +117,17 @@ TYPED_TEST(DeconvolutionLayerTest, TestSimpleDeconvolution) {
       for (int h = 0; h < this->blob_top_->height(); ++h) {
         for (int w = 0; w < this->blob_top_->width(); ++w) {
           Dtype expected = 3.1;
-          bool h_overlap = h % 2 == 0 && h > 0
-              && h < this->blob_top_->height() - 1;
-          bool w_overlap = w % 2 == 0 && w > 0
-              && w < this->blob_top_->width() - 1;
+          bool h_overlap =
+              h % 2 == 0 && h > 0 && h < this->blob_top_->height() - 1;
+          bool w_overlap =
+              w % 2 == 0 && w > 0 && w < this->blob_top_->width() - 1;
           if (h_overlap && w_overlap) {
             expected += 9;
           } else if (h_overlap || w_overlap) {
             expected += 3;
           }
-          EXPECT_NEAR(top_data[this->blob_top_->offset(n, c, h, w)],
-                      expected, 1e-4);
+          EXPECT_NEAR(top_data[this->blob_top_->offset(n, c, h, w)], expected,
+                      1e-4);
         }
       }
     }
@@ -313,7 +310,7 @@ TYPED_TEST(DeconvolutionLayerTest, TestGradient3D) {
 
 // Since ConvolutionLayerTest checks the shared conv/deconv code in detail,
 // we'll just do a simple forward test and a gradient check.
-template<typename TypeParam>
+template <typename TypeParam>
 class CuDNNDeconvolutionLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -321,8 +318,7 @@ protected:
   CuDNNDeconvolutionLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 6, 4)),
         blob_bottom_2_(new Blob<Dtype>(2, 3, 6, 4)),
-        blob_top_(new Blob<Dtype>()),
-        blob_top_2_(new Blob<Dtype>()) {}
+        blob_top_(new Blob<Dtype>()), blob_top_2_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     // fill the values
     FillerParameter filler_param;
@@ -361,7 +357,7 @@ TYPED_TEST(CuDNNDeconvolutionLayerTest, TestSetup) {
   convolution_param->set_num_output(4);
   this->blob_bottom_vec_.push_back(this->blob_bottom_2_);
   this->blob_top_vec_.push_back(this->blob_top_2_);
-  shared_ptr<Layer<Dtype> > layer(
+  shared_ptr<Layer<Dtype>> layer(
       new CuDNNDeconvolutionLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_->num(), 2);
@@ -401,7 +397,7 @@ TYPED_TEST(CuDNNDeconvolutionLayerTest, TestSimpleCuDNNDeconvolution) {
   convolution_param->mutable_weight_filler()->set_value(1);
   convolution_param->mutable_bias_filler()->set_type("constant");
   convolution_param->mutable_bias_filler()->set_value(0.1);
-  shared_ptr<Layer<Dtype> > layer(
+  shared_ptr<Layer<Dtype>> layer(
       new CuDNNDeconvolutionLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   // constant-fill the bottom blobs
@@ -418,17 +414,17 @@ TYPED_TEST(CuDNNDeconvolutionLayerTest, TestSimpleCuDNNDeconvolution) {
       for (int h = 0; h < this->blob_top_->height(); ++h) {
         for (int w = 0; w < this->blob_top_->width(); ++w) {
           Dtype expected = 3.1;
-          bool h_overlap = h % 2 == 0 && h > 0
-              && h < this->blob_top_->height() - 1;
-          bool w_overlap = w % 2 == 0 && w > 0
-              && w < this->blob_top_->width() - 1;
+          bool h_overlap =
+              h % 2 == 0 && h > 0 && h < this->blob_top_->height() - 1;
+          bool w_overlap =
+              w % 2 == 0 && w > 0 && w < this->blob_top_->width() - 1;
           if (h_overlap && w_overlap) {
             expected += 9;
           } else if (h_overlap || w_overlap) {
             expected += 3;
           }
-          EXPECT_NEAR(top_data[this->blob_top_->offset(n, c, h, w)],
-                      expected, 1e-4);
+          EXPECT_NEAR(top_data[this->blob_top_->offset(n, c, h, w)], expected,
+                      1e-4);
         }
       }
     }
@@ -580,4 +576,4 @@ TYPED_TEST(CuDNNDeconvolutionLayerTest, TestNDAgainst2D) {
 
 #endif
 
-}  // namespace caffe
+} // namespace caffe

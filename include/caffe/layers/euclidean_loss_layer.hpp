@@ -30,15 +30,15 @@ namespace caffe {
  * This can be used for least-squares regression tasks.  An InnerProductLayer
  * input to a EuclideanLossLayer exactly formulates a linear least squares
  * regression problem. With non-zero weight decay the problem becomes one of
- * ridge regression -- see src/caffe/test/test_gradient_based_solver.cpp for a concrete
- * example wherein we check that the gradients computed for a Net with exactly
- * this structure match hand-computed gradient formulas for ridge regression.
+ * ridge regression -- see src/caffe/test/test_gradient_based_solver.cpp for a
+ * concrete example wherein we check that the gradients computed for a Net with
+ * exactly this structure match hand-computed gradient formulas for ridge
+ * regression.
  *
  * (Note: Caffe, and SGD in general, is certainly \b not the best way to solve
  * linear least squares problems! We use it only as an instructive example.)
  */
-template<typename Dtype>
-class EuclideanLossLayer : public LossLayer<Dtype> {
+template <typename Dtype> class EuclideanLossLayer : public LossLayer<Dtype> {
 public:
   explicit EuclideanLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}
@@ -95,13 +95,15 @@ protected:
    *      @f$ if propagate_down[1]
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   Blob<Dtype> diff_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_EUCLIDEAN_LOSS_LAYER_HPP_
+#endif // CAFFE_EUCLIDEAN_LOSS_LAYER_HPP_

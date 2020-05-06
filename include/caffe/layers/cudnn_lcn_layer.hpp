@@ -13,8 +13,7 @@
 namespace caffe {
 
 #ifdef USE_CUDNN
-template<typename Dtype>
-class CuDNNLCNLayer : public LRNLayer<Dtype> {
+template <typename Dtype> class CuDNNLCNLayer : public LRNLayer<Dtype> {
 public:
   explicit CuDNNLCNLayer(const LayerParameter &param)
       : LRNLayer<Dtype>(param), handles_setup_(false), tempDataSize(0),
@@ -29,7 +28,8 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   bool handles_setup_;
   cudnnHandle_t handle_;
@@ -44,6 +44,6 @@ protected:
 };
 #endif
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_CUDNN_LCN_LAYER_HPP_
+#endif // CAFFE_CUDNN_LCN_LAYER_HPP_

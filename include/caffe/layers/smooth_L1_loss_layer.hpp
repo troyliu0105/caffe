@@ -23,8 +23,7 @@ namespace caffe {
  * @brief Computes the SmoothL1 loss as introduced in:@f$
  *  Fast R-CNN, Ross Girshick, ICCV 2015.
  */
-template<typename Dtype>
-class SmoothL1LossLayer : public LossLayer<Dtype> {
+template <typename Dtype> class SmoothL1LossLayer : public LossLayer<Dtype> {
 public:
   explicit SmoothL1LossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}
@@ -54,15 +53,17 @@ protected:
                            const vector<Blob<Dtype> *> &top);
 
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   Blob<Dtype> diff_;
   Blob<Dtype> errors_;
   bool has_weights_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SMOOTH_L1_LOSS_LAYER_HPP_
+#endif // CAFFE_SMOOTH_L1_LOSS_LAYER_HPP_

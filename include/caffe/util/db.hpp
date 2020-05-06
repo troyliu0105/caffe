@@ -6,7 +6,8 @@
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
 
-namespace caffe::db {
+namespace caffe {
+namespace db {
 
 enum Mode { READ, WRITE, NEW };
 
@@ -20,7 +21,7 @@ public:
   virtual string value() = 0;
   virtual bool valid() = 0;
 
-DISABLE_COPY_AND_ASSIGN(Cursor);
+  DISABLE_COPY_AND_ASSIGN(Cursor);
 };
 
 class Transaction {
@@ -30,7 +31,7 @@ public:
   virtual void Put(const string &key, const string &value) = 0;
   virtual void Commit() = 0;
 
-DISABLE_COPY_AND_ASSIGN(Transaction);
+  DISABLE_COPY_AND_ASSIGN(Transaction);
 };
 
 class DB {
@@ -42,12 +43,12 @@ public:
   virtual Cursor *NewCursor() = 0;
   virtual Transaction *NewTransaction() = 0;
 
-DISABLE_COPY_AND_ASSIGN(DB);
+  DISABLE_COPY_AND_ASSIGN(DB);
 };
 
 DB *GetDB(DataParameter::DB backend);
 DB *GetDB(const string &backend);
+} // namespace db
+} // namespace caffe
 
-}  // namespace caffe
-
-#endif  // CAFFE_UTIL_DB_HPP
+#endif // CAFFE_UTIL_DB_HPP

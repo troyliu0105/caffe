@@ -8,13 +8,13 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void DetectionEvaluateLayer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const DetectionEvaluateParameter &detection_evaluate_param =
       this->layer_param_.detection_evaluate_param();
   CHECK(detection_evaluate_param.has_num_classes())
-          << "Must provide num_classes.";
+      << "Must provide num_classes.";
   num_classes_ = detection_evaluate_param.num_classes();
   background_label_id_ = detection_evaluate_param.background_label_id();
   overlap_threshold_ = detection_evaluate_param.overlap_threshold();
@@ -23,8 +23,7 @@ void DetectionEvaluateLayer<Dtype>::LayerSetUp(
   if (detection_evaluate_param.has_name_size_file()) {
     string name_size_file = detection_evaluate_param.name_size_file();
     std::ifstream infile(name_size_file.c_str());
-    CHECK(infile.good())
-            << "Failed to open name size file: " << name_size_file;
+    CHECK(infile.good()) << "Failed to open name size file: " << name_size_file;
     // The file is in the following format:
     //    name height width
     //    ...
@@ -46,7 +45,7 @@ void DetectionEvaluateLayer<Dtype>::LayerSetUp(
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DetectionEvaluateLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                             const vector<Blob<Dtype> *> &top) {
   CHECK_LE(count_, sizes_.size());
@@ -59,8 +58,8 @@ void DetectionEvaluateLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
 
   // num() and channels() are 1.
   vector<int> top_shape(2, 1);
-  int num_pos_classes = background_label_id_ == -1 ?
-                        num_classes_ : num_classes_ - 1;
+  int num_pos_classes =
+      background_label_id_ == -1 ? num_classes_ : num_classes_ - 1;
   int num_valid_det = 0;
   const Dtype *det_data = bottom[0]->cpu_data();
   for (int i = 0; i < bottom[0]->height(); ++i) {
@@ -76,7 +75,7 @@ void DetectionEvaluateLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   top[0]->Reshape(top_shape);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void DetectionEvaluateLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const Dtype *det_data = bottom[0]->cpu_data();
@@ -89,8 +88,8 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
 
   // Retrieve all ground truth (including difficult ones).
   map<int, LabelBBox> all_gt_bboxes;
-  GetGroundTruth(gt_data, bottom[1]->height(), background_label_id_,
-                 true, &all_gt_bboxes);
+  GetGroundTruth(gt_data, bottom[1]->height(), background_label_id_, true,
+                 &all_gt_bboxes);
 
   Dtype *top_data = top[0]->mutable_cpu_data();
   caffe_set(top[0]->count(), Dtype(0.), top_data);
@@ -196,15 +195,15 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
             top_data[num_det * 5 + 1] = label;
             top_data[num_det * 5 + 2] = bboxes[i].score();
             if (!use_normalized_bbox_) {
-              OutputBBox(bboxes[i], sizes_[count_], has_resize_,
-                         resize_param_, &(bboxes[i]));
+              OutputBBox(bboxes[i], sizes_[count_], has_resize_, resize_param_,
+                         &(bboxes[i]));
             }
             // Compare with each ground truth bbox.
             float overlap_max = -1;
             int jmax = -1;
             for (int j = 0; j < gt_bboxes.size(); ++j) {
-              float overlap = JaccardOverlap(bboxes[i], gt_bboxes[j],
-                                             use_normalized_bbox_);
+              float overlap =
+                  JaccardOverlap(bboxes[i], gt_bboxes[j], use_normalized_bbox_);
               if (overlap > overlap_max) {
                 overlap_max = overlap;
                 jmax = j;
@@ -247,4 +246,4 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
 INSTANTIATE_CLASS(DetectionEvaluateLayer);
 REGISTER_LAYER_CLASS(DetectionEvaluate);
 
-}  // namespace caffe
+} // namespace caffe

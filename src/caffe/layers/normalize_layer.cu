@@ -11,10 +11,10 @@
 namespace caffe {
 
 // divid a matrix with vector
-template<typename Dtype>
-__global__ void DivBsx(const int nthreads, const Dtype *A,
-                       const Dtype *v, const int rows, const int cols, const CBLAS_TRANSPOSE trans,
-                       Dtype *B) {
+template <typename Dtype>
+__global__ void DivBsx(const int nthreads, const Dtype *A, const Dtype *v,
+                       const int rows, const int cols,
+                       const CBLAS_TRANSPOSE trans, Dtype *B) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     int c = index % cols;
     int r = (index / cols) % rows;
@@ -26,10 +26,10 @@ __global__ void DivBsx(const int nthreads, const Dtype *A,
   }
 }
 
-template<typename Dtype>
-__global__ void MulBsx(const int nthreads, const Dtype *A,
-                       const Dtype *v, const int rows, const int cols, const CBLAS_TRANSPOSE trans,
-                       Dtype *B) {
+template <typename Dtype>
+__global__ void MulBsx(const int nthreads, const Dtype *A, const Dtype *v,
+                       const int rows, const int cols,
+                       const CBLAS_TRANSPOSE trans, Dtype *B) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     int c = index % cols;
     int r = (index / cols) % rows;
@@ -41,7 +41,7 @@ __global__ void MulBsx(const int nthreads, const Dtype *A,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void NormalizeLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                         const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -84,7 +84,7 @@ void NormalizeLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
       caffe_gpu_powx<Dtype>(spatial_dim, norm_data, Dtype(0.5), norm_data);
       // scale the layer
       // NOLINT_NEXT_LINE(whitespace/operators)
-      DivBsx<Dtype> <<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
+      DivBsx<Dtype><<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
           dim, bottom_data, norm_data, channels, spatial_dim, CblasNoTrans,
           top_data);
       CUDA_POST_KERNEL_CHECK;
@@ -95,9 +95,8 @@ void NormalizeLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
       caffe_gpu_scal<Dtype>(dim, scale[0], top_data);
     } else {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      MulBsx<Dtype> <<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
-          dim, top_data, scale, channels, spatial_dim, CblasTrans,
-          top_data);
+      MulBsx<Dtype><<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
+          dim, top_data, scale, channels, spatial_dim, CblasTrans, top_data);
       CUDA_POST_KERNEL_CHECK;
     }
     bottom_data += dim;
@@ -105,9 +104,10 @@ void NormalizeLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void NormalizeLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                         const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                         const vector<bool> &propagate_down,
+                                         const vector<Blob<Dtype> *> &bottom) {
   const Dtype *top_diff = top[0]->gpu_diff();
   const Dtype *top_data = top[0]->gpu_data();
   const Dtype *bottom_data = bottom[0]->mutable_gpu_data();
@@ -147,7 +147,8 @@ void NormalizeLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
       Dtype *scale_diff = this->blobs_[0]->mutable_gpu_diff();
       for (int n = 0; n < num; ++n) {
         // compute a
-        caffe_gpu_mul<Dtype>(dim, top_data + n * dim, top_diff + n * dim, buffer_data);
+        caffe_gpu_mul<Dtype>(dim, top_data + n * dim, top_diff + n * dim,
+                             buffer_data);
         caffe_gpu_gemv<Dtype>(CblasNoTrans, channels, spatial_dim, Dtype(1),
                               buffer_data, sum_spatial_multiplier, Dtype(0),
                               buffer_channel);
@@ -177,21 +178,21 @@ void NormalizeLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
                               buffer_spatial);
         // scale botom_diff
         // NOLINT_NEXT_LINE(whitespace/operators)
-        MulBsx<Dtype> <<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
+        MulBsx<Dtype><<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
             dim, bottom_data, buffer_spatial, channels, spatial_dim,
             CblasNoTrans, bottom_diff);
         CUDA_POST_KERNEL_CHECK;
         // divide by square of norm
         caffe_gpu_powx<Dtype>(spatial_dim, norm_data, Dtype(2), buffer_spatial);
         // NOLINT_NEXT_LINE(whitespace/operators)
-        DivBsx<Dtype> <<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
+        DivBsx<Dtype><<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
             dim, bottom_diff, buffer_spatial, channels, spatial_dim,
             CblasNoTrans, bottom_diff);
         CUDA_POST_KERNEL_CHECK;
         caffe_gpu_sub<Dtype>(dim, top_diff, bottom_diff, bottom_diff);
         // divide by norm
         // NOLINT_NEXT_LINE(whitespace/operators)
-        DivBsx<Dtype> <<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
+        DivBsx<Dtype><<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
             dim, bottom_diff, norm_data, channels, spatial_dim, CblasNoTrans,
             bottom_diff);
         CUDA_POST_KERNEL_CHECK;
@@ -202,7 +203,7 @@ void NormalizeLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
         caffe_gpu_scal<Dtype>(dim, scale[0], bottom_diff);
       } else {
         // NOLINT_NEXT_LINE(whitespace/operators)
-        MulBsx<Dtype> <<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
+        MulBsx<Dtype><<<CAFFE_GET_BLOCKS(dim), CAFFE_CUDA_NUM_THREADS>>>(
             dim, bottom_diff, scale, channels, spatial_dim, CblasTrans,
             bottom_diff);
         CUDA_POST_KERNEL_CHECK;
@@ -216,4 +217,4 @@ void NormalizeLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(NormalizeLayer);
 
-}  // namespace caffe
+} // namespace caffe

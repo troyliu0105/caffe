@@ -4,7 +4,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void BasePrefetchingDataLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   if (prefetch_current_) {
@@ -27,4 +27,4 @@ void BasePrefetchingDataLayer<Dtype>::Forward_gpu(
 
 INSTANTIATE_LAYER_GPU_FORWARD(BasePrefetchingDataLayer);
 
-}  // namespace caffe
+} // namespace caffe

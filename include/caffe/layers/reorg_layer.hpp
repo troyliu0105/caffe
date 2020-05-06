@@ -15,11 +15,9 @@ namespace caffe {
  * Note: similarly to FlattenLayer, this layer does not change the input values
  * (see FlattenLayer, Blob::ShareData and Blob::ShareDiff).
  */
-template<typename Dtype>
-class ReorgLayer : public Layer<Dtype> {
+template <typename Dtype> class ReorgLayer : public Layer<Dtype> {
 public:
-  explicit ReorgLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit ReorgLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
 
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
@@ -34,18 +32,19 @@ public:
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
 protected:
-
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
 
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
 
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   int stride_;
   bool reverse_;
@@ -56,8 +55,9 @@ protected:
   int reorged_height_, reorged_width_;
   Blob<Dtype> diff_;
 };
-template<typename Dtype>
-void reorg_cpu(Dtype *x, int w, int h, int c, int batch, int stride, int forward, Dtype *out) {
+template <typename Dtype>
+void reorg_cpu(Dtype *x, int w, int h, int c, int batch, int stride,
+               int forward, Dtype *out) {
   int b, i, j, k;
   int out_c = c / (stride * stride);
 
@@ -70,16 +70,19 @@ void reorg_cpu(Dtype *x, int w, int h, int c, int batch, int stride, int forward
           int offset = k / out_c;
           int w2 = i * stride + offset % stride;
           int h2 = j * stride + offset / stride;
-          int out_index = w2 + w * stride * (h2 + h * stride * (c2 + out_c * b));
-          if (forward) out[out_index] = x[in_index];
-          else out[in_index] = x[out_index];
+          int out_index =
+              w2 + w * stride * (h2 + h * stride * (c2 + out_c * b));
+          if (forward)
+            out[out_index] = x[in_index];
+          else
+            out[in_index] = x[out_index];
         }
       }
     }
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void reorg_cpu(const Dtype *bottom_data, const int b_w, const int b_h,
                const int b_c, const int b_n, const int stride,
                const bool forward, Dtype *top_data) {
@@ -96,7 +99,8 @@ void reorg_cpu(const Dtype *bottom_data, const int b_w, const int b_h,
           int w2 = w * stride + offset % stride;
           int h2 = h * stride + offset / stride;
           int top_index = w2 + t_w * (h2 + t_h * (c2 + t_c * n));
-          if (forward) top_data[top_index] = bottom_data[bottom_index];
+          if (forward)
+            top_data[top_index] = bottom_data[bottom_index];
           else
             top_data[bottom_index] = bottom_data[top_index];
         }
@@ -105,6 +109,6 @@ void reorg_cpu(const Dtype *bottom_data, const int b_w, const int b_h,
   }
 }
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_REORG_LAYER_HPP_
+#endif // CAFFE_REORG_LAYER_HPP_

@@ -17,7 +17,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class NetTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -30,9 +30,10 @@ protected:
     net_.reset(new Net<Dtype>(param));
   }
 
-  virtual void InitNetFromProtoFileWithState(const string &proto,
-                                             Phase phase = caffe::TRAIN, const int level = 0,
-                                             const vector<string> *stages = NULL) {
+  virtual void
+  InitNetFromProtoFileWithState(const string &proto, Phase phase = caffe::TRAIN,
+                                const int level = 0,
+                                const vector<string> *stages = NULL) {
     NetParameter param;
     CHECK(google::protobuf::TextFormat::ParseFromString(proto, &param));
     string param_file;
@@ -42,9 +43,9 @@ protected:
   }
 
   virtual void CopyNetBlobs(const bool copy_diff,
-                            vector<shared_ptr<Blob<Dtype> > > *blobs_copy) {
+                            vector<shared_ptr<Blob<Dtype>>> *blobs_copy) {
     CHECK(net_);
-    const vector<shared_ptr<Blob<Dtype> > > &net_blobs = net_->blobs();
+    const vector<shared_ptr<Blob<Dtype>>> &net_blobs = net_->blobs();
     blobs_copy->clear();
     blobs_copy->resize(net_blobs.size());
     const bool kReshape = true;
@@ -55,9 +56,9 @@ protected:
   }
 
   virtual void CopyNetParams(const bool copy_diff,
-                             vector<shared_ptr<Blob<Dtype> > > *params_copy) {
+                             vector<shared_ptr<Blob<Dtype>>> *params_copy) {
     CHECK(net_);
-    const vector<shared_ptr<Blob<Dtype> > > &net_params = net_->params();
+    const vector<shared_ptr<Blob<Dtype>>> &net_params = net_->params();
     params_copy->clear();
     params_copy->resize(net_params.size());
     const bool kReshape = true;
@@ -69,74 +70,72 @@ protected:
 
   virtual void InitTinyNet(const bool force_backward = false,
                            const bool accuracy_layer = false) {
-    string proto =
-        "name: 'TinyTestNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    shape { "
-        "      dim: 5 "
-        "      dim: 2 "
-        "      dim: 3 "
-        "      dim: 4 "
-        "    } "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    shape { "
-        "      dim: 5 "
-        "    } "
-        "    data_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  top: 'data' "
-        "  top: 'label' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 1000 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    bias_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  param { "
-        "    lr_mult: 1 "
-        "    decay_mult: 1 "
-        "  } "
-        "  param { "
-        "    lr_mult: 2 "
-        "    decay_mult: 0 "
-        "  } "
-        "  bottom: 'data' "
-        "  top: 'innerproduct' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'SoftmaxWithLoss' "
-        "  bottom: 'innerproduct' "
-        "  bottom: 'label' "
-        "  top: 'top_loss' "
-        "} ";
+    string proto = "name: 'TinyTestNetwork' "
+                   "layer { "
+                   "  name: 'data' "
+                   "  type: 'DummyData' "
+                   "  dummy_data_param { "
+                   "    shape { "
+                   "      dim: 5 "
+                   "      dim: 2 "
+                   "      dim: 3 "
+                   "      dim: 4 "
+                   "    } "
+                   "    data_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "    shape { "
+                   "      dim: 5 "
+                   "    } "
+                   "    data_filler { "
+                   "      type: 'constant' "
+                   "      value: 0 "
+                   "    } "
+                   "  } "
+                   "  top: 'data' "
+                   "  top: 'label' "
+                   "} "
+                   "layer { "
+                   "  name: 'innerproduct' "
+                   "  type: 'InnerProduct' "
+                   "  inner_product_param { "
+                   "    num_output: 1000 "
+                   "    weight_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "    bias_filler { "
+                   "      type: 'constant' "
+                   "      value: 0 "
+                   "    } "
+                   "  } "
+                   "  param { "
+                   "    lr_mult: 1 "
+                   "    decay_mult: 1 "
+                   "  } "
+                   "  param { "
+                   "    lr_mult: 2 "
+                   "    decay_mult: 0 "
+                   "  } "
+                   "  bottom: 'data' "
+                   "  top: 'innerproduct' "
+                   "} "
+                   "layer { "
+                   "  name: 'loss' "
+                   "  type: 'SoftmaxWithLoss' "
+                   "  bottom: 'innerproduct' "
+                   "  bottom: 'label' "
+                   "  top: 'top_loss' "
+                   "} ";
     if (accuracy_layer) {
-      proto +=
-          "layer { "
-          "  name: 'loss' "
-          "  type: 'Accuracy' "
-          "  bottom: 'innerproduct' "
-          "  bottom: 'label' "
-          "  top: 'accuracy' "
-          "} ";
+      proto += "layer { "
+               "  name: 'loss' "
+               "  type: 'Accuracy' "
+               "  bottom: 'innerproduct' "
+               "  bottom: 'label' "
+               "  top: 'accuracy' "
+               "} ";
     }
     if (force_backward) {
       proto += "force_backward: true ";
@@ -145,59 +144,58 @@ protected:
   }
 
   virtual void InitTinyNetEuclidean(const bool force_backward = false) {
-    string proto =
-        "name: 'TinyTestEuclidLossNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    num: 5 "
-        "    channels: 2 "
-        "    height: 3 "
-        "    width: 4 "
-        "    num: 5 "
-        "    channels: 1 "
-        "    height: 1 "
-        "    width: 1 "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "  } "
-        "  top: 'data' "
-        "  top: 'label' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 1 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    bias_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  param { "
-        "    lr_mult: 1 "
-        "    decay_mult: 1 "
-        "  } "
-        "  param { "
-        "    lr_mult: 2 "
-        "    decay_mult: 0 "
-        "  } "
-        "  bottom: 'data' "
-        "  top: 'innerproduct' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'EuclideanLoss' "
-        "  bottom: 'innerproduct' "
-        "  bottom: 'label' "
-        "} ";
+    string proto = "name: 'TinyTestEuclidLossNetwork' "
+                   "layer { "
+                   "  name: 'data' "
+                   "  type: 'DummyData' "
+                   "  dummy_data_param { "
+                   "    num: 5 "
+                   "    channels: 2 "
+                   "    height: 3 "
+                   "    width: 4 "
+                   "    num: 5 "
+                   "    channels: 1 "
+                   "    height: 1 "
+                   "    width: 1 "
+                   "    data_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "  } "
+                   "  top: 'data' "
+                   "  top: 'label' "
+                   "} "
+                   "layer { "
+                   "  name: 'innerproduct' "
+                   "  type: 'InnerProduct' "
+                   "  inner_product_param { "
+                   "    num_output: 1 "
+                   "    weight_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "    bias_filler { "
+                   "      type: 'constant' "
+                   "      value: 0 "
+                   "    } "
+                   "  } "
+                   "  param { "
+                   "    lr_mult: 1 "
+                   "    decay_mult: 1 "
+                   "  } "
+                   "  param { "
+                   "    lr_mult: 2 "
+                   "    decay_mult: 0 "
+                   "  } "
+                   "  bottom: 'data' "
+                   "  top: 'innerproduct' "
+                   "} "
+                   "layer { "
+                   "  name: 'loss' "
+                   "  type: 'EuclideanLoss' "
+                   "  bottom: 'innerproduct' "
+                   "  bottom: 'label' "
+                   "} ";
     if (force_backward) {
       proto += "force_backward: true ";
     }
@@ -209,85 +207,84 @@ protected:
     if (loss_weight) {
       loss_weight_stream << "  loss_weight: " << *loss_weight << " ";
     }
-    const string &proto =
-        "name: 'TrickyTestNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    num: 5 "
-        "    channels: 2 "
-        "    height: 3 "
-        "    width: 4 "
-        "    num: 5 "
-        "    channels: 1 "
-        "    height: 1 "
-        "    width: 1 "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "  } "
-        "  top: 'data' "
-        "  top: 'label' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 1000 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    bias_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  param { "
-        "    lr_mult: 1 "
-        "    decay_mult: 1 "
-        "  } "
-        "  param { "
-        "    lr_mult: 2 "
-        "    decay_mult: 0 "
-        "  } "
-        "  bottom: 'data' "
-        "  top: 'transformed_data' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 1 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    bias_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  param { "
-        "    lr_mult: 1 "
-        "    decay_mult: 1 "
-        "  } "
-        "  param { "
-        "    lr_mult: 2 "
-        "    decay_mult: 0 "
-        "  } "
-        "  bottom: 'label' "
-        "  top: 'transformed_label' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'SoftmaxWithLoss' " +
-            loss_weight_stream.str() +
-            "  bottom: 'transformed_data' "
-            "  bottom: 'transformed_label' "
-            "} ";
+    const string &proto = "name: 'TrickyTestNetwork' "
+                          "layer { "
+                          "  name: 'data' "
+                          "  type: 'DummyData' "
+                          "  dummy_data_param { "
+                          "    num: 5 "
+                          "    channels: 2 "
+                          "    height: 3 "
+                          "    width: 4 "
+                          "    num: 5 "
+                          "    channels: 1 "
+                          "    height: 1 "
+                          "    width: 1 "
+                          "    data_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 0.01 "
+                          "    } "
+                          "  } "
+                          "  top: 'data' "
+                          "  top: 'label' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 1000 "
+                          "    weight_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 0.01 "
+                          "    } "
+                          "    bias_filler { "
+                          "      type: 'constant' "
+                          "      value: 0 "
+                          "    } "
+                          "  } "
+                          "  param { "
+                          "    lr_mult: 1 "
+                          "    decay_mult: 1 "
+                          "  } "
+                          "  param { "
+                          "    lr_mult: 2 "
+                          "    decay_mult: 0 "
+                          "  } "
+                          "  bottom: 'data' "
+                          "  top: 'transformed_data' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 1 "
+                          "    weight_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 0.01 "
+                          "    } "
+                          "    bias_filler { "
+                          "      type: 'constant' "
+                          "      value: 0 "
+                          "    } "
+                          "  } "
+                          "  param { "
+                          "    lr_mult: 1 "
+                          "    decay_mult: 1 "
+                          "  } "
+                          "  param { "
+                          "    lr_mult: 2 "
+                          "    decay_mult: 0 "
+                          "  } "
+                          "  bottom: 'label' "
+                          "  top: 'transformed_label' "
+                          "} "
+                          "layer { "
+                          "  name: 'loss' "
+                          "  type: 'SoftmaxWithLoss' " +
+                          loss_weight_stream.str() +
+                          "  bottom: 'transformed_data' "
+                          "  bottom: 'transformed_label' "
+                          "} ";
     InitNetFromProtoString(proto);
   }
 
@@ -295,552 +292,540 @@ protected:
   // midnet_loss_weight is the loss weight for the first 'InnerProduct' layer
   // output.  Should both default to 0.0 if unspecified (i.e., if NULL is
   // passed to this function).
-  virtual void InitUnsharedWeightsNet(const Dtype *loss_weight = NULL,
-                                      const Dtype *midnet_loss_weight = NULL,
-                                      const bool force_backward = false, const bool bias_term = false,
-                                      const Dtype blobs_lr_w1 = 1, const Dtype blobs_lr_b1 = 2,
-                                      const Dtype blobs_lr_w2 = 1, const Dtype blobs_lr_b2 = 2) {
+  virtual void InitUnsharedWeightsNet(
+      const Dtype *loss_weight = NULL, const Dtype *midnet_loss_weight = NULL,
+      const bool force_backward = false, const bool bias_term = false,
+      const Dtype blobs_lr_w1 = 1, const Dtype blobs_lr_b1 = 2,
+      const Dtype blobs_lr_w2 = 1, const Dtype blobs_lr_b2 = 2) {
     string bias_str = bias_term ? "true " : "false ";
     ostringstream proto;
     proto << "name: 'UnsharedWeightsNetwork' ";
     if (force_backward) {
       proto << "force_backward: true ";
     }
-    proto <<
-          "layer { "
-          "  name: 'data' "
-          "  type: 'DummyData' "
-          "  dummy_data_param { "
-          "    num: 5 "
-          "    channels: 2 "
-          "    height: 3 "
-          "    width: 4 "
-          "    data_filler { "
-          "      type: 'gaussian' "
-          "      std: 0.01 "
-          "    } "
-          "  } "
-          "  top: 'data' "
-          "} "
-          "layer { "
-          "  name: 'innerproduct1' "
-          "  type: 'InnerProduct' "
-          "  inner_product_param { "
-          "    num_output: 10 "
-          "    bias_term: " << bias_str <<
-          "    weight_filler { "
-          "      type: 'gaussian' "
-          "      std: 10 "
-          "    } "
-          "  } "
-          "  param { "
-          "    name: 'unsharedweights1' "
-          "    lr_mult: " << blobs_lr_w1 <<
-          "  } ";
+    proto << "layer { "
+             "  name: 'data' "
+             "  type: 'DummyData' "
+             "  dummy_data_param { "
+             "    num: 5 "
+             "    channels: 2 "
+             "    height: 3 "
+             "    width: 4 "
+             "    data_filler { "
+             "      type: 'gaussian' "
+             "      std: 0.01 "
+             "    } "
+             "  } "
+             "  top: 'data' "
+             "} "
+             "layer { "
+             "  name: 'innerproduct1' "
+             "  type: 'InnerProduct' "
+             "  inner_product_param { "
+             "    num_output: 10 "
+             "    bias_term: "
+          << bias_str
+          << "    weight_filler { "
+             "      type: 'gaussian' "
+             "      std: 10 "
+             "    } "
+             "  } "
+             "  param { "
+             "    name: 'unsharedweights1' "
+             "    lr_mult: "
+          << blobs_lr_w1 << "  } ";
     if (bias_term) {
       proto << "  param { lr_mult: " << blobs_lr_b1 << " } ";
     }
-    proto <<
-          "  bottom: 'data' "
-          "  top: 'innerproduct1' ";
+    proto << "  bottom: 'data' "
+             "  top: 'innerproduct1' ";
     if (midnet_loss_weight) {
       proto << "  loss_weight: " << *midnet_loss_weight << " ";
     }
-    proto <<
-          "} "
-          "layer { "
-          "  name: 'innerproduct2' "
-          "  type: 'InnerProduct' "
-          "  inner_product_param { "
-          "    num_output: 10 "
-          "    bias_term: " << bias_str <<
-          "    weight_filler { "
-          "      type: 'gaussian' "
-          "      std: 10 "
-          "    } "
-          "  } "
-          "  param { "
-          "    name: 'unsharedweights2' "
-          "    lr_mult: " << blobs_lr_w2 <<
-          "  } ";
+    proto << "} "
+             "layer { "
+             "  name: 'innerproduct2' "
+             "  type: 'InnerProduct' "
+             "  inner_product_param { "
+             "    num_output: 10 "
+             "    bias_term: "
+          << bias_str
+          << "    weight_filler { "
+             "      type: 'gaussian' "
+             "      std: 10 "
+             "    } "
+             "  } "
+             "  param { "
+             "    name: 'unsharedweights2' "
+             "    lr_mult: "
+          << blobs_lr_w2 << "  } ";
     if (bias_term) {
       proto << "  param { lr_mult: " << blobs_lr_b2 << " } ";
     }
-    proto <<
-          "  bottom: 'data' "
-          "  top: 'innerproduct2' "
-          "} "
-          "layer { "
-          "  name: 'loss' "
-          "  type: 'EuclideanLoss' ";
+    proto << "  bottom: 'data' "
+             "  top: 'innerproduct2' "
+             "} "
+             "layer { "
+             "  name: 'loss' "
+             "  type: 'EuclideanLoss' ";
     if (loss_weight) {
       proto << "  loss_weight: " << *loss_weight << " ";
     }
-    proto <<
-          "  bottom: 'innerproduct1' "
-          "  bottom: 'innerproduct2' "
-          "} ";
+    proto << "  bottom: 'innerproduct1' "
+             "  bottom: 'innerproduct2' "
+             "} ";
     InitNetFromProtoString(proto.str());
   }
 
   virtual void InitSharedWeightsNet() {
-    const string &proto =
-        "name: 'SharedWeightsNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    num: 5 "
-        "    channels: 2 "
-        "    height: 3 "
-        "    width: 4 "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "  } "
-        "  top: 'data' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct1' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: false "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 10 "
-        "    } "
-        "  } "
-        "  param { name: 'sharedweights' } "
-        "  bottom: 'data' "
-        "  top: 'innerproduct1' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct2' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: false "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 10 "
-        "    } "
-        "  } "
-        "  param { name: 'sharedweights' } "
-        "  bottom: 'data' "
-        "  top: 'innerproduct2' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'EuclideanLoss' "
-        "  bottom: 'innerproduct1' "
-        "  bottom: 'innerproduct2' "
-        "} ";
+    const string &proto = "name: 'SharedWeightsNetwork' "
+                          "layer { "
+                          "  name: 'data' "
+                          "  type: 'DummyData' "
+                          "  dummy_data_param { "
+                          "    num: 5 "
+                          "    channels: 2 "
+                          "    height: 3 "
+                          "    width: 4 "
+                          "    data_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 0.01 "
+                          "    } "
+                          "  } "
+                          "  top: 'data' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct1' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 10 "
+                          "    bias_term: false "
+                          "    weight_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 10 "
+                          "    } "
+                          "  } "
+                          "  param { name: 'sharedweights' } "
+                          "  bottom: 'data' "
+                          "  top: 'innerproduct1' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct2' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 10 "
+                          "    bias_term: false "
+                          "    weight_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 10 "
+                          "    } "
+                          "  } "
+                          "  param { name: 'sharedweights' } "
+                          "  bottom: 'data' "
+                          "  top: 'innerproduct2' "
+                          "} "
+                          "layer { "
+                          "  name: 'loss' "
+                          "  type: 'EuclideanLoss' "
+                          "  bottom: 'innerproduct1' "
+                          "  bottom: 'innerproduct2' "
+                          "} ";
     InitNetFromProtoString(proto);
   }
 
   virtual void InitDiffDataUnsharedWeightsNet() {
-    const string &proto =
-        "name: 'DiffDataUnsharedWeightsNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    num: 10 "
-        "    channels: 10 "
-        "    height: 1 "
-        "    width: 1 "
-        "    num: 10 "
-        "    channels: 10 "
-        "    height: 1 "
-        "    width: 1 "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 10 "
-        "    } "
-        "  } "
-        "  top: 'data1' "
-        "  top: 'data2' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct1' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: false "
-        "    weight_filler { "
-        "      type: 'constant' "
-        "      value: 0.5 "
-        "    } "
-        "  } "
-        "  param { name: 'unsharedweights1' } "
-        "  bottom: 'data1' "
-        "  top: 'innerproduct1' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct2' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: false "
-        "    weight_filler { "
-        "      type: 'constant' "
-        "      value: 0.5 "
-        "    } "
-        "  } "
-        "  param { name: 'unsharedweights2' } "
-        "  bottom: 'innerproduct1' "
-        "  top: 'innerproduct2' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'EuclideanLoss' "
-        "  bottom: 'data2' "
-        "  bottom: 'innerproduct2' "
-        "} ";
+    const string &proto = "name: 'DiffDataUnsharedWeightsNetwork' "
+                          "layer { "
+                          "  name: 'data' "
+                          "  type: 'DummyData' "
+                          "  dummy_data_param { "
+                          "    num: 10 "
+                          "    channels: 10 "
+                          "    height: 1 "
+                          "    width: 1 "
+                          "    num: 10 "
+                          "    channels: 10 "
+                          "    height: 1 "
+                          "    width: 1 "
+                          "    data_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 10 "
+                          "    } "
+                          "  } "
+                          "  top: 'data1' "
+                          "  top: 'data2' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct1' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 10 "
+                          "    bias_term: false "
+                          "    weight_filler { "
+                          "      type: 'constant' "
+                          "      value: 0.5 "
+                          "    } "
+                          "  } "
+                          "  param { name: 'unsharedweights1' } "
+                          "  bottom: 'data1' "
+                          "  top: 'innerproduct1' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct2' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 10 "
+                          "    bias_term: false "
+                          "    weight_filler { "
+                          "      type: 'constant' "
+                          "      value: 0.5 "
+                          "    } "
+                          "  } "
+                          "  param { name: 'unsharedweights2' } "
+                          "  bottom: 'innerproduct1' "
+                          "  top: 'innerproduct2' "
+                          "} "
+                          "layer { "
+                          "  name: 'loss' "
+                          "  type: 'EuclideanLoss' "
+                          "  bottom: 'data2' "
+                          "  bottom: 'innerproduct2' "
+                          "} ";
     InitNetFromProtoString(proto);
   }
 
   virtual void InitDiffDataSharedWeightsNet() {
-    const string &proto =
-        "name: 'DiffDataSharedWeightsNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    num: 10 "
-        "    channels: 10 "
-        "    height: 1 "
-        "    width: 1 "
-        "    num: 10 "
-        "    channels: 10 "
-        "    height: 1 "
-        "    width: 1 "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 10 "
-        "    } "
-        "  } "
-        "  top: 'data1' "
-        "  top: 'data2' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct1' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: false "
-        "    weight_filler { "
-        "      type: 'constant' "
-        "      value: 0.5 "
-        "    } "
-        "  } "
-        "  param { name: 'sharedweights' } "
-        "  bottom: 'data1' "
-        "  top: 'innerproduct1' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct2' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 10 "
-        "    bias_term: false "
-        "    weight_filler { "
-        "      type: 'constant' "
-        "      value: 0.5 "
-        "    } "
-        "  } "
-        "  param { name: 'sharedweights' } "
-        "  bottom: 'innerproduct1' "
-        "  top: 'innerproduct2' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'EuclideanLoss' "
-        "  bottom: 'data2' "
-        "  bottom: 'innerproduct2' "
-        "} ";
+    const string &proto = "name: 'DiffDataSharedWeightsNetwork' "
+                          "layer { "
+                          "  name: 'data' "
+                          "  type: 'DummyData' "
+                          "  dummy_data_param { "
+                          "    num: 10 "
+                          "    channels: 10 "
+                          "    height: 1 "
+                          "    width: 1 "
+                          "    num: 10 "
+                          "    channels: 10 "
+                          "    height: 1 "
+                          "    width: 1 "
+                          "    data_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 10 "
+                          "    } "
+                          "  } "
+                          "  top: 'data1' "
+                          "  top: 'data2' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct1' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 10 "
+                          "    bias_term: false "
+                          "    weight_filler { "
+                          "      type: 'constant' "
+                          "      value: 0.5 "
+                          "    } "
+                          "  } "
+                          "  param { name: 'sharedweights' } "
+                          "  bottom: 'data1' "
+                          "  top: 'innerproduct1' "
+                          "} "
+                          "layer { "
+                          "  name: 'innerproduct2' "
+                          "  type: 'InnerProduct' "
+                          "  inner_product_param { "
+                          "    num_output: 10 "
+                          "    bias_term: false "
+                          "    weight_filler { "
+                          "      type: 'constant' "
+                          "      value: 0.5 "
+                          "    } "
+                          "  } "
+                          "  param { name: 'sharedweights' } "
+                          "  bottom: 'innerproduct1' "
+                          "  top: 'innerproduct2' "
+                          "} "
+                          "layer { "
+                          "  name: 'loss' "
+                          "  type: 'EuclideanLoss' "
+                          "  bottom: 'data2' "
+                          "  bottom: 'innerproduct2' "
+                          "} ";
     InitNetFromProtoString(proto);
   }
 
   virtual void InitReshapableNet() {
-    const string &proto =
-        "name: 'ReshapableNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'Input' "
-        "  top: 'data' "
-        "  input_param { "
-        "  shape: { dim: 1 dim: 3 dim: 100 dim: 100 } "
-        "  } "
-        "} "
-        "layer { "
-        "  name: 'conv1' "
-        "  type: 'Convolution' "
-        "  bottom: 'data' "
-        "  top: 'conv1' "
-        "  convolution_param { "
-        "    num_output: 5 "
-        "    kernel_size: 3 "
-        "    stride: 2 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    bias_filler { "
-        "      type: 'constant' "
-        "      value: 0.2 "
-        "    } "
-        "  } "
-        "} "
-        "layer { "
-        "  name: 'relu1' "
-        "  type: 'ReLU' "
-        "  bottom: 'conv1' "
-        "  top: 'conv1' "
-        "} "
-        "layer { "
-        "  name: 'pool1' "
-        "  type: 'Pooling' "
-        "  bottom: 'conv1' "
-        "  top: 'pool1' "
-        "  pooling_param { "
-        "    pool: MAX "
-        "    kernel_size: 2 "
-        "    stride: 2 "
-        "  } "
-        "} "
-        "layer { "
-        "  name: 'norm1' "
-        "  type: 'LRN' "
-        "  bottom: 'pool1' "
-        "  top: 'norm1' "
-        "  lrn_param { "
-        "    local_size: 3 "
-        "  } "
-        "} "
-        "layer { "
-        "  name: 'softmax' "
-        "  type: 'Softmax' "
-        "  bottom: 'norm1' "
-        "  top: 'softmax' "
-        "} ";
+    const string &proto = "name: 'ReshapableNetwork' "
+                          "layer { "
+                          "  name: 'data' "
+                          "  type: 'Input' "
+                          "  top: 'data' "
+                          "  input_param { "
+                          "  shape: { dim: 1 dim: 3 dim: 100 dim: 100 } "
+                          "  } "
+                          "} "
+                          "layer { "
+                          "  name: 'conv1' "
+                          "  type: 'Convolution' "
+                          "  bottom: 'data' "
+                          "  top: 'conv1' "
+                          "  convolution_param { "
+                          "    num_output: 5 "
+                          "    kernel_size: 3 "
+                          "    stride: 2 "
+                          "    weight_filler { "
+                          "      type: 'gaussian' "
+                          "      std: 0.01 "
+                          "    } "
+                          "    bias_filler { "
+                          "      type: 'constant' "
+                          "      value: 0.2 "
+                          "    } "
+                          "  } "
+                          "} "
+                          "layer { "
+                          "  name: 'relu1' "
+                          "  type: 'ReLU' "
+                          "  bottom: 'conv1' "
+                          "  top: 'conv1' "
+                          "} "
+                          "layer { "
+                          "  name: 'pool1' "
+                          "  type: 'Pooling' "
+                          "  bottom: 'conv1' "
+                          "  top: 'pool1' "
+                          "  pooling_param { "
+                          "    pool: MAX "
+                          "    kernel_size: 2 "
+                          "    stride: 2 "
+                          "  } "
+                          "} "
+                          "layer { "
+                          "  name: 'norm1' "
+                          "  type: 'LRN' "
+                          "  bottom: 'pool1' "
+                          "  top: 'norm1' "
+                          "  lrn_param { "
+                          "    local_size: 3 "
+                          "  } "
+                          "} "
+                          "layer { "
+                          "  name: 'softmax' "
+                          "  type: 'Softmax' "
+                          "  bottom: 'norm1' "
+                          "  top: 'softmax' "
+                          "} ";
     InitNetFromProtoString(proto);
   }
 
   virtual void InitSkipPropNet(bool test_skip_true) {
-    string proto =
-        "name: 'SkipPropTestNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    shape { "
-        "      dim: 5 "
-        "      dim: 2 "
-        "      dim: 3 "
-        "      dim: 4 "
-        "    } "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    shape { "
-        "      dim: 5 "
-        "    } "
-        "    data_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  top: 'data' "
-        "  top: 'label' "
-        "} "
-        "layer { "
-        "  name: 'silence' "
-        "  bottom: 'label' "
-        "  type: 'Silence' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 1 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    bias_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  param { "
-        "    lr_mult: 1 "
-        "    decay_mult: 1 "
-        "  } "
-        "  param { "
-        "    lr_mult: 2 "
-        "    decay_mult: 0 "
-        "  } "
-        "  bottom: 'data' "
-        "  top: 'innerproduct' "
-        "} "
-        "layer { "
-        "  name: 'ip_fake_labels' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 1 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    bias_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  bottom: 'data' "
-        "  top: 'fake_labels' "
-        "} "
-        "layer { "
-        "  name: 'argmax' "
-        "  bottom: 'fake_labels' "
-        "  top: 'label_argmax' "
-        "  type: 'ArgMax' "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  bottom: 'innerproduct' "
-        "  bottom: 'label_argmax' ";
+    string proto = "name: 'SkipPropTestNetwork' "
+                   "layer { "
+                   "  name: 'data' "
+                   "  type: 'DummyData' "
+                   "  dummy_data_param { "
+                   "    shape { "
+                   "      dim: 5 "
+                   "      dim: 2 "
+                   "      dim: 3 "
+                   "      dim: 4 "
+                   "    } "
+                   "    data_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "    shape { "
+                   "      dim: 5 "
+                   "    } "
+                   "    data_filler { "
+                   "      type: 'constant' "
+                   "      value: 0 "
+                   "    } "
+                   "  } "
+                   "  top: 'data' "
+                   "  top: 'label' "
+                   "} "
+                   "layer { "
+                   "  name: 'silence' "
+                   "  bottom: 'label' "
+                   "  type: 'Silence' "
+                   "} "
+                   "layer { "
+                   "  name: 'innerproduct' "
+                   "  type: 'InnerProduct' "
+                   "  inner_product_param { "
+                   "    num_output: 1 "
+                   "    weight_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "    bias_filler { "
+                   "      type: 'constant' "
+                   "      value: 0 "
+                   "    } "
+                   "  } "
+                   "  param { "
+                   "    lr_mult: 1 "
+                   "    decay_mult: 1 "
+                   "  } "
+                   "  param { "
+                   "    lr_mult: 2 "
+                   "    decay_mult: 0 "
+                   "  } "
+                   "  bottom: 'data' "
+                   "  top: 'innerproduct' "
+                   "} "
+                   "layer { "
+                   "  name: 'ip_fake_labels' "
+                   "  type: 'InnerProduct' "
+                   "  inner_product_param { "
+                   "    num_output: 1 "
+                   "    weight_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "    bias_filler { "
+                   "      type: 'constant' "
+                   "      value: 0 "
+                   "    } "
+                   "  } "
+                   "  bottom: 'data' "
+                   "  top: 'fake_labels' "
+                   "} "
+                   "layer { "
+                   "  name: 'argmax' "
+                   "  bottom: 'fake_labels' "
+                   "  top: 'label_argmax' "
+                   "  type: 'ArgMax' "
+                   "} "
+                   "layer { "
+                   "  name: 'loss' "
+                   "  bottom: 'innerproduct' "
+                   "  bottom: 'label_argmax' ";
     if (test_skip_true)
       proto += "  propagate_down: true "
                "  propagate_down: false ";
     else
       proto += "  propagate_down: true "
                "  propagate_down: true ";
-    proto +=
-        "  top: 'cross_entropy_loss' "
-        "  type: 'SigmoidCrossEntropyLoss' "
-        "  loss_weight: 0.1 "
-        "} ";
+    proto += "  top: 'cross_entropy_loss' "
+             "  type: 'SigmoidCrossEntropyLoss' "
+             "  loss_weight: 0.1 "
+             "} ";
     InitNetFromProtoString(proto);
   }
 
   virtual void InitForcePropNet(bool test_force_true) {
-    string proto =
-        "name: 'ForcePropTestNetwork' "
-        "layer { "
-        "  name: 'data' "
-        "  type: 'DummyData' "
-        "  dummy_data_param { "
-        "    shape { "
-        "      dim: 5 "
-        "      dim: 2 "
-        "      dim: 3 "
-        "      dim: 4 "
-        "    } "
-        "    data_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "    shape { "
-        "      dim: 5 "
-        "    } "
-        "    data_filler { "
-        "      type: 'constant' "
-        "      value: 0 "
-        "    } "
-        "  } "
-        "  top: 'data' "
-        "  top: 'label' "
-        "} "
-        "layer { "
-        "  name: 'innerproduct' "
-        "  type: 'InnerProduct' "
-        "  inner_product_param { "
-        "    num_output: 1 "
-        "    weight_filler { "
-        "      type: 'gaussian' "
-        "      std: 0.01 "
-        "    } "
-        "  } "
-        "  bottom: 'data' "
-        "  top: 'innerproduct' ";
+    string proto = "name: 'ForcePropTestNetwork' "
+                   "layer { "
+                   "  name: 'data' "
+                   "  type: 'DummyData' "
+                   "  dummy_data_param { "
+                   "    shape { "
+                   "      dim: 5 "
+                   "      dim: 2 "
+                   "      dim: 3 "
+                   "      dim: 4 "
+                   "    } "
+                   "    data_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "    shape { "
+                   "      dim: 5 "
+                   "    } "
+                   "    data_filler { "
+                   "      type: 'constant' "
+                   "      value: 0 "
+                   "    } "
+                   "  } "
+                   "  top: 'data' "
+                   "  top: 'label' "
+                   "} "
+                   "layer { "
+                   "  name: 'innerproduct' "
+                   "  type: 'InnerProduct' "
+                   "  inner_product_param { "
+                   "    num_output: 1 "
+                   "    weight_filler { "
+                   "      type: 'gaussian' "
+                   "      std: 0.01 "
+                   "    } "
+                   "  } "
+                   "  bottom: 'data' "
+                   "  top: 'innerproduct' ";
     if (test_force_true) {
       proto += "  propagate_down: true ";
     }
-    proto +=
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  bottom: 'innerproduct' "
-        "  bottom: 'label' "
-        "  top: 'cross_entropy_loss' "
-        "  type: 'SigmoidCrossEntropyLoss' "
-        "} ";
+    proto += "} "
+             "layer { "
+             "  name: 'loss' "
+             "  bottom: 'innerproduct' "
+             "  bottom: 'label' "
+             "  top: 'cross_entropy_loss' "
+             "  type: 'SigmoidCrossEntropyLoss' "
+             "} ";
     InitNetFromProtoString(proto);
   }
 
-  virtual void InitAllInOneNet(Phase phase = caffe::TRAIN,
-                               const int level = 0, const vector<string> *stages = NULL) {
-    string proto =
-        "name: 'All-in-one Network'"
-        "layer { "
-        "  name: 'train-data' "
-        "  type: 'DummyData' "
-        "  top: 'data' "
-        "  top: 'label' "
-        "  dummy_data_param { "
-        "    shape { dim: 1 dim: 10 } "
-        "    shape { dim: 1 dim: 1 } "
-        "  } "
-        "  include { phase: TRAIN stage: 'train' } "
-        "} "
-        "layer { "
-        "  name: 'val-data' "
-        "  type: 'DummyData' "
-        "  top: 'data' "
-        "  top: 'label' "
-        "  dummy_data_param { "
-        "    shape { dim: 1 dim: 10 } "
-        "    shape { dim: 1 dim: 1 } "
-        "  } "
-        "  include { phase: TEST stage: 'val' } "
-        "} "
-        "layer { "
-        "  name: 'deploy-data' "
-        "  type: 'Input' "
-        "  top: 'data' "
-        "  input_param { "
-        "    shape { dim: 1 dim: 10 } "
-        "  } "
-        "  include { phase: TEST stage: 'deploy' } "
-        "} "
-        "layer { "
-        "  name: 'ip' "
-        "  type: 'InnerProduct' "
-        "  bottom: 'data' "
-        "  top: 'ip' "
-        "  inner_product_param { "
-        "    num_output: 2 "
-        "  } "
-        "} "
-        "layer { "
-        "  name: 'loss' "
-        "  type: 'SoftmaxWithLoss' "
-        "  bottom: 'ip' "
-        "  bottom: 'label' "
-        "  top: 'loss' "
-        "  include { phase: TRAIN stage: 'train' } "
-        "  include { phase: TEST stage: 'val' } "
-        "} ";
+  virtual void InitAllInOneNet(Phase phase = caffe::TRAIN, const int level = 0,
+                               const vector<string> *stages = NULL) {
+    string proto = "name: 'All-in-one Network'"
+                   "layer { "
+                   "  name: 'train-data' "
+                   "  type: 'DummyData' "
+                   "  top: 'data' "
+                   "  top: 'label' "
+                   "  dummy_data_param { "
+                   "    shape { dim: 1 dim: 10 } "
+                   "    shape { dim: 1 dim: 1 } "
+                   "  } "
+                   "  include { phase: TRAIN stage: 'train' } "
+                   "} "
+                   "layer { "
+                   "  name: 'val-data' "
+                   "  type: 'DummyData' "
+                   "  top: 'data' "
+                   "  top: 'label' "
+                   "  dummy_data_param { "
+                   "    shape { dim: 1 dim: 10 } "
+                   "    shape { dim: 1 dim: 1 } "
+                   "  } "
+                   "  include { phase: TEST stage: 'val' } "
+                   "} "
+                   "layer { "
+                   "  name: 'deploy-data' "
+                   "  type: 'Input' "
+                   "  top: 'data' "
+                   "  input_param { "
+                   "    shape { dim: 1 dim: 10 } "
+                   "  } "
+                   "  include { phase: TEST stage: 'deploy' } "
+                   "} "
+                   "layer { "
+                   "  name: 'ip' "
+                   "  type: 'InnerProduct' "
+                   "  bottom: 'data' "
+                   "  top: 'ip' "
+                   "  inner_product_param { "
+                   "    num_output: 2 "
+                   "  } "
+                   "} "
+                   "layer { "
+                   "  name: 'loss' "
+                   "  type: 'SoftmaxWithLoss' "
+                   "  bottom: 'ip' "
+                   "  bottom: 'label' "
+                   "  top: 'loss' "
+                   "  include { phase: TRAIN stage: 'train' } "
+                   "  include { phase: TEST stage: 'val' } "
+                   "} ";
     InitNetFromProtoFileWithState(proto, phase, level, stages);
   }
 
   int seed_;
-  shared_ptr<Net<Dtype> > net_;
+  shared_ptr<Net<Dtype>> net_;
 };
 
 TYPED_TEST_CASE(NetTest, TestDtypesAndDevices);
@@ -881,7 +866,7 @@ TYPED_TEST(NetTest, TestGetLayerByName) {
 
 TYPED_TEST(NetTest, TestBottomNeedBackward) {
   this->InitTinyNet();
-  const vector<vector<bool> > &bottom_need_backward =
+  const vector<vector<bool>> &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(3, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -895,7 +880,7 @@ TYPED_TEST(NetTest, TestBottomNeedBackward) {
 TYPED_TEST(NetTest, TestBottomNeedBackwardForce) {
   const bool force_backward = true;
   this->InitTinyNet(force_backward);
-  const vector<vector<bool> > &bottom_need_backward =
+  const vector<vector<bool>> &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(3, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -909,7 +894,7 @@ TYPED_TEST(NetTest, TestBottomNeedBackwardForce) {
 TYPED_TEST(NetTest, TestBottomNeedBackwardEuclideanForce) {
   const bool force_backward = true;
   this->InitTinyNetEuclidean(force_backward);
-  const vector<vector<bool> > &bottom_need_backward =
+  const vector<vector<bool>> &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(3, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -922,7 +907,7 @@ TYPED_TEST(NetTest, TestBottomNeedBackwardEuclideanForce) {
 
 TYPED_TEST(NetTest, TestBottomNeedBackwardTricky) {
   this->InitTrickyNet();
-  const vector<vector<bool> > &bottom_need_backward =
+  const vector<vector<bool>> &bottom_need_backward =
       this->net_->bottom_need_backward();
   EXPECT_EQ(4, bottom_need_backward.size());
   EXPECT_EQ(0, bottom_need_backward[0].size());
@@ -949,9 +934,9 @@ TYPED_TEST(NetTest, TestLossWeight) {
   this->InitUnsharedWeightsNet(NULL, NULL, kForceBackward);
   const Dtype loss = this->net_->ForwardBackward();
   const bool kCopyDiff = true;
-  vector<shared_ptr<Blob<Dtype> > > blob_grads;
+  vector<shared_ptr<Blob<Dtype>>> blob_grads;
   this->CopyNetBlobs(kCopyDiff, &blob_grads);
-  vector<shared_ptr<Blob<Dtype> > > param_grads;
+  vector<shared_ptr<Blob<Dtype>>> param_grads;
   this->CopyNetParams(kCopyDiff, &param_grads);
   // Check that the loss is non-trivial, otherwise the test doesn't prove much.
   const Dtype kMinLossAbsValue = 1e-2;
@@ -965,9 +950,8 @@ TYPED_TEST(NetTest, TestLossWeight) {
     const Dtype weighted_loss = this->net_->ForwardBackward();
     const Dtype error_margin = kErrorMargin * fabs(kLossWeights[i]);
     EXPECT_NEAR(loss * kLossWeights[i], weighted_loss, error_margin)
-            << "loss weight = " << kLossWeights[i];
-    const vector<shared_ptr<Blob<Dtype> > > &weighted_blobs =
-        this->net_->blobs();
+        << "loss weight = " << kLossWeights[i];
+    const vector<shared_ptr<Blob<Dtype>>> &weighted_blobs = this->net_->blobs();
     ASSERT_EQ(blob_grads.size(), weighted_blobs.size());
     for (int j = 0; j < blob_grads.size(); ++j) {
       ASSERT_EQ(blob_grads[j]->count(), weighted_blobs[j]->count());
@@ -976,7 +960,7 @@ TYPED_TEST(NetTest, TestLossWeight) {
                     weighted_blobs[j]->cpu_diff()[k], error_margin);
       }
     }
-    const vector<shared_ptr<Blob<Dtype> > > &weighted_params =
+    const vector<shared_ptr<Blob<Dtype>>> &weighted_params =
         this->net_->params();
     ASSERT_EQ(param_grads.size(), weighted_params.size());
     for (int j = 0; j < param_grads.size(); ++j) {
@@ -1015,8 +999,8 @@ TYPED_TEST(NetTest, TestLossWeightMidNet) {
     const Dtype weighted_loss = this->net_->ForwardBackward();
     const Dtype error_margin = kErrorMargin * fabs(kLossWeights[i]);
     EXPECT_NEAR(loss * kLossWeights[i], weighted_loss, error_margin)
-            << "loss weight = " << kLossWeights[i];
-    const shared_ptr<Blob<Dtype> > &weighted_blob =
+        << "loss weight = " << kLossWeights[i];
+    const shared_ptr<Blob<Dtype>> &weighted_blob =
         this->net_->blob_by_name("data");
     ASSERT_EQ(data_grad.count(), weighted_blob->count());
     for (int j = 0; j < data_grad.count(); ++j) {
@@ -1042,9 +1026,9 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
                                kForceBackward);
   const Dtype loss = this->net_->ForwardBackward();
   const bool kCopyDiff = true;
-  vector<shared_ptr<Blob<Dtype> > > blob_grads;
+  vector<shared_ptr<Blob<Dtype>>> blob_grads;
   this->CopyNetBlobs(kCopyDiff, &blob_grads);
-  vector<shared_ptr<Blob<Dtype> > > param_grads;
+  vector<shared_ptr<Blob<Dtype>>> param_grads;
   this->CopyNetParams(kCopyDiff, &param_grads);
 
   loss_weight = 2;
@@ -1053,9 +1037,9 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
   this->InitUnsharedWeightsNet(&loss_weight, &midnet_loss_weight,
                                kForceBackward);
   const Dtype loss_main_2 = this->net_->ForwardBackward();
-  vector<shared_ptr<Blob<Dtype> > > blob_grads_loss_2;
+  vector<shared_ptr<Blob<Dtype>>> blob_grads_loss_2;
   this->CopyNetBlobs(kCopyDiff, &blob_grads_loss_2);
-  vector<shared_ptr<Blob<Dtype> > > param_grads_loss_2;
+  vector<shared_ptr<Blob<Dtype>>> param_grads_loss_2;
   this->CopyNetParams(kCopyDiff, &param_grads_loss_2);
 
   loss_weight = 3;
@@ -1064,7 +1048,7 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
   this->InitUnsharedWeightsNet(&loss_weight, &midnet_loss_weight,
                                kForceBackward);
   const Dtype loss_main_3 = this->net_->ForwardBackward();
-  const vector<shared_ptr<Blob<Dtype> > > &blob_grads_loss_3 =
+  const vector<shared_ptr<Blob<Dtype>>> &blob_grads_loss_3 =
       this->net_->blobs();
   ASSERT_EQ(blob_grads.size(), blob_grads_loss_3.size());
   ASSERT_EQ(blob_grads_loss_2.size(), blob_grads_loss_3.size());
@@ -1077,10 +1061,10 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
     ASSERT_EQ(blob_grads[j]->count(), blob_grads_loss_3[j]->count());
     ASSERT_EQ(blob_grads_loss_2[j]->count(), blob_grads_loss_3[j]->count());
     for (int k = 0; k < blob_grads[j]->count(); ++k) {
-      const Dtype grad_diff_2 = blob_grads_loss_2[j]->cpu_diff()[k] -
-          blob_grads[j]->cpu_diff()[k];
-      const Dtype grad_diff_3 = blob_grads_loss_3[j]->cpu_diff()[k] -
-          blob_grads[j]->cpu_diff()[k];
+      const Dtype grad_diff_2 =
+          blob_grads_loss_2[j]->cpu_diff()[k] - blob_grads[j]->cpu_diff()[k];
+      const Dtype grad_diff_3 =
+          blob_grads_loss_3[j]->cpu_diff()[k] - blob_grads[j]->cpu_diff()[k];
       if (grad_should_change) {
         // Test non-triviality.
         const Dtype kMinGradDiffAbsValue = 1e-4;
@@ -1108,7 +1092,7 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
   this->InitUnsharedWeightsNet(&loss_weight, &midnet_loss_weight,
                                kForceBackward);
   const Dtype loss_midnet_3 = this->net_->ForwardBackward();
-  const vector<shared_ptr<Blob<Dtype> > > &blob_grads_midnet_loss_3 =
+  const vector<shared_ptr<Blob<Dtype>>> &blob_grads_midnet_loss_3 =
       this->net_->blobs();
   ASSERT_EQ(blob_grads.size(), blob_grads_midnet_loss_3.size());
   ASSERT_EQ(blob_grads_loss_2.size(), blob_grads_midnet_loss_3.size());
@@ -1124,10 +1108,10 @@ TYPED_TEST(NetTest, TestComboLossWeight) {
     ASSERT_EQ(blob_grads[j]->count(), blob_grads_midnet_loss_3[j]->count());
     ASSERT_EQ(blob_grads[j]->count(), blob_grads_loss_2[j]->count());
     for (int k = 0; k < blob_grads[j]->count(); ++k) {
-      const Dtype grad_diff_2 = blob_grads_loss_2[j]->cpu_diff()[k] -
-          blob_grads[j]->cpu_diff()[k];
+      const Dtype grad_diff_2 =
+          blob_grads_loss_2[j]->cpu_diff()[k] - blob_grads[j]->cpu_diff()[k];
       const Dtype grad_diff_3 = blob_grads_midnet_loss_3[j]->cpu_diff()[k] -
-          blob_grads[j]->cpu_diff()[k];
+                                blob_grads[j]->cpu_diff()[k];
       if (grad_should_change) {
         // Test non-triviality.
         const Dtype kMinGradDiffAbsValue = 1e-4;
@@ -1352,10 +1336,11 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
   Caffe::set_random_seed(this->seed_);
   Dtype blobs_lr_w1 = 1, blobs_lr_w2 = 1, blobs_lr_b1 = 2, blobs_lr_b2 = 2;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1,
+                               blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > > &params = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype>>> &params = this->net_->params();
   const int num_params = params.size();
   ASSERT_EQ(4, num_params);
   const Dtype kNonZeroTestMin = 1e-3;
@@ -1372,10 +1357,11 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
   Caffe::set_random_seed(this->seed_);
   blobs_lr_w1 *= 2, blobs_lr_w2 *= 2, blobs_lr_b1 *= 2, blobs_lr_b2 *= 2;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1,
+                               blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > > &params2 = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype>>> &params2 = this->net_->params();
   ASSERT_EQ(num_params, params2.size());
   for (int i = 0; i < num_params; ++i) {
     const Dtype param_asum =
@@ -1388,10 +1374,11 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
   Caffe::set_random_seed(this->seed_);
   blobs_lr_w1 = 1, blobs_lr_w2 = 0, blobs_lr_b1 = 0, blobs_lr_b2 = 1;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1,
+                               blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > > &params3 = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype>>> &params3 = this->net_->params();
   ASSERT_EQ(num_params, params3.size());
   for (int i = 0; i < num_params; ++i) {
     const Dtype param_asum =
@@ -1407,10 +1394,11 @@ TYPED_TEST(NetTest, TestParamPropagateDown) {
   Caffe::set_random_seed(this->seed_);
   blobs_lr_w1 = 0, blobs_lr_w2 = 1, blobs_lr_b1 = 1, blobs_lr_b2 = 0;
   this->InitUnsharedWeightsNet(kLossWeight1, kLossWeight2, kForceBackward,
-                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1, blobs_lr_b2);
+                               kBiasTerm, blobs_lr_w1, blobs_lr_w2, blobs_lr_b1,
+                               blobs_lr_b2);
   this->net_->Forward();
   this->net_->Backward();
-  const vector<shared_ptr<Blob<Dtype> > > &params4 = this->net_->params();
+  const vector<shared_ptr<Blob<Dtype>>> &params4 = this->net_->params();
   ASSERT_EQ(num_params, params4.size());
   for (int i = 0; i < num_params; ++i) {
     const Dtype param_asum =
@@ -1459,11 +1447,11 @@ TYPED_TEST(NetTest, TestFromTo) {
 
 class FilterNetTest : public ::testing::Test {
 protected:
-  void RunFilterNetTest(
-      const string &input_param_string, const string &filtered_param_string) {
+  void RunFilterNetTest(const string &input_param_string,
+                        const string &filtered_param_string) {
     NetParameter input_param;
-    CHECK(google::protobuf::TextFormat::ParseFromString(
-        input_param_string, &input_param));
+    CHECK(google::protobuf::TextFormat::ParseFromString(input_param_string,
+                                                        &input_param));
     NetParameter expected_filtered_param;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         filtered_param_string, &expected_filtered_param));
@@ -1480,263 +1468,259 @@ protected:
 };
 
 TEST_F(FilterNetTest, TestNoFilter) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterLeNetTrainTest) {
-  const string &input_proto =
-      "name: 'LeNet' "
-      "layer { "
-      "  name: 'mnist' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "  data_param { "
-      "    source: 'mnist-train-leveldb' "
-      "    batch_size: 64 "
-      "  } "
-      "  transform_param { "
-      "    scale: 0.00390625 "
-      "  } "
-      "  include: { phase: TRAIN } "
-      "} "
-      "layer { "
-      "  name: 'mnist' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "  data_param { "
-      "    source: 'mnist-test-leveldb' "
-      "    batch_size: 100 "
-      "  } "
-      "  transform_param { "
-      "    scale: 0.00390625 "
-      "  } "
-      "  include: { phase: TEST } "
-      "} "
-      "layer { "
-      "  name: 'conv1' "
-      "  type: 'Convolution' "
-      "  bottom: 'data' "
-      "  top: 'conv1' "
-      "  param { "
-      "    lr_mult: 1 "
-      "  } "
-      "  param { "
-      "    lr_mult: 2 "
-      "  } "
-      "  convolution_param { "
-      "    num_output: 20 "
-      "    kernel_size: 5 "
-      "    stride: 1 "
-      "    weight_filler { "
-      "      type: 'xavier' "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "    } "
-      "  } "
-      "} "
-      "layer { "
-      "  name: 'ip1' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'conv1' "
-      "  top: 'ip1' "
-      "  param { "
-      "    lr_mult: 1 "
-      "  } "
-      "  param { "
-      "    lr_mult: 2 "
-      "  } "
-      "  inner_product_param { "
-      "    num_output: 10 "
-      "    weight_filler { "
-      "      type: 'xavier' "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "    } "
-      "  } "
-      "} "
-      "layer { "
-      "  name: 'accuracy' "
-      "  type: 'Accuracy' "
-      "  bottom: 'ip1' "
-      "  bottom: 'label' "
-      "  top: 'accuracy' "
-      "  include: { phase: TEST } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'ip2' "
-      "  bottom: 'label' "
-      "  top: 'loss' "
-      "} ";
+  const string &input_proto = "name: 'LeNet' "
+                              "layer { "
+                              "  name: 'mnist' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "  data_param { "
+                              "    source: 'mnist-train-leveldb' "
+                              "    batch_size: 64 "
+                              "  } "
+                              "  transform_param { "
+                              "    scale: 0.00390625 "
+                              "  } "
+                              "  include: { phase: TRAIN } "
+                              "} "
+                              "layer { "
+                              "  name: 'mnist' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "  data_param { "
+                              "    source: 'mnist-test-leveldb' "
+                              "    batch_size: 100 "
+                              "  } "
+                              "  transform_param { "
+                              "    scale: 0.00390625 "
+                              "  } "
+                              "  include: { phase: TEST } "
+                              "} "
+                              "layer { "
+                              "  name: 'conv1' "
+                              "  type: 'Convolution' "
+                              "  bottom: 'data' "
+                              "  top: 'conv1' "
+                              "  param { "
+                              "    lr_mult: 1 "
+                              "  } "
+                              "  param { "
+                              "    lr_mult: 2 "
+                              "  } "
+                              "  convolution_param { "
+                              "    num_output: 20 "
+                              "    kernel_size: 5 "
+                              "    stride: 1 "
+                              "    weight_filler { "
+                              "      type: 'xavier' "
+                              "    } "
+                              "    bias_filler { "
+                              "      type: 'constant' "
+                              "    } "
+                              "  } "
+                              "} "
+                              "layer { "
+                              "  name: 'ip1' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'conv1' "
+                              "  top: 'ip1' "
+                              "  param { "
+                              "    lr_mult: 1 "
+                              "  } "
+                              "  param { "
+                              "    lr_mult: 2 "
+                              "  } "
+                              "  inner_product_param { "
+                              "    num_output: 10 "
+                              "    weight_filler { "
+                              "      type: 'xavier' "
+                              "    } "
+                              "    bias_filler { "
+                              "      type: 'constant' "
+                              "    } "
+                              "  } "
+                              "} "
+                              "layer { "
+                              "  name: 'accuracy' "
+                              "  type: 'Accuracy' "
+                              "  bottom: 'ip1' "
+                              "  bottom: 'label' "
+                              "  top: 'accuracy' "
+                              "  include: { phase: TEST } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'ip2' "
+                              "  bottom: 'label' "
+                              "  top: 'loss' "
+                              "} ";
   const string input_proto_train = "state: { phase: TRAIN } " + input_proto;
   const string input_proto_test = "state: { phase: TEST } " + input_proto;
-  const string output_proto_train =
-      "name: 'LeNet' "
-      "layer { "
-      "  name: 'mnist' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "  data_param { "
-      "    source: 'mnist-train-leveldb' "
-      "    batch_size: 64 "
-      "  } "
-      "  transform_param { "
-      "    scale: 0.00390625 "
-      "  } "
-      "  include: { phase: TRAIN } "
-      "} "
-      "layer { "
-      "  name: 'conv1' "
-      "  type: 'Convolution' "
-      "  bottom: 'data' "
-      "  top: 'conv1' "
-      "  param { "
-      "    lr_mult: 1 "
-      "  } "
-      "  param { "
-      "    lr_mult: 2 "
-      "  } "
-      "  convolution_param { "
-      "    num_output: 20 "
-      "    kernel_size: 5 "
-      "    stride: 1 "
-      "    weight_filler { "
-      "      type: 'xavier' "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "    } "
-      "  } "
-      "} "
-      "layer { "
-      "  name: 'ip1' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'conv1' "
-      "  top: 'ip1' "
-      "  param { "
-      "    lr_mult: 1 "
-      "  } "
-      "  param { "
-      "    lr_mult: 2 "
-      "  } "
-      "  inner_product_param { "
-      "    num_output: 10 "
-      "    weight_filler { "
-      "      type: 'xavier' "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "    } "
-      "  } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'ip2' "
-      "  bottom: 'label' "
-      "  top: 'loss' "
-      "} ";
-  const string &output_proto_test =
-      "name: 'LeNet' "
-      "layer { "
-      "  name: 'mnist' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "  data_param { "
-      "    source: 'mnist-test-leveldb' "
-      "    batch_size: 100 "
-      "  } "
-      "  transform_param { "
-      "    scale: 0.00390625 "
-      "  } "
-      "  include: { phase: TEST } "
-      "} "
-      "layer { "
-      "  name: 'conv1' "
-      "  type: 'Convolution' "
-      "  bottom: 'data' "
-      "  top: 'conv1' "
-      "  param { "
-      "    lr_mult: 1 "
-      "  } "
-      "  param { "
-      "    lr_mult: 2 "
-      "  } "
-      "  convolution_param { "
-      "    num_output: 20 "
-      "    kernel_size: 5 "
-      "    stride: 1 "
-      "    weight_filler { "
-      "      type: 'xavier' "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "    } "
-      "  } "
-      "} "
-      "layer { "
-      "  name: 'ip1' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'conv1' "
-      "  top: 'ip1' "
-      "  param { "
-      "    lr_mult: 1 "
-      "  } "
-      "  param { "
-      "    lr_mult: 2 "
-      "  } "
-      "  inner_product_param { "
-      "    num_output: 10 "
-      "    weight_filler { "
-      "      type: 'xavier' "
-      "    } "
-      "    bias_filler { "
-      "      type: 'constant' "
-      "    } "
-      "  } "
-      "} "
-      "layer { "
-      "  name: 'accuracy' "
-      "  type: 'Accuracy' "
-      "  bottom: 'ip1' "
-      "  bottom: 'label' "
-      "  top: 'accuracy' "
-      "  include: { phase: TEST } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'ip2' "
-      "  bottom: 'label' "
-      "  top: 'loss' "
-      "} ";
+  const string output_proto_train = "name: 'LeNet' "
+                                    "layer { "
+                                    "  name: 'mnist' "
+                                    "  type: 'Data' "
+                                    "  top: 'data' "
+                                    "  top: 'label' "
+                                    "  data_param { "
+                                    "    source: 'mnist-train-leveldb' "
+                                    "    batch_size: 64 "
+                                    "  } "
+                                    "  transform_param { "
+                                    "    scale: 0.00390625 "
+                                    "  } "
+                                    "  include: { phase: TRAIN } "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'conv1' "
+                                    "  type: 'Convolution' "
+                                    "  bottom: 'data' "
+                                    "  top: 'conv1' "
+                                    "  param { "
+                                    "    lr_mult: 1 "
+                                    "  } "
+                                    "  param { "
+                                    "    lr_mult: 2 "
+                                    "  } "
+                                    "  convolution_param { "
+                                    "    num_output: 20 "
+                                    "    kernel_size: 5 "
+                                    "    stride: 1 "
+                                    "    weight_filler { "
+                                    "      type: 'xavier' "
+                                    "    } "
+                                    "    bias_filler { "
+                                    "      type: 'constant' "
+                                    "    } "
+                                    "  } "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'ip1' "
+                                    "  type: 'InnerProduct' "
+                                    "  bottom: 'conv1' "
+                                    "  top: 'ip1' "
+                                    "  param { "
+                                    "    lr_mult: 1 "
+                                    "  } "
+                                    "  param { "
+                                    "    lr_mult: 2 "
+                                    "  } "
+                                    "  inner_product_param { "
+                                    "    num_output: 10 "
+                                    "    weight_filler { "
+                                    "      type: 'xavier' "
+                                    "    } "
+                                    "    bias_filler { "
+                                    "      type: 'constant' "
+                                    "    } "
+                                    "  } "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'loss' "
+                                    "  type: 'SoftmaxWithLoss' "
+                                    "  bottom: 'ip2' "
+                                    "  bottom: 'label' "
+                                    "  top: 'loss' "
+                                    "} ";
+  const string &output_proto_test = "name: 'LeNet' "
+                                    "layer { "
+                                    "  name: 'mnist' "
+                                    "  type: 'Data' "
+                                    "  top: 'data' "
+                                    "  top: 'label' "
+                                    "  data_param { "
+                                    "    source: 'mnist-test-leveldb' "
+                                    "    batch_size: 100 "
+                                    "  } "
+                                    "  transform_param { "
+                                    "    scale: 0.00390625 "
+                                    "  } "
+                                    "  include: { phase: TEST } "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'conv1' "
+                                    "  type: 'Convolution' "
+                                    "  bottom: 'data' "
+                                    "  top: 'conv1' "
+                                    "  param { "
+                                    "    lr_mult: 1 "
+                                    "  } "
+                                    "  param { "
+                                    "    lr_mult: 2 "
+                                    "  } "
+                                    "  convolution_param { "
+                                    "    num_output: 20 "
+                                    "    kernel_size: 5 "
+                                    "    stride: 1 "
+                                    "    weight_filler { "
+                                    "      type: 'xavier' "
+                                    "    } "
+                                    "    bias_filler { "
+                                    "      type: 'constant' "
+                                    "    } "
+                                    "  } "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'ip1' "
+                                    "  type: 'InnerProduct' "
+                                    "  bottom: 'conv1' "
+                                    "  top: 'ip1' "
+                                    "  param { "
+                                    "    lr_mult: 1 "
+                                    "  } "
+                                    "  param { "
+                                    "    lr_mult: 2 "
+                                    "  } "
+                                    "  inner_product_param { "
+                                    "    num_output: 10 "
+                                    "    weight_filler { "
+                                    "      type: 'xavier' "
+                                    "    } "
+                                    "    bias_filler { "
+                                    "      type: 'constant' "
+                                    "    } "
+                                    "  } "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'accuracy' "
+                                    "  type: 'Accuracy' "
+                                    "  bottom: 'ip1' "
+                                    "  bottom: 'label' "
+                                    "  top: 'accuracy' "
+                                    "  include: { phase: TEST } "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'loss' "
+                                    "  type: 'SoftmaxWithLoss' "
+                                    "  bottom: 'ip2' "
+                                    "  bottom: 'label' "
+                                    "  top: 'loss' "
+                                    "} ";
   const string output_proto_train_explicit =
       output_proto_train + " state: { phase: TRAIN } ";
   const string output_proto_test_explicit =
@@ -1746,131 +1730,125 @@ TEST_F(FilterNetTest, TestFilterLeNetTrainTest) {
 }
 
 TEST_F(FilterNetTest, TestFilterOutByStage) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "  include: { stage: 'mystage' } "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
-  const string &output_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "  include: { stage: 'mystage' } "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
+  const string &output_proto = "name: 'TestNetwork' "
+                               "layer { "
+                               "  name: 'innerprod' "
+                               "  type: 'InnerProduct' "
+                               "  bottom: 'data' "
+                               "  top: 'innerprod' "
+                               "} "
+                               "layer { "
+                               "  name: 'loss' "
+                               "  type: 'SoftmaxWithLoss' "
+                               "  bottom: 'innerprod' "
+                               "  bottom: 'label' "
+                               "} ";
   this->RunFilterNetTest(input_proto, output_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterOutByStage2) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { stage: 'mystage' } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
-  const string &output_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { stage: 'mystage' } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
+  const string &output_proto = "name: 'TestNetwork' "
+                               "layer { "
+                               "  name: 'data' "
+                               "  type: 'Data' "
+                               "  top: 'data' "
+                               "  top: 'label' "
+                               "} "
+                               "layer { "
+                               "  name: 'loss' "
+                               "  type: 'SoftmaxWithLoss' "
+                               "  bottom: 'innerprod' "
+                               "  bottom: 'label' "
+                               "} ";
   this->RunFilterNetTest(input_proto, output_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInByStage) {
-  const string &input_proto =
-      "state: { stage: 'mystage' } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { stage: 'mystage' } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "state: { stage: 'mystage' } "
+                              "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { stage: 'mystage' } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInByStage2) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  exclude: { stage: 'mystage' } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  exclude: { stage: 'mystage' } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
@@ -1898,50 +1876,48 @@ TEST_F(FilterNetTest, TestFilterOutByMultipleStage) {
       "  bottom: 'label' "
       "  include: { stage: 'mystage' } "
       "} ";
-  const string &output_proto =
-      "state: { stage: 'mystage' } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  include: { stage: 'mystage' } "
-      "} ";
+  const string &output_proto = "state: { stage: 'mystage' } "
+                               "name: 'TestNetwork' "
+                               "layer { "
+                               "  name: 'data' "
+                               "  type: 'Data' "
+                               "  top: 'data' "
+                               "  top: 'label' "
+                               "} "
+                               "layer { "
+                               "  name: 'loss' "
+                               "  type: 'SoftmaxWithLoss' "
+                               "  bottom: 'innerprod' "
+                               "  bottom: 'label' "
+                               "  include: { stage: 'mystage' } "
+                               "} ";
   this->RunFilterNetTest(input_proto, output_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInByMultipleStage) {
-  const string &input_proto =
-      "state: { stage: 'mystage' } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { stage: 'myotherstage' } "
-      "  include: { stage: 'mystage' } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  include: { stage: 'mystage' } "
-      "} ";
+  const string &input_proto = "state: { stage: 'mystage' } "
+                              "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { stage: 'myotherstage' } "
+                              "  include: { stage: 'mystage' } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "  include: { stage: 'mystage' } "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
@@ -1973,271 +1949,259 @@ TEST_F(FilterNetTest, TestFilterInByMultipleStage2) {
 }
 
 TEST_F(FilterNetTest, TestFilterInByNotStage) {
-  const string &input_proto =
-      "state: { stage: 'mystage' } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { not_stage: 'myotherstage' } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  include: { not_stage: 'myotherstage' } "
-      "} ";
+  const string &input_proto = "state: { stage: 'mystage' } "
+                              "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { not_stage: 'myotherstage' } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "  include: { not_stage: 'myotherstage' } "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterOutByNotStage) {
-  const string &input_proto =
-      "state: { stage: 'mystage' } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { not_stage: 'mystage' } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  include: { not_stage: 'mystage' } "
-      "} ";
-  const string &output_proto =
-      "state: { stage: 'mystage' } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} ";
+  const string &input_proto = "state: { stage: 'mystage' } "
+                              "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { not_stage: 'mystage' } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "  include: { not_stage: 'mystage' } "
+                              "} ";
+  const string &output_proto = "state: { stage: 'mystage' } "
+                               "name: 'TestNetwork' "
+                               "layer { "
+                               "  name: 'data' "
+                               "  type: 'Data' "
+                               "  top: 'data' "
+                               "  top: 'label' "
+                               "} ";
   this->RunFilterNetTest(input_proto, output_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterOutByMinLevel) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { min_level: 3 } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
-  const string &output_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { min_level: 3 } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
+  const string &output_proto = "name: 'TestNetwork' "
+                               "layer { "
+                               "  name: 'data' "
+                               "  type: 'Data' "
+                               "  top: 'data' "
+                               "  top: 'label' "
+                               "} "
+                               "layer { "
+                               "  name: 'loss' "
+                               "  type: 'SoftmaxWithLoss' "
+                               "  bottom: 'innerprod' "
+                               "  bottom: 'label' "
+                               "} ";
   this->RunFilterNetTest(input_proto, output_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterOutByMaxLevel) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { max_level: -3 } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
-  const string &output_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { max_level: -3 } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
+  const string &output_proto = "name: 'TestNetwork' "
+                               "layer { "
+                               "  name: 'data' "
+                               "  type: 'Data' "
+                               "  top: 'data' "
+                               "  top: 'label' "
+                               "} "
+                               "layer { "
+                               "  name: 'loss' "
+                               "  type: 'SoftmaxWithLoss' "
+                               "  bottom: 'innerprod' "
+                               "  bottom: 'label' "
+                               "} ";
   this->RunFilterNetTest(input_proto, output_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInByMinLevel) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { min_level: 0 } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { min_level: 0 } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInByMinLevel2) {
-  const string &input_proto =
-      "state: { level: 7 } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { min_level: 3 } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "state: { level: 7 } "
+                              "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { min_level: 3 } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInByMaxLevel) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { max_level: 0 } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { max_level: 0 } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInByMaxLevel2) {
-  const string &input_proto =
-      "state: { level: -7 } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { max_level: -3 } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "} ";
+  const string &input_proto = "state: { level: -7 } "
+                              "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { max_level: -3 } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "} ";
   this->RunFilterNetTest(input_proto, input_proto);
 }
 
 TEST_F(FilterNetTest, TestFilterInOutByIncludeMultiRule) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { min_level: 2  phase: TRAIN } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  include: { min_level: 2  phase: TEST } "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { min_level: 2  phase: TRAIN } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "  include: { min_level: 2  phase: TEST } "
+                              "} ";
   const string &input_proto_train =
       "state: { level: 4  phase: TRAIN } " + input_proto;
   const string &input_proto_test =
@@ -2258,51 +2222,49 @@ TEST_F(FilterNetTest, TestFilterInOutByIncludeMultiRule) {
       "  top: 'innerprod' "
       "  include: { min_level: 2  phase: TRAIN } "
       "} ";
-  const string &output_proto_test =
-      "state: { level: 4  phase: TEST } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  include: { min_level: 2  phase: TEST } "
-      "} ";
+  const string &output_proto_test = "state: { level: 4  phase: TEST } "
+                                    "name: 'TestNetwork' "
+                                    "layer { "
+                                    "  name: 'data' "
+                                    "  type: 'Data' "
+                                    "  top: 'data' "
+                                    "  top: 'label' "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'loss' "
+                                    "  type: 'SoftmaxWithLoss' "
+                                    "  bottom: 'innerprod' "
+                                    "  bottom: 'label' "
+                                    "  include: { min_level: 2  phase: TEST } "
+                                    "} ";
   this->RunFilterNetTest(input_proto_train, output_proto_train);
   this->RunFilterNetTest(input_proto_test, output_proto_test);
 }
 
 TEST_F(FilterNetTest, TestFilterInByIncludeMultiRule) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  include: { min_level: 2  phase: TRAIN } "
-      "  include: { phase: TEST } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  include: { min_level: 2  phase: TEST } "
-      "  include: { phase: TRAIN } "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  include: { min_level: 2  phase: TRAIN } "
+                              "  include: { phase: TEST } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "  include: { min_level: 2  phase: TEST } "
+                              "  include: { phase: TRAIN } "
+                              "} ";
   const string &input_proto_train =
       "state: { level: 2  phase: TRAIN } " + input_proto;
   const string &input_proto_test =
@@ -2312,64 +2274,61 @@ TEST_F(FilterNetTest, TestFilterInByIncludeMultiRule) {
 }
 
 TEST_F(FilterNetTest, TestFilterInOutByExcludeMultiRule) {
-  const string &input_proto =
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  exclude: { min_level: 2  phase: TRAIN } "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  exclude: { min_level: 2  phase: TEST } "
-      "} ";
+  const string &input_proto = "name: 'TestNetwork' "
+                              "layer { "
+                              "  name: 'data' "
+                              "  type: 'Data' "
+                              "  top: 'data' "
+                              "  top: 'label' "
+                              "} "
+                              "layer { "
+                              "  name: 'innerprod' "
+                              "  type: 'InnerProduct' "
+                              "  bottom: 'data' "
+                              "  top: 'innerprod' "
+                              "  exclude: { min_level: 2  phase: TRAIN } "
+                              "} "
+                              "layer { "
+                              "  name: 'loss' "
+                              "  type: 'SoftmaxWithLoss' "
+                              "  bottom: 'innerprod' "
+                              "  bottom: 'label' "
+                              "  exclude: { min_level: 2  phase: TEST } "
+                              "} ";
   const string &input_proto_train =
       "state: { level: 4  phase: TRAIN } " + input_proto;
   const string &input_proto_test =
       "state: { level: 4  phase: TEST } " + input_proto;
-  const string &output_proto_train =
-      "state: { level: 4  phase: TRAIN } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'loss' "
-      "  type: 'SoftmaxWithLoss' "
-      "  bottom: 'innerprod' "
-      "  bottom: 'label' "
-      "  exclude: { min_level: 2  phase: TEST } "
-      "} ";
-  const string &output_proto_test =
-      "state: { level: 4  phase: TEST } "
-      "name: 'TestNetwork' "
-      "layer { "
-      "  name: 'data' "
-      "  type: 'Data' "
-      "  top: 'data' "
-      "  top: 'label' "
-      "} "
-      "layer { "
-      "  name: 'innerprod' "
-      "  type: 'InnerProduct' "
-      "  bottom: 'data' "
-      "  top: 'innerprod' "
-      "  exclude: { min_level: 2  phase: TRAIN } "
-      "} ";
+  const string &output_proto_train = "state: { level: 4  phase: TRAIN } "
+                                     "name: 'TestNetwork' "
+                                     "layer { "
+                                     "  name: 'data' "
+                                     "  type: 'Data' "
+                                     "  top: 'data' "
+                                     "  top: 'label' "
+                                     "} "
+                                     "layer { "
+                                     "  name: 'loss' "
+                                     "  type: 'SoftmaxWithLoss' "
+                                     "  bottom: 'innerprod' "
+                                     "  bottom: 'label' "
+                                     "  exclude: { min_level: 2  phase: TEST } "
+                                     "} ";
+  const string &output_proto_test = "state: { level: 4  phase: TEST } "
+                                    "name: 'TestNetwork' "
+                                    "layer { "
+                                    "  name: 'data' "
+                                    "  type: 'Data' "
+                                    "  top: 'data' "
+                                    "  top: 'label' "
+                                    "} "
+                                    "layer { "
+                                    "  name: 'innerprod' "
+                                    "  type: 'InnerProduct' "
+                                    "  bottom: 'data' "
+                                    "  top: 'innerprod' "
+                                    "  exclude: { min_level: 2  phase: TRAIN } "
+                                    "} ";
   this->RunFilterNetTest(input_proto_train, output_proto_train);
   this->RunFilterNetTest(input_proto_test, output_proto_test);
 }
@@ -2392,7 +2351,7 @@ TYPED_TEST(NetTest, TestReshape) {
   filler.Fill(&blob2);
 
   this->InitReshapableNet();
-  shared_ptr<Blob<Dtype> > input_blob = this->net_->blob_by_name("data");
+  shared_ptr<Blob<Dtype>> input_blob = this->net_->blob_by_name("data");
   Blob<Dtype> *output_blob = this->net_->output_blobs()[0];
   input_blob->Reshape(blob1.num(), blob1.channels(), blob1.height(),
                       blob1.width());
@@ -2463,10 +2422,10 @@ TYPED_TEST(NetTest, TestSkipPropagateDown) {
     if (layer_name.find("data") != std::string::npos ||
         layer_name == "silence") {
       EXPECT_FALSE(vec_layer_need_backward[layer_id])
-              << "layer_need_backward for " << layer_name << " should be False";
+          << "layer_need_backward for " << layer_name << " should be False";
     } else {
       EXPECT_TRUE(vec_layer_need_backward[layer_id])
-              << "layer_need_backward for " << layer_name << " should be True";
+          << "layer_need_backward for " << layer_name << " should be True";
     }
   }
   // check bottom_need_backward if propagat_down is false
@@ -2486,10 +2445,10 @@ TYPED_TEST(NetTest, TestSkipPropagateDown) {
     // loss layers
     if (layer_name == "innerproduct" || layer_name == "loss") {
       EXPECT_TRUE(vec_layer_need_backward[layer_id])
-              << "layer_need_backward for " << layer_name << " should be True";
+          << "layer_need_backward for " << layer_name << " should be True";
     } else {
       EXPECT_FALSE(vec_layer_need_backward[layer_id])
-              << "layer_need_backward for " << layer_name << " should be False";
+          << "layer_need_backward for " << layer_name << " should be False";
     }
   }
 }
@@ -2506,12 +2465,12 @@ TYPED_TEST(NetTest, TestForcePropagateDown) {
       EXPECT_FALSE(layer_need_backward[layer_id]);
     } else if (layer_name == "innerproduct") {
       ASSERT_EQ(need_backward.size(), 1);
-      EXPECT_FALSE(need_backward[0]);  // data
+      EXPECT_FALSE(need_backward[0]); // data
       EXPECT_TRUE(layer_need_backward[layer_id]);
     } else if (layer_name == "loss") {
       ASSERT_EQ(need_backward.size(), 2);
-      EXPECT_TRUE(need_backward[0]);   // innerproduct
-      EXPECT_FALSE(need_backward[1]);  // label
+      EXPECT_TRUE(need_backward[0]);  // innerproduct
+      EXPECT_FALSE(need_backward[1]); // label
       EXPECT_TRUE(layer_need_backward[layer_id]);
     } else {
       LOG(FATAL) << "Unknown layer: " << layer_name;
@@ -2528,12 +2487,12 @@ TYPED_TEST(NetTest, TestForcePropagateDown) {
       EXPECT_FALSE(layer_need_backward[layer_id]);
     } else if (layer_name == "innerproduct") {
       ASSERT_EQ(need_backward.size(), 1);
-      EXPECT_TRUE(need_backward[0]);  // data
+      EXPECT_TRUE(need_backward[0]); // data
       EXPECT_TRUE(layer_need_backward[layer_id]);
     } else if (layer_name == "loss") {
       ASSERT_EQ(need_backward.size(), 2);
-      EXPECT_TRUE(need_backward[0]);   // innerproduct
-      EXPECT_FALSE(need_backward[1]);  // label
+      EXPECT_TRUE(need_backward[0]);  // innerproduct
+      EXPECT_FALSE(need_backward[1]); // label
       EXPECT_TRUE(layer_need_backward[layer_id]);
     } else {
       LOG(FATAL) << "Unknown layer: " << layer_name;
@@ -2601,4 +2560,4 @@ TYPED_TEST(NetTest, TestAllInOneNetDeploy) {
   ASSERT_TRUE(found_data);
 }
 
-}  // namespace caffe
+} // namespace caffe

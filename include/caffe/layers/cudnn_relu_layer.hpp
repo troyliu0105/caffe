@@ -16,8 +16,7 @@ namespace caffe {
 /**
  * @brief CuDNN acceleration of ReLULayer.
  */
-template<typename Dtype>
-class CuDNNReLULayer : public ReLULayer<Dtype> {
+template <typename Dtype> class CuDNNReLULayer : public ReLULayer<Dtype> {
 public:
   explicit CuDNNReLULayer(const LayerParameter &param)
       : ReLULayer<Dtype>(param), handles_setup_(false) {}
@@ -31,7 +30,8 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   bool handles_setup_;
   cudnnHandle_t handle_;
@@ -41,6 +41,6 @@ protected:
 };
 #endif
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_CUDNN_RELU_LAYER_HPP_
+#endif // CAFFE_CUDNN_RELU_LAYER_HPP_

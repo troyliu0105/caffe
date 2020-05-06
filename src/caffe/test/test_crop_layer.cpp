@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class CropLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -120,10 +120,8 @@ TYPED_TEST(CropLayerTest, TestCropAll) {
     for (int c = 0; c < this->blob_bottom_0_->channels(); ++c) {
       for (int h = 0; h < this->blob_bottom_0_->height(); ++h) {
         for (int w = 0; w < this->blob_bottom_0_->width(); ++w) {
-          if (n < this->blob_top_->shape(0) &&
-              c < this->blob_top_->shape(1) &&
-              h < this->blob_top_->shape(2) &&
-              w < this->blob_top_->shape(3)) {
+          if (n < this->blob_top_->shape(0) && c < this->blob_top_->shape(1) &&
+              h < this->blob_top_->shape(2) && w < this->blob_top_->shape(3)) {
             EXPECT_EQ(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_0_->data_at(n, c, h, w));
           }
@@ -148,10 +146,8 @@ TYPED_TEST(CropLayerTest, TestCropAllOffset) {
     for (int c = 0; c < this->blob_bottom_0_->channels(); ++c) {
       for (int h = 0; h < this->blob_bottom_0_->height(); ++h) {
         for (int w = 0; w < this->blob_bottom_0_->width(); ++w) {
-          if (n < this->blob_top_->shape(0) &&
-              c < this->blob_top_->shape(1) &&
-              h < this->blob_top_->shape(2) &&
-              w < this->blob_top_->shape(3)) {
+          if (n < this->blob_top_->shape(0) && c < this->blob_top_->shape(1) &&
+              h < this->blob_top_->shape(2) && w < this->blob_top_->shape(3)) {
             EXPECT_EQ(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_0_->data_at(n, c + 1, h + 1, w + 2));
           }
@@ -174,10 +170,8 @@ TYPED_TEST(CropLayerTest, TestCropHW) {
     for (int c = 0; c < this->blob_bottom_0_->channels(); ++c) {
       for (int h = 0; h < this->blob_bottom_0_->height(); ++h) {
         for (int w = 0; w < this->blob_bottom_0_->width(); ++w) {
-          if (n < this->blob_top_->shape(0) &&
-              c < this->blob_top_->shape(1) &&
-              h < this->blob_top_->shape(2) &&
-              w < this->blob_top_->shape(3)) {
+          if (n < this->blob_top_->shape(0) && c < this->blob_top_->shape(1) &&
+              h < this->blob_top_->shape(2) && w < this->blob_top_->shape(3)) {
             EXPECT_EQ(this->blob_top_->data_at(n, c, h, w),
                       this->blob_bottom_0_->data_at(n, c, h + 1, w + 2));
           }
@@ -280,4 +274,4 @@ TYPED_TEST(CropLayerTest, TestCrop5DGradient) {
                                   this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

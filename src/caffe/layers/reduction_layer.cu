@@ -5,9 +5,9 @@
 
 namespace caffe {
 
-template<typename Dtype>
-void ReductionLayer<Dtype>::Forward_gpu(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void ReductionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
+                                        const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
   const Dtype *mult_data = NULL;
   if (sum_multiplier_.count() > 0) {
@@ -40,10 +40,13 @@ void ReductionLayer<Dtype>::Forward_gpu(
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ReductionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                         const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
-  if (!propagate_down[0]) { return; }
+                                         const vector<bool> &propagate_down,
+                                         const vector<Blob<Dtype> *> &bottom) {
+  if (!propagate_down[0]) {
+    return;
+  }
   // Get bottom_data, if needed.
   const Dtype *bottom_data = NULL;
   switch (op_) {
@@ -88,4 +91,4 @@ void ReductionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(ReductionLayer);
 
-}  // namespace caffe
+} // namespace caffe

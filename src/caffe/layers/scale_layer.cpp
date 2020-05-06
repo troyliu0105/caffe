@@ -8,7 +8,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ScaleLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                    const vector<Blob<Dtype> *> &top) {
   const ScaleParameter &param = this->layer_param_.scale_param();
@@ -22,8 +22,8 @@ void ScaleLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                            << "or -1 to extend to the end of bottom[0]";
     if (num_axes >= 0) {
       CHECK_GE(bottom[0]->num_axes(), axis_ + num_axes)
-        << "scale blob's shape extends past bottom[0]'s shape when applied "
-        << "starting with bottom[0] axis = " << axis_;
+          << "scale blob's shape extends past bottom[0]'s shape when applied "
+          << "starting with bottom[0] axis = " << axis_;
     }
     this->blobs_.resize(1);
     const vector<int>::const_iterator &shape_start =
@@ -38,7 +38,7 @@ void ScaleLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
       filler_param.set_type("constant");
       filler_param.set_value(1);
     }
-    shared_ptr<Filler<Dtype> > filler(GetFiller<Dtype>(filler_param));
+    shared_ptr<Filler<Dtype>> filler(GetFiller<Dtype>(filler_param));
     filler->Fill(this->blobs_[0].get());
   }
   if (param.bias_term()) {
@@ -72,7 +72,7 @@ void ScaleLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   this->param_propagate_down_.resize(this->blobs_.size(), true);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ScaleLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                 const vector<Blob<Dtype> *> &top) {
   const ScaleParameter &param = this->layer_param_.scale_param();
@@ -83,20 +83,21 @@ void ScaleLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   // with axis_ == 0 and (therefore) outer_dim_ == 1. (Setting axis_ to
   // bottom[0]->num_axes() - 1, giving inner_dim_ == 1, would be equally
   // performant.)
-  axis_ = (scale->num_axes() == 0) ?
-          0 : bottom[0]->CanonicalAxisIndex(param.axis());
+  axis_ = (scale->num_axes() == 0)
+              ? 0
+              : bottom[0]->CanonicalAxisIndex(param.axis());
   CHECK_GE(bottom[0]->num_axes(), axis_ + scale->num_axes())
-    << "scale blob's shape extends past bottom[0]'s shape when applied "
-    << "starting with bottom[0] axis = " << axis_;
+      << "scale blob's shape extends past bottom[0]'s shape when applied "
+      << "starting with bottom[0] axis = " << axis_;
   for (int i = 0; i < scale->num_axes(); ++i) {
     CHECK_EQ(bottom[0]->shape(axis_ + i), scale->shape(i))
-      << "dimension mismatch between bottom[0]->shape(" << axis_ + i
-      << ") and scale->shape(" << i << ")";
+        << "dimension mismatch between bottom[0]->shape(" << axis_ + i
+        << ") and scale->shape(" << i << ")";
   }
   outer_dim_ = bottom[0]->count(0, axis_);
   scale_dim_ = scale->count();
   inner_dim_ = bottom[0]->count(axis_ + scale->num_axes());
-  if (bottom[0] == top[0]) {  // in-place computation
+  if (bottom[0] == top[0]) { // in-place computation
     temp_.ReshapeLike(*bottom[0]);
   } else {
     top[0]->ReshapeLike(*bottom[0]);
@@ -113,9 +114,9 @@ void ScaleLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-void ScaleLayer<Dtype>::Forward_cpu(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void ScaleLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                                    const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
   if (bottom[0] == top[0]) {
     // In-place computation; need to store bottom data before overwriting it.
@@ -141,9 +142,10 @@ void ScaleLayer<Dtype>::Forward_cpu(
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ScaleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                     const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                     const vector<bool> &propagate_down,
+                                     const vector<Blob<Dtype> *> &bottom) {
   if (bias_layer_ &&
       this->param_propagate_down_[this->param_propagate_down_.size() - 1]) {
     bias_layer_->Backward(top, bias_propagate_down_, bias_bottom_vec_);
@@ -161,8 +163,9 @@ void ScaleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     // If we're computing in-place (and not doing eltwise computation), this
     // hack doesn't work and we store the product in temp_.
     const bool is_eltwise = (bottom[0]->count() == scale->count());
-    Dtype *product = (is_eltwise ? scale->mutable_cpu_diff() :
-                      (in_place ? temp_.mutable_cpu_data() : bottom[0]->mutable_cpu_diff()));
+    Dtype *product = (is_eltwise ? scale->mutable_cpu_diff()
+                                 : (in_place ? temp_.mutable_cpu_data()
+                                             : bottom[0]->mutable_cpu_diff()));
     caffe_mul(top[0]->count(), top_diff, bottom_data, product);
     if (!is_eltwise) {
       Dtype *sum_result = NULL;
@@ -179,10 +182,10 @@ void ScaleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
         }
       } else {
         const Dtype *sum_mult = sum_multiplier_.cpu_data();
-        sum_result = (outer_dim_ == 1) ?
-                     scale->mutable_cpu_diff() : sum_result_.mutable_cpu_data();
-        caffe_cpu_gemv(CblasNoTrans, sum_result_.count(), inner_dim_,
-                       Dtype(1), product, sum_mult, Dtype(0), sum_result);
+        sum_result = (outer_dim_ == 1) ? scale->mutable_cpu_diff()
+                                       : sum_result_.mutable_cpu_data();
+        caffe_cpu_gemv(CblasNoTrans, sum_result_.count(), inner_dim_, Dtype(1),
+                       product, sum_mult, Dtype(0), sum_result);
       }
       if (outer_dim_ != 1) {
         const Dtype *sum_mult = sum_multiplier_.cpu_data();
@@ -195,9 +198,8 @@ void ScaleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
             *scale_diff = caffe_cpu_dot(outer_dim_, sum_mult, sum_result);
           }
         } else {
-          caffe_cpu_gemv(CblasTrans, outer_dim_, scale_dim_,
-                         Dtype(1), sum_result, sum_mult, Dtype(scale_param),
-                         scale_diff);
+          caffe_cpu_gemv(CblasTrans, outer_dim_, scale_dim_, Dtype(1),
+                         sum_result, sum_mult, Dtype(scale_param), scale_diff);
         }
       }
     }
@@ -224,4 +226,4 @@ STUB_GPU(ScaleLayer);
 INSTANTIATE_CLASS(ScaleLayer);
 REGISTER_LAYER_CLASS(Scale);
 
-}  // namespace caffe
+} // namespace caffe

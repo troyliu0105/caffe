@@ -9,12 +9,12 @@
 
 #include "caffe/util/db.hpp"
 
-namespace caffe { namespace db {
+namespace caffe {
+namespace db {
 
 class LevelDBCursor : public Cursor {
- public:
-  explicit LevelDBCursor(leveldb::Iterator* iter)
-    : iter_(iter) {
+public:
+  explicit LevelDBCursor(leveldb::Iterator *iter) : iter_(iter) {
     SeekToFirst();
     CHECK(iter_->status().ok()) << iter_->status().ToString();
   }
@@ -25,54 +25,53 @@ class LevelDBCursor : public Cursor {
   virtual string value() { return iter_->value().ToString(); }
   virtual bool valid() { return iter_->Valid(); }
 
- private:
-  leveldb::Iterator* iter_;
+private:
+  leveldb::Iterator *iter_;
 };
 
 class LevelDBTransaction : public Transaction {
- public:
-  explicit LevelDBTransaction(leveldb::DB* db) : db_(db) { CHECK_NOTNULL(db_); }
-  virtual void Put(const string& key, const string& value) {
+public:
+  explicit LevelDBTransaction(leveldb::DB *db) : db_(db) { CHECK_NOTNULL(db_); }
+  virtual void Put(const string &key, const string &value) {
     batch_.Put(key, value);
   }
   virtual void Commit() {
     leveldb::Status status = db_->Write(leveldb::WriteOptions(), &batch_);
-    CHECK(status.ok()) << "Failed to write batch to leveldb "
-                       << std::endl << status.ToString();
+    CHECK(status.ok()) << "Failed to write batch to leveldb " << std::endl
+                       << status.ToString();
   }
 
- private:
-  leveldb::DB* db_;
+private:
+  leveldb::DB *db_;
   leveldb::WriteBatch batch_;
 
   DISABLE_COPY_AND_ASSIGN(LevelDBTransaction);
 };
 
 class LevelDB : public DB {
- public:
-  LevelDB() : db_(NULL) { }
+public:
+  LevelDB() : db_(NULL) {}
   virtual ~LevelDB() { Close(); }
-  virtual void Open(const string& source, Mode mode);
+  virtual void Open(const string &source, Mode mode);
   virtual void Close() {
     if (db_ != NULL) {
       delete db_;
       db_ = NULL;
     }
   }
-  virtual LevelDBCursor* NewCursor() {
+  virtual LevelDBCursor *NewCursor() {
     return new LevelDBCursor(db_->NewIterator(leveldb::ReadOptions()));
   }
-  virtual LevelDBTransaction* NewTransaction() {
+  virtual LevelDBTransaction *NewTransaction() {
     return new LevelDBTransaction(db_);
   }
 
- private:
-  leveldb::DB* db_;
+private:
+  leveldb::DB *db_;
 };
 
+} // namespace db
+} // namespace caffe
 
-}  // namespace db
-}  // namespace caffe
-
-#endif  // CAFFE_UTIL_DB_LEVELDB_HPP
-#endif  // USE_LEVELDB
+#endif // CAFFE_UTIL_DB_LEVELDB_HPP
+#endif // USE_LEVELDB

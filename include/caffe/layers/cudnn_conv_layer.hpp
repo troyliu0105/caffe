@@ -25,8 +25,8 @@ namespace caffe {
  * input and filter regimes the CUDNN engine is faster than the CAFFE engine,
  * but for fully-convolutional models and large inputs the CAFFE engine can be
  * faster as long as it fits in memory.
-*/
-template<typename Dtype>
+ */
+template <typename Dtype>
 class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
 public:
   explicit CuDNNConvolutionLayer(const LayerParameter &param)
@@ -41,7 +41,8 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   bool handles_setup_;
   cudnnHandle_t *handle_;
@@ -61,12 +62,12 @@ protected:
   size_t *workspace_fwd_sizes_;
   size_t *workspace_bwd_data_sizes_;
   size_t *workspace_bwd_filter_sizes_;
-  size_t workspaceSizeInBytes;  // size of underlying storage
-  void *workspaceData;  // underlying storage
-  void **workspace;  // aliases into workspaceData
+  size_t workspaceSizeInBytes; // size of underlying storage
+  void *workspaceData;         // underlying storage
+  void **workspace;            // aliases into workspaceData
 };
 #endif
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_CUDNN_CONV_LAYER_HPP_
+#endif // CAFFE_CUDNN_CONV_LAYER_HPP_

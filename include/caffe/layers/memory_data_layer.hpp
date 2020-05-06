@@ -16,8 +16,7 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward and proto params.
  */
-template<typename Dtype>
-class MemoryDataLayer : public BaseDataLayer<Dtype> {
+template <typename Dtype> class MemoryDataLayer : public BaseDataLayer<Dtype> {
 public:
   explicit MemoryDataLayer(const LayerParameter &param)
       : BaseDataLayer<Dtype>(param), has_new_data_(false) {}
@@ -32,7 +31,7 @@ public:
 #ifdef USE_OPENCV
   virtual void AddMatVector(const vector<cv::Mat> &mat_vector,
                             const vector<int> &labels);
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
 
   // Reset should accept const pointers, but can't, because the memory
   //  will be given to Blob, which is mutable
@@ -58,6 +57,6 @@ protected:
   bool has_new_data_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_MEMORY_DATA_LAYER_HPP_
+#endif // CAFFE_MEMORY_DATA_LAYER_HPP_

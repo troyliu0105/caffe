@@ -30,7 +30,6 @@ public:
     } else {
       pool_ = nullptr;
     }
-
   }
   ~NNPACKPool() {
     if (pool_) {
@@ -45,6 +44,6 @@ private:
   pthreadpool_t pool_;
 };
 
-}
+} // namespace caffe
 
-#endif //CAFFE_INCLUDE_CAFFE_NNPACK_POOL_HPP
+#endif // CAFFE_INCLUDE_CAFFE_NNPACK_POOL_HPP

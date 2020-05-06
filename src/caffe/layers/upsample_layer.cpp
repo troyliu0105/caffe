@@ -1,18 +1,18 @@
-#include <vector>
 #include "caffe/layers/upsample_layer.hpp"
+#include <vector>
 
 namespace caffe {
 
-template<typename Dtype>
-void UpsampleLayer<Dtype>::LayerSetUp(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void UpsampleLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                                      const vector<Blob<Dtype> *> &top) {
   UpsampleParameter upsample_param = this->layer_param_.upsample_param();
   scale_ = upsample_param.scale();
 }
 
-template<typename Dtype>
-void UpsampleLayer<Dtype>::Reshape(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void UpsampleLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
+                                   const vector<Blob<Dtype> *> &top) {
   vector<int> out_shape;
   for (int i = 0; i < bottom[0]->num_axes(); i++) {
     out_shape.push_back(bottom[0]->shape(i));
@@ -22,7 +22,7 @@ void UpsampleLayer<Dtype>::Reshape(
   top[0]->Reshape(out_shape);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void UpsampleLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                        const vector<Blob<Dtype> *> &top) {
   int N = top[0]->shape(0);
@@ -47,9 +47,10 @@ void UpsampleLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void UpsampleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                        const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                        const vector<bool> &propagate_down,
+                                        const vector<Blob<Dtype> *> &bottom) {
   int N = bottom[0]->shape(0);
   int C = bottom[0]->shape(1);
   int H = bottom[0]->shape(2);
@@ -66,7 +67,8 @@ void UpsampleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
               int nw = w * scale_ + i;
               int nh = h * scale_ + j;
               int out_idx = (((n * C + c) * H) + h) * W + w;
-              int in_idx = (((n * C + c) * (H * scale_)) + nh) * (W * scale_) + nw;
+              int in_idx =
+                  (((n * C + c) * (H * scale_)) + nh) * (W * scale_) + nw;
               bottom_diff[out_idx] += output_grad[in_idx];
             }
           }
@@ -82,4 +84,4 @@ STUB_GPU(UpsampleLayer);
 
 INSTANTIATE_CLASS(UpsampleLayer);
 REGISTER_LAYER_CLASS(Upsample);
-}  // namespace caffe
+} // namespace caffe

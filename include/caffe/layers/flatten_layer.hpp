@@ -19,11 +19,9 @@ namespace caffe {
  * and in Backward, the diff pointer of the bottom Blob to that of the top Blob
  * (see Blob::ShareDiff).
  */
-template<typename Dtype>
-class FlattenLayer : public Layer<Dtype> {
+template <typename Dtype> class FlattenLayer : public Layer<Dtype> {
 public:
-  explicit FlattenLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
+  explicit FlattenLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
                        const vector<Blob<Dtype> *> &top);
 
@@ -53,9 +51,10 @@ protected:
    *        gradient is (virtually) copied
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_FLATTEN_LAYER_HPP_
+#endif // CAFFE_FLATTEN_LAYER_HPP_

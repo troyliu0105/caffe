@@ -19,8 +19,7 @@ namespace caffe {
  * Note that the gradient vanishes as the values move away from 0.
  * The ReLULayer is often a better choice for this reason.
  */
-template<typename Dtype>
-class HardSigmoidLayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class HardSigmoidLayer : public NeuronLayer<Dtype> {
 public:
   explicit HardSigmoidLayer(const LayerParameter &param)
       : NeuronLayer<Dtype>(param) {}
@@ -40,7 +39,7 @@ protected:
    */
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
-  //virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+  // virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   //    const vector<Blob<Dtype>*>& top);
 
   /**
@@ -61,11 +60,12 @@ protected:
    *      @f$ if propagate_down[0]
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
-  //virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
+  // virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
   //    const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SIGMOID_LAYER_HPP_
+#endif // CAFFE_SIGMOID_LAYER_HPP_

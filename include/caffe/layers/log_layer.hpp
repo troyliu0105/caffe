@@ -16,8 +16,7 @@ namespace caffe {
  *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
  *        and base @f$ \gamma @f$.
  */
-template<typename Dtype>
-class LogLayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class LogLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides LogParameter log_param,
@@ -27,8 +26,7 @@ public:
    *   - base (\b optional, default -1 for a value of @f$ e \approx 2.718 @f$)
    *         the base @f$ \gamma @f$
    */
-  explicit LogLayer(const LayerParameter &param)
-      : NeuronLayer<Dtype>(param) {}
+  explicit LogLayer(const LayerParameter &param) : NeuronLayer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
 
@@ -68,15 +66,17 @@ protected:
    *      @f$ if propagate_down[0]
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   Dtype base_scale_;
   Dtype input_scale_, input_shift_;
   Dtype backward_num_scale_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_LOG_LAYER_HPP_
+#endif // CAFFE_LOG_LAYER_HPP_

@@ -5,13 +5,13 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void ReductionLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                        const vector<Blob<Dtype> *> &top) {
   op_ = this->layer_param_.reduction_param().operation();
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   axis_ = bottom[0]->CanonicalAxisIndex(
@@ -38,9 +38,9 @@ void ReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
-void ReductionLayer<Dtype>::Forward_cpu(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void ReductionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                                        const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
   const Dtype *mult_data = NULL;
   if (sum_multiplier_.count() > 0) {
@@ -73,10 +73,13 @@ void ReductionLayer<Dtype>::Forward_cpu(
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void ReductionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                         const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
-  if (!propagate_down[0]) { return; }
+                                         const vector<bool> &propagate_down,
+                                         const vector<Blob<Dtype> *> &bottom) {
+  if (!propagate_down[0]) {
+    return;
+  }
   // Get bottom_data, if needed.
   const Dtype *bottom_data = NULL;
   switch (op_) {
@@ -126,4 +129,4 @@ STUB_GPU(ReductionLayer);
 INSTANTIATE_CLASS(ReductionLayer);
 REGISTER_LAYER_CLASS(Reduction);
 
-}  // namespace caffe
+} // namespace caffe

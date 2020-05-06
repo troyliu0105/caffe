@@ -14,7 +14,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 class DataLayer : public BasePrefetchingDataLayer<Dtype> {
 public:
   explicit DataLayer(const LayerParameter &param);
@@ -34,6 +34,6 @@ protected:
   DataReader<Datum> reader_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DATA_LAYER_HPP_
+#endif // CAFFE_DATA_LAYER_HPP_

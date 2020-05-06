@@ -10,12 +10,11 @@
 
 namespace caffe {
 
-template<typename Dtype>
-class BlobSimpleTest : public ::testing::Test {
+template <typename Dtype> class BlobSimpleTest : public ::testing::Test {
 protected:
   BlobSimpleTest()
-      : blob_(new Blob<Dtype>()),
-        blob_preshaped_(new Blob<Dtype>(2, 3, 4, 5)) {}
+      : blob_(new Blob<Dtype>()), blob_preshaped_(new Blob<Dtype>(2, 3, 4, 5)) {
+  }
   virtual ~BlobSimpleTest() {
     delete blob_;
     delete blob_preshaped_;
@@ -115,13 +114,12 @@ TYPED_TEST(BlobSimpleTest, TestLegacyBlobProtoShapeEquals) {
   EXPECT_FALSE(this->blob_->ShapeEquals(blob_proto));
 }
 
-template<typename TypeParam>
+template <typename TypeParam>
 class BlobMathTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
+
 protected:
-  BlobMathTest()
-      : blob_(new Blob<Dtype>(2, 3, 4, 5)),
-        epsilon_(1e-6) {}
+  BlobMathTest() : blob_(new Blob<Dtype>(2, 3, 4, 5)), epsilon_(1e-6) {}
 
   virtual ~BlobMathTest() { delete blob_; }
   Blob<Dtype> *const blob_;
@@ -301,4 +299,4 @@ TYPED_TEST(BlobMathTest, TestScaleData) {
               this->epsilon_ * expected_diff_asum);
 }
 
-}  // namespace caffe
+} // namespace caffe

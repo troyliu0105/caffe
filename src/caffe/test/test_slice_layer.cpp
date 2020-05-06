@@ -12,15 +12,14 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class SliceLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   SliceLayerTest()
       : blob_bottom_(new Blob<Dtype>(6, 12, 2, 3)),
-        blob_top_0_(new Blob<Dtype>()),
-        blob_top_1_(new Blob<Dtype>()),
+        blob_top_0_(new Blob<Dtype>()), blob_top_1_(new Blob<Dtype>()),
         blob_top_2_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     // fill the values
@@ -214,4 +213,4 @@ TYPED_TEST(SliceLayerTest, TestGradientAcrossChannels) {
                                   this->blob_top_vec_0_);
 }
 
-}  // namespace caffe
+} // namespace caffe

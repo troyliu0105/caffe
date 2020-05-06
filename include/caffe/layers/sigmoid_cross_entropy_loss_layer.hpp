@@ -41,12 +41,11 @@ namespace caffe {
  *              \right]
  *      @f$
  */
-template<typename Dtype>
+template <typename Dtype>
 class SigmoidCrossEntropyLossLayer : public LossLayer<Dtype> {
 public:
   explicit SigmoidCrossEntropyLossLayer(const LayerParameter &param)
-      : LossLayer<Dtype>(param),
-        sigmoid_layer_(new SigmoidLayer<Dtype>(param)),
+      : LossLayer<Dtype>(param), sigmoid_layer_(new SigmoidLayer<Dtype>(param)),
         sigmoid_output_(new Blob<Dtype>()) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
@@ -93,21 +92,24 @@ protected:
    *      the labels -- ignored as we can't compute their error gradients
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   /// Read the normalization mode parameter and compute the normalizer based
   /// on the blob size.  If normalization_mode is VALID, the count of valid
   /// outputs will be read from valid_count, unless it is -1 in which case
   /// all outputs are assumed to be valid.
-  virtual Dtype get_normalizer(
-      LossParameter_NormalizationMode normalization_mode, int valid_count);
+  virtual Dtype
+  get_normalizer(LossParameter_NormalizationMode normalization_mode,
+                 int valid_count);
 
   /// The internal SigmoidLayer used to map predictions to probabilities.
-  shared_ptr<SigmoidLayer<Dtype> > sigmoid_layer_;
+  shared_ptr<SigmoidLayer<Dtype>> sigmoid_layer_;
   /// sigmoid_output stores the output of the SigmoidLayer.
-  shared_ptr<Blob<Dtype> > sigmoid_output_;
+  shared_ptr<Blob<Dtype>> sigmoid_output_;
   /// bottom vector holder to call the underlying SigmoidLayer::Forward
   vector<Blob<Dtype> *> sigmoid_bottom_vec_;
   /// top vector holder to call the underlying SigmoidLayer::Forward
@@ -123,6 +125,6 @@ protected:
   int outer_num_, inner_num_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_SIGMOID_CROSS_ENTROPY_LOSS_LAYER_HPP_
+#endif // CAFFE_SIGMOID_CROSS_ENTROPY_LOSS_LAYER_HPP_

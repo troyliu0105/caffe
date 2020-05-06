@@ -11,20 +11,16 @@
 
 namespace caffe {
 #ifdef USE_NNPACK
-template<typename Dtype>
+template <typename Dtype>
 class NNPackPoolingLayer : public PoolingLayer<Dtype> {
 public:
   explicit NNPackPoolingLayer(const LayerParameter &param)
       : PoolingLayer<Dtype>(param) {}
-  virtual inline const char *type() const {
-    return "NNPackPooling";
-  }
-  virtual void Forward_cpu(
-      const vector<Blob < Dtype> *
-  >& bottom,
-  const vector<Blob < Dtype>*>& top);
+  virtual inline const char *type() const { return "NNPackPooling"; }
+  virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
+                           const vector<Blob<Dtype> *> &top);
 };
 #endif
-}
+} // namespace caffe
 
-#endif //CAFFE_INCLUDE_CAFFE_LAYERS_NNPACK_POOLING_LAYER_HPP
+#endif // CAFFE_INCLUDE_CAFFE_LAYERS_NNPACK_POOLING_LAYER_HPP

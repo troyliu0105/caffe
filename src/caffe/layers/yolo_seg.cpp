@@ -1,37 +1,36 @@
 /*
-* @Author: Eric612
-* @Date:   2019-01-29
-* @https://github.com/eric612/Caffe-YOLOv2-Windows
-* @https://github.com/eric612/MobileNet-YOLO
-* Avisonic , ELAN microelectronics
-*/
+ * @Author: Eric612
+ * @Date:   2019-01-29
+ * @https://github.com/eric612/Caffe-YOLOv2-Windows
+ * @https://github.com/eric612/MobileNet-YOLO
+ * Avisonic , ELAN microelectronics
+ */
 
 #ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #if (!defined(CV_VERSION_EPOCH) && CV_VERSION_MAJOR >= 3)
-#include <opencv2/videoio.hpp>
 #include <opencv2/video.hpp>
+#include <opencv2/videoio.hpp>
 #endif
-#endif  // USE_OPENCV
+#endif // USE_OPENCV
 
-#include <cmath>
-#include <vector>
-#include "caffe/util/math_functions.hpp"
+#include "caffe/layers/region_loss_layer.hpp"
 #include "caffe/layers/yolo_seg_layer.hpp"
 #include "caffe/util/math_functions.hpp"
-#include "caffe/layers/region_loss_layer.hpp"
-#include <iostream>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <vector>
 namespace caffe {
 
-template<typename Dtype>
-void YoloSegLayer<Dtype>::LayerSetUp(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void YoloSegLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
+                                     const vector<Blob<Dtype> *> &top) {
   LossLayer<Dtype>::LayerSetUp(bottom, top);
-  CHECK_EQ(bottom[0]->count(), bottom[1]->count()) <<
-                                                   "YoloSeg layer inputs must have the same count.";
+  CHECK_EQ(bottom[0]->count(), bottom[1]->count())
+      << "YoloSeg layer inputs must have the same count.";
   YoloSegParameter param = this->layer_param_.yolo_seg_param();
   use_logic_gradient_ = param.use_logic_gradient();
   use_hardsigmoid_ = param.use_hardsigmoid();
@@ -45,17 +44,18 @@ void YoloSegLayer<Dtype>::LayerSetUp(
   iter_ = 0;
 }
 
-template<typename Dtype>
-void YoloSegLayer<Dtype>::Reshape(
-    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void YoloSegLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
+                                  const vector<Blob<Dtype> *> &top) {
   LossLayer<Dtype>::Reshape(bottom, top);
-  CHECK_EQ(bottom[0]->count(), bottom[0]->count()) <<
-                                                   "YoloSeg layer inputs must have the same count.";
+  CHECK_EQ(bottom[0]->count(), bottom[0]->count())
+      << "YoloSeg layer inputs must have the same count.";
   diff_.ReshapeLike(*bottom[0]);
   swap_.ReshapeLike(*bottom[0]);
 }
-template<typename Dtype>
-void YoloSegLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void YoloSegLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom,
+                                        const vector<Blob<Dtype> *> &top) {
   int w = bottom[0]->width();
   int h = bottom[0]->height();
   cv::Mat img2(w, h, CV_8UC1);
@@ -67,24 +67,25 @@ void YoloSegLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom, con
     uchar *ptr2 = img2.ptr<uchar>(y);
     int img_index2 = 0;
     for (int j = 0; j < w; j++) {
-      //LOG(INFO)<<(int)(bottom_data[img_index1] * 255);
-      ptr2[img_index2] = (unsigned char) (logistic_activate(bottom_data[img_index1]) * 255);
+      // LOG(INFO)<<(int)(bottom_data[img_index1] * 255);
+      ptr2[img_index2] =
+          (unsigned char)(logistic_activate(bottom_data[img_index1]) * 255);
 
-      //ptr2[img_index2] = (unsigned char)((label_data[img_index1]) * 255);
+      // ptr2[img_index2] = (unsigned char)((label_data[img_index1]) * 255);
       img_index1++;
       img_index2++;
     }
   }
-  //cv::imwrite("test.jpg",img2);
+  // cv::imwrite("test.jpg",img2);
   cv::namedWindow("show", cv::WINDOW_NORMAL);
   cv::resizeWindow("show", 600, 600);
   cv::imshow("show", img2);
   cv::waitKey(1);
 }
-template<typename Dtype>
+template <typename Dtype>
 void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
-  //LOG(INFO)<<bottom[1]->channels()<<","<<bottom[1]->num()<<","<<bottom[1]->width()<<","<<bottom[1]->height();
+  // LOG(INFO)<<bottom[1]->channels()<<","<<bottom[1]->num()<<","<<bottom[1]->width()<<","<<bottom[1]->height();
 
   Dtype *diff;
   const Dtype *label_data;
@@ -99,15 +100,15 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     swap_.ReshapeLike(*bottom[0]);
   }
   diff = diff_.mutable_cpu_data();
-  //caffe_set(diff_.count(), Dtype(0.0), diff);
+  // caffe_set(diff_.count(), Dtype(0.0), diff);
 
   for (int i = 0; i < count; ++i) {
     diff[i] = logistic_activate(bottom_data[i]);
   }
-  //caffe_copy(count,swap,diff);
+  // caffe_copy(count,swap,diff);
 #endif
   diff = diff_.mutable_cpu_data();
-  //caffe_gpu_set(diff_.count(), Dtype(0.0), diff);
+  // caffe_gpu_set(diff_.count(), Dtype(0.0), diff);
   const Dtype alpha = object_scale_;
   int classes_num = bottom[1]->channels();
   const Dtype *class_weighting_data;
@@ -120,15 +121,15 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       Dtype scale_val = 0;
       Dtype total(0.0);
       for (int j = 0; j < bottom[2]->num(); j++) {
-        //LOG(INFO) << class_weighting_data[i];
+        // LOG(INFO) << class_weighting_data[i];
         scale_val += class_weighting_data[j * classes_num + i];
         total += image_size - class_weighting_data[j * classes_num + i];
-        //LOG(INFO) << scale_val << "," << image_size - class_weighting_data[j*classes_num + i];
+        // LOG(INFO) << scale_val << "," << image_size -
+        // class_weighting_data[j*classes_num + i];
       }
 
       scale_data.push_back(scale_val / total);
     }
-
   }
   if (enable_weighting_) {
     diff = diff_.mutable_cpu_data();
@@ -137,17 +138,19 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     for (int i = 0; i < classes_num; i++) {
 
       const Dtype beta = alpha * (2.0 - 1. * scale_data[i]);
-      //LOG(INFO)<<beta;
+      // LOG(INFO)<<beta;
       for (int j = 0; j < bottom[0]->num(); j++) {
         int offset = bottom[0]->offset(j) + i * image_size;
-        //LOG(INFO) << offset <<"," << bottom[0]->width() << "," << bottom[0]->height();
-        //caffe_gpu_axpby(image_size,-beta,label_data+offset,beta,diff+offset);
+        // LOG(INFO) << offset <<"," << bottom[0]->width() << "," <<
+        // bottom[0]->height();
+        // caffe_gpu_axpby(image_size,-beta,label_data+offset,beta,diff+offset);
         for (int k = 0; k < image_size; k++) {
           int idx = offset + k;
           if (label_data[idx] > 0.5) {
             diff[idx] = (-1.0) * (label_data[idx] - (diff[idx])) * beta;
           } else {
-            diff[idx] = (-1.0) * (label_data[idx] - (diff[idx])) * object_scale_;
+            diff[idx] =
+                (-1.0) * (label_data[idx] - (diff[idx])) * object_scale_;
           }
         }
       }
@@ -200,14 +203,17 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     eval_count_total += eval_count;
 
     if (nii_count)
-      IOU_class = (float) nii_count / (float) (pos_count + eval_count - nii_count);
+      IOU_class =
+          (float)nii_count / (float)(pos_count + eval_count - nii_count);
     mIOU += IOU_class;
   }
 
-  mIOU /= (float) classes_num;
+  mIOU /= (float)classes_num;
 
   if (iter_ % 16 == 0) {
-    LOG(INFO) << "no_obj : " << no_obj_score_ / 16 << " , obj : " << obj_score_ / 16 << " , mIOU : " << IOU_score_ / 16;
+    LOG(INFO) << "no_obj : " << no_obj_score_ / 16
+              << " , obj : " << obj_score_ / 16
+              << " , mIOU : " << IOU_score_ / 16;
     obj_score_ = 0;
     no_obj_score_ = 0;
     IOU_score_ = 0;
@@ -221,10 +227,10 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
   iter_++;
   top[0]->mutable_cpu_data()[0] = loss / bottom[0]->num();
-  //visualization(bottom,top);	
+  // visualization(bottom,top);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void YoloSegLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                        const vector<bool> &propagate_down,
                                        const vector<Blob<Dtype> *> &bottom) {
@@ -235,15 +241,11 @@ void YoloSegLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     const int count = bottom[0]->count();
     const Dtype sign(1.);
     const Dtype alpha = sign * top[0]->cpu_diff()[0] / bottom[0]->num();
-    //const Dtype alpha(1.0);
-    //LOG(INFO) << "alpha:" << alpha;
+    // const Dtype alpha(1.0);
+    // LOG(INFO) << "alpha:" << alpha;
 
-    caffe_cpu_axpby(
-        bottom[0]->count(),
-        alpha,
-        diff_.cpu_data(),
-        Dtype(0),
-        bottom[0]->mutable_cpu_diff());
+    caffe_cpu_axpby(bottom[0]->count(), alpha, diff_.cpu_data(), Dtype(0),
+                    bottom[0]->mutable_cpu_diff());
   }
 }
 
@@ -254,4 +256,4 @@ STUB_GPU(YoloSegLayer);
 INSTANTIATE_CLASS(YoloSegLayer);
 REGISTER_LAYER_CLASS(YoloSeg);
 
-}  // namespace caffe
+} // namespace caffe

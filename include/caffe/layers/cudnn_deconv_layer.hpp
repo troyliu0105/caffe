@@ -20,8 +20,8 @@ namespace caffe {
  * bias plus backward kernels for the gradient w.r.t. the filters, biases, and
  * inputs. Caffe + cuDNN further speeds up the computation through forward
  * parallelism across groups and backward parallelism across gradients.
-*/
-template<typename Dtype>
+ */
+template <typename Dtype>
 class CuDNNDeconvolutionLayer : public DeconvolutionLayer<Dtype> {
 public:
   explicit CuDNNDeconvolutionLayer(const LayerParameter &param)
@@ -57,12 +57,12 @@ protected:
   size_t *workspace_fwd_sizes_;
   size_t *workspace_bwd_data_sizes_;
   size_t *workspace_bwd_filter_sizes_;
-  size_t workspaceSizeInBytes;  // size of underlying storage
-  void *workspaceData;  // underlying storage
-  void **workspace;  // aliases into workspaceData
+  size_t workspaceSizeInBytes; // size of underlying storage
+  void *workspaceData;         // underlying storage
+  void **workspace;            // aliases into workspaceData
 };
 #endif
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_CUDNN_DECONV_LAYER_HPP_
+#endif // CAFFE_CUDNN_DECONV_LAYER_HPP_

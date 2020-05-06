@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void SplitLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   for (int i = 0; i < top.size(); ++i) {
@@ -13,10 +13,13 @@ void SplitLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void SplitLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                     const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
-  if (!propagate_down[0]) { return; }
+                                     const vector<bool> &propagate_down,
+                                     const vector<Blob<Dtype> *> &bottom) {
+  if (!propagate_down[0]) {
+    return;
+  }
   if (top.size() == 1) {
     caffe_copy(count_, top[0]->gpu_diff(), bottom[0]->mutable_gpu_diff());
     return;
@@ -33,4 +36,4 @@ void SplitLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(SplitLayer);
 
-}  // namespace caffe
+} // namespace caffe

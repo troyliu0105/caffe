@@ -1,9 +1,9 @@
-#include <vector>
 #include "caffe/layers/depthwise_conv_layer.hpp"
+#include <vector>
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void DepthwiseConvolutionLayer<Dtype>::compute_output_shape() {
   const int *kernel_shape_data = this->kernel_shape_.cpu_data();
   const int *stride_data = this->stride_.cpu_data();
@@ -14,15 +14,15 @@ void DepthwiseConvolutionLayer<Dtype>::compute_output_shape() {
     // i + 1 to skip channel axis
     const int input_dim = this->input_shape(i + 1);
     const int kernel_extent = dilation_data[i] * (kernel_shape_data[i] - 1) + 1;
-    const int output_dim = (input_dim + 2 * pad_data[i] - kernel_extent)
-        / stride_data[i] + 1;
+    const int output_dim =
+        (input_dim + 2 * pad_data[i] - kernel_extent) / stride_data[i] + 1;
     this->output_shape_.push_back(output_dim);
   }
 }
 
-template<typename Dtype>
-void DepthwiseConvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
-                                                   const vector<Blob<Dtype> *> &top) {
+template <typename Dtype>
+void DepthwiseConvolutionLayer<Dtype>::Forward_cpu(
+    const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const Dtype *weight = this->blobs_[0]->cpu_data();
   for (int i = 0; i < bottom.size(); ++i) {
     const Dtype *bottom_data = bottom[i]->cpu_data();
@@ -38,10 +38,10 @@ void DepthwiseConvolutionLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &
   }
 }
 
-template<typename Dtype>
-void DepthwiseConvolutionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
-                                                    const vector<bool> &propagate_down,
-                                                    const vector<Blob<Dtype> *> &bottom) {
+template <typename Dtype>
+void DepthwiseConvolutionLayer<Dtype>::Backward_cpu(
+    const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
+    const vector<Blob<Dtype> *> &bottom) {
   const Dtype *weight = this->blobs_[0]->cpu_data();
   Dtype *weight_diff = this->blobs_[0]->mutable_cpu_diff();
   for (int i = 0; i < top.size(); ++i) {
@@ -78,4 +78,4 @@ STUB_GPU(DepthwiseConvolutionLayer);
 
 INSTANTIATE_CLASS(DepthwiseConvolutionLayer);
 REGISTER_LAYER_CLASS(DepthwiseConvolution);
-}  // namespace caffe
+} // namespace caffe

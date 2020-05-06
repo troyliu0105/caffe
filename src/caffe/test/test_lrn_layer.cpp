@@ -16,19 +16,18 @@
 #include "caffe/test/test_caffe_main.hpp"
 #include "caffe/test/test_gradient_check_util.hpp"
 
-using std::min;
 using std::max;
+using std::min;
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class LRNLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   LRNLayerTest()
-      : epsilon_(Dtype(1e-5)),
-        blob_bottom_(new Blob<Dtype>()),
+      : epsilon_(Dtype(1e-5)), blob_bottom_(new Blob<Dtype>()),
         blob_top_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
@@ -45,7 +44,8 @@ protected:
     delete blob_top_;
   }
   void ReferenceLRNForward(const Blob<Dtype> &blob_bottom,
-                           const LayerParameter &layer_param, Blob<Dtype> *blob_top);
+                           const LayerParameter &layer_param,
+                           Blob<Dtype> *blob_top);
 
   Dtype epsilon_;
   Blob<Dtype> *const blob_bottom_;
@@ -54,7 +54,7 @@ protected:
   vector<Blob<Dtype> *> blob_top_vec_;
 };
 
-template<typename TypeParam>
+template <typename TypeParam>
 void LRNLayerTest<TypeParam>::ReferenceLRNForward(
     const Blob<Dtype> &blob_bottom, const LayerParameter &layer_param,
     Blob<Dtype> *blob_top) {
@@ -137,8 +137,7 @@ TYPED_TEST(LRNLayerTest, TestForwardAcrossChannels) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
-  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-                            &top_reference);
+  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param, &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -153,8 +152,7 @@ TYPED_TEST(LRNLayerTest, TestForwardAcrossChannelsLargeRegion) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
-  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-                            &top_reference);
+  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param, &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -172,8 +170,7 @@ TYPED_TEST(LRNLayerTest, TestGradientAcrossChannels) {
     this->blob_top_->mutable_cpu_diff()[i] = 1.;
   }
   vector<bool> propagate_down(this->blob_bottom_vec_.size(), true);
-  layer.Backward(this->blob_top_vec_, propagate_down,
-                 this->blob_bottom_vec_);
+  layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
   // for (int i = 0; i < this->blob_bottom_->count(); ++i) {
   //   std::cout << "CPU diff " << this->blob_bottom_->cpu_diff()[i]
   //       << std::endl;
@@ -194,8 +191,7 @@ TYPED_TEST(LRNLayerTest, TestGradientAcrossChannelsLargeRegion) {
     this->blob_top_->mutable_cpu_diff()[i] = 1.;
   }
   vector<bool> propagate_down(this->blob_bottom_vec_.size(), true);
-  layer.Backward(this->blob_top_vec_, propagate_down,
-                 this->blob_bottom_vec_);
+  layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
   // for (int i = 0; i < this->blob_bottom_->count(); ++i) {
   //   std::cout << "CPU diff " << this->blob_bottom_->cpu_diff()[i]
   //       << std::endl;
@@ -228,8 +224,7 @@ TYPED_TEST(LRNLayerTest, TestForwardWithinChannel) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
-  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-                            &top_reference);
+  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param, &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -254,12 +249,11 @@ TYPED_TEST(LRNLayerTest, TestGradientWithinChannel) {
 }
 
 #ifdef USE_CUDNN
-template<typename Dtype>
+template <typename Dtype>
 class CuDNNLRNLayerTest : public GPUDeviceTest<Dtype> {
 protected:
   CuDNNLRNLayerTest()
-      : epsilon_(Dtype(1e-5)),
-        blob_bottom_(new Blob<Dtype>()),
+      : epsilon_(Dtype(1e-5)), blob_bottom_(new Blob<Dtype>()),
         blob_top_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
@@ -276,7 +270,8 @@ protected:
     delete blob_top_;
   }
   void ReferenceLRNForward(const Blob<Dtype> &blob_bottom,
-                           const LayerParameter &layer_param, Blob<Dtype> *blob_top);
+                           const LayerParameter &layer_param,
+                           Blob<Dtype> *blob_top);
 
   Dtype epsilon_;
   Blob<Dtype> *const blob_bottom_;
@@ -285,7 +280,7 @@ protected:
   vector<Blob<Dtype> *> blob_top_vec_;
 };
 
-template<typename TypeParam>
+template <typename TypeParam>
 void CuDNNLRNLayerTest<TypeParam>::ReferenceLRNForward(
     const Blob<TypeParam> &blob_bottom, const LayerParameter &layer_param,
     Blob<TypeParam> *blob_top) {
@@ -357,8 +352,7 @@ TYPED_TEST(CuDNNLRNLayerTest, TestForwardAcrossChannelsCuDNN) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<TypeParam> top_reference;
-  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-                            &top_reference);
+  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param, &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -373,8 +367,7 @@ TYPED_TEST(CuDNNLRNLayerTest, TestForwardAcrossChannelsLargeRegionCuDNN) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
-  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-                            &top_reference);
+  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param, &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -392,8 +385,7 @@ TYPED_TEST(CuDNNLRNLayerTest, TestGradientAcrossChannelsCuDNN) {
     this->blob_top_->mutable_cpu_diff()[i] = 1.;
   }
   vector<bool> propagate_down(this->blob_bottom_vec_.size(), true);
-  layer.Backward(this->blob_top_vec_, propagate_down,
-                 this->blob_bottom_vec_);
+  layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
                                   this->blob_top_vec_);
 }
@@ -408,8 +400,7 @@ TYPED_TEST(CuDNNLRNLayerTest, TestForwardWithinChannel) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   Blob<Dtype> top_reference;
-  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param,
-                            &top_reference);
+  this->ReferenceLRNForward(*(this->blob_bottom_), layer_param, &top_reference);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
     EXPECT_NEAR(this->blob_top_->cpu_data()[i], top_reference.cpu_data()[i],
                 this->epsilon_);
@@ -445,12 +436,11 @@ TYPED_TEST(CuDNNLRNLayerTest, TestGradientAcrossChannelsLargeRegionCuDNN) {
     this->blob_top_->mutable_cpu_diff()[i] = 1.;
   }
   vector<bool> propagate_down(this->blob_bottom_vec_.size(), true);
-  layer.Backward(this->blob_top_vec_, propagate_down,
-                 this->blob_bottom_vec_);
+  layer.Backward(this->blob_top_vec_, propagate_down, this->blob_bottom_vec_);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
                                   this->blob_top_vec_);
 }
 
 #endif
 
-}  // namespace caffe
+} // namespace caffe

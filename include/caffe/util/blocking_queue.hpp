@@ -6,8 +6,7 @@
 
 namespace caffe {
 
-template<typename T>
-class BlockingQueue {
+template <typename T> class BlockingQueue {
 public:
   explicit BlockingQueue();
 
@@ -35,11 +34,11 @@ protected:
   class sync;
 
   std::queue<T> queue_;
-  shared_ptr <sync> sync_;
+  shared_ptr<sync> sync_;
 
-DISABLE_COPY_AND_ASSIGN(BlockingQueue);
+  DISABLE_COPY_AND_ASSIGN(BlockingQueue);
 };
 
-}  // namespace caffe
+} // namespace caffe
 
 #endif

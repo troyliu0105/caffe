@@ -1,5 +1,5 @@
-#include "caffe/common.hpp"
 #include "caffe/syncedmem.hpp"
+#include "caffe/common.hpp"
 #include "caffe/util/math_functions.hpp"
 
 namespace caffe {
@@ -33,7 +33,7 @@ SyncedMemory::~SyncedMemory() {
   if (gpu_ptr_ && own_gpu_data_) {
     CUDA_CHECK(cudaFree(gpu_ptr_));
   }
-#endif  // CPU_ONLY
+#endif // CPU_ONLY
 }
 
 inline void SyncedMemory::to_cpu() {
@@ -93,7 +93,7 @@ inline void SyncedMemory::to_gpu() {
 const void *SyncedMemory::cpu_data() {
   check_device();
   to_cpu();
-  return (const void *) cpu_ptr_;
+  return (const void *)cpu_ptr_;
 }
 
 void SyncedMemory::set_cpu_data(void *data) {
@@ -111,7 +111,7 @@ const void *SyncedMemory::gpu_data() {
   check_device();
 #ifndef CPU_ONLY
   to_gpu();
-  return (const void *) gpu_ptr_;
+  return (const void *)gpu_ptr_;
 #else
   NO_GPU;
   return NULL;
@@ -182,5 +182,4 @@ void SyncedMemory::check_device() {
 #endif
 }
 
-}  // namespace caffe
-
+} // namespace caffe

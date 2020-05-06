@@ -49,13 +49,11 @@
 
 namespace caffe {
 
-template<typename Dtype>
-class Layer;
+template <typename Dtype> class Layer;
 
-template<typename Dtype>
-class LayerRegistry {
+template <typename Dtype> class LayerRegistry {
 public:
-  typedef shared_ptr<Layer<Dtype> > (*Creator)(const LayerParameter &);
+  typedef shared_ptr<Layer<Dtype>> (*Creator)(const LayerParameter &);
   typedef std::map<string, Creator> CreatorRegistry;
 
   static CreatorRegistry &Registry();
@@ -64,9 +62,9 @@ public:
   static void AddCreator(const string &type, Creator creator);
 
   // Get a layer using a LayerParameter.
-  static shared_ptr <Layer<Dtype>> CreateLayer(const LayerParameter &param);
+  static shared_ptr<Layer<Dtype>> CreateLayer(const LayerParameter &param);
 
-  static vector <string> LayerTypeList();
+  static vector<string> LayerTypeList();
 
 private:
   // Layer registry should never be instantiated - everything is done with its
@@ -76,25 +74,24 @@ private:
   static string LayerTypeListString();
 };
 
-template<typename Dtype>
-class LayerRegisterer {
+template <typename Dtype> class LayerRegisterer {
 public:
   LayerRegisterer(const string &type,
-                  shared_ptr<Layer<Dtype> > (*creator)(const LayerParameter &));
+                  shared_ptr<Layer<Dtype>> (*creator)(const LayerParameter &));
 };
 
 #define REGISTER_LAYER_CREATOR(type, creator)                                  \
   static LayerRegisterer<float> g_creator_f_##type(#type, creator<float>);     \
-  static LayerRegisterer<double> g_creator_d_##type(#type, creator<double>)    \
+  static LayerRegisterer<double> g_creator_d_##type(#type, creator<double>)
 
 #define REGISTER_LAYER_CLASS(type)                                             \
   template <typename Dtype>                                                    \
-  shared_ptr<Layer<Dtype> > Creator_##type##Layer(const LayerParameter& param) \
-  {                                                                            \
-    return shared_ptr<Layer<Dtype> >(new type##Layer<Dtype>(param));           \
+  shared_ptr<Layer<Dtype>> Creator_##type##Layer(                              \
+      const LayerParameter &param) {                                           \
+    return shared_ptr<Layer<Dtype>>(new type##Layer<Dtype>(param));            \
   }                                                                            \
   REGISTER_LAYER_CREATOR(type, Creator_##type##Layer)
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_LAYER_FACTORY_H_
+#endif // CAFFE_LAYER_FACTORY_H_

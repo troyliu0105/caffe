@@ -1,10 +1,10 @@
 /*
-* @Author: Eric612
-* @Date:   2019-01-29
-* @https://github.com/eric612/Caffe-YOLOv2-Windows
-* @https://github.com/eric612/MobileNet-YOLO
-* Avisonic , ELAN microelectronics
-*/
+ * @Author: Eric612
+ * @Date:   2019-01-29
+ * @https://github.com/eric612/Caffe-YOLOv2-Windows
+ * @https://github.com/eric612/MobileNet-YOLO
+ * Avisonic , ELAN microelectronics
+ */
 #ifndef CAFFE_YOLO_SEG_LAYER_HPP_
 #define CAFFE_YOLO_SEG_LAYER_HPP_
 
@@ -18,8 +18,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
-class YoloSegLayer : public LossLayer<Dtype> {
+template <typename Dtype> class YoloSegLayer : public LossLayer<Dtype> {
 public:
   explicit YoloSegLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}
@@ -29,23 +28,26 @@ public:
                        const vector<Blob<Dtype> *> &top);
   virtual inline const char *type() const { return "YoloSeg"; }
   virtual inline int ExactNumBottomBlobs() const { return 3; }
-protected:
 
+protected:
   virtual void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
 
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
-  void visualization(const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top);
+  void visualization(const vector<Blob<Dtype> *> &bottom,
+                     const vector<Blob<Dtype> *> &top);
 
 protected:
-  Blob<Dtype> diff_;  // cached for backward pass
-  Blob<Dtype> swap_;  // cached for backward pass
+  Blob<Dtype> diff_; // cached for backward pass
+  Blob<Dtype> swap_; // cached for backward pass
   bool enable_weighting_;
   bool use_logic_gradient_;
   bool use_hardsigmoid_;
@@ -58,6 +60,6 @@ protected:
   float IOU_score_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_YOLO_SEG_LAYER_HPP_
+#endif // CAFFE_YOLO_SEG_LAYER_HPP_

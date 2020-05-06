@@ -22,8 +22,7 @@ namespace caffe {
  *   -# @f$ (N \times C \times H \times W) @f$
  *      the computed outputs @f$ y = |x| @f$
  */
-template<typename Dtype>
-class DropoutLayer : public NeuronLayer<Dtype> {
+template <typename Dtype> class DropoutLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides DropoutParameter dropout_param,
@@ -62,9 +61,11 @@ protected:
   virtual void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                            const vector<Blob<Dtype> *> &top);
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
   /// when divided by UINT_MAX, the randomly generated values @f$u\sim U(0,1)@f$
   Blob<unsigned int> rand_vec_;
@@ -75,6 +76,6 @@ protected:
   unsigned int uint_thres_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DROPOUT_LAYER_HPP_
+#endif // CAFFE_DROPOUT_LAYER_HPP_

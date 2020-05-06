@@ -16,14 +16,13 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class PoolingLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
 protected:
   PoolingLayerTest()
-      : blob_bottom_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()),
+      : blob_bottom_(new Blob<Dtype>()), blob_top_(new Blob<Dtype>()),
         blob_top_mask_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
@@ -427,7 +426,8 @@ TYPED_TEST(PoolingLayerTest, PrintBackward) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
-    cout << "bottom data " << i << " " << this->blob_bottom_->cpu_data()[i] << endl;
+    cout << "bottom data " << i << " " << this->blob_bottom_->cpu_data()[i] <<
+endl;
   }
   for (int i = 0; i < this->blob_top_->count(); ++i) {
     cout << "top data " << i << " " << this->blob_top_->cpu_data()[i] << endl;
@@ -438,7 +438,8 @@ TYPED_TEST(PoolingLayerTest, PrintBackward) {
   }
   layer.Backward(this->blob_top_vec_, true, this->blob_bottom_vec_);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
-    cout << "bottom diff " << i << " " << this->blob_bottom_->cpu_diff()[i] << endl;
+    cout << "bottom diff " << i << " " << this->blob_bottom_->cpu_diff()[i] <<
+endl;
   }
 }
 */
@@ -610,12 +611,11 @@ TYPED_TEST(PoolingLayerTest, TestGradientAvePadded) {
 }
 
 #ifdef USE_CUDNN
-template<typename Dtype>
+template <typename Dtype>
 class CuDNNPoolingLayerTest : public GPUDeviceTest<Dtype> {
 protected:
   CuDNNPoolingLayerTest()
-      : blob_bottom_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()),
+      : blob_bottom_(new Blob<Dtype>()), blob_top_(new Blob<Dtype>()),
         blob_top_mask_(new Blob<Dtype>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
@@ -1003,7 +1003,8 @@ TYPED_TEST(CuDNNPoolingLayerTest, PrintBackwardCuDNN) {
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
-    cout << "bottom data " << i << " " << this->blob_bottom_->cpu_data()[i] << endl;
+    cout << "bottom data " << i << " " << this->blob_bottom_->cpu_data()[i] <<
+endl;
   }
   for (int i = 0; i < this->blob_top_->count(); ++i) {
     cout << "top data " << i << " " << this->blob_top_->cpu_data()[i] << endl;
@@ -1014,7 +1015,8 @@ TYPED_TEST(CuDNNPoolingLayerTest, PrintBackwardCuDNN) {
   }
   layer.Backward(this->blob_top_vec_, true, this->blob_bottom_vec_);
   for (int i = 0; i < this->blob_bottom_->count(); ++i) {
-    cout << "bottom diff " << i << " " << this->blob_bottom_->cpu_diff()[i] << endl;
+    cout << "bottom diff " << i << " " << this->blob_bottom_->cpu_diff()[i] <<
+endl;
   }
 }
 */
@@ -1182,4 +1184,4 @@ TYPED_TEST(CuDNNPoolingLayerTest, TestGradientAvePaddedCuDNN) {
 
 #endif
 
-}  // namespace caffe
+} // namespace caffe

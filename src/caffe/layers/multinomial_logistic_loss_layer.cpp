@@ -7,7 +7,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void MultinomialLogisticLossLayer<Dtype>::Reshape(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   LossLayer<Dtype>::Reshape(bottom, top);
@@ -16,7 +16,7 @@ void MultinomialLogisticLossLayer<Dtype>::Reshape(
   CHECK_EQ(bottom[1]->width(), 1);
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void MultinomialLogisticLossLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype> *> &bottom, const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -26,14 +26,13 @@ void MultinomialLogisticLossLayer<Dtype>::Forward_cpu(
   Dtype loss = 0;
   for (int i = 0; i < num; ++i) {
     int label = static_cast<int>(bottom_label[i]);
-    Dtype prob = std::max(
-        bottom_data[i * dim + label], Dtype(kLOG_THRESHOLD));
+    Dtype prob = std::max(bottom_data[i * dim + label], Dtype(kLOG_THRESHOLD));
     loss -= log(prob);
   }
   top[0]->mutable_cpu_data()[0] = loss / num;
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void MultinomialLogisticLossLayer<Dtype>::Backward_cpu(
     const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
     const vector<Blob<Dtype> *> &bottom) {
@@ -51,8 +50,8 @@ void MultinomialLogisticLossLayer<Dtype>::Backward_cpu(
     const Dtype scale = -top[0]->cpu_diff()[0] / num;
     for (int i = 0; i < num; ++i) {
       int label = static_cast<int>(bottom_label[i]);
-      Dtype prob = std::max(
-          bottom_data[i * dim + label], Dtype(kLOG_THRESHOLD));
+      Dtype prob =
+          std::max(bottom_data[i * dim + label], Dtype(kLOG_THRESHOLD));
       bottom_diff[i * dim + label] = scale / prob;
     }
   }
@@ -61,4 +60,4 @@ void MultinomialLogisticLossLayer<Dtype>::Backward_cpu(
 INSTANTIATE_CLASS(MultinomialLogisticLossLayer);
 REGISTER_LAYER_CLASS(MultinomialLogisticLoss);
 
-}  // namespace caffe
+} // namespace caffe

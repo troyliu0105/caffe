@@ -22,8 +22,7 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template<typename Dtype>
-class DetectionOutputLayer : public Layer<Dtype> {
+template <typename Dtype> class DetectionOutputLayer : public Layer<Dtype> {
 public:
   explicit DetectionOutputLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}
@@ -59,11 +58,13 @@ protected:
                            const vector<Blob<Dtype> *> &top);
   /// @brief Not implemented
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     NOT_IMPLEMENTED;
   }
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom) {
     NOT_IMPLEMENTED;
   }
 
@@ -90,7 +91,7 @@ protected:
   map<int, string> label_to_name_;
   map<int, string> label_to_display_name_;
   vector<string> names_;
-  vector<pair<int, int> > sizes_;
+  vector<pair<int, int>> sizes_;
   int num_test_image_;
   int name_count_;
   bool has_resize_;
@@ -98,13 +99,13 @@ protected:
 
   bool visualize_;
   float visualize_threshold_;
-  shared_ptr<DataTransformer<Dtype> > data_transformer_;
+  shared_ptr<DataTransformer<Dtype>> data_transformer_;
   string save_file_;
   Blob<Dtype> bbox_preds_;
   Blob<Dtype> bbox_permute_;
   Blob<Dtype> conf_permute_;
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_DETECTION_OUTPUT_LAYER_HPP_
+#endif // CAFFE_DETECTION_OUTPUT_LAYER_HPP_

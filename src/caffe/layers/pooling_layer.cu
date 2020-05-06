@@ -7,13 +7,14 @@
 
 namespace caffe {
 
-template<typename Dtype>
-__global__ void MaxPoolForward(const int nthreads,
-                               const Dtype *const bottom_data, const int num, const int channels,
-                               const int height, const int width, const int pooled_height,
-                               const int pooled_width, const int kernel_h, const int kernel_w,
-                               const int stride_h, const int stride_w, const int pad_h, const int pad_w,
-                               Dtype *const top_data, int *mask, Dtype *top_mask) {
+template <typename Dtype>
+__global__ void
+MaxPoolForward(const int nthreads, const Dtype *const bottom_data,
+               const int num, const int channels, const int height,
+               const int width, const int pooled_height, const int pooled_width,
+               const int kernel_h, const int kernel_w, const int stride_h,
+               const int stride_w, const int pad_h, const int pad_w,
+               Dtype *const top_data, int *mask, Dtype *top_mask) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -46,13 +47,14 @@ __global__ void MaxPoolForward(const int nthreads,
   }
 }
 
-template<typename Dtype>
-__global__ void AvePoolForward(const int nthreads,
-                               const Dtype *const bottom_data, const int num, const int channels,
-                               const int height, const int width, const int pooled_height,
-                               const int pooled_width, const int kernel_h, const int kernel_w,
-                               const int stride_h, const int stride_w, const int pad_h, const int pad_w,
-                               Dtype *const top_data) {
+template <typename Dtype>
+__global__ void
+AvePoolForward(const int nthreads, const Dtype *const bottom_data,
+               const int num, const int channels, const int height,
+               const int width, const int pooled_height, const int pooled_width,
+               const int kernel_h, const int kernel_w, const int stride_h,
+               const int stride_w, const int pad_h, const int pad_w,
+               Dtype *const top_data) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -79,9 +81,10 @@ __global__ void AvePoolForward(const int nthreads,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void GlobalAvePoolForward(const int spatial_dim,
-                                     const Dtype *bottom_data, Dtype *top_data) {
+                                     const Dtype *bottom_data,
+                                     Dtype *top_data) {
   __shared__ Dtype buffer[CAFFE_CUDA_NUM_THREADS];
   unsigned int tid = threadIdx.x;
   buffer[tid] = 0;
@@ -104,13 +107,14 @@ __global__ void GlobalAvePoolForward(const int spatial_dim,
   }
 }
 
-template<typename Dtype>
-__global__ void StoPoolForwardTrain(const int nthreads,
-                                    const Dtype *const bottom_data,
-                                    const int num, const int channels, const int height,
-                                    const int width, const int pooled_height, const int pooled_width,
-                                    const int kernel_h, const int kernel_w, const int stride_h,
-                                    const int stride_w, Dtype *const rand_idx, Dtype *const top_data) {
+template <typename Dtype>
+__global__ void
+StoPoolForwardTrain(const int nthreads, const Dtype *const bottom_data,
+                    const int num, const int channels, const int height,
+                    const int width, const int pooled_height,
+                    const int pooled_width, const int kernel_h,
+                    const int kernel_w, const int stride_h, const int stride_w,
+                    Dtype *const rand_idx, Dtype *const top_data) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -145,13 +149,14 @@ __global__ void StoPoolForwardTrain(const int nthreads,
   }
 }
 
-template<typename Dtype>
-__global__ void StoPoolForwardTest(const int nthreads,
-                                   const Dtype *const bottom_data,
-                                   const int num, const int channels, const int height,
-                                   const int width, const int pooled_height, const int pooled_width,
-                                   const int kernel_h, const int kernel_w, const int stride_h,
-                                   const int stride_w, Dtype *const top_data) {
+template <typename Dtype>
+__global__ void
+StoPoolForwardTest(const int nthreads, const Dtype *const bottom_data,
+                   const int num, const int channels, const int height,
+                   const int width, const int pooled_height,
+                   const int pooled_width, const int kernel_h,
+                   const int kernel_w, const int stride_h, const int stride_w,
+                   Dtype *const top_data) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int pw = index % pooled_width;
     const int ph = (index / pooled_width) % pooled_height;
@@ -177,7 +182,7 @@ __global__ void StoPoolForwardTest(const int nthreads,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
@@ -196,22 +201,23 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
     MaxPoolForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-        count, bottom_data, bottom[0]->num(), channels_,
-        height_, width_, pooled_height_, pooled_width_, kernel_h_,
-        kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data,
-        mask, top_mask);
+        count, bottom_data, bottom[0]->num(), channels_, height_, width_,
+        pooled_height_, pooled_width_, kernel_h_, kernel_w_, stride_h_,
+        stride_w_, pad_h_, pad_w_, top_data, mask, top_mask);
     break;
   case PoolingParameter_PoolMethod_AVE:
     if (this->layer_param_.pooling_param().global_pooling()) {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      GlobalAvePoolForward<Dtype><<<bottom[0]->count(0, 2), CAFFE_CUDA_NUM_THREADS>>>(
-          bottom[0]->count(2), bottom_data, top_data);
+      GlobalAvePoolForward<Dtype>
+          <<<bottom[0]->count(0, 2), CAFFE_CUDA_NUM_THREADS>>>(
+              bottom[0]->count(2), bottom_data, top_data);
     } else {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      AvePoolForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-          count, bottom_data, bottom[0]->num(), channels_,
-          height_, width_, pooled_height_, pooled_width_, kernel_h_,
-          kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, top_data);
+      AvePoolForward<Dtype>
+          <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+              count, bottom_data, bottom[0]->num(), channels_, height_, width_,
+              pooled_height_, pooled_width_, kernel_h_, kernel_w_, stride_h_,
+              stride_w_, pad_h_, pad_w_, top_data);
     }
     break;
   case PoolingParameter_PoolMethod_STOCHASTIC:
@@ -220,19 +226,18 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
       caffe_gpu_rng_uniform(count, Dtype(0), Dtype(1),
                             rand_idx_.mutable_gpu_data());
       // NOLINT_NEXT_LINE(whitespace/operators)
-      StoPoolForwardTrain<Dtype><<<CAFFE_GET_BLOCKS(count),
-      CAFFE_CUDA_NUM_THREADS>>>(
-          count, bottom_data, bottom[0]->num(), channels_,
-          height_, width_, pooled_height_, pooled_width_, kernel_h_,
-          kernel_w_, stride_h_, stride_w_,
-          rand_idx_.mutable_gpu_data(), top_data);
+      StoPoolForwardTrain<Dtype>
+          <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+              count, bottom_data, bottom[0]->num(), channels_, height_, width_,
+              pooled_height_, pooled_width_, kernel_h_, kernel_w_, stride_h_,
+              stride_w_, rand_idx_.mutable_gpu_data(), top_data);
     } else {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      StoPoolForwardTest<Dtype><<<CAFFE_GET_BLOCKS(count),
-      CAFFE_CUDA_NUM_THREADS>>>(
-          count, bottom_data, bottom[0]->num(), channels_,
-          height_, width_, pooled_height_, pooled_width_, kernel_h_,
-          kernel_w_, stride_h_, stride_w_, top_data);
+      StoPoolForwardTest<Dtype>
+          <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+              count, bottom_data, bottom[0]->num(), channels_, height_, width_,
+              pooled_height_, pooled_width_, kernel_h_, kernel_w_, stride_h_,
+              stride_w_, top_data);
     }
     break;
   default:
@@ -241,13 +246,15 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   CUDA_POST_KERNEL_CHECK;
 }
 
-template<typename Dtype>
-__global__ void MaxPoolBackward(const int nthreads, const Dtype *const top_diff,
-                                const int *const mask, const Dtype *const top_mask, const int num,
-                                const int channels, const int height, const int width,
-                                const int pooled_height, const int pooled_width, const int kernel_h,
-                                const int kernel_w, const int stride_h, const int stride_w, const int pad_h,
-                                const int pad_w, Dtype *const bottom_diff) {
+template <typename Dtype>
+__global__ void
+MaxPoolBackward(const int nthreads, const Dtype *const top_diff,
+                const int *const mask, const Dtype *const top_mask,
+                const int num, const int channels, const int height,
+                const int width, const int pooled_height,
+                const int pooled_width, const int kernel_h, const int kernel_w,
+                const int stride_h, const int stride_w, const int pad_h,
+                const int pad_w, Dtype *const bottom_diff) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     // find out the local index
     // find out the local offset
@@ -287,13 +294,14 @@ __global__ void MaxPoolBackward(const int nthreads, const Dtype *const top_diff,
   }
 }
 
-template<typename Dtype>
-__global__ void AvePoolBackward(const int nthreads, const Dtype *const top_diff,
-                                const int num, const int channels, const int height,
-                                const int width, const int pooled_height, const int pooled_width,
-                                const int kernel_h, const int kernel_w, const int stride_h,
-                                const int stride_w, const int pad_h, const int pad_w,
-                                Dtype *const bottom_diff) {
+template <typename Dtype>
+__global__ void
+AvePoolBackward(const int nthreads, const Dtype *const top_diff, const int num,
+                const int channels, const int height, const int width,
+                const int pooled_height, const int pooled_width,
+                const int kernel_h, const int kernel_w, const int stride_h,
+                const int stride_w, const int pad_h, const int pad_w,
+                Dtype *const bottom_diff) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     // find out the local index
     // find out the local offset
@@ -323,21 +331,23 @@ __global__ void AvePoolBackward(const int nthreads, const Dtype *const top_diff,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 __global__ void GlobalAvePoolBackward(const int nthreads, const int spatial_dim,
-                                      const Dtype *top_diff, Dtype *bottom_diff) {
+                                      const Dtype *top_diff,
+                                      Dtype *bottom_diff) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int n = index / spatial_dim;
     bottom_diff[index] = top_diff[n] / spatial_dim;
   }
 }
 
-template<typename Dtype>
-__global__ void StoPoolBackward(const int nthreads,
-                                const Dtype *const rand_idx, const Dtype *const top_diff,
-                                const int num, const int channels, const int height,
-                                const int width, const int pooled_height, const int pooled_width,
-                                const int kernel_h, const int kernel_w, const int stride_h,
+template <typename Dtype>
+__global__ void StoPoolBackward(const int nthreads, const Dtype *const rand_idx,
+                                const Dtype *const top_diff, const int num,
+                                const int channels, const int height,
+                                const int width, const int pooled_height,
+                                const int pooled_width, const int kernel_h,
+                                const int kernel_w, const int stride_h,
                                 const int stride_w, Dtype *const bottom_diff) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     // find out the local index
@@ -357,7 +367,8 @@ __global__ void StoPoolBackward(const int nthreads,
         top_diff + (n * channels + c) * pooled_height * pooled_width;
     for (int ph = phstart; ph < phend; ++ph) {
       for (int pw = pwstart; pw < pwend; ++pw) {
-        gradient += top_diff_slice[ph * pooled_width + pw] *
+        gradient +=
+            top_diff_slice[ph * pooled_width + pw] *
             (index == static_cast<int>(rand_idx_slice[ph * pooled_width + pw]));
       }
     }
@@ -365,9 +376,10 @@ __global__ void StoPoolBackward(const int nthreads,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                       const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                       const vector<bool> &propagate_down,
+                                       const vector<Blob<Dtype> *> &bottom) {
   if (!propagate_down[0]) {
     return;
   }
@@ -388,32 +400,31 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
     }
     // NOLINT_NEXT_LINE(whitespace/operators)
     MaxPoolBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-        count, top_diff, mask, top_mask, top[0]->num(), channels_,
-        height_, width_, pooled_height_, pooled_width_,
-        kernel_h_, kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_,
-        bottom_diff);
+        count, top_diff, mask, top_mask, top[0]->num(), channels_, height_,
+        width_, pooled_height_, pooled_width_, kernel_h_, kernel_w_, stride_h_,
+        stride_w_, pad_h_, pad_w_, bottom_diff);
     break;
   case PoolingParameter_PoolMethod_AVE:
     if (this->layer_param_.pooling_param().global_pooling()) {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      GlobalAvePoolBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-          count, bottom[0]->count(2),
-          top_diff, bottom_diff);
+      GlobalAvePoolBackward<Dtype>
+          <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+              count, bottom[0]->count(2), top_diff, bottom_diff);
     } else {
       // NOLINT_NEXT_LINE(whitespace/operators)
-      AvePoolBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-          count, top_diff, top[0]->num(), channels_,
-          height_, width_, pooled_height_, pooled_width_, kernel_h_,
-          kernel_w_, stride_h_, stride_w_, pad_h_, pad_w_, bottom_diff);
+      AvePoolBackward<Dtype>
+          <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+              count, top_diff, top[0]->num(), channels_, height_, width_,
+              pooled_height_, pooled_width_, kernel_h_, kernel_w_, stride_h_,
+              stride_w_, pad_h_, pad_w_, bottom_diff);
     }
     break;
   case PoolingParameter_PoolMethod_STOCHASTIC:
     // NOLINT_NEXT_LINE(whitespace/operators)
     StoPoolBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-        count, rand_idx_.gpu_data(), top_diff,
-        top[0]->num(), channels_, height_, width_, pooled_height_,
-        pooled_width_, kernel_h_, kernel_w_, stride_h_, stride_w_,
-        bottom_diff);
+        count, rand_idx_.gpu_data(), top_diff, top[0]->num(), channels_,
+        height_, width_, pooled_height_, pooled_width_, kernel_h_, kernel_w_,
+        stride_h_, stride_w_, bottom_diff);
     break;
   default:
     LOG(FATAL) << "Unknown pooling method.";
@@ -423,4 +434,4 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(PoolingLayer);
 
-}  // namespace caffe
+} // namespace caffe

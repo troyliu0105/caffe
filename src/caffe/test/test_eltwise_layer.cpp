@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class EltwiseLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -56,8 +56,7 @@ TYPED_TEST(EltwiseLayerTest, TestSetUp) {
   LayerParameter layer_param;
   EltwiseParameter *eltwise_param = layer_param.mutable_eltwise_param();
   eltwise_param->set_operation(EltwiseParameter_EltwiseOp_PROD);
-  shared_ptr<EltwiseLayer<Dtype> > layer(
-      new EltwiseLayer<Dtype>(layer_param));
+  shared_ptr<EltwiseLayer<Dtype>> layer(new EltwiseLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_->num(), 2);
   EXPECT_EQ(this->blob_top_->channels(), 3);
@@ -70,8 +69,7 @@ TYPED_TEST(EltwiseLayerTest, TestProd) {
   LayerParameter layer_param;
   EltwiseParameter *eltwise_param = layer_param.mutable_eltwise_param();
   eltwise_param->set_operation(EltwiseParameter_EltwiseOp_PROD);
-  shared_ptr<EltwiseLayer<Dtype> > layer(
-      new EltwiseLayer<Dtype>(layer_param));
+  shared_ptr<EltwiseLayer<Dtype>> layer(new EltwiseLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   const Dtype *data = this->blob_top_->cpu_data();
@@ -89,8 +87,7 @@ TYPED_TEST(EltwiseLayerTest, TestSum) {
   LayerParameter layer_param;
   EltwiseParameter *eltwise_param = layer_param.mutable_eltwise_param();
   eltwise_param->set_operation(EltwiseParameter_EltwiseOp_SUM);
-  shared_ptr<EltwiseLayer<Dtype> > layer(
-      new EltwiseLayer<Dtype>(layer_param));
+  shared_ptr<EltwiseLayer<Dtype>> layer(new EltwiseLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   const Dtype *data = this->blob_top_->cpu_data();
@@ -111,8 +108,7 @@ TYPED_TEST(EltwiseLayerTest, TestSumCoeff) {
   eltwise_param->add_coeff(1);
   eltwise_param->add_coeff(-0.5);
   eltwise_param->add_coeff(2);
-  shared_ptr<EltwiseLayer<Dtype> > layer(
-      new EltwiseLayer<Dtype>(layer_param));
+  shared_ptr<EltwiseLayer<Dtype>> layer(new EltwiseLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   const Dtype *data = this->blob_top_->cpu_data();
@@ -180,8 +176,7 @@ TYPED_TEST(EltwiseLayerTest, TestMax) {
   LayerParameter layer_param;
   EltwiseParameter *eltwise_param = layer_param.mutable_eltwise_param();
   eltwise_param->set_operation(EltwiseParameter_EltwiseOp_MAX);
-  shared_ptr<EltwiseLayer<Dtype> > layer(
-      new EltwiseLayer<Dtype>(layer_param));
+  shared_ptr<EltwiseLayer<Dtype>> layer(new EltwiseLayer<Dtype>(layer_param));
   layer->SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   layer->Forward(this->blob_bottom_vec_, this->blob_top_vec_);
   const Dtype *data = this->blob_top_->cpu_data();
@@ -206,4 +201,4 @@ TYPED_TEST(EltwiseLayerTest, TestMaxGradient) {
                                this->blob_top_vec_);
 }
 
-}  // namespace caffe
+} // namespace caffe

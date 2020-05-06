@@ -18,4 +18,4 @@
 #include "caffe/util/io.hpp"
 #include "caffe/util/upgrade_proto.hpp"
 
-#endif  // CAFFE_CAFFE_HPP_
+#endif // CAFFE_CAFFE_HPP_

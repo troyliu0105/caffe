@@ -7,11 +7,11 @@
 
 namespace caffe {
 
-template<typename Dtype>
-__global__ void PermuteKernel(const int nthreads,
-                              Dtype *const bottom_data, const bool forward, const int *permute_order,
-                              const int *old_steps, const int *new_steps, const int num_axes,
-                              Dtype *const top_data) {
+template <typename Dtype>
+__global__ void PermuteKernel(const int nthreads, Dtype *const bottom_data,
+                              const bool forward, const int *permute_order,
+                              const int *old_steps, const int *new_steps,
+                              const int num_axes, Dtype *const top_data) {
   CUDA_KERNEL_LOOP(index, nthreads) {
     int temp_idx = index;
     int old_idx = 0;
@@ -28,7 +28,7 @@ __global__ void PermuteKernel(const int nthreads,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PermuteLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   if (need_permute_) {
@@ -50,9 +50,10 @@ void PermuteLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PermuteLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
-                                       const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom) {
+                                       const vector<bool> &propagate_down,
+                                       const vector<Blob<Dtype> *> &bottom) {
   if (need_permute_) {
     Dtype *top_diff = top[0]->mutable_gpu_diff();
     Dtype *bottom_diff = bottom[0]->mutable_gpu_diff();
@@ -74,4 +75,4 @@ void PermuteLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(PermuteLayer);
 
-}  // namespace caffe
+} // namespace caffe

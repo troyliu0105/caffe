@@ -15,19 +15,16 @@ namespace caffe {
  *        each element of the output depends only on the corresponding input
  *        element.
  */
-template<typename Dtype>
-class NeuronLayer : public Layer<Dtype> {
+template <typename Dtype> class NeuronLayer : public Layer<Dtype> {
 public:
-  explicit NeuronLayer(const LayerParameter &param)
-      : Layer<Dtype>(param) {}
-  virtual void Reshape(const vector<Blob < Dtype> *
-  > &bottom,
-  const vector<Blob < Dtype> *> &top);
+  explicit NeuronLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
+  virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
+                       const vector<Blob<Dtype> *> &top);
 
   virtual inline int ExactNumBottomBlobs() const { return 1; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_NEURON_LAYER_HPP_
+#endif // CAFFE_NEURON_LAYER_HPP_

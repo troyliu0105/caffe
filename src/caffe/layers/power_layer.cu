@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-template<typename Dtype>
+template <typename Dtype>
 void PowerLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
   Dtype *top_data = top[0]->mutable_gpu_data();
@@ -29,7 +29,7 @@ void PowerLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template<typename Dtype>
+template <typename Dtype>
 void PowerLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
                                      const vector<bool> &propagate_down,
                                      const vector<Blob<Dtype> *> &bottom) {
@@ -47,8 +47,8 @@ void PowerLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
         // Special case for y = (shift + scale * x)^2
         //     -> dy/dx = 2 * scale * (shift + scale * x)
         //              = diff_scale * shift + diff_scale * scale * x
-        caffe_gpu_axpby(count, diff_scale_ * scale_, bottom_data,
-                        Dtype(0), bottom_diff);
+        caffe_gpu_axpby(count, diff_scale_ * scale_, bottom_data, Dtype(0),
+                        bottom_diff);
         if (shift_ != Dtype(0)) {
           caffe_gpu_add_scalar(count, diff_scale_ * shift_, bottom_diff);
         }
@@ -81,4 +81,4 @@ void PowerLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
 
 INSTANTIATE_LAYER_GPU_FUNCS(PowerLayer);
 
-}  // namespace caffe
+} // namespace caffe

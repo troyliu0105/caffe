@@ -35,8 +35,7 @@ namespace caffe {
  *          d = \left| \left| a_n - b_n \right| \right|_2 @f$.
  * This can be used to train siamese networks.
  */
-template<typename Dtype>
-class ContrastiveLossLayer : public LossLayer<Dtype> {
+template <typename Dtype> class ContrastiveLossLayer : public LossLayer<Dtype> {
 public:
   explicit ContrastiveLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}
@@ -86,16 +85,18 @@ protected:
    *      propagate_down[1]
    */
   virtual void Backward_cpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype> *> &top,
-                            const vector<bool> &propagate_down, const vector<Blob<Dtype> *> &bottom);
+                            const vector<bool> &propagate_down,
+                            const vector<Blob<Dtype> *> &bottom);
 
-  Blob<Dtype> diff_;  // cached for backward pass
-  Blob<Dtype> dist_sq_;  // cached for backward pass
-  Blob<Dtype> diff_sq_;  // tmp storage for gpu forward pass
-  Blob<Dtype> summer_vec_;  // tmp storage for gpu forward pass
+  Blob<Dtype> diff_;       // cached for backward pass
+  Blob<Dtype> dist_sq_;    // cached for backward pass
+  Blob<Dtype> diff_sq_;    // tmp storage for gpu forward pass
+  Blob<Dtype> summer_vec_; // tmp storage for gpu forward pass
 };
 
-}  // namespace caffe
+} // namespace caffe
 
-#endif  // CAFFE_CONTRASTIVE_LOSS_LAYER_HPP_
+#endif // CAFFE_CONTRASTIVE_LOSS_LAYER_HPP_

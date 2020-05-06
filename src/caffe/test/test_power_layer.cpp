@@ -13,7 +13,7 @@
 
 namespace caffe {
 
-template<typename TypeParam>
+template <typename TypeParam>
 class PowerLayerTest : public MultiDeviceTest<TypeParam> {
   typedef typename TypeParam::Dtype Dtype;
 
@@ -170,4 +170,4 @@ TYPED_TEST(PowerLayerTest, TestPowerTwoScaleHalfGradient) {
   this->TestBackward(power, scale, shift);
 }
 
-}  // namespace caffe
+} // namespace caffe
