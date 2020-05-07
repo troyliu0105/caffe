@@ -13,6 +13,10 @@ const int kMaxBlobAxes = 32;
 
 namespace caffe {
 
+template <class T> class Blob;
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const Blob<T> &blob);
 /**
  * @brief A wrapper around SyncedMemory holders serving as the basic
  *        computational unit through which Layer%s, Net%s, and Solver%s
@@ -263,6 +267,10 @@ public:
   void ShareDiff(const Blob &other);
 
   bool ShapeEquals(const BlobProto &other);
+
+  //@formatter:off
+  friend std::ostream &operator<< <>(std::ostream &out, const Blob<Dtype> &blob);
+  //@formatter:on
 
 protected:
   shared_ptr<SyncedMemory> data_;

@@ -2,11 +2,54 @@
 #include <vector>
 
 #include "caffe/blob.hpp"
-#include "caffe/common.hpp"
-#include "caffe/syncedmem.hpp"
 #include "caffe/util/math_functions.hpp"
 
+#include "xtensor/xadapt.hpp"
+#include "xtensor/xio.hpp"
+
 namespace caffe {
+
+//@formatter:off
+template<>
+std::ostream &operator<<<>(std::ostream &out, const Blob<float> &blob) {
+  std::vector<size_t> shape;
+  for (size_t i = 0; i < blob.shape().size(); ++i) {
+    shape.push_back(blob.shape(i));
+  }
+  auto arr = xt::adapt(blob.cpu_data(), shape);
+  out << "Shape: {";
+  for (int d = 0; d  < arr.dimension(); d++) {
+    out << arr.shape(d);
+    if (!(d + 1 != arr.dimension())) out << ", ";
+  }
+  out << "}, ";
+  out << "Max: " << xt::amax(arr) << ", ";
+  out << "Min: " << xt::amin(arr) << ", ";
+  out << "Mean: " << xt::mean(arr) << "\n";
+  out << arr;
+  return out;
+}
+
+template<>
+std::ostream &operator<<<>(std::ostream &out, const Blob<double> &blob) {
+  std::vector<size_t> shape;
+  for (size_t i = 0; i < blob.shape().size(); ++i) {
+    shape.push_back(blob.shape(i));
+  }
+  auto arr = xt::adapt(blob.cpu_data(), shape);
+  out << "Shape: {";
+  for (int d = 0; d  < arr.dimension(); d++) {
+  out << arr.shape(d);
+    if (!(d + 1 != arr.dimension())) out << ", ";
+  }
+  out << "}, ";
+  out << "Max: " << xt::amax(arr) << ", ";
+  out << "Min: " << xt::amin(arr) << ", ";
+  out << "Mean: " << xt::mean(arr) << "\n";
+  out << arr;
+  return out;
+}
+//@formatter:on
 
 template <typename Dtype>
 void Blob<Dtype>::Reshape(const int num, const int channels, const int height,
