@@ -16,6 +16,7 @@ endif ()
 
 # ---[ Caffe project
 project(Caffe LANGUAGES C CXX)
+#set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")  # Reset.
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CUDA_STANDARD 14)
 

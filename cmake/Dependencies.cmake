@@ -4,16 +4,29 @@ set(Caffe_INCLUDE_DIRS "")
 set(Caffe_DEFINITIONS "")
 set(Caffe_COMPILE_OPTIONS "")
 
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+    list(APPEND Caffe_LINKER_LIBS PUBLIC ${CONAN_LIBS})
+    list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${CONAN_INCLUDE_DIRS})
+    list(APPEND Caffe_DEFINITIONS PUBLIC ${CONAN_DEFINES})
+else ()
+    message(WARNING "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
+endif ()
+
 # ---[ Boost
-find_package(Boost 1.54 REQUIRED COMPONENTS system thread filesystem)
-list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${Boost_INCLUDE_DIRS})
+if (NOT DEFINED CONAN_BOOST_ROOT)
+    find_package(Boost 1.54 REQUIRED COMPONENTS system thread filesystem)
+    list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${Boost_INCLUDE_DIRS})
+    list(APPEND Caffe_LINKER_LIBS PUBLIC ${Boost_LIBRARIES})
+endif ()
 list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_ALL_NO_LIB)
-list(APPEND Caffe_LINKER_LIBS PUBLIC ${Boost_LIBRARIES})
 
 if (DEFINED MSVC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18.0.40629.0)
     # Required for VS 2013 Update 4 or earlier.
     list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_NO_CXX11_TEMPLATE_ALIASES)
 endif ()
+
 # ---[ Threads
 find_package(Threads REQUIRED)
 list(APPEND Caffe_LINKER_LIBS PRIVATE ${CMAKE_THREAD_LIBS_INIT})
@@ -55,52 +68,49 @@ if (USE_OPENMP)
 endif ()
 
 # ---[ Google-glog
-include("cmake/External/glog.cmake")
-list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GLOG_INCLUDE_DIRS})
-list(APPEND Caffe_LINKER_LIBS PUBLIC ${GLOG_LIBRARIES})
+if (NOT DEFINED CONAN_GLOG_ROOT)
+    include("cmake/External/glog.cmake")
+    list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GLOG_INCLUDE_DIRS})
+    list(APPEND Caffe_LINKER_LIBS PUBLIC ${GLOG_LIBRARIES})
+endif ()
 
 # ---[ Google-gflags
-include("cmake/External/gflags.cmake")
-list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GFLAGS_INCLUDE_DIRS})
-list(APPEND Caffe_LINKER_LIBS PUBLIC ${GFLAGS_LIBRARIES})
+if (NOT DEFINED CONAN_GFLAGS_ROOT)
+    include("cmake/External/gflags.cmake")
+    list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GFLAGS_INCLUDE_DIRS})
+    list(APPEND Caffe_LINKER_LIBS PUBLIC ${GFLAGS_LIBRARIES})
+endif ()
 
 # ---[ Google-protobuf
 include(cmake/ProtoBuf.cmake)
 
 # ---[ HDF5
-if (MSVC)
-    # Find HDF5 using it's hdf5-config.cmake file with MSVC
-    if (DEFINED HDF5_DIR)
-        list(APPEND CMAKE_MODULE_PATH ${HDF5_DIR})
-    endif ()
-    if (BUILD_SHARED_LIBS)
-        set(LIB_TYPE SHARED) # or SHARED
+if (NOT DEFINED CONAN_HDF5_ROOT)
+    if (MSVC)
+        # Find HDF5 using it's hdf5-config.cmake file with MSVC
+        if (DEFINED HDF5_DIR)
+            list(APPEND CMAKE_MODULE_PATH ${HDF5_DIR})
+        endif ()
+        find_package(HDF5 COMPONENTS C HL REQUIRED)
+        set(HDF5_LIBRARIES hdf5-shared)
+        set(HDF5_HL_LIBRARIES hdf5_hl-shared)
     else ()
-        set(LIB_TYPE STATIC)
+        find_package(HDF5 COMPONENTS HL REQUIRED)
     endif ()
-    string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
-    find_package(HDF5 NAMES hdf5 COMPONENTS C HL ${SEARCH_TYPE})
-    set(HDF5_LIBRARIES ${HDF5_C_${LIB_TYPE}_LIBRARY})
-    set(HDF5_HL_LIBRARIES ${HDF5_HL_${LIB_TYPE}_LIBRARY})
-    if (NOT HDF5_INCLUDE_DIRS)
-        set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
-    endif ()
-else ()
-    find_package(HDF5 COMPONENTS HL REQUIRED)
+    list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${HDF5_INCLUDE_DIRS})
+    list(APPEND Caffe_LINKER_LIBS PUBLIC ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 endif ()
-list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${HDF5_INCLUDE_DIRS})
-list(APPEND Caffe_LINKER_LIBS PUBLIC ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 add_definitions(-DUSE_HDF5)
 
 # ---[ LMDB
-if (USE_LMDB)
+if (NOT DEFINED CONAN_LMDB_ROOT)
     find_package(LMDB REQUIRED)
     list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${LMDB_INCLUDE_DIR})
     list(APPEND Caffe_LINKER_LIBS PUBLIC ${LMDB_LIBRARIES})
-    list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_LMDB)
-    if (ALLOW_LMDB_NOLOCK)
-        list(APPEND Caffe_DEFINITIONS PRIVATE -DALLOW_LMDB_NOLOCK)
-    endif ()
+endif ()
+list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_LMDB)
+if (ALLOW_LMDB_NOLOCK)
+    list(APPEND Caffe_DEFINITIONS PRIVATE -DALLOW_LMDB_NOLOCK)
 endif ()
 
 # ---[ LevelDB
@@ -149,7 +159,7 @@ if (USE_NNPACK)
 endif ()
 
 # ---[ OpenCV
-if (USE_OPENCV)
+if (NOT DEFINED CONAN_OPENCV_ROOT)
     find_package(OpenCV QUIET COMPONENTS core highgui imgproc imgcodecs videoio video)
     if (NOT OpenCV_FOUND) # if not OpenCV 3.x, then imgcodecs are not found
         find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc videoio)
@@ -157,8 +167,8 @@ if (USE_OPENCV)
     list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${OpenCV_INCLUDE_DIRS})
     list(APPEND Caffe_LINKER_LIBS PUBLIC ${OpenCV_LIBS})
     message(STATUS "OpenCV found (${OpenCV_CONFIG_PATH})")
-    list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_OPENCV)
 endif ()
+list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_OPENCV)
 
 # ---[ BLAS
 if (NOT APPLE)
