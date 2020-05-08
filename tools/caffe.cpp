@@ -75,7 +75,7 @@ static BrewFunction GetBrewFunction(const caffe::string &name) {
       LOG(ERROR) << "\t" << it.first;
     }
     LOG(FATAL) << "Unknown action: " << name;
-    return NULL; // not reachable, just to suppress old compiler warnings.
+    return nullptr; // not reachable, just to suppress old compiler warnings.
   }
 }
 
@@ -418,7 +418,7 @@ RegisterBrewFunction(time);
 
 int main(int argc, char **argv) {
   // Print output to stderr (while still logging).
-  FLAGS_alsologtostderr = 1;
+  FLAGS_alsologtostderr = true;
   // Set version
   gflags::SetVersionString(AS_STRING(CAFFE_VERSION));
   // Usage message.

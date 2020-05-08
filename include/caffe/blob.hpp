@@ -13,10 +13,12 @@ const int kMaxBlobAxes = 32;
 
 namespace caffe {
 
+#ifdef USE_XTENSOR
 template <class T> class Blob;
 
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const Blob<T> &blob);
+#endif
 /**
  * @brief A wrapper around SyncedMemory holders serving as the basic
  *        computational unit through which Layer%s, Net%s, and Solver%s
@@ -268,9 +270,11 @@ public:
 
   bool ShapeEquals(const BlobProto &other);
 
+#ifdef USE_XTENSOR
   //@formatter:off
   friend std::ostream &operator<< <>(std::ostream &out, const Blob<Dtype> &blob);
   //@formatter:on
+#endif
 
 protected:
   shared_ptr<SyncedMemory> data_;

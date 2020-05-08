@@ -4,11 +4,14 @@
 #include "caffe/blob.hpp"
 #include "caffe/util/math_functions.hpp"
 
+#ifdef USE_XTENSOR
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xio.hpp"
+#endif
 
 namespace caffe {
 
+#ifdef USE_XTENSOR
 //@formatter:off
 template<>
 std::ostream &operator<<<>(std::ostream &out, const Blob<float> &blob) {
@@ -50,6 +53,7 @@ std::ostream &operator<<<>(std::ostream &out, const Blob<double> &blob) {
   return out;
 }
 //@formatter:on
+#endif
 
 template <typename Dtype>
 void Blob<Dtype>::Reshape(const int num, const int channels, const int height,
