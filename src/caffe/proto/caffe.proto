@@ -513,13 +513,14 @@ message Yolov3Parameter {
     optional float iou_thresh = 17 [default = 0.5];
     optional float max_delta = 18 [default = 10];
     optional bool accumulate = 19 [default = true];
+    optional float label_smooth_eps = 20 [default = 0.1];
 
     enum ARC {
         DEFAULT = 0;
         BCE = 1;
         CE = 2;
     }
-    optional ARC arc = 20 [default = DEFAULT];
+    optional ARC arc = 21 [default = DEFAULT];
 }
 message RegionLossParameter {
     //Yolo 9000

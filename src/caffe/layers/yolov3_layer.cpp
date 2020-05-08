@@ -246,12 +246,25 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
 template <typename Dtype>
 void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
                            int class_label, int classes, float scale,
-                           Dtype *avg_cat, int stride, bool use_focal_loss) {
-  if (diff[index]) {
-    diff[index + stride * class_label] =
-        (-1.0) * (1 - input_data[index + stride * class_label]);
-    *avg_cat += input_data[index + stride * class_label];
-    // LOG(INFO)<<"test";
+                           Dtype *avg_cat, int stride, bool use_focal_loss,
+                           float label_smooth_eps) {
+  if (diff[index + stride * class_label]) {
+
+    float y_true = 1;
+    if (label_smooth_eps)
+      y_true = y_true * (1 - label_smooth_eps) + 0.5 * label_smooth_eps;
+    float result_delta = y_true - input_data[index + stride * class_label];
+    if (!isnan(result_delta) && !isinf(result_delta))
+      diff[index + stride * class_label] = (-1.0) * scale * result_delta;
+    // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
+
+    if (avg_cat)
+      *avg_cat += input_data[index + stride * class_label];
+
+    // diff[index + stride*class_label] = (-1.0) * (1 - input_data[index +
+    // stride*class_label]); *avg_cat += input_data[index +
+    // stride*class_label]*scale;
+    // LOG(INFO) << "test";
     return;
   }
   if (use_focal_loss) {
@@ -283,14 +296,27 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
 
   } else {
     for (int n = 0; n < classes; ++n) {
-      diff[index + n * stride] =
-          (-1.0) * scale *
-          (((n == class_label) ? 1 : 0) - input_data[index + n * stride]);
+      float y_true = ((n == class_label) ? 1 : 0);
+      if (label_smooth_eps)
+        y_true = y_true * (1 - label_smooth_eps) + 0.5 * label_smooth_eps;
+      float result_delta = y_true - input_data[index + stride * n];
+      if (!isnan(result_delta) && !isinf(result_delta))
+        diff[index + stride * n] = (-1.0) * scale * result_delta;
+      // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
+
+      if (n == class_label && avg_cat)
+        *avg_cat += input_data[index + stride * class_label];
+      // diff[index + n*stride] = (-1.0) * scale * (((n == class_label) ? 1 : 0)
+      // - input_data[index + n*stride]);
+      //      diff[index + n * stride] =
+      //          (-1.0) * scale *
+      //          (((n == class_label) ? 1 : 0) - input_data[index + n *
+      //          stride]);
       // std::cout<<diff[index+n]<<",";
-      if (n == class_label) {
-        *avg_cat += input_data[index + n * stride];
-        // std::cout<<"avg_cat:"<<input_data[index+n]<<std::endl;
-      }
+      //      if (n == class_label) {
+      //        *avg_cat += input_data[index + n * stride];
+      // std::cout<<"avg_cat:"<<input_data[index+n]<<std::endl;
+      //      }
     }
   }
 }
@@ -441,6 +467,7 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   iou_thresh_ = param.iou_thresh();
   max_delta_ = param.max_delta();
   accumulate_ = param.accumulate();
+  label_smooth_eps_ = param.label_smooth_eps();
   for (int c = 0; c < param.biases_size(); ++c) {
     biases_.push_back(param.biases(c));
   }
@@ -602,8 +629,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         diff[index + 4 * stride] = (-1) * (0 - swap_data[index + 4 * stride]);
         // diff[index + 4 * stride] = (-1) * (0 - exp(input_data[index + 4 *
         // stride]-exp(input_data[index + 4 * stride]))); diff[index + 4 *
-        // stride] = (-1) * noobject_scale_ * (0 - swap_data[index + 4 * stride])
-        // *logistic_gradient(swap_data[index + 4 * stride]);
+        // stride] = (-1) * noobject_scale_ * (0 - swap_data[index + 4 *
+        // stride]) *logistic_gradient(swap_data[index + 4 * stride]);
         if (best_iou > thresh_) {
           diff[index + 4 * stride] = 0;
         }
@@ -613,7 +640,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
           delta_region_class_v3(swap_data, diff, index + 5 * stride, best_class,
                                 num_class_, class_scale_, &avg_cat, stride,
-                                use_focal_loss_);
+                                use_focal_loss_, label_smooth_eps_);
           delta_region_box(
               best_truth, swap_data, biases_, mask_[n], index, x2, y2, side_w_,
               side_h_, side_w_ * anchors_scale_, side_h_ * anchors_scale_, diff,
@@ -704,8 +731,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
         delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
                               class_label, num_class_, class_scale_, &avg_cat,
-                              stride,
-                              use_focal_loss_); // softmax_tree_
+                              stride, use_focal_loss_,
+                              label_smooth_eps_); // softmax_tree_
 
         ++count;
         ++class_count_;
@@ -759,8 +786,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
             delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
                                   class_label, num_class_, class_scale_,
-                                  &avg_cat, stride,
-                                  use_focal_loss_); // softmax_tree_
+                                  &avg_cat, stride, use_focal_loss_,
+                                  label_smooth_eps_); // softmax_tree_
 
             ++count;
             ++class_count_;
@@ -806,7 +833,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   if (!(iter_ % 16)) {
     if (time_count_ > 0) {
       LOG(INFO) << "noobj: " << score_.avg_anyobj / time_count_
-                << " obj: " << score_.avg_obj / time_count_
+                << " obj: " << score_.avg_obj / 16
                 << " iou: " << score_.avg_iou / time_count_
                 << " cat: " << score_.avg_cat / time_count_
                 << " recall: " << score_.recall / time_count_

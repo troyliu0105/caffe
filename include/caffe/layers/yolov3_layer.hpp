@@ -74,6 +74,7 @@ protected:
   float iou_thresh_;
   float max_delta_;
   bool accumulate_;
+  float label_smooth_eps_;
 };
 
 } // namespace caffe
