@@ -4,7 +4,6 @@
 #endif
 
 #include <boost/thread.hpp>
-#include <cmath>
 #include <cstdio>
 #include <ctime>
 #include <glog/logging.h>
@@ -27,9 +26,8 @@ Caffe &Caffe::Get() {
 // random seeding
 int64_t cluster_seedgen() {
   int64_t s, seed, pid;
-  FILE *f = nullptr;
-  if (fopen_s(&f, "/dev/urandom", "rb") == 0 &&
-      fread(&seed, 1, sizeof(seed), f) == sizeof(seed)) {
+  FILE *f = fopen("/dev/urandom", "rb");
+  if (f != nullptr && fread(&seed, 1, sizeof(seed), f) == sizeof(seed)) {
     fclose(f);
     return seed;
   }
@@ -63,7 +61,7 @@ Caffe::Caffe()
     : random_generator_(), mode_(Caffe::CPU), solver_count_(1), solver_rank_(0),
       multiprocess_(false) {}
 
-Caffe::~Caffe() {}
+Caffe::~Caffe() = default;
 
 void Caffe::set_random_seed(const unsigned int seed) {
   // RNG seed

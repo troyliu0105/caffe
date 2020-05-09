@@ -5,11 +5,13 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
+#include <algorithm>
 #include <climits>
 #include <cmath>
 #include <fstream>  // NOLINT(readability/streams)
 #include <iostream> // NOLINT(readability/streams)
 #include <map>
+#include <random>
 #include <set>
 #include <sstream>
 #include <string>
