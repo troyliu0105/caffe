@@ -34,7 +34,7 @@ void SoftmaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   caffe_copy(bottom[0]->count(), bottom_data, top_data);
   // We need to subtract the max to avoid numerical issues, compute the exp,
   // and then normalize.
-  for (int i = 0; i < outer_num_; ++i) {
+  for (int i = 0; i < outer_num_; ++i) { // batch (or before axis_)
     // initialize scale_data to the first plane
     caffe_copy(inner_num_, bottom_data + i * dim, scale_data);
     for (int j = 0; j < channels; j++) {

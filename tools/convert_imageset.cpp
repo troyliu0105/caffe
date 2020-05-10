@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <fstream> // NOLINT(readability/streams)
+#include <omp.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -108,7 +109,7 @@ int main(int argc, char **argv) {
   int count = 0;
   int data_size = 0;
   bool data_size_initialized = false;
-
+#pragma omp parallel for
   for (int line_id = 0; line_id < lines.size(); ++line_id) {
     bool status;
     std::string enc = encode_type;
@@ -142,13 +143,16 @@ int main(int argc, char **argv) {
     // Put in db
     string out;
     CHECK(datum.SerializeToString(&out));
-    txn->Put(key_str, out);
+#pragma omp critical(dataupdate)
+    {
+      txn->Put(key_str, out);
 
-    if (++count % 1000 == 0) {
-      // Commit db
-      txn->Commit();
-      txn.reset(db->NewTransaction());
-      LOG(INFO) << "Processed " << count << " files.";
+      if (++count % 1000 == 0) {
+        // Commit db
+        txn->Commit();
+        txn.reset(db->NewTransaction());
+        LOG(INFO) << "Processed " << count << " files.";
+      }
     }
   }
   // write the last batch

@@ -6,10 +6,6 @@
  * Avisonic
  */
 #include "caffe/layers/yolov3_layer.hpp"
-#include "caffe/layers/region_loss_layer.hpp"
-#include "caffe/layers/sigmoid_layer.hpp"
-#include "caffe/util/math_functions.hpp"
-#include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <fstream>

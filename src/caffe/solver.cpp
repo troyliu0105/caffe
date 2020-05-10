@@ -1,6 +1,7 @@
 #include <cstdio>
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "boost/algorithm/string.hpp"
@@ -16,7 +17,7 @@ namespace caffe {
 
 template <typename Dtype>
 void Solver<Dtype>::SetActionFunction(ActionCallback func) {
-  action_request_function_ = func;
+  action_request_function_ = std::move(func);
 }
 
 template <typename Dtype>
@@ -81,10 +82,10 @@ template <typename Dtype>
 void LoadNetWeights(shared_ptr<Net<Dtype>> net, const std::string &model_list) {
   std::vector<std::string> model_names;
   boost::split(model_names, model_list, boost::is_any_of(","));
-  for (int i = 0; i < model_names.size(); ++i) {
-    boost::trim(model_names[i]);
-    LOG(INFO) << "Finetuning from " << model_names[i];
-    net->CopyTrainedLayersFrom(model_names[i]);
+  for (auto &model_name : model_names) {
+    boost::trim(model_name);
+    LOG(INFO) << "Finetuning from " << model_name;
+    net->CopyTrainedLayersFrom(model_name);
   }
 }
 
@@ -533,10 +534,9 @@ void Solver<Dtype>::TestDetection(const int test_net_id) {
     map<int, float> APs;
     float mAP = 0.;
     // Sort true_pos and false_pos with descend scores.
-    for (map<int, int>::const_iterator it = num_pos.begin();
-         it != num_pos.end(); ++it) {
-      int label = it->first;
-      int label_num_pos = it->second;
+    for (const auto &num_po : num_pos) {
+      int label = num_po.first;
+      int label_num_pos = num_po.second;
       if (true_pos.find(label) == true_pos.end()) {
         LOG(WARNING) << "Missing true_pos for label: " << label;
         continue;
@@ -576,8 +576,8 @@ void Solver<Dtype>::TestDetectionSeg(const int test_net_id) {
   map<int, map<int, int>> all_num_pos;
   const shared_ptr<Net<Dtype>> &test_net = test_nets_[test_net_id];
   Dtype loss = 0;
-  float *iou = NULL;
-  int *count = NULL;
+  float *iou = nullptr;
+  int *count = nullptr;
   int classes = 1;
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
     SolverAction::Enum request = GetRequestedAction();
@@ -691,10 +691,9 @@ void Solver<Dtype>::TestDetectionSeg(const int test_net_id) {
     map<int, float> APs;
     float mAP = 0.;
     // Sort true_pos and false_pos with descend scores.
-    for (map<int, int>::const_iterator it = num_pos.begin();
-         it != num_pos.end(); ++it) {
-      int label = it->first;
-      int label_num_pos = it->second;
+    for (const auto &num_po : num_pos) {
+      int label = num_po.first;
+      int label_num_pos = num_po.second;
       if (true_pos.find(label) == true_pos.end()) {
         LOG(WARNING) << "Missing true_pos for label: " << label;
         continue;

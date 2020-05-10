@@ -8,7 +8,7 @@ namespace caffe {
 template <typename Dtype>
 typename SolverRegistry<Dtype>::CreatorRegistry &
 SolverRegistry<Dtype>::Registry() {
-  static CreatorRegistry *g_registry_ = new CreatorRegistry;
+  static auto *g_registry_ = new CreatorRegistry;
   return *g_registry_;
 }
 
@@ -36,8 +36,7 @@ template <typename Dtype>
 vector<string> SolverRegistry<Dtype>::SolverTypeList() {
   CreatorRegistry &registry = Registry();
   vector<string> solver_types;
-  for (typename CreatorRegistry::iterator iter = registry.begin();
-       iter != registry.end(); ++iter) {
+  for (auto iter = registry.begin(); iter != registry.end(); ++iter) {
     solver_types.push_back(iter->first);
   }
   return solver_types;
@@ -45,13 +44,12 @@ vector<string> SolverRegistry<Dtype>::SolverTypeList() {
 
 // Solver registry should never be instantiated - everything is done with its
 // static variables.
-template <typename Dtype> SolverRegistry<Dtype>::SolverRegistry() {}
+template <typename Dtype> SolverRegistry<Dtype>::SolverRegistry() = default;
 
 template <typename Dtype> string SolverRegistry<Dtype>::SolverTypeListString() {
   vector<string> solver_types = SolverTypeList();
   string solver_types_str;
-  for (vector<string>::iterator iter = solver_types.begin();
-       iter != solver_types.end(); ++iter) {
+  for (auto iter = solver_types.begin(); iter != solver_types.end(); ++iter) {
     if (iter != solver_types.begin()) {
       solver_types_str += ", ";
     }
