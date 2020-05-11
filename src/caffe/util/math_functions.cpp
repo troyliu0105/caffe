@@ -88,20 +88,6 @@ template void caffe_set<int>(const int N, const int alpha, int *Y);
 template void caffe_set<float>(const int N, const float alpha, float *Y);
 template void caffe_set<double>(const int N, const double alpha, double *Y);
 
-template <>
-void caffe_add_scalar(const int N, const float alpha, float *Y) {
-  for (int i = 0; i < N; ++i) {
-    Y[i] += alpha;
-  }
-}
-
-template <>
-void caffe_add_scalar(const int N, const double alpha, double *Y) {
-  for (int i = 0; i < N; ++i) {
-    Y[i] += alpha;
-  }
-}
-
 template <typename Dtype>
 void caffe_copy(const int N, const Dtype *X, Dtype *Y) {
   if (X != Y) {
@@ -402,10 +388,10 @@ void caffe_softmax(const int N, const Dtype *a, Dtype *y) {
     if (a[i] > ele)
       ele = a[i];
   }
-  caffe_sub(N, a, ele, y);
+  caffe_sub_scalar(N, a, ele, y);
   caffe_exp(N, y, y);
   ele = caffe_cpu_asum(N, y);
-  caffe_div(N, y, ele, y);
+  caffe_div_scalar(N, y, ele, y);
 }
 template void caffe_softmax(const int N, const float *a, float *y);
 template void caffe_softmax(const int N, const double *a, double *y);
@@ -446,25 +432,5 @@ template void caffe_sigmoid(const int N, const int *a, int stride, int *y);
 template void caffe_sigmoid(const int N, const float *a, int stride, float *y);
 template void caffe_sigmoid(const int N, const double *a, int stride,
                             double *y);
-
-template <typename Dtype>
-void caffe_sub(int N, const Dtype *a, Dtype b, Dtype *y) {
-  for (int i = 0; i < N; ++i) {
-    y[i] = a[i] - b;
-  }
-}
-template void caffe_sub(const int N, const int *a, int b, int *y);
-template void caffe_sub(const int N, const float *a, float b, float *y);
-template void caffe_sub(const int N, const double *a, double b, double *y);
-
-template <typename Dtype>
-void caffe_div(int N, const Dtype *a, Dtype b, Dtype *y) {
-  for (int i = 0; i < N; ++i) {
-    y[i] = a[i] / b;
-  }
-}
-template void caffe_div(const int N, const int *a, int b, int *y);
-template void caffe_div(const int N, const float *a, float b, float *y);
-template void caffe_div(const int N, const double *a, double b, double *y);
 
 } // namespace caffe

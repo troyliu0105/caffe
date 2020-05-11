@@ -112,9 +112,6 @@ inline void caffe_memset(const size_t N, const int alpha, void *X) {
 }
 
 template <typename Dtype>
-void caffe_add_scalar(const int N, const Dtype alpha, Dtype *X);
-
-template <typename Dtype>
 void caffe_scal(const int N, const Dtype alpha, Dtype *X);
 
 template <typename Dtype>
@@ -358,6 +355,26 @@ void caffe_gpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype *y);
 
 #endif // !CPU_ONLY
 
+#define DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(name, operation)                   \
+  template <typename Dtype>                                                    \
+  void caffe_##name##_scalar(const int n, const Dtype *x, Dtype b, Dtype *y) { \
+    CHECK_GT(n, 0);                                                            \
+    CHECK(x);                                                                  \
+    CHECK(y);                                                                  \
+    for (int i = 0; i < n; ++i) {                                              \
+      operation;                                                               \
+    }                                                                          \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  void caffe_##name##_scalar(const int n, Dtype b, Dtype *y) {                 \
+    CHECK_GT(n, 0);                                                            \
+    CHECK(y);                                                                  \
+    Dtype *x = y;                                                              \
+    for (int i = 0; i < n; ++i) {                                              \
+      operation;                                                               \
+    }                                                                          \
+  }
+
 template <typename Dtype>
 void caffe_softmax(int N, const Dtype *a, Dtype *y);
 
@@ -370,14 +387,12 @@ void caffe_sigmoid(int N, const Dtype *a, Dtype *y);
 template <typename Dtype>
 void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y);
 
-template <typename Dtype>
-void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y);
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(add, y[i] = x[i] + b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(sub, y[i] = x[i] - b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(mul, y[i] = x[i] * b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(div, y[i] = x[i] / b)
 
-template <typename Dtype>
-void caffe_sub(int N, const Dtype *a, Dtype b, Dtype *y);
-
-template <typename Dtype>
-void caffe_div(int N, const Dtype *a, Dtype b, Dtype *y);
+DEFINE_CAFFE_CPU_UNARY_FUNC(tanh, y[i] = std::tanh(x[i]))
 
 } // namespace caffe
 
