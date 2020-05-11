@@ -15,7 +15,8 @@
 namespace caffe {
 
 /// @brief Fills a Blob with constant or randomly-generated data.
-template <typename Dtype> class Filler {
+template <typename Dtype>
+class Filler {
 public:
   explicit Filler(const FillerParameter &param) : filler_param_(param) {}
   virtual ~Filler() {}
@@ -26,7 +27,8 @@ protected:
 }; // class Filler
 
 /// @brief Fills a Blob with constant values @f$ x = 0 @f$.
-template <typename Dtype> class ConstantFiller : public Filler<Dtype> {
+template <typename Dtype>
+class ConstantFiller : public Filler<Dtype> {
 public:
   explicit ConstantFiller(const FillerParameter &param)
       : Filler<Dtype>(param) {}
@@ -44,7 +46,8 @@ public:
 };
 
 /// @brief Fills a Blob with uniformly distributed values @f$ x\sim U(a, b) @f$.
-template <typename Dtype> class UniformFiller : public Filler<Dtype> {
+template <typename Dtype>
+class UniformFiller : public Filler<Dtype> {
 public:
   explicit UniformFiller(const FillerParameter &param) : Filler<Dtype>(param) {}
   virtual void Fill(Blob<Dtype> *blob) {
@@ -58,7 +61,8 @@ public:
 };
 
 /// @brief Fills a Blob with Gaussian-distributed values @f$ x = a @f$.
-template <typename Dtype> class GaussianFiller : public Filler<Dtype> {
+template <typename Dtype>
+class GaussianFiller : public Filler<Dtype> {
 public:
   explicit GaussianFiller(const FillerParameter &param)
       : Filler<Dtype>(param) {}
@@ -94,7 +98,8 @@ protected:
 /** @brief Fills a Blob with values @f$ x \in [0, 1] @f$
  *         such that @f$ \forall i \sum_j x_{ij} = 1 @f$.
  */
-template <typename Dtype> class PositiveUnitballFiller : public Filler<Dtype> {
+template <typename Dtype>
+class PositiveUnitballFiller : public Filler<Dtype> {
 public:
   explicit PositiveUnitballFiller(const FillerParameter &param)
       : Filler<Dtype>(param) {}
@@ -136,7 +141,8 @@ public:
  *
  * TODO(dox): make notation in above comment consistent with rest & use LaTeX.
  */
-template <typename Dtype> class XavierFiller : public Filler<Dtype> {
+template <typename Dtype>
+class XavierFiller : public Filler<Dtype> {
 public:
   explicit XavierFiller(const FillerParameter &param) : Filler<Dtype>(param) {}
   virtual void Fill(Blob<Dtype> *blob) {
@@ -178,7 +184,8 @@ public:
  * a, b, c) where a * b * c = fan_in and num * b * c = fan_out. Note that this
  * is currently not the case for inner product layers.
  */
-template <typename Dtype> class MSRAFiller : public Filler<Dtype> {
+template <typename Dtype>
+class MSRAFiller : public Filler<Dtype> {
 public:
   explicit MSRAFiller(const FillerParameter &param) : Filler<Dtype>(param) {}
   virtual void Fill(Blob<Dtype> *blob) {
@@ -236,7 +243,8 @@ operation is equivalent to the following call in Python with Scikit.Image.
 out = skimage.transform.rescale(img, factor, mode='constant', cval=0)
 \endcode
  */
-template <typename Dtype> class BilinearFiller : public Filler<Dtype> {
+template <typename Dtype>
+class BilinearFiller : public Filler<Dtype> {
 public:
   explicit BilinearFiller(const FillerParameter &param)
       : Filler<Dtype>(param) {}

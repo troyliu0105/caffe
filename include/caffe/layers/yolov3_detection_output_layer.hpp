@@ -13,7 +13,8 @@
 #include "caffe/util/bbox_util.hpp"
 
 namespace caffe {
-template <typename Dtype> class PredictionResult {
+template <typename Dtype>
+class PredictionResult {
 public:
   Dtype x;
   Dtype y;

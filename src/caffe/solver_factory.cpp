@@ -44,9 +44,11 @@ vector<string> SolverRegistry<Dtype>::SolverTypeList() {
 
 // Solver registry should never be instantiated - everything is done with its
 // static variables.
-template <typename Dtype> SolverRegistry<Dtype>::SolverRegistry() = default;
+template <typename Dtype>
+SolverRegistry<Dtype>::SolverRegistry() = default;
 
-template <typename Dtype> string SolverRegistry<Dtype>::SolverTypeListString() {
+template <typename Dtype>
+string SolverRegistry<Dtype>::SolverTypeListString() {
   vector<string> solver_types = SolverTypeList();
   string solver_types_str;
   for (auto iter = solver_types.begin(); iter != solver_types.end(); ++iter) {

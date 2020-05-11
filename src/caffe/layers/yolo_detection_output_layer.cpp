@@ -33,12 +33,14 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
-template <typename Dtype> Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-template <typename Dtype> Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
 }
 template <typename Dtype>

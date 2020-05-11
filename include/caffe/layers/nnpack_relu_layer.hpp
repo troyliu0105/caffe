@@ -11,7 +11,8 @@
 
 namespace caffe {
 #ifdef USE_NNPACK
-template <typename Dtype> class NNPackReLULayer : public ReLULayer<Dtype> {
+template <typename Dtype>
+class NNPackReLULayer : public ReLULayer<Dtype> {
 public:
   explicit NNPackReLULayer(const LayerParameter &param)
       : ReLULayer<Dtype>(param) {}

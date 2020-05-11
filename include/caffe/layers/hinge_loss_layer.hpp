@@ -54,7 +54,8 @@ namespace caffe {
  * outside the InnerProductLayer and no other losses outside the
  * HingeLossLayer).
  */
-template <typename Dtype> class HingeLossLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class HingeLossLayer : public LossLayer<Dtype> {
 public:
   explicit HingeLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param) {}

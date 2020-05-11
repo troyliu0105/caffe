@@ -18,7 +18,8 @@
 
 namespace caffe {
 
-template <typename Dtype> class YoloSegLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class YoloSegLayer : public LossLayer<Dtype> {
 public:
   explicit YoloSegLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}

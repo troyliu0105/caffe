@@ -21,7 +21,8 @@ namespace caffe {
  *   -# @f$ (N \times C \times H \times W) @f$
  *      the computed outputs @f$ y = |x| @f$
  */
-template <typename Dtype> class AbsValLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class AbsValLayer : public NeuronLayer<Dtype> {
 public:
   explicit AbsValLayer(const LayerParameter &param)
       : NeuronLayer<Dtype>(param) {}

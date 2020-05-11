@@ -19,7 +19,8 @@ namespace caffe {
  * [1] Prajit Ramachandran, Barret Zoph, Quoc V. Le. "Searching for
  *     Activation Functions". arXiv preprint arXiv:1710.05941v2 (2017).
  */
-template <typename Dtype> class SwishLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class SwishLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides SwishParameter swish_param,

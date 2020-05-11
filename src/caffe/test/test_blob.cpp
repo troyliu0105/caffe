@@ -10,7 +10,8 @@
 
 namespace caffe {
 
-template <typename Dtype> class BlobSimpleTest : public ::testing::Test {
+template <typename Dtype>
+class BlobSimpleTest : public ::testing::Test {
 protected:
   BlobSimpleTest()
       : blob_(new Blob<Dtype>()), blob_preshaped_(new Blob<Dtype>(2, 3, 4, 5)) {

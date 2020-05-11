@@ -12,7 +12,8 @@
 #include <vector>
 namespace caffe {
 
-template <typename Dtype> class Yolov3Layer : public LossLayer<Dtype> {
+template <typename Dtype>
+class Yolov3Layer : public LossLayer<Dtype> {
 public:
   explicit Yolov3Layer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}

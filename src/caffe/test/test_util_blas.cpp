@@ -12,7 +12,8 @@ namespace caffe {
 
 extern cudaDeviceProp CAFFE_TEST_CUDA_PROP;
 
-template <typename TypeParam> class GemmTest : public ::testing::Test {};
+template <typename TypeParam>
+class GemmTest : public ::testing::Test {};
 
 TYPED_TEST_CASE(GemmTest, TestDtypes);
 

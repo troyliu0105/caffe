@@ -13,7 +13,8 @@ namespace caffe {
  * @brief Ignores bottom blobs while producing no top blobs. (This is useful
  *        to suppress outputs during testing.)
  */
-template <typename Dtype> class SilenceLayer : public Layer<Dtype> {
+template <typename Dtype>
+class SilenceLayer : public Layer<Dtype> {
 public:
   explicit SilenceLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,

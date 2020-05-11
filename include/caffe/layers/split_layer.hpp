@@ -15,7 +15,8 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward, Backward, and proto params.
  */
-template <typename Dtype> class SplitLayer : public Layer<Dtype> {
+template <typename Dtype>
+class SplitLayer : public Layer<Dtype> {
 public:
   explicit SplitLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,

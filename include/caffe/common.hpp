@@ -198,7 +198,8 @@ public:
   inline static bool root_solver() { return Get().solver_rank_ == 0; }
 
 #ifdef USE_NNPACK
-  template <typename Dtype> static bool nnpack_supported();
+  template <typename Dtype>
+  static bool nnpack_supported();
   inline static pthreadpool_t nnpack_threadpool() {
     return Get().nnpack_threadpool_.pool();
   }

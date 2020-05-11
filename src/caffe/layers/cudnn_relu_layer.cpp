@@ -29,7 +29,8 @@ void CuDNNReLULayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   cudnn::setTensor4dDesc<Dtype>(&top_desc_, N, K, H, W);
 }
 
-template <typename Dtype> CuDNNReLULayer<Dtype>::~CuDNNReLULayer() {
+template <typename Dtype>
+CuDNNReLULayer<Dtype>::~CuDNNReLULayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) {
     return;

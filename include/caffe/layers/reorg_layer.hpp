@@ -15,7 +15,8 @@ namespace caffe {
  * Note: similarly to FlattenLayer, this layer does not change the input values
  * (see FlattenLayer, Blob::ShareData and Blob::ShareDiff).
  */
-template <typename Dtype> class ReorgLayer : public Layer<Dtype> {
+template <typename Dtype>
+class ReorgLayer : public Layer<Dtype> {
 public:
   explicit ReorgLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
 

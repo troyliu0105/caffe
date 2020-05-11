@@ -33,16 +33,19 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
-template <typename Dtype> Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-template <typename Dtype> Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
 }
 
-template <typename Dtype> boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = {0};
   ba.top = fmin(a[1] - a[3] / 2, b[1] - b[3] / 2);
   ba.bot = fmax(a[1] + a[3] / 2, b[1] + b[3] / 2);
@@ -52,7 +55,8 @@ template <typename Dtype> boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
 }
 
 // representation from x, y, w, h to top, left, bottom, right
-template <typename Dtype> boxabs to_tblr(vector<Dtype> a) {
+template <typename Dtype>
+boxabs to_tblr(vector<Dtype> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
@@ -64,7 +68,8 @@ template <typename Dtype> boxabs to_tblr(vector<Dtype> a) {
   tblr.right = r;
   return tblr;
 }
-template <> boxabs to_tblr(vector<float> a) {
+template <>
+boxabs to_tblr(vector<float> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
@@ -76,7 +81,8 @@ template <> boxabs to_tblr(vector<float> a) {
   tblr.right = r;
   return tblr;
 }
-template <> boxabs to_tblr(vector<double> a) {
+template <>
+boxabs to_tblr(vector<double> a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
@@ -88,7 +94,8 @@ template <> boxabs to_tblr(vector<double> a) {
   tblr.right = r;
   return tblr;
 }
-template <typename Dtype> Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -103,7 +110,8 @@ template <typename Dtype> Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
   return iou - giou_term;
 }
 
-template <> float box_giou(vector<float> a, vector<float> b) {
+template <>
+float box_giou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -117,7 +125,8 @@ template <> float box_giou(vector<float> a, vector<float> b) {
 
   return iou - giou_term;
 }
-template <> double box_giou(vector<double> a, vector<double> b) {
+template <>
+double box_giou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
   double h = ba.bot - ba.top;
@@ -133,7 +142,8 @@ template <> double box_giou(vector<double> a, vector<double> b) {
 }
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
-template <typename Dtype> Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
   Dtype h = ba.bot - ba.top;
@@ -148,7 +158,8 @@ template <typename Dtype> Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
 
   return iou - diou_term;
 }
-template <> float box_diou(vector<float> a, vector<float> b) {
+template <>
+float box_diou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -163,7 +174,8 @@ template <> float box_diou(vector<float> a, vector<float> b) {
 
   return iou - diou_term;
 }
-template <> double box_diou(vector<double> a, vector<double> b) {
+template <>
+double box_diou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
   double h = ba.bot - ba.top;
@@ -197,7 +209,8 @@ float box_diounms(vector<float> a, vector<float> b, float beta1) {
 }
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
-template <typename Dtype> Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
+template <typename Dtype>
+Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
   Dtype h = ba.bot - ba.top;
@@ -216,7 +229,8 @@ template <typename Dtype> Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   Dtype ciou_term = d + alpha * ar_loss; // ciou
   return iou - ciou_term;
 }
-template <> float box_ciou(vector<float> a, vector<float> b) {
+template <>
+float box_ciou(vector<float> a, vector<float> b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -235,7 +249,8 @@ template <> float box_ciou(vector<float> a, vector<float> b) {
   float ciou_term = d + alpha * ar_loss; // ciou
   return iou - ciou_term;
 }
-template <> double box_ciou(vector<double> a, vector<double> b) {
+template <>
+double box_ciou(vector<double> a, vector<double> b) {
   boxabs ba = box_c(a, b);
   double w = ba.right - ba.left;
   double h = ba.bot - ba.top;
@@ -268,7 +283,8 @@ Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
   }
   return iou;
 }
-template <> float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
+template <>
+float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
   float iou;
   if (type == GIOU) {
     iou = box_giou(a, b);
@@ -281,7 +297,8 @@ template <> float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
   }
   return iou;
 }
-template <> double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
+template <>
+double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
   double iou;
   if (type == GIOU) {
     iou = box_giou(a, b);

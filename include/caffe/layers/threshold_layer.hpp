@@ -15,7 +15,8 @@ namespace caffe {
  * @brief Tests whether the input exceeds a threshold: outputs 1 for inputs
  *        above threshold; 0 otherwise.
  */
-template <typename Dtype> class ThresholdLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class ThresholdLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides ThresholdParameter threshold_param,

@@ -35,7 +35,8 @@ namespace caffe {
  *          d = \left| \left| a_n - b_n \right| \right|_2 @f$.
  * This can be used to train siamese networks.
  */
-template <typename Dtype> class ContrastiveLossLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class ContrastiveLossLayer : public LossLayer<Dtype> {
 public:
   explicit ContrastiveLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}

@@ -20,7 +20,8 @@ namespace caffe {
  *        \end{array} \right.
  *      @f$.
  */
-template <typename Dtype> class ELULayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class ELULayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides ELUParameter elu_param,

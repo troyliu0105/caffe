@@ -20,7 +20,8 @@ namespace caffe {
  *
  * TODO(dox): more thorough description.
  */
-template <typename Dtype> class Net {
+template <typename Dtype>
+class Net {
 public:
   explicit Net(const NetParameter &param);
   explicit Net(const string &param_file, Phase phase, const int level = 0,
@@ -230,7 +231,8 @@ public:
   protected:
     virtual void run(int layer) = 0;
 
-    template <typename T> friend class Net;
+    template <typename T>
+    friend class Net;
   };
   const vector<Callback *> &before_forward() const { return before_forward_; }
   void add_before_forward(Callback *value) { before_forward_.push_back(value); }

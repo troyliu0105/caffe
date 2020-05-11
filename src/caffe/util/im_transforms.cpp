@@ -126,7 +126,8 @@ void InferNewSize(const ResizeParameter &resize_param, const int old_width,
 }
 
 #ifdef USE_OPENCV
-template <typename T> bool is_border(const cv::Mat &edge, T color) {
+template <typename T>
+bool is_border(const cv::Mat &edge, T color) {
   cv::Mat im = edge.clone().reshape(0, 1);
   bool res = true;
   for (int i = 0; i < im.cols; ++i) {

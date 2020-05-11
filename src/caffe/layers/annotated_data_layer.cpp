@@ -22,7 +22,8 @@ template <typename Dtype>
 AnnotatedDataLayer<Dtype>::AnnotatedDataLayer(const LayerParameter &param)
     : BasePrefetchingDataLayer<Dtype>(param), reader_(param) {}
 
-template <typename Dtype> AnnotatedDataLayer<Dtype>::~AnnotatedDataLayer() {
+template <typename Dtype>
+AnnotatedDataLayer<Dtype>::~AnnotatedDataLayer() {
   this->StopInternalThread();
 }
 

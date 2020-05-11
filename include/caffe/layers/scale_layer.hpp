@@ -22,7 +22,8 @@ namespace caffe {
  * The latter, scale input may be omitted, in which case it's learned as
  * parameter of the layer (as is the bias, if it is included).
  */
-template <typename Dtype> class ScaleLayer : public Layer<Dtype> {
+template <typename Dtype>
+class ScaleLayer : public Layer<Dtype> {
 public:
   explicit ScaleLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

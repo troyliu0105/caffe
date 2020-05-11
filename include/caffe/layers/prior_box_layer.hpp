@@ -17,7 +17,8 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template <typename Dtype> class PriorBoxLayer : public Layer<Dtype> {
+template <typename Dtype>
+class PriorBoxLayer : public Layer<Dtype> {
 public:
   /**
    * @param param provides PriorBoxParameter prior_box_param,

@@ -16,7 +16,8 @@ namespace caffe {
 /**
  * @brief CuDNN acceleration of TanHLayer.
  */
-template <typename Dtype> class CuDNNTanHLayer : public TanHLayer<Dtype> {
+template <typename Dtype>
+class CuDNNTanHLayer : public TanHLayer<Dtype> {
 public:
   explicit CuDNNTanHLayer(const LayerParameter &param)
       : TanHLayer<Dtype>(param), handles_setup_(false) {}

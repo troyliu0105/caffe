@@ -17,7 +17,8 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward and proto params.
  */
-template <typename Dtype> class BaseDataLayer : public Layer<Dtype> {
+template <typename Dtype>
+class BaseDataLayer : public Layer<Dtype> {
 public:
   explicit BaseDataLayer(const LayerParameter &param);
   // LayerSetUp: implements common data layer setup functionality, and calls
@@ -47,7 +48,8 @@ protected:
   bool output_seg_labels_;
 };
 
-template <typename Dtype> class Batch {
+template <typename Dtype>
+class Batch {
 public:
   Blob<Dtype> data_, label_, seg_label_;
 };

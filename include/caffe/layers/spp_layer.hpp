@@ -15,7 +15,8 @@ namespace caffe {
  *        so that the result vector of different sized
  *        images are of the same size.
  */
-template <typename Dtype> class SPPLayer : public Layer<Dtype> {
+template <typename Dtype>
+class SPPLayer : public Layer<Dtype> {
 public:
   explicit SPPLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

@@ -38,7 +38,8 @@ typedef boost::function<SolverAction::Enum()> ActionCallback;
  * Requires implementation of ApplyUpdate to compute a parameter update
  * given the current state of the Net parameters.
  */
-template <typename Dtype> class Solver {
+template <typename Dtype>
+class Solver {
 public:
   explicit Solver(const SolverParameter &param);
   explicit Solver(const string &param_file);
@@ -79,7 +80,8 @@ public:
     virtual void on_start() = 0;
     virtual void on_gradients_ready() = 0;
 
-    template <typename T> friend class Solver;
+    template <typename T>
+    friend class Solver;
   };
   const vector<Callback *> &callbacks() const { return callbacks_; }
   void add_callback(Callback *value) { callbacks_.push_back(value); }

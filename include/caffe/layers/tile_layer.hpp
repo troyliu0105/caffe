@@ -12,7 +12,8 @@ namespace caffe {
 /**
  * @brief Copy a Blob along specified dimensions.
  */
-template <typename Dtype> class TileLayer : public Layer<Dtype> {
+template <typename Dtype>
+class TileLayer : public Layer<Dtype> {
 public:
   explicit TileLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,

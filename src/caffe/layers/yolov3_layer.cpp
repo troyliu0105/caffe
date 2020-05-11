@@ -491,7 +491,8 @@ void Yolov3Layer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   diff_.ReshapeLike(*bottom[0]);
   real_diff_.ReshapeLike(*bottom[0]);
 }
-template <typename Dtype> int int_index(vector<Dtype> a, int val, int n) {
+template <typename Dtype>
+int int_index(vector<Dtype> a, int val, int n) {
   int i;
   for (i = 0; i < n; ++i) {
     if (a[i] == val)

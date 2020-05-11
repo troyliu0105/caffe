@@ -4,7 +4,8 @@
 
 namespace caffe {
 
-template <typename Dtype> void AdaDeltaSolver<Dtype>::AdaDeltaPreSolve() {
+template <typename Dtype>
+void AdaDeltaSolver<Dtype>::AdaDeltaPreSolve() {
   // Add the extra history entries for AdaDelta after those from
   // SGDSolver::PreSolve
   const vector<Blob<Dtype> *> &net_params = this->net_->learnable_params();

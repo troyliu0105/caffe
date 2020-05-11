@@ -23,7 +23,8 @@ namespace caffe {
  * @brief Computes the SmoothL1 loss as introduced in:@f$
  *  Fast R-CNN, Ross Girshick, ICCV 2015.
  */
-template <typename Dtype> class SmoothL1LossLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class SmoothL1LossLayer : public LossLayer<Dtype> {
 public:
   explicit SmoothL1LossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}

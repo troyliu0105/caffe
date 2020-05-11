@@ -21,7 +21,8 @@
 
 namespace caffe {
 
-template <typename Dtype> Net<Dtype>::Net(const NetParameter &param) {
+template <typename Dtype>
+Net<Dtype>::Net(const NetParameter &param) {
   Init(param);
 }
 
@@ -41,7 +42,8 @@ Net<Dtype>::Net(const string &param_file, Phase phase, const int level,
   Init(param);
 }
 
-template <typename Dtype> void Net<Dtype>::Init(const NetParameter &in_param) {
+template <typename Dtype>
+void Net<Dtype>::Init(const NetParameter &in_param) {
   // Set phase from the state.
   phase_ = in_param.state().phase();
   // Filter layers based on their include/exclude rules and
@@ -525,7 +527,8 @@ void Net<Dtype>::AppendParam(const NetParameter &param, const int layer_id,
   }
 }
 
-template <typename Dtype> Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
+template <typename Dtype>
+Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
   CHECK_GE(start, 0);
   CHECK_LT(end, layers_.size());
   Dtype loss = 0;
@@ -546,11 +549,13 @@ template <typename Dtype> Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
   return loss;
 }
 
-template <typename Dtype> Dtype Net<Dtype>::ForwardFrom(int start) {
+template <typename Dtype>
+Dtype Net<Dtype>::ForwardFrom(int start) {
   return ForwardFromTo(start, layers_.size() - 1);
 }
 
-template <typename Dtype> Dtype Net<Dtype>::ForwardTo(int end) {
+template <typename Dtype>
+Dtype Net<Dtype>::ForwardTo(int end) {
   return ForwardFromTo(0, end);
 }
 
@@ -577,7 +582,8 @@ Net<Dtype>::Forward(const vector<Blob<Dtype> *> &bottom, Dtype *loss) {
   return Forward(loss);
 }
 
-template <typename Dtype> void Net<Dtype>::BackwardFromTo(int start, int end) {
+template <typename Dtype>
+void Net<Dtype>::BackwardFromTo(int start, int end) {
   CHECK_GE(end, 0);
   CHECK_LT(start, layers_.size());
   for (int i = start; i >= end; --i) {
@@ -650,7 +656,8 @@ void Net<Dtype>::BackwardDebugInfo(const int layer_id) {
   }
 }
 
-template <typename Dtype> void Net<Dtype>::UpdateDebugInfo(const int param_id) {
+template <typename Dtype>
+void Net<Dtype>::UpdateDebugInfo(const int param_id) {
   const Blob<Dtype> &blob = *params_[param_id];
   const int param_owner = param_owners_[param_id];
   const string &layer_name = layer_names_[param_layer_indices_[param_id].first];
@@ -705,15 +712,18 @@ void Net<Dtype>::ShareTrainedLayersWith(const Net *other) {
   }
 }
 
-template <typename Dtype> void Net<Dtype>::BackwardFrom(int start) {
+template <typename Dtype>
+void Net<Dtype>::BackwardFrom(int start) {
   BackwardFromTo(start, 0);
 }
 
-template <typename Dtype> void Net<Dtype>::BackwardTo(int end) {
+template <typename Dtype>
+void Net<Dtype>::BackwardTo(int end) {
   BackwardFromTo(layers_.size() - 1, end);
 }
 
-template <typename Dtype> void Net<Dtype>::Backward() {
+template <typename Dtype>
+void Net<Dtype>::Backward() {
   BackwardFromTo(layers_.size() - 1, 0);
   if (debug_info_) {
     Dtype asum_data = 0, asum_diff = 0, sumsq_data = 0, sumsq_diff = 0;
@@ -731,7 +741,8 @@ template <typename Dtype> void Net<Dtype>::Backward() {
   }
 }
 
-template <typename Dtype> void Net<Dtype>::Reshape() {
+template <typename Dtype>
+void Net<Dtype>::Reshape() {
   for (int i = 0; i < layers_.size(); ++i) {
     layers_[i]->Reshape(bottom_vecs_[i], top_vecs_[i]);
   }
@@ -921,13 +932,15 @@ void Net<Dtype>::ToHDF5(const string &filename, bool write_diff) const {
 #endif // USE_HDF5
 }
 
-template <typename Dtype> void Net<Dtype>::Update() {
+template <typename Dtype>
+void Net<Dtype>::Update() {
   for (int i = 0; i < learnable_params_.size(); ++i) {
     learnable_params_[i]->Update();
   }
 }
 
-template <typename Dtype> void Net<Dtype>::ClearParamDiffs() {
+template <typename Dtype>
+void Net<Dtype>::ClearParamDiffs() {
   for (int i = 0; i < learnable_params_.size(); ++i) {
     Blob<Dtype> *blob = learnable_params_[i];
     switch (Caffe::mode()) {
@@ -946,7 +959,8 @@ template <typename Dtype> void Net<Dtype>::ClearParamDiffs() {
   }
 }
 
-template <typename Dtype> void Net<Dtype>::ShareWeights() {
+template <typename Dtype>
+void Net<Dtype>::ShareWeights() {
   for (int i = 0; i < params_.size(); ++i) {
     if (param_owners_[i] < 0) {
       continue;

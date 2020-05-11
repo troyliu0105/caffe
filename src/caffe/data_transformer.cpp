@@ -1470,7 +1470,8 @@ DataTransformer<Dtype>::InferBlobShape(const vector<cv::Mat> &mat_vector) {
 }
 #endif // USE_OPENCV
 
-template <typename Dtype> void DataTransformer<Dtype>::InitRand() {
+template <typename Dtype>
+void DataTransformer<Dtype>::InitRand() {
   const bool needs_rand =
       param_.mirror() || (phase_ == TRAIN && param_.crop_size());
   if (needs_rand) {
@@ -1481,7 +1482,8 @@ template <typename Dtype> void DataTransformer<Dtype>::InitRand() {
   }
 }
 
-template <typename Dtype> int DataTransformer<Dtype>::Rand(int n) {
+template <typename Dtype>
+int DataTransformer<Dtype>::Rand(int n) {
   CHECK(rng_);
   CHECK_GT(n, 0);
   auto *rng = static_cast<caffe::rng_t *>(rng_->generator());

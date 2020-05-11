@@ -740,7 +740,10 @@ inline void Shuffle(internal::Random *random, std::vector<E> *v) {
 
 // A function for deleting an object.  Handy for being used as a
 // functor.
-template <typename T> static void Delete(T *x) { delete x; }
+template <typename T>
+static void Delete(T *x) {
+  delete x;
+}
 
 // A predicate that checks the key of a TestProperty against a known key.
 //

@@ -17,7 +17,8 @@
 
 namespace caffe {
 
-template <typename Dtype> ImageDataLayer<Dtype>::~ImageDataLayer<Dtype>() {
+template <typename Dtype>
+ImageDataLayer<Dtype>::~ImageDataLayer<Dtype>() {
   this->StopInternalThread();
 }
 
@@ -98,7 +99,8 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template <typename Dtype> void ImageDataLayer<Dtype>::ShuffleImages() {
+template <typename Dtype>
+void ImageDataLayer<Dtype>::ShuffleImages() {
   caffe::rng_t *prefetch_rng =
       static_cast<caffe::rng_t *>(prefetch_rng_->generator());
   shuffle(lines_.begin(), lines_.end(), prefetch_rng);

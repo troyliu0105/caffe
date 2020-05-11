@@ -23,7 +23,8 @@ void InferNewSize(const ResizeParameter &resize_param, const int old_width,
                   const int old_height, int *new_width, int *new_height);
 
 #ifdef USE_OPENCV
-template <typename T> bool is_border(const cv::Mat &edge, T color);
+template <typename T>
+bool is_border(const cv::Mat &edge, T color);
 
 // Auto cropping image.
 template <typename T>

@@ -233,7 +233,8 @@ void RecurrentLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template <typename Dtype> void RecurrentLayer<Dtype>::Reset() {
+template <typename Dtype>
+void RecurrentLayer<Dtype>::Reset() {
   // "Reset" the hidden state of the net by zeroing out all recurrent outputs.
   for (int i = 0; i < recur_output_blobs_.size(); ++i) {
     caffe_set(recur_output_blobs_[i]->count(), Dtype(0),

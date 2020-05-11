@@ -12,7 +12,8 @@ namespace caffe {
  * @brief Optimizes the parameters of a Net using
  *        stochastic gradient descent (SGD) with momentum.
  */
-template <typename Dtype> class SGDSolver : public Solver<Dtype> {
+template <typename Dtype>
+class SGDSolver : public Solver<Dtype> {
 public:
   explicit SGDSolver(const SolverParameter &param) : Solver<Dtype>(param) {
     PreSolve();
@@ -47,7 +48,8 @@ protected:
   DISABLE_COPY_AND_ASSIGN(SGDSolver);
 };
 
-template <typename Dtype> class NesterovSolver : public SGDSolver<Dtype> {
+template <typename Dtype>
+class NesterovSolver : public SGDSolver<Dtype> {
 public:
   explicit NesterovSolver(const SolverParameter &param)
       : SGDSolver<Dtype>(param) {}
@@ -61,7 +63,8 @@ protected:
   DISABLE_COPY_AND_ASSIGN(NesterovSolver);
 };
 
-template <typename Dtype> class AdaGradSolver : public SGDSolver<Dtype> {
+template <typename Dtype>
+class AdaGradSolver : public SGDSolver<Dtype> {
 public:
   explicit AdaGradSolver(const SolverParameter &param)
       : SGDSolver<Dtype>(param) {
@@ -83,7 +86,8 @@ protected:
   DISABLE_COPY_AND_ASSIGN(AdaGradSolver);
 };
 
-template <typename Dtype> class RMSPropSolver : public SGDSolver<Dtype> {
+template <typename Dtype>
+class RMSPropSolver : public SGDSolver<Dtype> {
 public:
   explicit RMSPropSolver(const SolverParameter &param)
       : SGDSolver<Dtype>(param) {
@@ -109,7 +113,8 @@ protected:
   DISABLE_COPY_AND_ASSIGN(RMSPropSolver);
 };
 
-template <typename Dtype> class AdaDeltaSolver : public SGDSolver<Dtype> {
+template <typename Dtype>
+class AdaDeltaSolver : public SGDSolver<Dtype> {
 public:
   explicit AdaDeltaSolver(const SolverParameter &param)
       : SGDSolver<Dtype>(param) {
@@ -136,7 +141,8 @@ protected:
  * [1] D. P. Kingma and J. L. Ba, "ADAM: A Method for Stochastic Optimization."
  *     arXiv preprint arXiv:1412.6980v8 (2014).
  */
-template <typename Dtype> class AdamSolver : public SGDSolver<Dtype> {
+template <typename Dtype>
+class AdamSolver : public SGDSolver<Dtype> {
 public:
   explicit AdamSolver(const SolverParameter &param) : SGDSolver<Dtype>(param) {
     AdamPreSolve();

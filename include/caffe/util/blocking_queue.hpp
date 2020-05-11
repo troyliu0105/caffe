@@ -6,7 +6,8 @@
 
 namespace caffe {
 
-template <typename T> class BlockingQueue {
+template <typename T>
+class BlockingQueue {
 public:
   explicit BlockingQueue();
 

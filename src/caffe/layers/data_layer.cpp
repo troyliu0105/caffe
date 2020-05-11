@@ -15,7 +15,8 @@ template <typename Dtype>
 DataLayer<Dtype>::DataLayer(const LayerParameter &param)
     : BasePrefetchingDataLayer<Dtype>(param), reader_(param) {}
 
-template <typename Dtype> DataLayer<Dtype>::~DataLayer() {
+template <typename Dtype>
+DataLayer<Dtype>::~DataLayer() {
   this->StopInternalThread();
 }
 

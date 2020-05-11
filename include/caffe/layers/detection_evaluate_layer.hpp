@@ -18,7 +18,8 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template <typename Dtype> class DetectionEvaluateLayer : public Layer<Dtype> {
+template <typename Dtype>
+class DetectionEvaluateLayer : public Layer<Dtype> {
 public:
   explicit DetectionEvaluateLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}

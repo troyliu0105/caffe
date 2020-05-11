@@ -26,7 +26,8 @@ int main(int argc, char **argv);
 
 namespace caffe {
 
-template <typename TypeParam> class MultiDeviceTest : public ::testing::Test {
+template <typename TypeParam>
+class MultiDeviceTest : public ::testing::Test {
 public:
   typedef typename TypeParam::Dtype Dtype;
 
@@ -37,7 +38,8 @@ protected:
 
 typedef ::testing::Types<float, double> TestDtypes;
 
-template <typename TypeParam> struct CPUDevice {
+template <typename TypeParam>
+struct CPUDevice {
   typedef TypeParam Dtype;
   static const Caffe::Brew device = Caffe::CPU;
 };
@@ -52,7 +54,8 @@ typedef ::testing::Types<CPUDevice<float>, CPUDevice<double>>
 
 #else
 
-template <typename TypeParam> struct GPUDevice {
+template <typename TypeParam>
+struct GPUDevice {
   typedef TypeParam Dtype;
   static const Caffe::Brew device = Caffe::GPU;
 };

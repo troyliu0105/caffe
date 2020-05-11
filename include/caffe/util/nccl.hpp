@@ -16,13 +16,16 @@ namespace caffe {
 
 namespace nccl {
 
-template <typename Dtype> class dataType;
+template <typename Dtype>
+class dataType;
 
-template <> class dataType<float> {
+template <>
+class dataType<float> {
 public:
   static const ncclDataType_t type = ncclFloat;
 };
-template <> class dataType<double> {
+template <>
+class dataType<double> {
 public:
   static const ncclDataType_t type = ncclDouble;
 };

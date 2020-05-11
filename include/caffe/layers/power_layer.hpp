@@ -16,7 +16,8 @@ namespace caffe {
  *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
  *        and power @f$ \gamma @f$.
  */
-template <typename Dtype> class PowerLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class PowerLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides PowerParameter power_param,

@@ -27,7 +27,8 @@
 
 namespace caffe {
 
-template <typename Dtype> WindowDataLayer<Dtype>::~WindowDataLayer<Dtype>() {
+template <typename Dtype>
+WindowDataLayer<Dtype>::~WindowDataLayer<Dtype>() {
   this->StopInternalThread();
 }
 
@@ -214,7 +215,8 @@ void WindowDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template <typename Dtype> unsigned int WindowDataLayer<Dtype>::PrefetchRand() {
+template <typename Dtype>
+unsigned int WindowDataLayer<Dtype>::PrefetchRand() {
   CHECK(prefetch_rng_);
   caffe::rng_t *prefetch_rng =
       static_cast<caffe::rng_t *>(prefetch_rng_->generator());

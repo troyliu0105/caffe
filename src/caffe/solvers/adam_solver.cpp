@@ -4,7 +4,8 @@
 
 namespace caffe {
 
-template <typename Dtype> void AdamSolver<Dtype>::AdamPreSolve() {
+template <typename Dtype>
+void AdamSolver<Dtype>::AdamPreSolve() {
   // Add the extra history entries for Adam after those from
   // SGDSolver::PreSolve
   const vector<Blob<Dtype> *> &net_params = this->net_->learnable_params();

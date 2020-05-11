@@ -14,7 +14,8 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward, Backward, and proto params.
  */
-template <typename Dtype> class MVNLayer : public Layer<Dtype> {
+template <typename Dtype>
+class MVNLayer : public Layer<Dtype> {
 public:
   explicit MVNLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,

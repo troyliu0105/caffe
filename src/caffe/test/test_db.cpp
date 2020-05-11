@@ -15,7 +15,8 @@ namespace caffe {
 
 using boost::scoped_ptr;
 
-template <typename TypeParam> class DBTest : public ::testing::Test {
+template <typename TypeParam>
+class DBTest : public ::testing::Test {
 protected:
   DBTest()
       : backend_(TypeParam::backend),

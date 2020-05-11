@@ -14,7 +14,8 @@ namespace caffe {
 /**
  * @brief Clip: @f$ y = \max(min, \min(max, x)) @f$.
  */
-template <typename Dtype> class ClipLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class ClipLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides ClipParameter clip_param,

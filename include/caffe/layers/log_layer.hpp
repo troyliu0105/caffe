@@ -16,7 +16,8 @@ namespace caffe {
  *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
  *        and base @f$ \gamma @f$.
  */
-template <typename Dtype> class LogLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class LogLayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides LogParameter log_param,

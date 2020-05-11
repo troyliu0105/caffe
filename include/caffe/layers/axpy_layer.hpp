@@ -21,7 +21,8 @@ namespace caffe {
  *        into a single layer called "axpy".
  *
  */
-template <typename Dtype> class AxpyLayer : public Layer<Dtype> {
+template <typename Dtype>
+class AxpyLayer : public Layer<Dtype> {
 public:
   explicit AxpyLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

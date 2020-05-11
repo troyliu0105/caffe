@@ -15,7 +15,8 @@ namespace caffe {
  *        each element of the output depends only on the corresponding input
  *        element.
  */
-template <typename Dtype> class NeuronLayer : public Layer<Dtype> {
+template <typename Dtype>
+class NeuronLayer : public Layer<Dtype> {
 public:
   explicit NeuronLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,

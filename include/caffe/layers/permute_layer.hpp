@@ -22,7 +22,8 @@ void Permute(const int count, Dtype *bottom_data, const bool forward,
              const int *permute_order, const int *old_steps,
              const int *new_steps, const int num_axes, Dtype *top_data);
 
-template <typename Dtype> class PermuteLayer : public Layer<Dtype> {
+template <typename Dtype>
+class PermuteLayer : public Layer<Dtype> {
 public:
   explicit PermuteLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

@@ -19,7 +19,8 @@
 
 namespace caffe {
 
-template <typename Dtype> class AssistedExcitationLayer : public Layer<Dtype> {
+template <typename Dtype>
+class AssistedExcitationLayer : public Layer<Dtype> {
 public:
   explicit AssistedExcitationLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}

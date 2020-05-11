@@ -19,7 +19,8 @@ namespace caffe {
  * Note that the gradient vanishes as the values move away from 0.
  * The ReLULayer is often a better choice for this reason.
  */
-template <typename Dtype> class TanHLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class TanHLayer : public NeuronLayer<Dtype> {
 public:
   explicit TanHLayer(const LayerParameter &param) : NeuronLayer<Dtype>(param) {}
 

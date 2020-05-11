@@ -15,7 +15,8 @@ namespace caffe {
  * TODO(weiliu89): thorough documentation for Forward, Backward, and proto
  * params.
  */
-template <typename Dtype> class NormalizeLayer : public Layer<Dtype> {
+template <typename Dtype>
+class NormalizeLayer : public Layer<Dtype> {
 public:
   explicit NormalizeLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

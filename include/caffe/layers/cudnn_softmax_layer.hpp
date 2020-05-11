@@ -16,7 +16,8 @@ namespace caffe {
  * @brief cuDNN implementation of SoftmaxLayer.
  *        Fallback to SoftmaxLayer for CPU mode.
  */
-template <typename Dtype> class CuDNNSoftmaxLayer : public SoftmaxLayer<Dtype> {
+template <typename Dtype>
+class CuDNNSoftmaxLayer : public SoftmaxLayer<Dtype> {
 public:
   explicit CuDNNSoftmaxLayer(const LayerParameter &param)
       : SoftmaxLayer<Dtype>(param), handles_setup_(false) {}

@@ -5,7 +5,8 @@
 
 namespace caffe {
 
-template <typename Dtype> inline Dtype sigmoid(Dtype x) {
+template <typename Dtype>
+inline Dtype sigmoid(Dtype x) {
   return 0.5 * tanh(0.5 * x) + 0.5;
 }
 

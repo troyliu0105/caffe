@@ -27,7 +27,8 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template <typename Dtype> class YoloDetectionOutputLayer : public Layer<Dtype> {
+template <typename Dtype>
+class YoloDetectionOutputLayer : public Layer<Dtype> {
 public:
   explicit YoloDetectionOutputLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}

@@ -22,7 +22,8 @@ namespace caffe {
  *
  * NOTE: does not implement Backwards operation.
  */
-template <typename Dtype> class DetectionOutputLayer : public Layer<Dtype> {
+template <typename Dtype>
+class DetectionOutputLayer : public Layer<Dtype> {
 public:
   explicit DetectionOutputLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}

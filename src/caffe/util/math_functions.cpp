@@ -9,13 +9,15 @@
 
 namespace caffe {
 
-template <> void caffe_cpu_logistic_activate(float *x, const int n) {
+template <>
+void caffe_cpu_logistic_activate(float *x, const int n) {
   int i;
   for (i = 0; i < n; ++i) {
     x[i] = logistic_activate(x[i]);
   }
 }
-template <> void caffe_cpu_hard_sigmoid(float *x, const int n) {
+template <>
+void caffe_cpu_hard_sigmoid(float *x, const int n) {
   int i;
   for (i = 0; i < n; ++i) {
     x[i] = hard_sigmoid(x[i]);
@@ -86,13 +88,15 @@ template void caffe_set<int>(const int N, const int alpha, int *Y);
 template void caffe_set<float>(const int N, const float alpha, float *Y);
 template void caffe_set<double>(const int N, const double alpha, double *Y);
 
-template <> void caffe_add_scalar(const int N, const float alpha, float *Y) {
+template <>
+void caffe_add_scalar(const int N, const float alpha, float *Y) {
   for (int i = 0; i < N; ++i) {
     Y[i] += alpha;
   }
 }
 
-template <> void caffe_add_scalar(const int N, const double alpha, double *Y) {
+template <>
+void caffe_add_scalar(const int N, const double alpha, double *Y) {
   for (int i = 0; i < N; ++i) {
     Y[i] += alpha;
   }
@@ -121,7 +125,8 @@ template void caffe_copy<unsigned int>(const int N, const unsigned int *X,
 template void caffe_copy<float>(const int N, const float *X, float *Y);
 template void caffe_copy<double>(const int N, const double *X, double *Y);
 
-template <> void caffe_scal<float>(const int N, const float alpha, float *X) {
+template <>
+void caffe_scal<float>(const int N, const float alpha, float *X) {
   cblas_sscal(N, alpha, X, 1);
 }
 
@@ -197,49 +202,60 @@ void caffe_powx<double>(const int n, const double *a, const double b,
   vdPowx(n, a, b, y);
 }
 
-template <> void caffe_sqr<float>(const int n, const float *a, float *y) {
+template <>
+void caffe_sqr<float>(const int n, const float *a, float *y) {
   vsSqr(n, a, y);
 }
 
-template <> void caffe_sqr<double>(const int n, const double *a, double *y) {
+template <>
+void caffe_sqr<double>(const int n, const double *a, double *y) {
   vdSqr(n, a, y);
 }
 
-template <> void caffe_sqrt<float>(const int n, const float *a, float *y) {
+template <>
+void caffe_sqrt<float>(const int n, const float *a, float *y) {
   vsSqrt(n, a, y);
 }
 
-template <> void caffe_sqrt<double>(const int n, const double *a, double *y) {
+template <>
+void caffe_sqrt<double>(const int n, const double *a, double *y) {
   vdSqrt(n, a, y);
 }
 
-template <> void caffe_exp<float>(const int n, const float *a, float *y) {
+template <>
+void caffe_exp<float>(const int n, const float *a, float *y) {
   vsExp(n, a, y);
 }
 
-template <> void caffe_exp<double>(const int n, const double *a, double *y) {
+template <>
+void caffe_exp<double>(const int n, const double *a, double *y) {
   vdExp(n, a, y);
 }
 
-template <> void caffe_log<float>(const int n, const float *a, float *y) {
+template <>
+void caffe_log<float>(const int n, const float *a, float *y) {
   vsLn(n, a, y);
 }
 
-template <> void caffe_log<double>(const int n, const double *a, double *y) {
+template <>
+void caffe_log<double>(const int n, const double *a, double *y) {
   vdLn(n, a, y);
 }
 
-template <> void caffe_abs<float>(const int n, const float *a, float *y) {
+template <>
+void caffe_abs<float>(const int n, const float *a, float *y) {
   vsAbs(n, a, y);
 }
 
-template <> void caffe_abs<double>(const int n, const double *a, double *y) {
+template <>
+void caffe_abs<double>(const int n, const double *a, double *y) {
   vdAbs(n, a, y);
 }
 
 unsigned int caffe_rng_rand() { return (*caffe_rng())(); }
 
-template <typename Dtype> Dtype caffe_nextafter(const Dtype b) {
+template <typename Dtype>
+Dtype caffe_nextafter(const Dtype b) {
   return boost::math::nextafter<Dtype>(b, std::numeric_limits<Dtype>::max());
 }
 
@@ -348,11 +364,13 @@ template float caffe_cpu_dot<float>(const int n, const float *x,
 template double caffe_cpu_dot<double>(const int n, const double *x,
                                       const double *y);
 
-template <> float caffe_cpu_asum<float>(const int n, const float *x) {
+template <>
+float caffe_cpu_asum<float>(const int n, const float *x) {
   return cblas_sasum(n, x, 1);
 }
 
-template <> double caffe_cpu_asum<double>(const int n, const double *x) {
+template <>
+double caffe_cpu_asum<double>(const int n, const double *x) {
   return cblas_dasum(n, x, 1);
 }
 

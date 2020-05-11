@@ -35,7 +35,8 @@ void CuDNNLRNLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   CUDNN_CHECK(cudnnSetLRNDescriptor(norm_desc_, size_, alpha_, beta_, k_));
 }
 
-template <typename Dtype> CuDNNLRNLayer<Dtype>::~CuDNNLRNLayer() {
+template <typename Dtype>
+CuDNNLRNLayer<Dtype>::~CuDNNLRNLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) {
     return;

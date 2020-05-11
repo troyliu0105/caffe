@@ -51,7 +51,8 @@ void CuDNNLCNLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template <typename Dtype> CuDNNLCNLayer<Dtype>::~CuDNNLCNLayer() {
+template <typename Dtype>
+CuDNNLCNLayer<Dtype>::~CuDNNLCNLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) {
     return;

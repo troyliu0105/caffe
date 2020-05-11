@@ -10,12 +10,14 @@
 #include <vector>
 
 namespace caffe {
-template <typename Dtype> Dtype Overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2);
+template <typename Dtype>
+Dtype Overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2);
 
 template <typename Dtype>
 Dtype Calc_iou(const vector<Dtype> &box, const vector<Dtype> &truth);
 
-template <typename Dtype> void disp(Blob<Dtype> &swap);
+template <typename Dtype>
+void disp(Blob<Dtype> &swap);
 
 template <typename Dtype>
 Dtype softmax_region(Dtype *input, int classes, int stride);
@@ -36,7 +38,8 @@ void delta_region_class(Dtype *input_data, Dtype *&diff, int index,
                         int class_label, int classes, float scale,
                         Dtype *avg_cat, int stride);
 
-template <typename Dtype> class PredictionResult {
+template <typename Dtype>
+class PredictionResult {
 public:
   Dtype x;
   Dtype y;
@@ -58,7 +61,8 @@ public:
   float recall75, loss;
 };
 
-template <typename Dtype> class RegionLossLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class RegionLossLayer : public LossLayer<Dtype> {
 public:
   explicit RegionLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}

@@ -14,7 +14,8 @@ const int kMaxBlobAxes = 32;
 namespace caffe {
 
 #ifdef USE_XTENSOR
-template <class T> class Blob;
+template <class T>
+class Blob;
 
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const Blob<T> &blob);
@@ -26,7 +27,8 @@ std::ostream &operator<<(std::ostream &out, const Blob<T> &blob);
  *
  * TODO(dox): more thorough description.
  */
-template <typename Dtype> class Blob {
+template <typename Dtype>
+class Blob {
 public:
   Blob() : data_(), diff_(), count_(0), capacity_(0) {}
 

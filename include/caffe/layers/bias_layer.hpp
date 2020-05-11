@@ -18,7 +18,8 @@ namespace caffe {
  * of the layer. Note: in case bias and scaling are desired, both operations can
  * be handled by `ScaleLayer` configured with `bias_term: true`.
  */
-template <typename Dtype> class BiasLayer : public Layer<Dtype> {
+template <typename Dtype>
+class BiasLayer : public Layer<Dtype> {
 public:
   explicit BiasLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

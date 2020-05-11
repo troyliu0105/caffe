@@ -49,9 +49,11 @@
 
 namespace caffe {
 
-template <typename Dtype> class Layer;
+template <typename Dtype>
+class Layer;
 
-template <typename Dtype> class LayerRegistry {
+template <typename Dtype>
+class LayerRegistry {
 public:
   typedef shared_ptr<Layer<Dtype>> (*Creator)(const LayerParameter &);
   typedef std::map<string, Creator> CreatorRegistry;
@@ -74,7 +76,8 @@ private:
   static string LayerTypeListString();
 };
 
-template <typename Dtype> class LayerRegisterer {
+template <typename Dtype>
+class LayerRegisterer {
 public:
   LayerRegisterer(const string &type,
                   shared_ptr<Layer<Dtype>> (*creator)(const LayerParameter &));

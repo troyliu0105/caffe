@@ -17,7 +17,8 @@ namespace caffe {
  * @brief Applies common transformations to the input data, such as
  * scaling, mirroring, substracting the image mean...
  */
-template <typename Dtype> class DataTransformer {
+template <typename Dtype>
+class DataTransformer {
 public:
   explicit DataTransformer(const TransformationParameter &param, Phase phase);
   virtual ~DataTransformer() {}

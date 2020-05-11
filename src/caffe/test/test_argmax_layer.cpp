@@ -12,7 +12,8 @@
 
 namespace caffe {
 
-template <typename Dtype> class ArgMaxLayerTest : public CPUDeviceTest<Dtype> {
+template <typename Dtype>
+class ArgMaxLayerTest : public CPUDeviceTest<Dtype> {
 protected:
   ArgMaxLayerTest()
       : blob_bottom_(new Blob<Dtype>(10, 10, 20, 20)),

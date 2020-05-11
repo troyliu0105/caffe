@@ -10,7 +10,8 @@ namespace bp = boost::python;
 
 namespace caffe {
 
-template <typename Dtype> class PythonLayer : public Layer<Dtype> {
+template <typename Dtype>
+class PythonLayer : public Layer<Dtype> {
 public:
   PythonLayer(PyObject *self, const LayerParameter &param)
       : Layer<Dtype>(param), self_(bp::handle<>(bp::borrowed(self))) {}

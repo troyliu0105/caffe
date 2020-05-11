@@ -2,6 +2,10 @@
 #include <io.h>
 #endif
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
@@ -524,7 +528,8 @@ bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
       << labelfile << " no valid image width/height.";
   int instance_id = 0;
   std::vector<int> h_samples;
-  BOOST_FOREACH (ptree::value_type &v1, pt.get_child("h_samples")) { // h_samples
+  BOOST_FOREACH (ptree::value_type &v1,
+                 pt.get_child("h_samples")) { // h_samples
     Annotation *anno = NULL;
     ptree object = v1.second;
     h_samples.push_back(object.get_value<int>());

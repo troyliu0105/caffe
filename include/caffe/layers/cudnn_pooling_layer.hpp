@@ -16,7 +16,8 @@ namespace caffe {
  * @brief cuDNN implementation of PoolingLayer.
  *        Fallback to PoolingLayer for CPU mode.
  */
-template <typename Dtype> class CuDNNPoolingLayer : public PoolingLayer<Dtype> {
+template <typename Dtype>
+class CuDNNPoolingLayer : public PoolingLayer<Dtype> {
 public:
   explicit CuDNNPoolingLayer(const LayerParameter &param)
       : PoolingLayer<Dtype>(param), handles_setup_(false) {}

@@ -15,7 +15,8 @@ namespace caffe {
  * Note: similarly to FlattenLayer, this layer does not change the input values
  * (see FlattenLayer, Blob::ShareData and Blob::ShareDiff).
  */
-template <typename Dtype> class ReshapeLayer : public Layer<Dtype> {
+template <typename Dtype>
+class ReshapeLayer : public Layer<Dtype> {
 public:
   explicit ReshapeLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

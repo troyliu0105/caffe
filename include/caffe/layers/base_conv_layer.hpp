@@ -14,7 +14,8 @@ namespace caffe {
  * @brief Abstract base class that factors out the BLAS code common to
  *        ConvolutionLayer and DeconvolutionLayer.
  */
-template <typename Dtype> class BaseConvolutionLayer : public Layer<Dtype> {
+template <typename Dtype>
+class BaseConvolutionLayer : public Layer<Dtype> {
 public:
   explicit BaseConvolutionLayer(const LayerParameter &param)
       : Layer<Dtype>(param) {}

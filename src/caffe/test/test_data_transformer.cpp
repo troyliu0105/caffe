@@ -29,7 +29,8 @@ void FillDatum(const int label, const int channels, const int height,
   }
 }
 
-template <typename Dtype> class DataTransformTest : public ::testing::Test {
+template <typename Dtype>
+class DataTransformTest : public ::testing::Test {
 protected:
   DataTransformTest() : seed_(1701), num_iter_(10) {}
 

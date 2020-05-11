@@ -13,7 +13,8 @@
 namespace caffe {
 
 #ifdef USE_CUDNN
-template <typename Dtype> class CuDNNLCNLayer : public LRNLayer<Dtype> {
+template <typename Dtype>
+class CuDNNLCNLayer : public LRNLayer<Dtype> {
 public:
   explicit CuDNNLCNLayer(const LayerParameter &param)
       : LRNLayer<Dtype>(param), handles_setup_(false), tempDataSize(0),

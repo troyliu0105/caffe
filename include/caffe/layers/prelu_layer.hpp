@@ -19,7 +19,8 @@ namespace caffe {
  *        channels. The number of axes of input blob should be greater than or
  *        equal to 2. The 1st axis (0-based) is seen as channels.
  */
-template <typename Dtype> class PReLULayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class PReLULayer : public NeuronLayer<Dtype> {
 public:
   /**
    * @param param provides PReLUParameter prelu_param,

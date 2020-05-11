@@ -75,7 +75,8 @@ LayerRegistry<Dtype>::CreateLayer(const LayerParameter &param) {
   return registry[type](param);
 }
 
-template <typename Dtype> vector<string> LayerRegistry<Dtype>::LayerTypeList() {
+template <typename Dtype>
+vector<string> LayerRegistry<Dtype>::LayerTypeList() {
   CreatorRegistry &registry = Registry();
   vector<string> layer_types;
   for (typename CreatorRegistry::iterator iter = registry.begin();
@@ -87,9 +88,11 @@ template <typename Dtype> vector<string> LayerRegistry<Dtype>::LayerTypeList() {
 
 // Layer registry should never be instantiated - everything is done with its
 // static variables.
-template <typename Dtype> LayerRegistry<Dtype>::LayerRegistry() {}
+template <typename Dtype>
+LayerRegistry<Dtype>::LayerRegistry() {}
 
-template <typename Dtype> string LayerRegistry<Dtype>::LayerTypeListString() {
+template <typename Dtype>
+string LayerRegistry<Dtype>::LayerTypeListString() {
   vector<string> layer_types = LayerTypeList();
   string layer_types_str;
   for (vector<string>::iterator iter = layer_types.begin();

@@ -28,7 +28,8 @@ namespace caffe {
  *         \end{array} \right.
  *      @f$
  */
-template <typename Dtype> class BNLLLayer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class BNLLLayer : public NeuronLayer<Dtype> {
 public:
   explicit BNLLLayer(const LayerParameter &param) : NeuronLayer<Dtype>(param) {}
 

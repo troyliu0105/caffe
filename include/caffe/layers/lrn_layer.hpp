@@ -19,7 +19,8 @@ namespace caffe {
  *
  * TODO(dox): thorough documentation for Forward, Backward, and proto params.
  */
-template <typename Dtype> class LRNLayer : public Layer<Dtype> {
+template <typename Dtype>
+class LRNLayer : public Layer<Dtype> {
 public:
   explicit LRNLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

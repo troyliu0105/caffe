@@ -15,7 +15,8 @@ namespace caffe {
  * @brief Computes the classification accuracy for a one-of-many
  *        classification task.
  */
-template <typename Dtype> class AccuracyLayer : public Layer<Dtype> {
+template <typename Dtype>
+class AccuracyLayer : public Layer<Dtype> {
 public:
   /**
    * @param param provides AccuracyParameter accuracy_param,

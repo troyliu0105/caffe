@@ -15,7 +15,8 @@ namespace caffe {
  * This data layer is a container that merely holds the data assigned to it;
  * forward, backward, and reshape are all no-ops.
  */
-template <typename Dtype> class InputLayer : public Layer<Dtype> {
+template <typename Dtype>
+class InputLayer : public Layer<Dtype> {
 public:
   explicit InputLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

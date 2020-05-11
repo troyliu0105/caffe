@@ -40,7 +40,8 @@ DataReader<T>::DataReader(const LayerParameter &param)
   body_->new_queue_pairs_.push(queue_pair_);
 }
 
-template <typename T> DataReader<T>::~DataReader() {
+template <typename T>
+DataReader<T>::~DataReader() {
   string key = source_key(body_->param_);
   body_.reset();
   boost::mutex::scoped_lock lock(bodies_mutex_);
@@ -49,14 +50,16 @@ template <typename T> DataReader<T>::~DataReader() {
   }
 }
 
-template <typename T> DataReader<T>::QueuePair::QueuePair(int size) {
+template <typename T>
+DataReader<T>::QueuePair::QueuePair(int size) {
   // Initialize the free queue with requested number of data
   for (int i = 0; i < size; ++i) {
     free_.push(new T());
   }
 }
 
-template <typename T> DataReader<T>::QueuePair::~QueuePair() {
+template <typename T>
+DataReader<T>::QueuePair::~QueuePair() {
   T *t;
   while (free_.try_pop(&t)) {
     delete t;
@@ -72,9 +75,13 @@ DataReader<T>::Body::Body(const LayerParameter &param)
   StartInternalThread();
 }
 
-template <typename T> DataReader<T>::Body::~Body() { StopInternalThread(); }
+template <typename T>
+DataReader<T>::Body::~Body() {
+  StopInternalThread();
+}
 
-template <typename T> void DataReader<T>::Body::InternalThreadEntry() {
+template <typename T>
+void DataReader<T>::Body::InternalThreadEntry() {
   shared_ptr<db::DB> db(db::GetDB(param_.data_param().backend()));
   db->Open(param_.data_param().source(), db::READ);
   shared_ptr<db::Cursor> cursor(db->NewCursor());

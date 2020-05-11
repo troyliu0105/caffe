@@ -84,7 +84,8 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype>> root_solver, int device)
   CUDA_CHECK(cudaSetDevice(initial_device));
 }
 
-template <typename Dtype> GPUParams<Dtype>::~GPUParams() {
+template <typename Dtype>
+GPUParams<Dtype>::~GPUParams() {
   CUDA_CHECK(cudaFree(data_));
   CUDA_CHECK(cudaFree(diff_));
 }
@@ -122,13 +123,15 @@ NCCL<Dtype>::NCCL(shared_ptr<Solver<Dtype>> solver, const string &uid)
   Init();
 }
 
-template <typename Dtype> void NCCL<Dtype>::Init() {
+template <typename Dtype>
+void NCCL<Dtype>::Init() {
   if (solver_->param().layer_wise_reduce()) {
     CUDA_CHECK(cudaStreamCreateWithFlags(&stream_, cudaStreamNonBlocking));
   }
 }
 
-template <typename Dtype> NCCL<Dtype>::~NCCL() {
+template <typename Dtype>
+NCCL<Dtype>::~NCCL() {
   if (solver_->param().layer_wise_reduce()) {
     CUDA_CHECK(cudaStreamDestroy(stream_));
   }
@@ -137,10 +140,12 @@ template <typename Dtype> NCCL<Dtype>::~NCCL() {
   }
 }
 
-template <typename Dtype> boost::barrier *NCCL<Dtype>::barrier() {
+template <typename Dtype>
+boost::barrier *NCCL<Dtype>::barrier() {
   return barrier_;
 }
-template <typename Dtype> void NCCL<Dtype>::set_barrier(boost::barrier *value) {
+template <typename Dtype>
+void NCCL<Dtype>::set_barrier(boost::barrier *value) {
   barrier_ = value;
 }
 
@@ -157,7 +162,8 @@ void NCCL<Dtype>::InitSingleProcess(vector<NCCL<Dtype> *> *nccls) {
   }
 }
 
-template <typename Dtype> string NCCL<Dtype>::new_uid() {
+template <typename Dtype>
+string NCCL<Dtype>::new_uid() {
   string uid;
   uid.resize(NCCL_UNIQUE_ID_BYTES);
   ncclUniqueId nccl_uid;
@@ -166,7 +172,8 @@ template <typename Dtype> string NCCL<Dtype>::new_uid() {
   return uid;
 }
 
-template <typename Dtype> void NCCL<Dtype>::Broadcast() {
+template <typename Dtype>
+void NCCL<Dtype>::Broadcast() {
   if (barrier_) { // NULL in multi process case
     barrier_->wait();
   }
@@ -178,7 +185,8 @@ template <typename Dtype> void NCCL<Dtype>::Broadcast() {
   }
 }
 
-template <typename Dtype> void NCCL<Dtype>::run(int layer) {
+template <typename Dtype>
+void NCCL<Dtype>::run(int layer) {
   CHECK(solver_->param().layer_wise_reduce());
   vector<shared_ptr<Blob<Dtype>>> &blobs =
       solver_->net()->layers()[layer]->blobs();
@@ -211,7 +219,8 @@ template <typename Dtype> void NCCL<Dtype>::run(int layer) {
   }
 }
 
-template <typename Dtype> void NCCL<Dtype>::on_gradients_ready() {
+template <typename Dtype>
+void NCCL<Dtype>::on_gradients_ready() {
   if (solver_->param().layer_wise_reduce()) {
     CHECK_EQ(solver_->net()->params().size(),
              solver_->net()->learnable_params().size())
@@ -231,7 +240,8 @@ template <typename Dtype> void NCCL<Dtype>::on_gradients_ready() {
   }
 }
 
-template <typename Dtype> class Worker : public InternalThread {
+template <typename Dtype>
+class Worker : public InternalThread {
 public:
   explicit Worker(shared_ptr<Solver<Dtype>> rank0, int device,
                   boost::barrier *barrier, vector<NCCL<Dtype> *> *nccls,

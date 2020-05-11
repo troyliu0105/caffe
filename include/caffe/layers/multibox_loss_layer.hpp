@@ -22,7 +22,8 @@ namespace caffe {
  *  - use matched boxes and confidences to compute loss.
  *
  */
-template <typename Dtype> class MultiBoxLossLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class MultiBoxLossLayer : public LossLayer<Dtype> {
 public:
   explicit MultiBoxLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param) {}

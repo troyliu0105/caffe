@@ -15,7 +15,8 @@ namespace caffe {
 
 // The gradient checker adds a L2 normalization loss function on top of the
 // top blobs, and checks the gradient.
-template <typename Dtype> class GradientChecker {
+template <typename Dtype>
+class GradientChecker {
 public:
   // kink and kink_range specify an ignored nonsmooth region of the form
   // kink - kink_range <= |feature value| <= kink + kink_range,

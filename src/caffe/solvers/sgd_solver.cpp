@@ -23,7 +23,8 @@ namespace caffe {
 //
 // where base_lr, max_iter, gamma, step, stepvalue and power are defined
 // in the solver parameter protocol buffer, and iter is the current iteration.
-template <typename Dtype> Dtype SGDSolver<Dtype>::GetLearningRate() {
+template <typename Dtype>
+Dtype SGDSolver<Dtype>::GetLearningRate() {
   Dtype rate;
   const string &lr_policy = this->param_.lr_policy();
   if (lr_policy == "fixed") {
@@ -80,7 +81,8 @@ template <typename Dtype> Dtype SGDSolver<Dtype>::GetLearningRate() {
   return rate;
 }
 
-template <typename Dtype> void SGDSolver<Dtype>::PreSolve() {
+template <typename Dtype>
+void SGDSolver<Dtype>::PreSolve() {
   // Initialize the history
   const vector<Blob<Dtype> *> &net_params = this->net_->learnable_params();
   history_.clear();
@@ -94,7 +96,8 @@ template <typename Dtype> void SGDSolver<Dtype>::PreSolve() {
   }
 }
 
-template <typename Dtype> void SGDSolver<Dtype>::ClipGradients() {
+template <typename Dtype>
+void SGDSolver<Dtype>::ClipGradients() {
   const Dtype clip_gradients = this->param_.clip_gradients();
   if (clip_gradients < 0) {
     return;
@@ -116,7 +119,8 @@ template <typename Dtype> void SGDSolver<Dtype>::ClipGradients() {
   }
 }
 
-template <typename Dtype> void SGDSolver<Dtype>::ApplyUpdate() {
+template <typename Dtype>
+void SGDSolver<Dtype>::ApplyUpdate() {
   Dtype rate = GetLearningRate();
   if (this->param_.display() && this->iter_ % this->param_.display() == 0) {
     LOG_IF(INFO, Caffe::root_solver())
@@ -136,7 +140,8 @@ template <typename Dtype> void SGDSolver<Dtype>::ApplyUpdate() {
   ++this->iter_;
 }
 
-template <typename Dtype> void SGDSolver<Dtype>::Normalize(int param_id) {
+template <typename Dtype>
+void SGDSolver<Dtype>::Normalize(int param_id) {
   if (this->param_.iter_size() == 1) {
     return;
   }
@@ -163,7 +168,8 @@ template <typename Dtype> void SGDSolver<Dtype>::Normalize(int param_id) {
   }
 }
 
-template <typename Dtype> void SGDSolver<Dtype>::Regularize(int param_id) {
+template <typename Dtype>
+void SGDSolver<Dtype>::Regularize(int param_id) {
   const vector<Blob<Dtype> *> &net_params = this->net_->learnable_params();
   const vector<float> &net_params_weight_decay =
       this->net_->params_weight_decay();

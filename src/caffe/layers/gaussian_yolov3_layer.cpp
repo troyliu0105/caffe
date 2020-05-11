@@ -273,7 +273,8 @@ void GaussianYolov3Layer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   diff_.ReshapeLike(*bottom[0]);
   real_diff_.ReshapeLike(*bottom[0]);
 }
-template <typename Dtype> int int_index(vector<Dtype> a, int val, int n) {
+template <typename Dtype>
+int int_index(vector<Dtype> a, int val, int n) {
   int i;
   for (i = 0; i < n; ++i) {
     if (a[i] == val)
@@ -406,8 +407,8 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
         diff[index + 8 * stride] = (-1) * (0 - swap_data[index + 8 * stride]);
         // diff[index + 4 * stride] = (-1) * (0 - exp(input_data[index + 4 *
         // stride]-exp(input_data[index + 4 * stride]))); diff[index + 4 *
-        // stride] = (-1) * noobject_scale_ * (0 - swap_data[index + 4 * stride])
-        // *logistic_gradient(swap_data[index + 4 * stride]);
+        // stride] = (-1) * noobject_scale_ * (0 - swap_data[index + 4 *
+        // stride]) *logistic_gradient(swap_data[index + 4 * stride]);
         if (best_iou > thresh_) {
           diff[index + 8 * stride] = 0;
         }

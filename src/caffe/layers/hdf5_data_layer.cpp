@@ -23,7 +23,8 @@ TODO:
 
 namespace caffe {
 
-template <typename Dtype> HDF5DataLayer<Dtype>::~HDF5DataLayer<Dtype>() {}
+template <typename Dtype>
+HDF5DataLayer<Dtype>::~HDF5DataLayer<Dtype>() {}
 
 // Load data and label from HDF5 filename into the class property blobs.
 template <typename Dtype>
@@ -128,7 +129,8 @@ void HDF5DataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   }
 }
 
-template <typename Dtype> bool HDF5DataLayer<Dtype>::Skip() {
+template <typename Dtype>
+bool HDF5DataLayer<Dtype>::Skip() {
   int size = Caffe::solver_count();
   int rank = Caffe::solver_rank();
   bool keep = (offset_ % size) == rank ||
@@ -137,7 +139,8 @@ template <typename Dtype> bool HDF5DataLayer<Dtype>::Skip() {
   return !keep;
 }
 
-template <typename Dtype> void HDF5DataLayer<Dtype>::Next() {
+template <typename Dtype>
+void HDF5DataLayer<Dtype>::Next() {
   if (++current_row_ == hdf_blobs_[0]->shape(0)) {
     if (num_files_ > 1) {
       ++current_file_;

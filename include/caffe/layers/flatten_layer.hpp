@@ -19,7 +19,8 @@ namespace caffe {
  * and in Backward, the diff pointer of the bottom Blob to that of the top Blob
  * (see Blob::ShareDiff).
  */
-template <typename Dtype> class FlattenLayer : public Layer<Dtype> {
+template <typename Dtype>
+class FlattenLayer : public Layer<Dtype> {
 public:
   explicit FlattenLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,

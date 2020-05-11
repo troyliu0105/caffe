@@ -4,7 +4,8 @@
 
 namespace caffe {
 
-template <typename Dtype> void ConvolutionLayer<Dtype>::compute_output_shape() {
+template <typename Dtype>
+void ConvolutionLayer<Dtype>::compute_output_shape() {
   const int *kernel_shape_data = this->kernel_shape_.cpu_data();
   const int *stride_data = this->stride_.cpu_data();
   const int *pad_data = this->pad_.cpu_data();

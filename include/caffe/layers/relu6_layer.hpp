@@ -14,7 +14,8 @@ namespace caffe {
 /**
  * @ y = min(max(0, x),6)
  */
-template <typename Dtype> class ReLU6Layer : public NeuronLayer<Dtype> {
+template <typename Dtype>
+class ReLU6Layer : public NeuronLayer<Dtype> {
 public:
   explicit ReLU6Layer(const LayerParameter &param)
       : NeuronLayer<Dtype>(param) {}

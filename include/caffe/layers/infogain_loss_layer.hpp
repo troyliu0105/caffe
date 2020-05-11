@@ -45,7 +45,8 @@ namespace caffe {
  *        \log(\hat{p}_{n,k})
  *      @f$, where @f$ H_{l_n} @f$ denotes row @f$l_n@f$ of @f$H@f$.
  */
-template <typename Dtype> class InfogainLossLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class InfogainLossLayer : public LossLayer<Dtype> {
 public:
   explicit InfogainLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), infogain_() {}

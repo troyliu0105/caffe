@@ -14,7 +14,8 @@
 
 namespace caffe {
 
-template <typename Dtype> class RecurrentLayer;
+template <typename Dtype>
+class RecurrentLayer;
 
 /**
  * @brief An abstract class for implementing recurrent behavior inside of an
@@ -22,7 +23,8 @@ template <typename Dtype> class RecurrentLayer;
  *        you should use one of its implementations which defines the recurrent
  *        architecture, such as RNNLayer or LSTMLayer.
  */
-template <typename Dtype> class RecurrentLayer : public Layer<Dtype> {
+template <typename Dtype>
+class RecurrentLayer : public Layer<Dtype> {
 public:
   explicit RecurrentLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

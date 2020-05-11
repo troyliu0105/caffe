@@ -23,7 +23,8 @@ template <typename Dtype>
 LaneDataLayer<Dtype>::LaneDataLayer(const LayerParameter &param)
     : BasePrefetchingDataLayer<Dtype>(param), reader_(param) {}
 
-template <typename Dtype> LaneDataLayer<Dtype>::~LaneDataLayer() {
+template <typename Dtype>
+LaneDataLayer<Dtype>::~LaneDataLayer() {
   this->StopInternalThread();
 }
 

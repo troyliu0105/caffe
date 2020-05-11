@@ -14,7 +14,8 @@
 
 namespace caffe {
 
-template <typename Dtype> class RecurrentLayer;
+template <typename Dtype>
+class RecurrentLayer;
 
 /**
  * @brief Processes sequential inputs using a "Long Short-Term Memory" (LSTM)
@@ -44,7 +45,8 @@ template <typename Dtype> class RecurrentLayer;
  * [3] Graves, Alex. "Generating sequences with recurrent neural networks."
  *     arXiv preprint arXiv:1308.0850 (2013).
  */
-template <typename Dtype> class LSTMLayer : public RecurrentLayer<Dtype> {
+template <typename Dtype>
+class LSTMLayer : public RecurrentLayer<Dtype> {
 public:
   explicit LSTMLayer(const LayerParameter &param)
       : RecurrentLayer<Dtype>(param) {}
@@ -64,7 +66,8 @@ protected:
  *        non-linearity of the LSTM, producing the updated cell and hidden
  *        states.
  */
-template <typename Dtype> class LSTMUnitLayer : public Layer<Dtype> {
+template <typename Dtype>
+class LSTMUnitLayer : public Layer<Dtype> {
 public:
   explicit LSTMUnitLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,

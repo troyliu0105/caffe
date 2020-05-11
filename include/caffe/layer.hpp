@@ -31,7 +31,8 @@ namespace caffe {
  * gradients with respect to their input Blob%s, given the error gradients with
  * their output Blob%s.
  */
-template <typename Dtype> class Layer {
+template <typename Dtype>
+class Layer {
 public:
   /**
    * You should not implement your own constructor. Any set up code should go

@@ -47,9 +47,11 @@
 
 namespace caffe {
 
-template <typename Dtype> class Solver;
+template <typename Dtype>
+class Solver;
 
-template <typename Dtype> class SolverRegistry {
+template <typename Dtype>
+class SolverRegistry {
 public:
   typedef Solver<Dtype> *(*Creator)(const SolverParameter &);
   typedef std::map<string, Creator> CreatorRegistry;
@@ -72,7 +74,8 @@ private:
   static string SolverTypeListString();
 };
 
-template <typename Dtype> class SolverRegisterer {
+template <typename Dtype>
+class SolverRegisterer {
 public:
   SolverRegisterer(const string &type,
                    Solver<Dtype> *(*creator)(const SolverParameter &));

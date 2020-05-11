@@ -12,24 +12,28 @@
 
 namespace caffe {
 
-template <typename Dtype> Dtype epsilon() {
+template <typename Dtype>
+Dtype epsilon() {
   return std::numeric_limits<Dtype>().epsilon();
 }
 
 //#define sigmoid(x)  logistic_activate(x)
 //#define sigmoid_gradient(x)  logistic_gradient(x)
 
-template <typename Dtype> static inline Dtype logistic_activate(Dtype x) {
+template <typename Dtype>
+static inline Dtype logistic_activate(Dtype x) {
   return 1. / (1. + exp(-x));
 }
-template <typename Dtype> static inline Dtype logistic_gradient(Dtype x) {
+template <typename Dtype>
+static inline Dtype logistic_gradient(Dtype x) {
   return (1 - x) * x;
 }
 static inline float hard_sigmoid(float x) {
   return std::min(1., std::max(0., x * 0.2 + 0.5));
 }
 
-template <typename Dtype> void caffe_cpu_logistic_activate(Dtype *x, int n) {
+template <typename Dtype>
+void caffe_cpu_logistic_activate(Dtype *x, int n) {
   caffe_sigmoid(n, x, x);
 }
 
@@ -39,7 +43,8 @@ void caffe_gpu_logistic_activate(const int N, const Dtype *a, Dtype *y);
 template <typename Dtype>
 void caffe_gpu_hard_sigmoid(const int N, const Dtype *a, Dtype *y);
 
-template <typename Dtype> void caffe_cpu_hard_sigmoid(Dtype *x, const int n);
+template <typename Dtype>
+void caffe_cpu_hard_sigmoid(Dtype *x, const int n);
 
 // Caffe gemm provides a simpler interface to the gemm functions, with the
 // limitation that the data has to be contiguous in memory.
@@ -112,7 +117,8 @@ void caffe_add_scalar(const int N, const Dtype alpha, Dtype *X);
 template <typename Dtype>
 void caffe_scal(const int N, const Dtype alpha, Dtype *X);
 
-template <typename Dtype> void caffe_sqr(const int N, const Dtype *a, Dtype *y);
+template <typename Dtype>
+void caffe_sqr(const int N, const Dtype *a, Dtype *y);
 
 template <typename Dtype>
 void caffe_sqrt(const int N, const Dtype *a, Dtype *y);
@@ -126,12 +132,14 @@ void caffe_sub(const int N, const Dtype *a, const Dtype *b, Dtype *y);
 template <typename Dtype>
 void caffe_sub(int N, const Dtype *a, Dtype b, Dtype *y);
 
-template <typename Dtype> void caffe_softmax(int N, const Dtype *a, Dtype *y);
+template <typename Dtype>
+void caffe_softmax(int N, const Dtype *a, Dtype *y);
 
 template <typename Dtype>
 void caffe_softmax(int N, const Dtype *a, int stride, Dtype *y);
 
-template <typename Dtype> void caffe_sigmoid(int N, const Dtype *a, Dtype *y);
+template <typename Dtype>
+void caffe_sigmoid(int N, const Dtype *a, Dtype *y);
 
 template <typename Dtype>
 void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y);
@@ -147,7 +155,8 @@ void caffe_powx(const int n, const Dtype *a, const Dtype b, Dtype *y);
 
 unsigned int caffe_rng_rand();
 
-template <typename Dtype> Dtype caffe_nextafter(const Dtype b);
+template <typename Dtype>
+Dtype caffe_nextafter(const Dtype b);
 
 template <typename Dtype>
 void caffe_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype *r);
@@ -162,11 +171,14 @@ void caffe_rng_bernoulli(const int n, const Dtype p, int *r);
 template <typename Dtype>
 void caffe_rng_bernoulli(const int n, const Dtype p, unsigned int *r);
 
-template <typename Dtype> void caffe_exp(const int n, const Dtype *a, Dtype *y);
+template <typename Dtype>
+void caffe_exp(const int n, const Dtype *a, Dtype *y);
 
-template <typename Dtype> void caffe_log(const int n, const Dtype *a, Dtype *y);
+template <typename Dtype>
+void caffe_log(const int n, const Dtype *a, Dtype *y);
 
-template <typename Dtype> void caffe_abs(const int n, const Dtype *a, Dtype *y);
+template <typename Dtype>
+void caffe_abs(const int n, const Dtype *a, Dtype *y);
 
 template <typename Dtype>
 Dtype caffe_cpu_dot(const int n, const Dtype *x, const Dtype *y);
@@ -176,11 +188,13 @@ Dtype caffe_cpu_strided_dot(const int n, const Dtype *x, const int incx,
                             const Dtype *y, const int incy);
 
 // Returns the sum of the absolute values of the elements of vector x
-template <typename Dtype> Dtype caffe_cpu_asum(const int n, const Dtype *x);
+template <typename Dtype>
+Dtype caffe_cpu_asum(const int n, const Dtype *x);
 
 // the branchless, type-safe version from
 // http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
-template <typename Dtype> inline int8_t caffe_sign(Dtype val) {
+template <typename Dtype>
+inline int8_t caffe_sign(Dtype val) {
   return (Dtype(0) < val) - (val < Dtype(0));
 }
 

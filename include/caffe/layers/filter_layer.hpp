@@ -15,7 +15,8 @@ namespace caffe {
  * the corresponding item has to be filtered, non-zero means that corresponding
  * item needs to stay).
  */
-template <typename Dtype> class FilterLayer : public Layer<Dtype> {
+template <typename Dtype>
+class FilterLayer : public Layer<Dtype> {
 public:
   explicit FilterLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

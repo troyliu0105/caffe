@@ -29,7 +29,8 @@ void CuDNNPoolingLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                 this->pooled_height_, this->pooled_width_);
 }
 
-template <typename Dtype> CuDNNPoolingLayer<Dtype>::~CuDNNPoolingLayer() {
+template <typename Dtype>
+CuDNNPoolingLayer<Dtype>::~CuDNNPoolingLayer() {
   // Check that handles have been setup before destroying.
   if (!handles_setup_) {
     return;

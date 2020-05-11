@@ -23,7 +23,8 @@ namespace caffe {
 // Represents a net parameters. Once a net is created, its parameter buffers can
 // be replaced by ones from Params, to allow parallelization. Params ensures
 // parameters are allocated in one consecutive array.
-template <typename Dtype> class Params {
+template <typename Dtype>
+class Params {
 public:
   explicit Params(shared_ptr<Solver<Dtype>> root_solver);
   virtual ~Params() {}
@@ -41,7 +42,8 @@ protected:
 };
 
 // Params stored in GPU memory.
-template <typename Dtype> class GPUParams : public Params<Dtype> {
+template <typename Dtype>
+class GPUParams : public Params<Dtype> {
 public:
   GPUParams(shared_ptr<Solver<Dtype>> root_solver, int device);
   virtual ~GPUParams();

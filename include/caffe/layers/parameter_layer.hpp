@@ -7,7 +7,8 @@
 
 namespace caffe {
 
-template <typename Dtype> class ParameterLayer : public Layer<Dtype> {
+template <typename Dtype>
+class ParameterLayer : public Layer<Dtype> {
 public:
   explicit ParameterLayer(const LayerParameter &param) : Layer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,

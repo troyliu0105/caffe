@@ -38,7 +38,8 @@ namespace caffe {
  * (Note: Caffe, and SGD in general, is certainly \b not the best way to solve
  * linear least squares problems! We use it only as an instructive example.)
  */
-template <typename Dtype> class EuclideanLossLayer : public LossLayer<Dtype> {
+template <typename Dtype>
+class EuclideanLossLayer : public LossLayer<Dtype> {
 public:
   explicit EuclideanLossLayer(const LayerParameter &param)
       : LossLayer<Dtype>(param), diff_() {}
