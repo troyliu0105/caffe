@@ -123,9 +123,8 @@ layer {
   }
   data_param {
     source: "data/VOC0712/VOC0712_trainval_lmdb"
-    batch_size: 4
+    batch_size: 8
     backend: LMDB
-    prefetch: 8
   }
   annotated_data_param {
 	yolo_data_type : 1

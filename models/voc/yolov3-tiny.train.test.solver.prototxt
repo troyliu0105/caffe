@@ -1,24 +1,37 @@
+#=============== net
 net: "models/voc/yolov3-tiny.train.test.prototxt"
+
+#=============== iter
 # voc07 test has 4952 images
 test_iter: 4952
 #test_iter: 2476
-test_interval: 10000
+test_interval: 100000
+max_iter: 500000
+iter_size: 2
+
+#=============== optimizer
+solver_mode: GPU
+type: "SGD"
 base_lr: 0.0001
-display: 10
-max_iter: 100000
+weight_decay: 0.00001
 lr_policy: "multistep"
 gamma: 0.1
-weight_decay: 0.00001
-snapshot: 20000
+stepvalue: 400000
+stepvalue: 450000
+
+#=============== snapshot
+snapshot: 50000
 snapshot_prefix: "models/voc/yolov3-tiny.train.test"
-solver_mode: GPU
-debug_info: false
 snapshot_after_train: true
-test_initialization: false
-average_loss: 10
-stepvalue: 80000
-stepvalue: 90000
-type: "SGD"
+
+#=============== evaluate
 eval_type: "detection"
 ap_version: "11point"
 show_per_class_result: true
+
+#=============== misc
+display: 100
+debug_info: false
+test_initialization: false
+average_loss: 10
+random_seed: 3355411
