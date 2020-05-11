@@ -130,21 +130,6 @@ template <typename Dtype>
 void caffe_sub(const int N, const Dtype *a, const Dtype *b, Dtype *y);
 
 template <typename Dtype>
-void caffe_sub(int N, const Dtype *a, Dtype b, Dtype *y);
-
-template <typename Dtype>
-void caffe_softmax(int N, const Dtype *a, Dtype *y);
-
-template <typename Dtype>
-void caffe_softmax(int N, const Dtype *a, int stride, Dtype *y);
-
-template <typename Dtype>
-void caffe_sigmoid(int N, const Dtype *a, Dtype *y);
-
-template <typename Dtype>
-void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y);
-
-template <typename Dtype>
 void caffe_mul(const int N, const Dtype *a, const Dtype *b, Dtype *y);
 
 template <typename Dtype>
@@ -372,6 +357,27 @@ void caffe_gpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype *y);
   }
 
 #endif // !CPU_ONLY
+
+template <typename Dtype>
+void caffe_softmax(int N, const Dtype *a, Dtype *y);
+
+template <typename Dtype>
+void caffe_softmax(int N, const Dtype *a, int stride, Dtype *y);
+
+template <typename Dtype>
+void caffe_sigmoid(int N, const Dtype *a, Dtype *y);
+
+template <typename Dtype>
+void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y);
+
+template <typename Dtype>
+void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y);
+
+template <typename Dtype>
+void caffe_sub(int N, const Dtype *a, Dtype b, Dtype *y);
+
+template <typename Dtype>
+void caffe_div(int N, const Dtype *a, Dtype b, Dtype *y);
 
 } // namespace caffe
 

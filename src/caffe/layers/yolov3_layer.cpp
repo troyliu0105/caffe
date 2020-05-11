@@ -6,6 +6,7 @@
  * Avisonic
  */
 #include "caffe/layers/yolov3_layer.hpp"
+#include "caffe/util/yolo_utils.hpp"
 #include <cfloat>
 #include <cmath>
 #include <fstream>
@@ -527,6 +528,13 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   Dtype *swap_data = swap_.mutable_cpu_data();
   int len = 4 + num_class_ + 1;
   int stride = side_w_ * side_h_;
+  for (int b = 0; b < bottom[0]->num(); ++b) {
+    for (int n = 0; n < num_; ++n) {
+      int index = bottom[0]->count(1) * b + n * len * stride;
+      activate_yolo_cpu(stride, index, num_class_, input_data, swap_data,
+                        DEFAULT, false, true);
+    }
+  }
   /*for (int i = 0; i < 81; i++) {
     char label[100];
     sprintf(label, "%d,%s\n",i, CLASSES[static_cast<int>(i )]);
@@ -585,17 +593,6 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         float best_iou = 0;
         int best_class = -1;
         vector<Dtype> best_truth;
-#ifdef CPU_ONLY
-        for (int c = 0; c < len; ++c) {
-          int index2 = c * stride + index;
-          // LOG(INFO)<<index2;
-          if (c == 2 || c == 3) {
-            swap_data[index2] = (input_data[index2 + 0]);
-          } else {
-            swap_data[index2] = logistic_activate(input_data[index2 + 0]);
-          }
-        }
-#endif
         int y2 = s / side_w_;
         int x2 = s % side_w_;
         get_region_box(pred, swap_data, biases_, mask_[n], index, x2, y2,

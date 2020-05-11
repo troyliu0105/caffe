@@ -25,10 +25,6 @@ namespace caffe {
  * @param arc
  * @param gaussian_box
  */
-// template<class Dtype>
-// void activate_yolo_cpu(int len, int stride, int index, int num_classes,
-//                       const Dtype *input_data, Dtype *output_data, Dtype
-//                       *scores, ARC arc, bool gaussian_box);
 template <class Dtype>
 void activate_yolo_cpu(int stride, int index, int num_classes,
                        const Dtype *input_data, Dtype *output_data, ARC arc,

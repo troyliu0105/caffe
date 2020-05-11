@@ -517,8 +517,7 @@ message Yolov3Parameter {
 
     enum ARC {
         DEFAULT = 0;
-        BCE = 1;
-        CE = 2;
+        CE = 1;
     }
     optional ARC arc = 21 [default = DEFAULT];
 }

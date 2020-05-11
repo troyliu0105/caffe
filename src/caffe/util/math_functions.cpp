@@ -365,6 +365,11 @@ template double caffe_cpu_dot<double>(const int n, const double *x,
                                       const double *y);
 
 template <>
+int caffe_cpu_asum<int>(const int n, const int *x) {
+  return std::accumulate(x, x + n, 0);
+}
+
+template <>
 float caffe_cpu_asum<float>(const int n, const float *x) {
   return cblas_sasum(n, x, 1);
 }
@@ -387,5 +392,79 @@ void caffe_cpu_scale<double>(const int n, const double alpha, const double *x,
   cblas_dcopy(n, x, 1, y, 1);
   cblas_dscal(n, alpha, y, 1);
 }
+
+// -----------------------------------------------------------------------------
+// new added function
+template <typename Dtype>
+void caffe_softmax(const int N, const Dtype *a, Dtype *y) {
+  Dtype ele = a[0];
+  for (int i = 0; i < N; ++i) {
+    if (a[i] > ele)
+      ele = a[i];
+  }
+  caffe_sub(N, a, ele, y);
+  caffe_exp(N, y, y);
+  ele = caffe_cpu_asum(N, y);
+  caffe_div(N, y, ele, y);
+}
+template void caffe_softmax(const int N, const float *a, float *y);
+template void caffe_softmax(const int N, const double *a, double *y);
+
+template <typename Dtype>
+void caffe_softmax(const int N, const Dtype *a, int stride, Dtype *y) {
+  auto *tmp = new Dtype[N];
+  for (int i = 0; i < N; ++i) {
+    tmp[i] = a[i * stride];
+  }
+  caffe_softmax(N, y, y);
+  for (int i = 0; i < N; ++i) {
+    y[i * stride] = tmp[i];
+  }
+  delete[] tmp;
+}
+template void caffe_softmax(const int N, const float *a, int stride, float *y);
+template void caffe_softmax(const int N, const double *a, int stride,
+                            double *y);
+
+template <typename Dtype>
+void caffe_sigmoid(const int N, const Dtype *a, Dtype *y) {
+  for (int i = 0; i < N; ++i) {
+    y[i] = logistic_activate(a[i]);
+  }
+}
+template void caffe_sigmoid(const int N, const int *a, int *y);
+template void caffe_sigmoid(const int N, const float *a, float *y);
+template void caffe_sigmoid(const int N, const double *a, double *y);
+
+template <typename Dtype>
+void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y) {
+  for (int i = 0; i < N; ++i) {
+    y[i * stride] = logistic_activate(a[i * stride]);
+  }
+}
+template void caffe_sigmoid(const int N, const int *a, int stride, int *y);
+template void caffe_sigmoid(const int N, const float *a, int stride, float *y);
+template void caffe_sigmoid(const int N, const double *a, int stride,
+                            double *y);
+
+template <typename Dtype>
+void caffe_sub(int N, const Dtype *a, Dtype b, Dtype *y) {
+  for (int i = 0; i < N; ++i) {
+    y[i] = a[i] - b;
+  }
+}
+template void caffe_sub(const int N, const int *a, int b, int *y);
+template void caffe_sub(const int N, const float *a, float b, float *y);
+template void caffe_sub(const int N, const double *a, double b, double *y);
+
+template <typename Dtype>
+void caffe_div(int N, const Dtype *a, Dtype b, Dtype *y) {
+  for (int i = 0; i < N; ++i) {
+    y[i] = a[i] / b;
+  }
+}
+template void caffe_div(const int N, const int *a, int b, int *y);
+template void caffe_div(const int N, const float *a, float b, float *y);
+template void caffe_div(const int N, const double *a, double b, double *y);
 
 } // namespace caffe
