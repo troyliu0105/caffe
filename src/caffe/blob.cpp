@@ -23,7 +23,7 @@ std::ostream &operator<<<>(std::ostream &out, const Blob<float> &blob) {
   out << "Shape: {";
   for (int d = 0; d  < arr.dimension(); d++) {
     out << arr.shape(d);
-    if (!(d + 1 != arr.dimension())) out << ", ";
+    if (d + 1 != arr.dimension()) out << ", ";
   }
   out << "}, ";
   out << "Max: " << xt::amax(arr) << ", ";
@@ -42,8 +42,8 @@ std::ostream &operator<<<>(std::ostream &out, const Blob<double> &blob) {
   auto arr = xt::adapt(blob.cpu_data(), shape);
   out << "Shape: {";
   for (int d = 0; d  < arr.dimension(); d++) {
-  out << arr.shape(d);
-    if (!(d + 1 != arr.dimension())) out << ", ";
+    out << arr.shape(d);
+    if (d + 1 != arr.dimension()) out << ", ";
   }
   out << "}, ";
   out << "Max: " << xt::amax(arr) << ", ";

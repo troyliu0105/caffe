@@ -159,7 +159,7 @@ layer {
   }
   data_param {
     source: "data/VOC0712/VOC0712_test_lmdb"
-    batch_size: 2
+    batch_size: 1
     backend: LMDB
   }
   annotated_data_param {
@@ -194,6 +194,7 @@ layer {
     top: "block0-conv0"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -258,6 +259,7 @@ layer {
     top: "block1-conv0"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -322,6 +324,7 @@ layer {
     top: "block2-conv0"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -386,6 +389,7 @@ layer {
     top: "block3-conv0"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -450,6 +454,7 @@ layer {
     top: "block4-conv0"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -514,6 +519,7 @@ layer {
     type: "BatchNorm"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -578,6 +584,7 @@ layer {
     top: "block6-conv0"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -630,6 +637,7 @@ layer {
     top: "block6-conv1"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -682,6 +690,7 @@ layer {
     top: "block6-conv2"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -753,6 +762,7 @@ layer {
     top: "upsampler"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {
@@ -821,6 +831,7 @@ layer {
     type: "BatchNorm"
     batch_norm_param {
         eps: 0.0001
+        moving_average_fraction: 0.1
     }
 }
 layer {

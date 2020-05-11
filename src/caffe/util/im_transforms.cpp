@@ -17,6 +17,7 @@
 #endif
 #endif // USE_OPENCV
 
+#include "caffe/util/rng.hpp"
 #include <algorithm>
 #include <numeric>
 #include <vector>
@@ -672,7 +673,7 @@ void RandomOrderChannels(const cv::Mat &in_img, cv::Mat *out_img,
     CHECK_EQ(channels.size(), 3);
 
     // Shuffle the channels.
-    std::random_shuffle(channels.begin(), channels.end());
+    caffe::shuffle(channels.begin(), channels.end());
     cv::merge(channels, *out_img);
   } else {
     *out_img = in_img;

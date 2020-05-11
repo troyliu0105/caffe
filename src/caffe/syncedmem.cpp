@@ -4,7 +4,7 @@
 
 namespace caffe {
 SyncedMemory::SyncedMemory()
-    : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(0), head_(UNINITIALIZED),
+    : cpu_ptr_(nullptr), gpu_ptr_(nullptr), size_(0), head_(UNINITIALIZED),
       own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false) {
 #ifndef CPU_ONLY
 #ifdef DEBUG
@@ -14,7 +14,7 @@ SyncedMemory::SyncedMemory()
 }
 
 SyncedMemory::SyncedMemory(size_t size)
-    : cpu_ptr_(NULL), gpu_ptr_(NULL), size_(size), head_(UNINITIALIZED),
+    : cpu_ptr_(nullptr), gpu_ptr_(nullptr), size_(size), head_(UNINITIALIZED),
       own_cpu_data_(false), cpu_malloc_use_cuda_(false), own_gpu_data_(false) {
 #ifndef CPU_ONLY
 #ifdef DEBUG
@@ -47,7 +47,7 @@ inline void SyncedMemory::to_cpu() {
     break;
   case HEAD_AT_GPU:
 #ifndef CPU_ONLY
-    if (cpu_ptr_ == NULL) {
+    if (cpu_ptr_ == nullptr) {
       CaffeMallocHost(&cpu_ptr_, size_, &cpu_malloc_use_cuda_);
       own_cpu_data_ = true;
     }
@@ -74,7 +74,7 @@ inline void SyncedMemory::to_gpu() {
     own_gpu_data_ = true;
     break;
   case HEAD_AT_CPU:
-    if (gpu_ptr_ == NULL) {
+    if (gpu_ptr_ == nullptr) {
       CUDA_CHECK(cudaMalloc(&gpu_ptr_, size_));
       own_gpu_data_ = true;
     }
@@ -156,7 +156,7 @@ void *SyncedMemory::mutable_gpu_data() {
 void SyncedMemory::async_gpu_push(const cudaStream_t &stream) {
   check_device();
   CHECK(head_ == HEAD_AT_CPU);
-  if (gpu_ptr_ == NULL) {
+  if (gpu_ptr_ == nullptr) {
     CUDA_CHECK(cudaMalloc(&gpu_ptr_, size_));
     own_gpu_data_ = true;
   }
@@ -174,7 +174,7 @@ void SyncedMemory::check_device() {
   cudaGetDevice(&device);
   CHECK(device == device_);
   if (gpu_ptr_ && own_gpu_data_) {
-    cudaPointerAttributes attributes;
+    cudaPointerAttributes attributes{};
     CUDA_CHECK(cudaPointerGetAttributes(&attributes, gpu_ptr_));
     CHECK(attributes.device == device_);
   }
