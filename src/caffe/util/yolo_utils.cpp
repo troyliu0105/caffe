@@ -31,26 +31,26 @@ void activate_yolo_cpu(int stride, int index, int num_classes,
                        const Dtype *input_data, Dtype *output_data, ARC arc,
                        bool gaussian_box, bool is_train, float xy_scale) {
   if (gaussian_box) {
-    caffe_sigmoid(4 * stride, input_data + index, output_data + index);
+    caffe_cpu_sigmoid(4 * stride, input_data + index, output_data + index);
     index += 4 * stride;
     caffe_copy(stride, input_data + index, output_data + index);
     index += 1 * stride;
-    caffe_sigmoid(stride, input_data + index, output_data + index);
+    caffe_cpu_sigmoid(stride, input_data + index, output_data + index);
     index += 1 * stride;
     caffe_copy(stride, input_data + index, output_data + index);
     index += 1 * stride;
-    caffe_sigmoid(stride, input_data + index, output_data + index);
+    caffe_cpu_sigmoid(stride, input_data + index, output_data + index);
     index += 1 * stride;
-    caffe_sigmoid((+1) * stride, input_data + index, output_data + index);
+    caffe_cpu_sigmoid((+1) * stride, input_data + index, output_data + index);
   } else {
-    caffe_sigmoid(2 * stride, input_data + index, output_data + index);
+    caffe_cpu_sigmoid(2 * stride, input_data + index, output_data + index);
     index += 2 * stride; // w, h
     // caffe_exp(2 * stride, input_data + index, output_data + index);
     caffe_copy(2 * stride, input_data + index, output_data + index);
     index += 2 * stride; // conf, clz
     if (arc == DEFAULT) {
-      caffe_sigmoid((num_classes + 1) * stride, input_data + index,
-                    output_data + index);
+      caffe_cpu_sigmoid((num_classes + 1) * stride, input_data + index,
+                        output_data + index);
     } else if (arc == CE) {
       // CE arc 使用 softmax 激活
       // io[..., 4:] = F.softmax(io[..., 4:], dim=4)

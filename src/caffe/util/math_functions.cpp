@@ -412,25 +412,4 @@ template void caffe_softmax(const int N, const float *a, int stride, float *y);
 template void caffe_softmax(const int N, const double *a, int stride,
                             double *y);
 
-template <typename Dtype>
-void caffe_sigmoid(const int N, const Dtype *a, Dtype *y) {
-  for (int i = 0; i < N; ++i) {
-    y[i] = logistic_activate(a[i]);
-  }
-}
-template void caffe_sigmoid(const int N, const int *a, int *y);
-template void caffe_sigmoid(const int N, const float *a, float *y);
-template void caffe_sigmoid(const int N, const double *a, double *y);
-
-template <typename Dtype>
-void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y) {
-  for (int i = 0; i < N; ++i) {
-    y[i * stride] = logistic_activate(a[i * stride]);
-  }
-}
-template void caffe_sigmoid(const int N, const int *a, int stride, int *y);
-template void caffe_sigmoid(const int N, const float *a, int stride, float *y);
-template void caffe_sigmoid(const int N, const double *a, int stride,
-                            double *y);
-
 } // namespace caffe

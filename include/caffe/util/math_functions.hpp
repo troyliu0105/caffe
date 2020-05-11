@@ -34,7 +34,7 @@ static inline float hard_sigmoid(float x) {
 
 template <typename Dtype>
 void caffe_cpu_logistic_activate(Dtype *x, int n) {
-  caffe_sigmoid(n, x, x);
+  caffe_cpu_sigmoid(n, x, x);
 }
 
 template <typename Dtype>
@@ -208,6 +208,17 @@ inline void caffe_cpu_clip(int N, const Dtype *src, Dtype *dst, Dtype min,
     for (int i = 0; i < n; ++i) {                                              \
       operation;                                                               \
     }                                                                          \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  void caffe_cpu_##name(const int n, int stride, const Dtype *x, Dtype *y) {   \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(stride, 0);                                                       \
+    CHECK(x);                                                                  \
+    CHECK(y);                                                                  \
+    for (int i = 0; i < n; ++i) {                                              \
+      i *= stride;                                                             \
+      operation;                                                               \
+    }                                                                          \
   }
 
 // output is 1 for the positives, 0 for zero, and -1 for the negatives
@@ -366,11 +377,34 @@ void caffe_gpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype *y);
     }                                                                          \
   }                                                                            \
   template <typename Dtype>                                                    \
+  void caffe_##name##_scalar(const int n, int stride, const Dtype *x, Dtype b, \
+                             Dtype *y) {                                       \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(stride, 0);                                                       \
+    CHECK(x);                                                                  \
+    CHECK(y);                                                                  \
+    for (int i = 0; i < n; ++i) {                                              \
+      i *= stride;                                                             \
+      operation;                                                               \
+    }                                                                          \
+  }                                                                            \
+  template <typename Dtype>                                                    \
   void caffe_##name##_scalar(const int n, Dtype b, Dtype *y) {                 \
     CHECK_GT(n, 0);                                                            \
     CHECK(y);                                                                  \
     Dtype *x = y;                                                              \
     for (int i = 0; i < n; ++i) {                                              \
+      operation;                                                               \
+    }                                                                          \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  void caffe_##name##_scalar(const int n, int stride, Dtype b, Dtype *y) {     \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(stride, 0);                                                       \
+    CHECK(y);                                                                  \
+    Dtype *x = y;                                                              \
+    for (int i = 0; i < n; ++i) {                                              \
+      i *= stride;                                                             \
       operation;                                                               \
     }                                                                          \
   }
@@ -381,18 +415,13 @@ void caffe_softmax(int N, const Dtype *a, Dtype *y);
 template <typename Dtype>
 void caffe_softmax(int N, const Dtype *a, int stride, Dtype *y);
 
-template <typename Dtype>
-void caffe_sigmoid(int N, const Dtype *a, Dtype *y);
-
-template <typename Dtype>
-void caffe_sigmoid(int N, const Dtype *a, int stride, Dtype *y);
-
 DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(add, y[i] = x[i] + b)
 DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(sub, y[i] = x[i] - b)
 DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(mul, y[i] = x[i] * b)
 DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(div, y[i] = x[i] / b)
 
 DEFINE_CAFFE_CPU_UNARY_FUNC(tanh, y[i] = std::tanh(x[i]))
+DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid, y[i] = logistic_activate(x[i]))
 
 } // namespace caffe
 
