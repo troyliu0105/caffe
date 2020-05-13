@@ -50,6 +50,7 @@ void SmoothL1LossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
   const Dtype *diff_data = diff_.cpu_data();
   Dtype *error_data = errors_.mutable_cpu_data();
+#pragma omp parallel for
   for (int i = 0; i < count; ++i) {
     Dtype val = diff_data[i];
     Dtype abs_val = fabs(val);
@@ -69,6 +70,7 @@ void SmoothL1LossLayer<Dtype>::Backward_cpu(
     const vector<Blob<Dtype> *> &bottom) {
   int count = diff_.count();
   Dtype *diff_data = diff_.mutable_cpu_data();
+#pragma omp parallel for
   for (int i = 0; i < count; ++i) {
     Dtype val = diff_data[i];
     // f'(x) = x         if |x| < 1

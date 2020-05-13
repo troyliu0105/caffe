@@ -86,6 +86,7 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Forward_cpu(
   const Dtype *target = bottom[1]->cpu_data();
   int valid_count = 0;
   Dtype loss = 0;
+#pragma omp parallel for reduction(- : loss) reduction(+ : valid_count)
   for (int i = 0; i < bottom[0]->count(); ++i) {
     const int target_value = static_cast<int>(target[i]);
     if (has_ignore_label_ && target_value == ignore_label_) {

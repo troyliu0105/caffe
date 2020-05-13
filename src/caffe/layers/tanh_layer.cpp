@@ -13,6 +13,7 @@ void TanHLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const Dtype *bottom_data = bottom[0]->cpu_data();
   Dtype *top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
+#pragma omp parallel for
   for (int i = 0; i < count; ++i) {
     top_data[i] = tanh(bottom_data[i]);
   }
@@ -28,6 +29,7 @@ void TanHLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
     const int count = bottom[0]->count();
     Dtype tanhx;
+#pragma omp parallel for private(tanhx)
     for (int i = 0; i < count; ++i) {
       tanhx = top_data[i];
       bottom_diff[i] = top_diff[i] * (1 - tanhx * tanhx);
