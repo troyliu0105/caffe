@@ -34,7 +34,7 @@
 #include <boost/progress.hpp>
 #define MAKE_PROGRESSBAR(count, msg)                                           \
   boost::shared_ptr<boost::progress_display> pbar(                             \
-      new boost::progress_display(count, std::cout, msg));
+      new boost::progress_display(count, std::cout, std::string(msg) + "\n"));
 #define INC_PROGRESSBAR ++(*pbar);
 
 // Convert macro to string
@@ -145,7 +145,7 @@ public:
   public:
     RNG();
     explicit RNG(unsigned int seed);
-    explicit RNG(const RNG &);
+    //    explicit RNG(const RNG &);
     RNG &operator=(const RNG &);
     void *generator();
 

@@ -11,15 +11,13 @@ namespace caffe {
 
 template <>
 void caffe_cpu_logistic_activate(float *x, const int n) {
-  int i;
-  for (i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     x[i] = logistic_activate(x[i]);
   }
 }
 template <>
 void caffe_cpu_hard_sigmoid(float *x, const int n) {
-  int i;
-  for (i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     x[i] = hard_sigmoid(x[i]);
   }
 }
@@ -402,7 +400,7 @@ void caffe_softmax(const int N, const Dtype *a, int stride, Dtype *y) {
   for (int i = 0; i < N; ++i) {
     tmp[i] = a[i * stride];
   }
-  caffe_softmax(N, y, y);
+  caffe_softmax(N, tmp, tmp);
   for (int i = 0; i < N; ++i) {
     y[i * stride] = tmp[i];
   }

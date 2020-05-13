@@ -115,6 +115,50 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   crop_bbox->set_xmax(Dtype(w_off + width) / datum_width);
   crop_bbox->set_ymax(Dtype(h_off + height) / datum_height);
 
+  //#ifdef USE_OPENCV
+  //  cv::Mat origin_img;
+  //  if (datum.encoded()) {
+  //    CHECK(has_uint8) << "Must have uint8 data";
+  //    std::vector<char> vec_data(data.c_str(), data.c_str() + data.size());
+  //    origin_img = cv::imdecode(vec_data, -1);
+  //  } else {
+  //    if (has_uint8) {
+  //      origin_img = cv::Mat(datum_height, datum_width,
+  //      CV_8UC(datum_channels),
+  //                           const_cast<char *>(data.c_str()));
+  //    } else {
+  //      CHECK(datum.float_data_size()) << "Must have uint8 or float data";
+  //      std::vector<float> vec_buff;
+  //      std::copy(datum.float_data().begin(), datum.float_data().end(),
+  //                std::back_inserter(vec_buff));
+  //      origin_img = cv::Mat(datum_height, datum_width,
+  //      CV_32FC(datum_channels),
+  //                           vec_buff.data());
+  //    }
+  //  }
+  //  cv::Rect roi(w_off, h_off, width, height);
+  //  cv::Mat cropped_img = origin_img(roi);
+  //  if (*do_mirror) {
+  //    cv::flip(cropped_img, cropped_img, 0);
+  //  }
+  //
+  //  cv::Mat float_img;
+  //  cropped_img.convertTo(float_img, CV_32F);
+  //  if (has_mean_file) {
+  //    auto *mean_float = new float[data_mean_.count()];
+  //    std::copy(mean, mean + data_mean_.count(), mean_float);
+  //    cv::Mat mean_mat(height, width, CV_32FC(datum_channels), mean_float);
+  //    float_img -= mean_mat;
+  //    float_img *= scale;
+  //  } else if (has_mean_values) {
+  //    auto *mean_float = new float[mean_values_.size()];
+  //    std::copy(mean_values_.begin(), mean_values_.end(), mean_float);
+  //    cv::Mat mean_mat(1, 1, CV_32FC(datum_channels), mean_float);
+  //    cv::repeat(mean_mat, height, width, mean_mat);
+  //    float_img -= mean_mat;
+  //    float_img *= scale;
+  //  }
+  //#else
   Dtype datum_element;
   int top_index, data_index;
   for (int c = 0; c < datum_channels; ++c) {
@@ -1207,15 +1251,16 @@ void DataTransformer<Dtype>::ExpandImage(const cv::Mat &img,
   expand_img->create(height, width, img.type());
   expand_img->setTo(cv::Scalar(0));
   const bool has_mean_file = param_.has_mean_file();
-  const bool has_mean_values = mean_values_.size() > 0;
+  const bool has_mean_values = !mean_values_.empty();
 
   if (has_mean_file) {
     CHECK_EQ(img_channels, data_mean_.channels());
     CHECK_EQ(height, data_mean_.height());
     CHECK_EQ(width, data_mean_.width());
     Dtype *mean = data_mean_.mutable_cpu_data();
+#pragma omp parallel for num_threads(img_channels)
     for (int h = 0; h < height; ++h) {
-      uchar *ptr = expand_img->ptr<uchar>(h);
+      auto *ptr = expand_img->ptr<uchar>(h);
       int img_index = 0;
       for (int w = 0; w < width; ++w) {
         for (int c = 0; c < img_channels; ++c) {
@@ -1284,7 +1329,7 @@ void DataTransformer<Dtype>::Transform(Blob<Dtype> *input_blob,
   const Dtype scale = param_.scale();
   const bool do_mirror = param_.mirror() && Rand(2);
   const bool has_mean_file = param_.has_mean_file();
-  const bool has_mean_values = mean_values_.size() > 0;
+  const bool has_mean_values = !mean_values_.empty();
 
   int h_off = 0;
   int w_off = 0;
