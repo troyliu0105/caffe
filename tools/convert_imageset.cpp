@@ -37,6 +37,7 @@ DEFINE_string(backend, "lmdb",
               "The backend {lmdb, leveldb} for storing the result");
 DEFINE_int32(resize_width, 0, "Width images are resized to");
 DEFINE_int32(resize_height, 0, "Height images are resized to");
+DEFINE_int32(resize_max_to, 0, "min side is resized to");
 DEFINE_bool(
     check_size, false,
     "When this option is on, check that all the datum have the same size");
@@ -97,6 +98,7 @@ int main(int argc, char **argv) {
 
   int resize_height = std::max<int>(0, FLAGS_resize_height);
   int resize_width = std::max<int>(0, FLAGS_resize_width);
+  int max_side = std::max<int>(0, FLAGS_resize_max_to);
 
   // Create new DB
   scoped_ptr<db::DB> db(db::GetDB(FLAGS_backend));
@@ -122,9 +124,16 @@ int main(int argc, char **argv) {
       enc = fn.substr(p);
       std::transform(enc.begin(), enc.end(), enc.begin(), ::tolower);
     }
-    status = ReadImageToDatum(root_folder + lines[line_id].first,
-                              lines[line_id].second, resize_height,
-                              resize_width, is_color, enc, &datum);
+    if (max_side > 0) {
+      status = ReadImageToDatum(root_folder + lines[line_id].first,
+                                lines[line_id].second, 0, 0, 0, max_side,
+                                is_color, enc, &datum);
+    } else {
+      status = ReadImageToDatum(root_folder + lines[line_id].first,
+                                lines[line_id].second, resize_height,
+                                resize_width, is_color, enc, &datum);
+    }
+
     if (!status)
       continue;
     if (check_size) {
