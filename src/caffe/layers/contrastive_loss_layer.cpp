@@ -42,8 +42,8 @@ void ContrastiveLossLayer<Dtype>::Forward_cpu(
   Dtype loss(0.0);
   for (int i = 0; i < bottom[0]->num(); ++i) {
     dist_sq_.mutable_cpu_data()[i] =
-        caffe_cpu_dot(channels, diff_.cpu_data() + (i * channels),
-                      diff_.cpu_data() + (i * channels));
+        caffe_blas_dot(channels, diff_.cpu_data() + (i * channels),
+                       diff_.cpu_data() + (i * channels));
     if (static_cast<int>(bottom[2]->cpu_data()[i])) { // similar pairs
       loss += dist_sq_.cpu_data()[i];
     } else { // dissimilar pairs
@@ -77,8 +77,8 @@ void ContrastiveLossLayer<Dtype>::Backward_cpu(
       for (int j = 0; j < num; ++j) {
         Dtype *bout = bottom[i]->mutable_cpu_diff();
         if (static_cast<int>(bottom[2]->cpu_data()[j])) { // similar pairs
-          caffe_cpu_axpby(channels, alpha, diff_.cpu_data() + (j * channels),
-                          Dtype(0.0), bout + (j * channels));
+          caffe_blas_axpby(channels, alpha, diff_.cpu_data() + (j * channels),
+                           Dtype(0.0), bout + (j * channels));
         } else { // dissimilar pairs
           Dtype mdist(0.0);
           Dtype beta(0.0);
@@ -91,8 +91,8 @@ void ContrastiveLossLayer<Dtype>::Backward_cpu(
             beta = -alpha * mdist / (dist + Dtype(1e-4));
           }
           if (mdist > Dtype(0.0)) {
-            caffe_cpu_axpby(channels, beta, diff_.cpu_data() + (j * channels),
-                            Dtype(0.0), bout + (j * channels));
+            caffe_blas_axpby(channels, beta, diff_.cpu_data() + (j * channels),
+                             Dtype(0.0), bout + (j * channels));
           } else {
             caffe_set(channels, Dtype(0), bout + (j * channels));
           }

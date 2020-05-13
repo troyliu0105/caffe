@@ -34,7 +34,7 @@ void SwishLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const int count = bottom[0]->count();
   Dtype beta = this->layer_param_.swish_param().beta();
   caffe_copy(count, bottom_data, sigmoid_input_data);
-  caffe_scal(count, beta, sigmoid_input_data);
+  caffe_blas_scal(count, beta, sigmoid_input_data);
   sigmoid_layer_->Forward(sigmoid_bottom_vec_, sigmoid_top_vec_);
   caffe_mul(count, bottom_data, sigmoid_output_->cpu_data(), top_data);
 }

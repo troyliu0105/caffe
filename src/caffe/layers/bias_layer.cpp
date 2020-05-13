@@ -79,9 +79,9 @@ void BiasLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     caffe_copy(bottom[0]->count(), bottom_data, top_data);
   }
   for (int n = 0; n < outer_dim_; ++n) {
-    caffe_cpu_gemm(CblasNoTrans, CblasNoTrans, bias_dim_, inner_dim_, 1,
-                   Dtype(1), bias_data, bias_multiplier_.cpu_data(), Dtype(1),
-                   top_data);
+    caffe_blas_gemm(CblasNoTrans, CblasNoTrans, bias_dim_, inner_dim_, 1,
+                    Dtype(1), bias_data, bias_multiplier_.cpu_data(), Dtype(1),
+                    top_data);
     top_data += dim_;
   }
 }
@@ -104,8 +104,8 @@ void BiasLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
         (bias_param ? this->blobs_[0].get() : bottom[1])->mutable_cpu_diff();
     bool accum = bias_param;
     for (int n = 0; n < outer_dim_; ++n) {
-      caffe_cpu_gemv(CblasNoTrans, bias_dim_, inner_dim_, Dtype(1), top_diff,
-                     bias_multiplier_.cpu_data(), Dtype(accum), bias_diff);
+      caffe_blas_gemv(CblasNoTrans, bias_dim_, inner_dim_, Dtype(1), top_diff,
+                      bias_multiplier_.cpu_data(), Dtype(accum), bias_diff);
       top_diff += dim_;
       accum = true;
     }

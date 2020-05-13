@@ -58,7 +58,7 @@ TYPED_TEST(CPUMathFunctionsTest, TestAsum) {
   for (int i = 0; i < n; ++i) {
     std_asum += std::fabs(x[i]);
   }
-  TypeParam cpu_asum = caffe_cpu_asum<TypeParam>(n, x);
+  TypeParam cpu_asum = caffe_blas_asum<TypeParam>(n, x);
   EXPECT_LT((cpu_asum - std_asum) / std_asum, 1e-2);
 }
 
@@ -97,8 +97,8 @@ TYPED_TEST(CPUMathFunctionsTest, TestScale) {
   TypeParam alpha =
       this->blob_bottom_
           ->cpu_diff()[caffe_rng_rand() % this->blob_bottom_->count()];
-  caffe_cpu_scale<TypeParam>(n, alpha, this->blob_bottom_->cpu_data(),
-                             this->blob_bottom_->mutable_cpu_diff());
+  caffe_blas_scale<TypeParam>(n, alpha, this->blob_bottom_->cpu_data(),
+                              this->blob_bottom_->mutable_cpu_diff());
   const TypeParam *scaled = this->blob_bottom_->cpu_diff();
   const TypeParam *x = this->blob_bottom_->cpu_data();
   for (int i = 0; i < n; ++i) {

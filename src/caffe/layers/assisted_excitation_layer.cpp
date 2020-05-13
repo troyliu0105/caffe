@@ -17,9 +17,7 @@
 #include <vector>
 #define BOUND(a, min_val, max_val)                                             \
   ((a < min_val) ? min_val : (a >= max_val) ? (max_val) : a)
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 /* pi */
-#endif
+
 namespace caffe {
 
 template <typename Dtype>
@@ -125,10 +123,10 @@ void AssistedExcitationLayer<Dtype>::Forward_cpu(
     }
     for (int c = 0; c < bottom[0]->channels(); c++) {
       int offset = bottom[0]->offset(b) + c * bottom[2]->count(1);
-      caffe_axpy(width * height, Dtype(1), mask_data, &top_data[offset]);
+      caffe_blas_axpy(width * height, Dtype(1), mask_data, &top_data[offset]);
     }
 
-    // caffe_axpy(bottom[2]->count(1), coeffs_[i], bottom[i]->cpu_data(),
+    // caffe_blas_axpy(bottom[2]->count(1), coeffs_[i], bottom[i]->cpu_data(),
     // top_data);
     /*if(b==0) {
       cv::namedWindow("show", cv::WINDOW_NORMAL);

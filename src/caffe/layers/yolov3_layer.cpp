@@ -909,8 +909,8 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     // const Dtype alpha(1.0);
     // LOG(INFO) << "alpha:" << alpha;
 
-    caffe_cpu_axpby(bottom[0]->count(), alpha, diff_.cpu_data(), Dtype(0),
-                    bottom[0]->mutable_cpu_diff());
+    caffe_blas_axpby(bottom[0]->count(), alpha, diff_.cpu_data(), Dtype(0),
+                     bottom[0]->mutable_cpu_diff());
   }
 }
 

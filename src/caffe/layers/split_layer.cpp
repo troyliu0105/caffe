@@ -48,7 +48,7 @@ void SplitLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   for (int i = 2; i < top.size(); ++i) {
     const Dtype *top_diff = top[i]->cpu_diff();
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
-    caffe_axpy(count_, Dtype(1.), top_diff, bottom_diff);
+    caffe_blas_axpy(count_, Dtype(1.), top_diff, bottom_diff);
   }
 }
 

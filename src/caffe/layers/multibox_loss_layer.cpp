@@ -281,7 +281,8 @@ void MultiBoxLossLayer<Dtype>::Backward_cpu(
       Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
           normalization_, num_, num_priors_, num_matches_);
       Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer;
-      caffe_scal(loc_pred_.count(), loss_weight, loc_pred_.mutable_cpu_diff());
+      caffe_blas_scal(loc_pred_.count(), loss_weight,
+                      loc_pred_.mutable_cpu_diff());
       // Copy gradient back to bottom[0].
       const Dtype *loc_pred_diff = loc_pred_.cpu_diff();
       int count = 0;
@@ -321,8 +322,8 @@ void MultiBoxLossLayer<Dtype>::Backward_cpu(
       Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
           normalization_, num_, num_priors_, num_matches_);
       Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer;
-      caffe_scal(conf_pred_.count(), loss_weight,
-                 conf_pred_.mutable_cpu_diff());
+      caffe_blas_scal(conf_pred_.count(), loss_weight,
+                      conf_pred_.mutable_cpu_diff());
       // Copy gradient back to bottom[1].
       const Dtype *conf_pred_diff = conf_pred_.cpu_diff();
       if (do_neg_mining_) {

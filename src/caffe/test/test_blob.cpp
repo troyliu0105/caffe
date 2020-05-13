@@ -164,8 +164,8 @@ TYPED_TEST(BlobMathTest, TestSumOfSquares) {
 
   // Check sumsq_diff too.
   const Dtype kDiffScaleFactor = 7;
-  caffe_cpu_scale(this->blob_->count(), kDiffScaleFactor, data,
-                  this->blob_->mutable_cpu_diff());
+  caffe_blas_scale(this->blob_->count(), kDiffScaleFactor, data,
+                   this->blob_->mutable_cpu_diff());
   switch (TypeParam::device) {
   case Caffe::CPU:
     this->blob_->mutable_cpu_diff();
@@ -219,8 +219,8 @@ TYPED_TEST(BlobMathTest, TestAsum) {
 
   // Check asum_diff too.
   const Dtype kDiffScaleFactor = 7;
-  caffe_cpu_scale(this->blob_->count(), kDiffScaleFactor, data,
-                  this->blob_->mutable_cpu_diff());
+  caffe_blas_scale(this->blob_->count(), kDiffScaleFactor, data,
+                   this->blob_->mutable_cpu_diff());
   switch (TypeParam::device) {
   case Caffe::CPU:
     this->blob_->mutable_cpu_diff();
@@ -271,8 +271,8 @@ TYPED_TEST(BlobMathTest, TestScaleData) {
   // Check scale_diff too.
   const Dtype kDataToDiffScaleFactor = 7;
   const Dtype *data = this->blob_->cpu_data();
-  caffe_cpu_scale(this->blob_->count(), kDataToDiffScaleFactor, data,
-                  this->blob_->mutable_cpu_diff());
+  caffe_blas_scale(this->blob_->count(), kDataToDiffScaleFactor, data,
+                   this->blob_->mutable_cpu_diff());
   const Dtype expected_asum_before_scale = asum_before_scale * kDataScaleFactor;
   EXPECT_NEAR(expected_asum_before_scale, this->blob_->asum_data(),
               this->epsilon_ * expected_asum_before_scale);

@@ -126,23 +126,24 @@ void LRNLayer<Dtype>::CrossChannelForward_cpu(
               padded_square_data + padded_square.offset(0, pre_pad_));
     // Create the first channel scale
     for (int c = 0; c < size_; ++c) {
-      caffe_axpy<Dtype>(height_ * width_, alpha_over_size,
-                        padded_square_data + padded_square.offset(0, c),
-                        scale_data + scale_.offset(n, 0));
+      caffe_blas_axpy<Dtype>(height_ * width_, alpha_over_size,
+                             padded_square_data + padded_square.offset(0, c),
+                             scale_data + scale_.offset(n, 0));
     }
     for (int c = 1; c < channels_; ++c) {
       // copy previous scale
       caffe_copy<Dtype>(height_ * width_, scale_data + scale_.offset(n, c - 1),
                         scale_data + scale_.offset(n, c));
       // add head
-      caffe_axpy<Dtype>(height_ * width_, alpha_over_size,
-                        padded_square_data +
-                            padded_square.offset(0, c + size_ - 1),
-                        scale_data + scale_.offset(n, c));
+      caffe_blas_axpy<Dtype>(height_ * width_, alpha_over_size,
+                             padded_square_data +
+                                 padded_square.offset(0, c + size_ - 1),
+                             scale_data + scale_.offset(n, c));
       // subtract tail
-      caffe_axpy<Dtype>(height_ * width_, -alpha_over_size,
-                        padded_square_data + padded_square.offset(0, c - 1),
-                        scale_data + scale_.offset(n, c));
+      caffe_blas_axpy<Dtype>(height_ * width_, -alpha_over_size,
+                             padded_square_data +
+                                 padded_square.offset(0, c - 1),
+                             scale_data + scale_.offset(n, c));
     }
   }
 
@@ -215,24 +216,24 @@ void LRNLayer<Dtype>::CrossChannelBackward_cpu(
     // Now, compute the accumulated ratios and the bottom diff
     caffe_set(accum_ratio.count(), Dtype(0), accum_ratio_data);
     for (int c = 0; c < size_ - 1; ++c) {
-      caffe_axpy<Dtype>(height_ * width_, 1.,
-                        padded_ratio_data + padded_ratio.offset(0, c),
-                        accum_ratio_data);
+      caffe_blas_axpy<Dtype>(height_ * width_, 1.,
+                             padded_ratio_data + padded_ratio.offset(0, c),
+                             accum_ratio_data);
     }
     for (int c = 0; c < channels_; ++c) {
-      caffe_axpy<Dtype>(height_ * width_, 1.,
-                        padded_ratio_data +
-                            padded_ratio.offset(0, c + size_ - 1),
-                        accum_ratio_data);
+      caffe_blas_axpy<Dtype>(height_ * width_, 1.,
+                             padded_ratio_data +
+                                 padded_ratio.offset(0, c + size_ - 1),
+                             accum_ratio_data);
       // compute bottom diff
       caffe_mul<Dtype>(height_ * width_, bottom_data + top[0]->offset(n, c),
                        accum_ratio_data, accum_ratio_times_bottom);
-      caffe_axpy<Dtype>(height_ * width_, -cache_ratio_value,
-                        accum_ratio_times_bottom,
-                        bottom_diff + top[0]->offset(n, c));
-      caffe_axpy<Dtype>(height_ * width_, -1.,
-                        padded_ratio_data + padded_ratio.offset(0, c),
-                        accum_ratio_data);
+      caffe_blas_axpy<Dtype>(height_ * width_, -cache_ratio_value,
+                             accum_ratio_times_bottom,
+                             bottom_diff + top[0]->offset(n, c));
+      caffe_blas_axpy<Dtype>(height_ * width_, -1.,
+                             padded_ratio_data + padded_ratio.offset(0, c),
+                             accum_ratio_data);
     }
   }
 }

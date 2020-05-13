@@ -144,7 +144,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(
     // Scale gradient
     Dtype loss_weight =
         top[0]->cpu_diff()[0] / get_normalizer(normalization_, count);
-    caffe_scal(prob_.count(), loss_weight, bottom_diff);
+    caffe_blas_scal(prob_.count(), loss_weight, bottom_diff);
   }
 }
 

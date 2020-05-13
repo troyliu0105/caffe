@@ -214,7 +214,7 @@ void InfogainLossLayer<Dtype>::Backward_cpu(
     // Scale gradient
     Dtype loss_weight =
         top[0]->cpu_diff()[0] / get_normalizer(normalization_, count);
-    caffe_scal(bottom[0]->count(), loss_weight, bottom_diff);
+    caffe_blas_scal(bottom[0]->count(), loss_weight, bottom_diff);
   }
 }
 

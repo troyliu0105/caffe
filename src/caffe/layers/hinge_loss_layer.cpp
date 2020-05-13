@@ -29,10 +29,10 @@ void HingeLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   Dtype *loss = top[0]->mutable_cpu_data();
   switch (this->layer_param_.hinge_loss_param().norm()) {
   case HingeLossParameter_Norm_L1:
-    loss[0] = caffe_cpu_asum(count, bottom_diff) / num;
+    loss[0] = caffe_blas_asum(count, bottom_diff) / num;
     break;
   case HingeLossParameter_Norm_L2:
-    loss[0] = caffe_cpu_dot(count, bottom_diff, bottom_diff) / num;
+    loss[0] = caffe_blas_dot(count, bottom_diff, bottom_diff) / num;
     break;
   default:
     LOG(FATAL) << "Unknown Norm";
@@ -62,10 +62,10 @@ void HingeLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     switch (this->layer_param_.hinge_loss_param().norm()) {
     case HingeLossParameter_Norm_L1:
       caffe_cpu_sign(count, bottom_diff, bottom_diff);
-      caffe_scal(count, loss_weight / num, bottom_diff);
+      caffe_blas_scal(count, loss_weight / num, bottom_diff);
       break;
     case HingeLossParameter_Norm_L2:
-      caffe_scal(count, loss_weight * 2 / num, bottom_diff);
+      caffe_blas_scal(count, loss_weight * 2 / num, bottom_diff);
       break;
     default:
       LOG(FATAL) << "Unknown Norm";

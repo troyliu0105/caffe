@@ -47,7 +47,7 @@ void TileLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     caffe_copy(inner_dim_, top_diff, bottom_diff);
     top_diff += inner_dim_;
     for (int t = 1; t < tiles_; ++t) {
-      caffe_axpy(inner_dim_, Dtype(1), top_diff, bottom_diff);
+      caffe_blas_axpy(inner_dim_, Dtype(1), top_diff, bottom_diff);
       top_diff += inner_dim_;
     }
     bottom_diff += inner_dim_;

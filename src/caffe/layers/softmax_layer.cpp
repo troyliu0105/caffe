@@ -44,14 +44,14 @@ void SoftmaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       }
     }
     // subtraction
-    caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, inner_num_, 1,
-                          -1., sum_multiplier_.cpu_data(), scale_data, 1.,
-                          top_data);
+    caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, inner_num_, 1,
+                           -1., sum_multiplier_.cpu_data(), scale_data, 1.,
+                           top_data);
     // exponentiation
     caffe_exp<Dtype>(dim, top_data, top_data);
     // sum after exp
-    caffe_cpu_gemv<Dtype>(CblasTrans, channels, inner_num_, 1., top_data,
-                          sum_multiplier_.cpu_data(), 0., scale_data);
+    caffe_blas_gemv<Dtype>(CblasTrans, channels, inner_num_, 1., top_data,
+                           sum_multiplier_.cpu_data(), 0., scale_data);
     // division
     for (int j = 0; j < channels; j++) {
       caffe_div(inner_num_, top_data, scale_data, top_data);
@@ -74,14 +74,14 @@ void SoftmaxLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   for (int i = 0; i < outer_num_; ++i) {
     // compute dot(top_diff, top_data) and subtract them from the bottom diff
     for (int k = 0; k < inner_num_; ++k) {
-      scale_data[k] = caffe_cpu_strided_dot<Dtype>(
+      scale_data[k] = caffe_blas_strided_dot<Dtype>(
           channels, bottom_diff + i * dim + k, inner_num_,
           top_data + i * dim + k, inner_num_);
     }
     // subtraction
-    caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, inner_num_, 1,
-                          -1., sum_multiplier_.cpu_data(), scale_data, 1.,
-                          bottom_diff + i * dim);
+    caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, inner_num_, 1,
+                           -1., sum_multiplier_.cpu_data(), scale_data, 1.,
+                           bottom_diff + i * dim);
   }
   // elementwise multiplication
   caffe_mul(top[0]->count(), bottom_diff, top_data, bottom_diff);

@@ -174,7 +174,8 @@ void caffe_gpu_dot<double>(const int n, const double *x, const double *y,
   CUBLAS_CHECK(cublasDdot(Caffe::cublas_handle(), n, x, 1, y, 1, out));
 }
 
-template <> void caffe_gpu_asum<float>(const int n, const float *x, float *y) {
+template <>
+void caffe_gpu_asum<float>(const int n, const float *x, float *y) {
   CUBLAS_CHECK(cublasSasum(Caffe::cublas_handle(), n, x, 1, y));
 }
 
@@ -329,7 +330,8 @@ __global__ void abs_kernel(const int n, const Dtype *a, Dtype *y) {
   CUDA_KERNEL_LOOP(index, n) { y[index] = abs(a[index]); }
 }
 
-template <> void caffe_gpu_abs<float>(const int N, const float *a, float *y) {
+template <>
+void caffe_gpu_abs<float>(const int N, const float *a, float *y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
   abs_kernel<float><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(N, a, y);
 }
@@ -345,7 +347,8 @@ __global__ void exp_kernel(const int n, const Dtype *a, Dtype *y) {
   CUDA_KERNEL_LOOP(index, n) { y[index] = exp(a[index]); }
 }
 
-template <> void caffe_gpu_exp<float>(const int N, const float *a, float *y) {
+template <>
+void caffe_gpu_exp<float>(const int N, const float *a, float *y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
   exp_kernel<float><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(N, a, y);
 }
@@ -361,7 +364,8 @@ __global__ void log_kernel(const int n, const Dtype *a, Dtype *y) {
   CUDA_KERNEL_LOOP(index, n) { y[index] = log(a[index]); }
 }
 
-template <> void caffe_gpu_log<float>(const int N, const float *a, float *y) {
+template <>
+void caffe_gpu_log<float>(const int N, const float *a, float *y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
   log_kernel<float><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(N, a, y);
 }
@@ -399,7 +403,8 @@ __global__ void sqrt_kernel(const int n, const Dtype *a, Dtype *y) {
   CUDA_KERNEL_LOOP(index, n) { y[index] = sqrt(a[index]); }
 }
 
-template <> void caffe_gpu_sqrt<float>(const int N, const float *a, float *y) {
+template <>
+void caffe_gpu_sqrt<float>(const int N, const float *a, float *y) {
   // NOLINT_NEXT_LINE(whitespace/operators)
   sqrt_kernel<float><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(N, a, y);
 }

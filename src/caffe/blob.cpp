@@ -12,6 +12,7 @@
 namespace caffe {
 
 #ifdef USE_XTENSOR
+//clang-format off
 //@formatter:off
 template<>
 std::ostream &operator<<<>(std::ostream &out, const Blob<float> &blob) {
@@ -53,6 +54,7 @@ std::ostream &operator<<<>(std::ostream &out, const Blob<double> &blob) {
   return out;
 }
 //@formatter:on
+//clang-format on
 #endif
 
 template <typename Dtype>
@@ -208,7 +210,7 @@ template <typename Dtype> void Blob<Dtype>::Update() {
   switch (data_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
     // perform computation on CPU
-    caffe_axpy<Dtype>(count_, Dtype(-1),
+    caffe_blas_axpy<Dtype>(count_, Dtype(-1),
                       static_cast<const Dtype *>(diff_->cpu_data()),
                       static_cast<Dtype *>(data_->mutable_cpu_data()));
     break;
@@ -249,7 +251,7 @@ template <typename Dtype> Dtype Blob<Dtype>::asum_data() const {
   }
   switch (data_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
-    return caffe_cpu_asum(count_, cpu_data());
+    return caffe_blas_asum(count_, cpu_data());
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
 #ifndef CPU_ONLY
@@ -290,7 +292,7 @@ template <typename Dtype> Dtype Blob<Dtype>::asum_diff() const {
   }
   switch (diff_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
-    return caffe_cpu_asum(count_, cpu_diff());
+    return caffe_blas_asum(count_, cpu_diff());
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
 #ifndef CPU_ONLY
@@ -334,7 +336,7 @@ template <typename Dtype> Dtype Blob<Dtype>::sumsq_data() const {
   switch (data_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
     data = cpu_data();
-    sumsq = caffe_cpu_dot(count_, data, data);
+    sumsq = caffe_blas_dot(count_, data, data);
     break;
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
@@ -377,7 +379,7 @@ template <typename Dtype> Dtype Blob<Dtype>::sumsq_diff() const {
   switch (diff_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
     diff = cpu_diff();
-    sumsq = caffe_cpu_dot(count_, diff, diff);
+    sumsq = caffe_blas_dot(count_, diff, diff);
     break;
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
@@ -412,7 +414,7 @@ template <typename Dtype> void Blob<Dtype>::scale_data(Dtype scale_factor) {
   switch (data_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
     data = mutable_cpu_data();
-    caffe_scal(count_, scale_factor, data);
+    caffe_blas_scal(count_, scale_factor, data);
     return;
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
@@ -446,7 +448,7 @@ template <typename Dtype> void Blob<Dtype>::scale_diff(Dtype scale_factor) {
   switch (diff_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
     diff = mutable_cpu_diff();
-    caffe_scal(count_, scale_factor, diff);
+    caffe_blas_scal(count_, scale_factor, diff);
     return;
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:

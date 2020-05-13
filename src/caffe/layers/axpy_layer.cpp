@@ -40,9 +40,9 @@ void AxpyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   for (int n = 0; n < bottom[1]->num(); ++n) {
     for (int c = 0; c < channel_dim; ++c) {
       int scale_offset = n * channel_dim + c;
-      caffe_axpy(spatial_dim, scale_data[scale_offset],
-                 x_data + scale_offset * spatial_dim,
-                 top_data + scale_offset * spatial_dim);
+      caffe_blas_axpy(spatial_dim, scale_data[scale_offset],
+                      x_data + scale_offset * spatial_dim,
+                      top_data + scale_offset * spatial_dim);
     }
   }
 }
@@ -60,9 +60,9 @@ void AxpyLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype *scale_diff = bottom[0]->mutable_cpu_diff();
     caffe_mul(count, top_diff, x_data, x_diff);
     caffe_set(bottom[0]->count(), Dtype(0), scale_diff);
-    caffe_cpu_gemv(CblasNoTrans, bottom[0]->count(), spatial_dim, Dtype(1),
-                   x_diff, spatial_sum_multiplier_.cpu_data(), Dtype(1),
-                   scale_diff);
+    caffe_blas_gemv(CblasNoTrans, bottom[0]->count(), spatial_dim, Dtype(1),
+                    x_diff, spatial_sum_multiplier_.cpu_data(), Dtype(1),
+                    scale_diff);
     if (!propagate_down[1]) {
       caffe_set(bottom[1]->count(), Dtype(0), x_diff);
     }
@@ -75,9 +75,9 @@ void AxpyLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     for (int n = 0; n < bottom[1]->num(); ++n) {
       for (int c = 0; c < channel_dim; ++c) {
         int scale_offset = n * channel_dim + c;
-        caffe_cpu_scale(spatial_dim, scale_data[scale_offset],
-                        top_diff + scale_offset * spatial_dim,
-                        x_diff + scale_offset * spatial_dim);
+        caffe_blas_scale(spatial_dim, scale_data[scale_offset],
+                         top_diff + scale_offset * spatial_dim,
+                         x_diff + scale_offset * spatial_dim);
       }
     }
   }

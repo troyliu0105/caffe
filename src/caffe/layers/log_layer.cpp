@@ -41,7 +41,7 @@ void LogLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   } else {
     caffe_copy(count, bottom_data, top_data);
     if (input_scale_ != Dtype(1)) {
-      caffe_scal(count, input_scale_, top_data);
+      caffe_blas_scal(count, input_scale_, top_data);
     }
     if (input_shift_ != Dtype(0)) {
       caffe_add_scalar(count, input_shift_, top_data);
@@ -49,7 +49,7 @@ void LogLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     caffe_log(count, top_data, top_data);
   }
   if (base_scale_ != Dtype(1)) {
-    caffe_scal(count, base_scale_, top_data);
+    caffe_blas_scal(count, base_scale_, top_data);
   }
 }
 
@@ -66,14 +66,14 @@ void LogLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
   caffe_copy(count, bottom_data, bottom_diff);
   if (input_scale_ != Dtype(1)) {
-    caffe_scal(count, input_scale_, bottom_diff);
+    caffe_blas_scal(count, input_scale_, bottom_diff);
   }
   if (input_shift_ != Dtype(0)) {
     caffe_add_scalar(count, input_shift_, bottom_diff);
   }
   caffe_powx(count, bottom_diff, Dtype(-1), bottom_diff);
   if (backward_num_scale_ != Dtype(1)) {
-    caffe_scal(count, backward_num_scale_, bottom_diff);
+    caffe_blas_scal(count, backward_num_scale_, bottom_diff);
   }
   caffe_mul(count, top_diff, bottom_diff, bottom_diff);
 }

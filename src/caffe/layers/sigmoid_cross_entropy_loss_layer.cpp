@@ -126,7 +126,7 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Backward_cpu(
     }
     // Scale down gradient
     Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer_;
-    caffe_scal(count, loss_weight, bottom_diff);
+    caffe_blas_scal(count, loss_weight, bottom_diff);
   }
 }
 

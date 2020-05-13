@@ -102,29 +102,29 @@ void NormalizeLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     if (across_spatial_) {
       // add eps to avoid overflow
       norm_data[n] =
-          pow(caffe_cpu_asum<Dtype>(dim, buffer_data) + eps_, Dtype(0.5));
-      caffe_cpu_scale<Dtype>(dim, Dtype(1.0 / norm_data[n]), bottom_data,
-                             top_data);
+          pow(caffe_blas_asum<Dtype>(dim, buffer_data) + eps_, Dtype(0.5));
+      caffe_blas_scale<Dtype>(dim, Dtype(1.0 / norm_data[n]), bottom_data,
+                              top_data);
     } else {
-      caffe_cpu_gemv<Dtype>(CblasTrans, channels, spatial_dim, Dtype(1),
-                            buffer_data, sum_channel_multiplier, Dtype(1),
-                            norm_data);
+      caffe_blas_gemv<Dtype>(CblasTrans, channels, spatial_dim, Dtype(1),
+                             buffer_data, sum_channel_multiplier, Dtype(1),
+                             norm_data);
       // compute norm
       caffe_powx<Dtype>(spatial_dim, norm_data, Dtype(0.5), norm_data);
       // scale the layer
-      caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
-                            1, Dtype(1), sum_channel_multiplier, norm_data,
-                            Dtype(0), buffer_data);
+      caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
+                             1, Dtype(1), sum_channel_multiplier, norm_data,
+                             Dtype(0), buffer_data);
       caffe_div<Dtype>(dim, bottom_data, buffer_data, top_data);
       norm_data += spatial_dim;
     }
     // scale the output
     if (channel_shared_) {
-      caffe_scal<Dtype>(dim, scale[0], top_data);
+      caffe_blas_scal<Dtype>(dim, scale[0], top_data);
     } else {
-      caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
-                            1, Dtype(1), scale, sum_spatial_multiplier,
-                            Dtype(0), buffer_data);
+      caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
+                             1, Dtype(1), scale, sum_spatial_multiplier,
+                             Dtype(0), buffer_data);
       caffe_mul<Dtype>(dim, top_data, buffer_data, top_data);
     }
     bottom_data += dim;
@@ -158,14 +158,14 @@ void NormalizeLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype *scale_diff = this->blobs_[0]->mutable_cpu_diff();
     if (channel_shared_) {
       scale_diff[0] +=
-          caffe_cpu_dot<Dtype>(count, top_data, top_diff) / scale[0];
+          caffe_blas_dot<Dtype>(count, top_data, top_diff) / scale[0];
     } else {
       for (int n = 0; n < num; ++n) {
         caffe_mul<Dtype>(dim, top_data + n * dim, top_diff + n * dim,
                          buffer_data);
-        caffe_cpu_gemv<Dtype>(CblasNoTrans, channels, spatial_dim, Dtype(1),
-                              buffer_data, sum_spatial_multiplier, Dtype(0),
-                              buffer_channel);
+        caffe_blas_gemv<Dtype>(CblasNoTrans, channels, spatial_dim, Dtype(1),
+                               buffer_data, sum_spatial_multiplier, Dtype(0),
+                               buffer_channel);
         // store a / scale[i] in buffer_data temporary
         caffe_div<Dtype>(channels, buffer_channel, scale, buffer_channel);
         caffe_add<Dtype>(channels, buffer_channel, scale_diff, scale_diff);
@@ -177,44 +177,44 @@ void NormalizeLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   if (propagate_down[0]) {
     for (int n = 0; n < num; ++n) {
       if (across_spatial_) {
-        Dtype a = caffe_cpu_dot<Dtype>(dim, bottom_data, top_diff);
-        caffe_cpu_scale<Dtype>(dim, a / norm_data[n] / norm_data[n],
-                               bottom_data, bottom_diff);
+        Dtype a = caffe_blas_dot<Dtype>(dim, bottom_data, top_diff);
+        caffe_blas_scale<Dtype>(dim, a / norm_data[n] / norm_data[n],
+                                bottom_data, bottom_diff);
         caffe_sub<Dtype>(dim, top_diff, bottom_diff, bottom_diff);
-        caffe_scal<Dtype>(dim, Dtype(1.0 / norm_data[n]), bottom_diff);
+        caffe_blas_scal<Dtype>(dim, Dtype(1.0 / norm_data[n]), bottom_diff);
       } else {
         // dot product between bottom_data and top_diff
         caffe_mul<Dtype>(dim, bottom_data, top_diff, buffer_data);
-        caffe_cpu_gemv<Dtype>(CblasTrans, channels, spatial_dim, Dtype(1),
-                              buffer_data, sum_channel_multiplier, Dtype(0),
-                              buffer_spatial);
+        caffe_blas_gemv<Dtype>(CblasTrans, channels, spatial_dim, Dtype(1),
+                               buffer_data, sum_channel_multiplier, Dtype(0),
+                               buffer_spatial);
         // scale bottom_diff
-        caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
-                              1, Dtype(1), sum_channel_multiplier,
-                              buffer_spatial, Dtype(0), buffer_data);
+        caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels,
+                               spatial_dim, 1, Dtype(1), sum_channel_multiplier,
+                               buffer_spatial, Dtype(0), buffer_data);
         caffe_mul<Dtype>(dim, bottom_data, buffer_data, bottom_diff);
         // divide by square of norm
         caffe_powx<Dtype>(spatial_dim, norm_data, Dtype(2), buffer_spatial);
-        caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
-                              1, Dtype(1), sum_channel_multiplier,
-                              buffer_spatial, Dtype(0), buffer_data);
+        caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels,
+                               spatial_dim, 1, Dtype(1), sum_channel_multiplier,
+                               buffer_spatial, Dtype(0), buffer_data);
         caffe_div<Dtype>(dim, bottom_diff, buffer_data, bottom_diff);
         // subtract
         caffe_sub<Dtype>(dim, top_diff, bottom_diff, bottom_diff);
         // divide by norm
-        caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
-                              1, Dtype(1), sum_channel_multiplier, norm_data,
-                              Dtype(0), buffer_data);
+        caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels,
+                               spatial_dim, 1, Dtype(1), sum_channel_multiplier,
+                               norm_data, Dtype(0), buffer_data);
         caffe_div<Dtype>(dim, bottom_diff, buffer_data, bottom_diff);
         norm_data += spatial_dim;
       }
       // scale the diff
       if (channel_shared_) {
-        caffe_scal<Dtype>(dim, scale[0], bottom_diff);
+        caffe_blas_scal<Dtype>(dim, scale[0], bottom_diff);
       } else {
-        caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, spatial_dim,
-                              1, Dtype(1), scale, sum_spatial_multiplier,
-                              Dtype(0), buffer_data);
+        caffe_blas_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels,
+                               spatial_dim, 1, Dtype(1), scale,
+                               sum_spatial_multiplier, Dtype(0), buffer_data);
         caffe_mul<Dtype>(dim, bottom_diff, buffer_data, bottom_diff);
       }
       bottom_data += dim;

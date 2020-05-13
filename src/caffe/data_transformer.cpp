@@ -146,6 +146,7 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
       }
     }
   }
+//#endif
 }
 
 template <typename Dtype>
@@ -1358,7 +1359,7 @@ void DataTransformer<Dtype>::Transform(Blob<Dtype> *input_blob,
   }
   if (scale != Dtype(1)) {
     DLOG(INFO) << "Scale: " << scale;
-    caffe_scal(size, scale, transformed_data);
+    caffe_blas_scal(size, scale, transformed_data);
   }
 }
 

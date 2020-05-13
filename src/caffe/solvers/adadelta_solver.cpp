@@ -36,9 +36,9 @@ void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
                Dtype(2), this->update_[param_id]->mutable_cpu_data());
 
     // update history of gradients
-    caffe_cpu_axpby(net_params[param_id]->count(), Dtype(1) - momentum,
-                    this->update_[param_id]->cpu_data(), momentum,
-                    this->history_[param_id]->mutable_cpu_data());
+    caffe_blas_axpby(net_params[param_id]->count(), Dtype(1) - momentum,
+                     this->update_[param_id]->cpu_data(), momentum,
+                     this->history_[param_id]->mutable_cpu_data());
 
     // add delta to history to guard against dividing by zero later
     caffe_set(net_params[param_id]->count(), delta,
@@ -73,15 +73,15 @@ void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
                Dtype(2), this->update_[param_id]->mutable_cpu_data());
 
     // update history of updates
-    caffe_cpu_axpby(
+    caffe_blas_axpby(
         net_params[param_id]->count(), Dtype(1) - momentum,
         this->update_[param_id]->cpu_data(), momentum,
         this->history_[update_history_offset + param_id]->mutable_cpu_data());
 
     // apply learning rate
-    caffe_cpu_scale(net_params[param_id]->count(), local_rate,
-                    net_params[param_id]->cpu_diff(),
-                    net_params[param_id]->mutable_cpu_diff());
+    caffe_blas_scale(net_params[param_id]->count(), local_rate,
+                     net_params[param_id]->cpu_diff(),
+                     net_params[param_id]->mutable_cpu_diff());
     break;
   }
   case Caffe::GPU: {

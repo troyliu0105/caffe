@@ -132,7 +132,7 @@ void ScaleLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   for (int n = 0; n < outer_dim_; ++n) {
     for (int d = 0; d < scale_dim_; ++d) {
       const Dtype factor = scale_data[d];
-      caffe_cpu_scale(inner_dim_, factor, bottom_data, top_data);
+      caffe_blas_scale(inner_dim_, factor, bottom_data, top_data);
       bottom_data += inner_dim_;
       top_data += inner_dim_;
     }
@@ -175,31 +175,31 @@ void ScaleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
         const Dtype *sum_mult = sum_multiplier_.cpu_data();
         Dtype *scale_diff = scale->mutable_cpu_diff();
         if (scale_param) {
-          Dtype result = caffe_cpu_dot(inner_dim_, product, sum_mult);
+          Dtype result = caffe_blas_dot(inner_dim_, product, sum_mult);
           *scale_diff += result;
         } else {
-          *scale_diff = caffe_cpu_dot(inner_dim_, product, sum_mult);
+          *scale_diff = caffe_blas_dot(inner_dim_, product, sum_mult);
         }
       } else {
         const Dtype *sum_mult = sum_multiplier_.cpu_data();
         sum_result = (outer_dim_ == 1) ? scale->mutable_cpu_diff()
                                        : sum_result_.mutable_cpu_data();
-        caffe_cpu_gemv(CblasNoTrans, sum_result_.count(), inner_dim_, Dtype(1),
-                       product, sum_mult, Dtype(0), sum_result);
+        caffe_blas_gemv(CblasNoTrans, sum_result_.count(), inner_dim_, Dtype(1),
+                        product, sum_mult, Dtype(0), sum_result);
       }
       if (outer_dim_ != 1) {
         const Dtype *sum_mult = sum_multiplier_.cpu_data();
         Dtype *scale_diff = scale->mutable_cpu_diff();
         if (scale_dim_ == 1) {
           if (scale_param) {
-            Dtype result = caffe_cpu_dot(outer_dim_, sum_mult, sum_result);
+            Dtype result = caffe_blas_dot(outer_dim_, sum_mult, sum_result);
             *scale_diff += result;
           } else {
-            *scale_diff = caffe_cpu_dot(outer_dim_, sum_mult, sum_result);
+            *scale_diff = caffe_blas_dot(outer_dim_, sum_mult, sum_result);
           }
         } else {
-          caffe_cpu_gemv(CblasTrans, outer_dim_, scale_dim_, Dtype(1),
-                         sum_result, sum_mult, Dtype(scale_param), scale_diff);
+          caffe_blas_gemv(CblasTrans, outer_dim_, scale_dim_, Dtype(1),
+                          sum_result, sum_mult, Dtype(scale_param), scale_diff);
         }
       }
     }
@@ -211,7 +211,7 @@ void ScaleLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     for (int n = 0; n < outer_dim_; ++n) {
       for (int d = 0; d < scale_dim_; ++d) {
         const Dtype factor = scale_data[d];
-        caffe_cpu_scale(inner_dim_, factor, top_diff, bottom_diff);
+        caffe_blas_scale(inner_dim_, factor, top_diff, bottom_diff);
         bottom_diff += inner_dim_;
         top_diff += inner_dim_;
       }
