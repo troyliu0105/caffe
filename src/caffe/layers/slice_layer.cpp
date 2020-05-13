@@ -39,17 +39,17 @@ void SliceLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   num_slices_ = bottom[0]->count(0, slice_axis_);
   slice_size_ = bottom[0]->count(slice_axis_ + 1);
   int count = 0;
-  if (slice_point_.size() != 0) {
+  if (!slice_point_.empty()) {
     CHECK_EQ(slice_point_.size(), top.size() - 1);
     CHECK_LE(top.size(), bottom_slice_axis)
         << "slice axis: " << slice_axis_
         << ", bottom[0] shape: " << bottom[0]->shape_string();
     int prev = 0;
     vector<int> slices;
-    for (int i = 0; i < slice_point_.size(); ++i) {
-      CHECK_GT(slice_point_[i], prev);
-      slices.push_back(slice_point_[i] - prev);
-      prev = slice_point_[i];
+    for (int i : slice_point_) {
+      CHECK_GT(i, prev);
+      slices.push_back(i - prev);
+      prev = i;
     }
     slices.push_back(bottom_slice_axis - prev);
     for (int i = 0; i < top.size(); ++i) {

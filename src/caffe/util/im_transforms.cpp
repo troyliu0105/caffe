@@ -103,8 +103,9 @@ void InferNewSize(const ResizeParameter &resize_param, const int old_width,
                   const int old_height, int *new_width, int *new_height) {
   int height = resize_param.height();
   int width = resize_param.width();
-  float orig_aspect = static_cast<float>(old_width) / old_height;
-  float aspect = static_cast<float>(width) / height;
+  float orig_aspect =
+      static_cast<float>(old_width) / static_cast<float>(old_height);
+  float aspect = static_cast<float>(width) / static_cast<float>(height);
 
   switch (resize_param.resize_mode()) {
   case ResizeParameter_Resize_mode_WARP:
@@ -686,43 +687,23 @@ cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param) {
   float prob;
   caffe_rng_uniform(1, 0.f, 1.f, &prob);
 
-  if (prob > 0.5) {
-    // Do random brightness distortion.
-    RandomBrightness(out_img, &out_img, param.brightness_prob(),
-                     param.brightness_delta());
+  // Do random brightness distortion.
+  RandomBrightness(out_img, &out_img, param.brightness_prob(),
+                   param.brightness_delta());
 
-    // Do random contrast distortion.
-    RandomContrast(out_img, &out_img, param.contrast_prob(),
-                   param.contrast_lower(), param.contrast_upper());
+  // Do random hue distortion.
+  RandomHue(out_img, &out_img, param.hue_prob(), param.hue_delta());
 
-    // Do random saturation distortion.
-    RandomSaturation(out_img, &out_img, param.saturation_prob(),
-                     param.saturation_lower(), param.saturation_upper());
+  // Do random contrast distortion.
+  RandomContrast(out_img, &out_img, param.contrast_prob(),
+                 param.contrast_lower(), param.contrast_upper());
 
-    // Do random hue distortion.
-    RandomHue(out_img, &out_img, param.hue_prob(), param.hue_delta());
+  // Do random saturation distortion.
+  RandomSaturation(out_img, &out_img, param.saturation_prob(),
+                   param.saturation_lower(), param.saturation_upper());
 
-    // Do random reordering of the channels.
-    RandomOrderChannels(out_img, &out_img, param.random_order_prob());
-  } else {
-    // Do random brightness distortion.
-    RandomBrightness(out_img, &out_img, param.brightness_prob(),
-                     param.brightness_delta());
-
-    // Do random saturation distortion.
-    RandomSaturation(out_img, &out_img, param.saturation_prob(),
-                     param.saturation_lower(), param.saturation_upper());
-
-    // Do random hue distortion.
-    RandomHue(out_img, &out_img, param.hue_prob(), param.hue_delta());
-
-    // Do random contrast distortion.
-    RandomContrast(out_img, &out_img, param.contrast_prob(),
-                   param.contrast_lower(), param.contrast_upper());
-
-    // Do random reordering of the channels.
-    RandomOrderChannels(out_img, &out_img, param.random_order_prob());
-  }
+  // Do random reordering of the channels.
+  RandomOrderChannels(out_img, &out_img, param.random_order_prob());
 
   return out_img;
 }

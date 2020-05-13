@@ -159,9 +159,9 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   // transform_param.resize_param(policy_num_).width() << "," << iters_;
   // this->prefetch_[0].data_.Reshape(top_shape);
   Dtype *top_data = batch->data_.mutable_cpu_data();
-  Dtype *top_label = NULL; // suppress warnings about uninitialized variables
+  Dtype *top_label = nullptr; // suppress warnings about uninitialized variables
   Dtype *top_seg_label =
-      NULL; // suppress warnings about uninitialized variables
+      nullptr; // suppress warnings about uninitialized variables
   vector<int> label_shape(4, 1);
   if (this->output_labels_) {
     label_shape[0] = batch_size;
@@ -177,11 +177,11 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   for (int item_id = 0; item_id < batch_size; ++item_id) {
     timer.Start();
     // get a anno_datum
-    AnnotatedDatum &anno_datum = *(reader_.full().pop("Waiting for data"));
+    anno_datum = *(reader_.full().pop("Waiting for data"));
     read_time += timer.MicroSeconds();
     timer.Start();
     AnnotatedDatum distort_datum;
-    AnnotatedDatum *expand_datum = NULL;
+    AnnotatedDatum *expand_datum = nullptr;
 
     if (transform_param.has_distort_param()) {
       distort_datum.CopyFrom(anno_datum);
@@ -196,21 +196,21 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         expand_datum = &anno_datum;
       }
     }
-    AnnotatedDatum *sampled_datum = NULL;
+    AnnotatedDatum *sampled_datum = nullptr;
 
     bool has_sampled = false;
-    if (batch_samplers_.size() > 0 || yolo_data_type_ == 1) {
+    if (!batch_samplers_.empty() || yolo_data_type_ == 1) {
       // Generate sampled bboxes from expand_datum.
       vector<NormalizedBBox> sampled_bboxes;
 
-      if (batch_samplers_.size() > 0) {
+      if (!batch_samplers_.empty()) {
         GenerateBatchSamples(*expand_datum, batch_samplers_, &sampled_bboxes);
       } else {
         bool keep = transform_param.resize_param(policy_num_).resize_mode() ==
                     ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD;
         GenerateJitterSamples(yolo_data_jitter_, &sampled_bboxes, keep);
       }
-      if (sampled_bboxes.size() > 0) {
+      if (!sampled_bboxes.empty()) {
         // Randomly pick a sampled bbox and crop the expand_datum.
         int rand_idx = caffe_rng_rand() % sampled_bboxes.size();
         sampled_datum = new AnnotatedDatum();
@@ -224,7 +224,7 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     } else {
       sampled_datum = expand_datum;
     }
-    CHECK(sampled_datum != NULL);
+    CHECK(sampled_datum != nullptr);
 
     vector<int> shape = this->data_transformer_->InferBlobShape(
         sampled_datum->datum(), policy_num_);

@@ -52,12 +52,18 @@ if (HAVE_CUDA)
     # remove them
     remove_definitions(${__cuda_options})
     list(APPEND srcs ${cuda_objs} ${cuda})
+#    set(cuda ${cuda_objs} ${cuda})
 endif ()
 
-add_library(caffe ${srcs})
+if (HAVE_CUDA)
+    project(caffe CXX CUDA)
+    add_library(caffe ${srcs})
+    set_target_properties(caffe PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    target_compile_features(caffe PUBLIC cxx_std_17)
+else ()
+    add_library(caffe ${srcs})
+endif ()
 caffe_default_properties(caffe)
-message("Caffe_LINKER_LIBS===>" ${Caffe_LINKER_LIBS})
-message("Caffe_INCLUDE_DIRS===>" ${Caffe_INCLUDE_DIRS})
 target_link_libraries(caffe ${Caffe_LINKER_LIBS})
 target_include_directories(caffe ${Caffe_INCLUDE_DIRS}
         PUBLIC

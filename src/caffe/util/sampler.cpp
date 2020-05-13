@@ -35,8 +35,7 @@ bool SatisfySampleConstraint(const NormalizedBBox &sampled_bbox,
   }
   // Check constraints.
   bool found = false;
-  for (int i = 0; i < object_bboxes.size(); ++i) {
-    const NormalizedBBox &object_bbox = object_bboxes[i];
+  for (const auto &object_bbox : object_bboxes) {
     // Test jaccard overlap.
     if (has_jaccard_overlap) {
       const float jaccard_overlap = JaccardOverlap(sampled_bbox, object_bbox);
@@ -184,15 +183,14 @@ void GenerateBatchSamples(const AnnotatedDatum &anno_datum,
   sampled_bboxes->clear();
   vector<NormalizedBBox> object_bboxes;
   GroupObjectBBoxes(anno_datum, &object_bboxes);
-  for (int i = 0; i < batch_samplers.size(); ++i) {
-    if (batch_samplers[i].use_original_image()) {
+  for (const auto &batch_sampler : batch_samplers) {
+    if (batch_sampler.use_original_image()) {
       NormalizedBBox unit_bbox;
       unit_bbox.set_xmin(0);
       unit_bbox.set_ymin(0);
       unit_bbox.set_xmax(1);
       unit_bbox.set_ymax(1);
-      GenerateSamples(unit_bbox, object_bboxes, batch_samplers[i],
-                      sampled_bboxes);
+      GenerateSamples(unit_bbox, object_bboxes, batch_sampler, sampled_bboxes);
     }
   }
 }

@@ -256,9 +256,10 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   // transform_param.resize_param(policy_num_).width() << "," << iters_;
   // this->prefetch_[0].data_.Reshape(top_shape);
   Dtype *top_data = batch->data_.mutable_cpu_data();
-  Dtype *top_label = NULL; // suppress warnings about uninitialized variables
-  Dtype *top_seg_label =
-      NULL; // suppress warnings about uninitialized variables
+  // suppress warnings about uninitialized variables
+  Dtype *top_label = nullptr;
+  // suppress warnings about uninitialized variables
+  Dtype *top_seg_label = nullptr;
   if (this->output_labels_ && !has_anno_type_) {
     top_label = batch->label_.mutable_cpu_data();
   }
@@ -272,11 +273,12 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   for (int item_id = 0; item_id < batch_size; ++item_id) {
     timer.Start();
     // get a anno_datum
-    AnnotatedDatum &anno_datum = *(reader_.full().pop("Waiting for data"));
+    anno_datum = *(reader_.full().pop("Waiting for data"));
     read_time += timer.MicroSeconds();
     timer.Start();
+    // -------------------------------------------------------- distort & expand
     AnnotatedDatum distort_datum;
-    AnnotatedDatum *expand_datum = NULL;
+    AnnotatedDatum *expand_datum = nullptr;
     if (transform_param.has_distort_param()) {
       distort_datum.CopyFrom(anno_datum);
       this->data_transformer_->DistortImage(anno_datum.datum(),
@@ -295,21 +297,22 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         expand_datum = &anno_datum;
       }
     }
-    AnnotatedDatum *sampled_datum = NULL;
+    // ------------------------------------------------------------------ sample
+    AnnotatedDatum *sampled_datum = nullptr;
     bool has_sampled = false;
-    if (batch_samplers_.size() > 0 || yolo_data_jitter_) {
+    if (!batch_samplers_.empty() || yolo_data_jitter_) {
       // Generate sampled bboxes from expand_datum.
       vector<NormalizedBBox> sampled_bboxes;
-      if (batch_samplers_.size() > 0) {
+      if (!batch_samplers_.empty()) {
         GenerateBatchSamples(*expand_datum, batch_samplers_, &sampled_bboxes);
       } else {
         bool keep = transform_param.resize_param(policy_num_).resize_mode() ==
                     ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD;
         GenerateJitterSamples(yolo_data_jitter_, &sampled_bboxes, keep);
       }
-      if (sampled_bboxes.size() > 0) {
+      if (!sampled_bboxes.empty()) {
         // Randomly pick a sampled bbox and crop the expand_datum.
-        int rand_idx = caffe_rng_rand() % sampled_bboxes.size();
+        uint32_t rand_idx = caffe_rng_rand() % sampled_bboxes.size();
         sampled_datum = new AnnotatedDatum();
         crop_box = sampled_bboxes[rand_idx];
         this->data_transformer_->CropImage(
@@ -321,11 +324,11 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     } else {
       sampled_datum = expand_datum;
     }
-    CHECK(sampled_datum != NULL);
+    CHECK(sampled_datum != nullptr);
 
     vector<int> shape = this->data_transformer_->InferBlobShape(
         sampled_datum->datum(), policy_num_);
-
+    // ------------------------------------------------------------------ resize
     // LOG(INFO) << shape[2] << "," << shape[3];
     if (transform_param.resize_param_size()) {
       if (transform_param.resize_param(policy_num_).resize_mode() ==
@@ -342,6 +345,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       CHECK(std::equal(top_shape.begin() + 1, top_shape.begin() + 4,
                        shape.begin() + 1));
     }
+    // --------------------------------------------------------- anno transforms
     // Apply data transformations (mirror, scale, crop...)
     int offset = batch->data_.offset(item_id);
     this->transformed_data_.set_cpu_data(top_data + offset);
@@ -365,8 +369,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         if (anno_type_ == AnnotatedDatum_AnnotationType_BBOX ||
             anno_type_ == AnnotatedDatum_AnnotationType_BBOXandSeg) {
           // Count the number of bboxes.
-          for (int g = 0; g < transformed_anno_vec.size(); ++g) {
-            num_bboxes += transformed_anno_vec[g].annotation_size();
+          for (auto &g : transformed_anno_vec) {
+            num_bboxes += g.annotation_size();
           }
         } else {
           LOG(FATAL) << "Unknown annotation type.";
