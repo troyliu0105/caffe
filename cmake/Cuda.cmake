@@ -4,7 +4,7 @@ endif ()
 
 # Known NVIDIA GPU achitectures Caffe can be compiled for.
 # This list will be used for CUDA_ARCH_NAME = All option
-set(Caffe_known_gpu_archs "20 21(20) 30 35 50 60 61")
+set(Caffe_known_gpu_archs "20 21(20) 30 35 50 60 61 70")
 
 ################################################################################################
 # A function for automatic detection of GPUs installed  (if autodetection is enabled)
@@ -156,6 +156,11 @@ macro(caffe_cuda_compile objlist_variable)
 
     if (APPLE)
         list(APPEND CUDA_NVCC_FLAGS -Xcompiler -Wno-unused-function)
+    endif ()
+
+    if (WIN32)
+        list(APPEND CUDA_NVCC_FLAGS "-Xcompiler /wd4819")
+        list(APPEND CUDA_NVCC_FLAGS "-Xcompiler /wd4244")
     endif ()
 
     cuda_compile(cuda_objcs ${ARGN})

@@ -144,6 +144,8 @@ if (NOT HAVE_CUDA)
     endif ()
 
     list(APPEND Caffe_DEFINITIONS PUBLIC -DCPU_ONLY)
+else ()
+    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -lineinfo -use_fast_math -Xcompiler")
 endif ()
 
 if (USE_NCCL)

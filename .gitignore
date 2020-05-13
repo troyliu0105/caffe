@@ -1,7 +1,13 @@
 ## General
 builds
 build
+cmake-build*
 *CMakeFiles*
+
+*.caffemodel
+*.solverstate
+*binaryproto
+*.mdb
 
 # Compiled Object files
 *.slo
