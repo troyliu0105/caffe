@@ -61,7 +61,7 @@ void HingeLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     const Dtype loss_weight = top[0]->cpu_diff()[0];
     switch (this->layer_param_.hinge_loss_param().norm()) {
     case HingeLossParameter_Norm_L1:
-      caffe_cpu_sign(count, bottom_diff, bottom_diff);
+      caffe_sign(count, bottom_diff, bottom_diff);
       caffe_blas_scal(count, loss_weight / num, bottom_diff);
       break;
     case HingeLossParameter_Norm_L2:

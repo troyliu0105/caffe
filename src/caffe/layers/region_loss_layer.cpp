@@ -76,8 +76,8 @@ void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n,
                     int index, int i, int j, int w, int h, int stride) {
 
   b.clear();
-  b.push_back((i + logistic_activate(x[index + 0 * stride])) / w);
-  b.push_back((j + logistic_activate(x[index + 1 * stride])) / h);
+  b.push_back((i + caffe_fn_sigmoid(x[index + 0 * stride])) / w);
+  b.push_back((j + caffe_fn_sigmoid(x[index + 1 * stride])) / h);
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
@@ -98,13 +98,13 @@ Dtype delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases,
   float th = log(truth[3] * h / biases[2 * n + 1]); // th = 0
 
   delta[index + 0 * stride] = (-1) * scale *
-                              (tx - logistic_activate(x[index + 0 * stride])) *
-                              logistic_activate(x[index + 0 * stride]) *
-                              (1 - logistic_activate(x[index + 0 * stride]));
+                              (tx - caffe_fn_sigmoid(x[index + 0 * stride])) *
+                              caffe_fn_sigmoid(x[index + 0 * stride]) *
+                              (1 - caffe_fn_sigmoid(x[index + 0 * stride]));
   delta[index + 1 * stride] = (-1) * scale *
-                              (ty - logistic_activate(x[index + 1 * stride])) *
-                              logistic_activate(x[index + 1 * stride]) *
-                              (1 - logistic_activate(x[index + 1 * stride]));
+                              (ty - caffe_fn_sigmoid(x[index + 1 * stride])) *
+                              caffe_fn_sigmoid(x[index + 1 * stride]) *
+                              (1 - caffe_fn_sigmoid(x[index + 1 * stride]));
   // delta[index + 0] = (-1) * scale * (1 - (tx - x[index + 0])*(tx - x[index +
   // 0])); delta[index + 1] = (-1) * scale * (1 - (ty - x[index + 1])*(ty -
   // x[index + 1]));
@@ -244,7 +244,7 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
           int index2 = c * stride + index;
           // LOG(INFO)<<index2;
           if (c == 4) {
-            swap_data[index2] = logistic_activate(input_data[index2 + 0]);
+            swap_data[index2] = caffe_fn_sigmoid(input_data[index2 + 0]);
           } else {
             swap_data[index2] = (input_data[index2 + 0]);
           }
@@ -281,7 +281,7 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         // diff[index + 4] = (-1) * noobject_scale_* (0 - swap_data[index + 4]);
         diff[index + 4 * stride] =
             (-1) * noobject_scale_ * (0 - swap_data[index + 4 * stride]) *
-            logistic_gradient(swap_data[index + 4 * stride]);
+            caffe_fn_sigmoid_grad_fast(swap_data[index + 4 * stride]);
         if (best_iou > thresh_) {
           diff[index + 4 * stride] = 0;
         }
@@ -367,12 +367,12 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         diff[best_index + 4 * stride] =
             (-1.0) * object_scale_ *
             (iou - swap_data[best_index + 4 * stride]) *
-            logistic_gradient(swap_data[best_index + 4 * stride]);
+            caffe_fn_sigmoid_grad_fast(swap_data[best_index + 4 * stride]);
       } else {
         // LOG(INFO)<<"test";
         diff[best_index + 4 * stride] =
             (-1.0) * object_scale_ * (1 - swap_data[best_index + 4 * stride]) *
-            logistic_gradient(swap_data[best_index + 4 * stride]);
+            caffe_fn_sigmoid_grad_fast(swap_data[best_index + 4 * stride]);
       }
 
       delta_region_class(swap_data, diff, best_index + 5 * stride, class_label,

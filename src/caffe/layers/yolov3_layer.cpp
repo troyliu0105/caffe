@@ -624,7 +624,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         // diff[index + 4 * stride] = (-1) * (0 - exp(input_data[index + 4 *
         // stride]-exp(input_data[index + 4 * stride]))); diff[index + 4 *
         // stride] = (-1) * noobject_scale_ * (0 - swap_data[index + 4 *
-        // stride]) *logistic_gradient(swap_data[index + 4 * stride]);
+        // stride]) *caffe_fn_sigmoid_grad(swap_data[index + 4 * stride]);
         if (best_iou > thresh_) {
           diff[index + 4 * stride] = 0;
         }
@@ -892,7 +892,8 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                 diff[index2] = diff[index2 + 0];
               } else {
                 diff[index2] =
-                    diff[index2 + 0] * logistic_gradient(top_data[index2 + 0]);
+                    diff[index2 + 0] *
+                               caffe_fn_sigmoid_grad_fast(top_data[index2 + 0]);
               }
             }
           }

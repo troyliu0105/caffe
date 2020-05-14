@@ -17,26 +17,6 @@ Dtype epsilon() {
   return std::numeric_limits<Dtype>().epsilon();
 }
 
-//#define sigmoid(x)  logistic_activate(x)
-//#define sigmoid_gradient(x)  logistic_gradient(x)
-
-template <typename Dtype>
-static inline Dtype logistic_activate(Dtype x) {
-  return 1. / (1. + exp(-x));
-}
-template <typename Dtype>
-static inline Dtype logistic_gradient(Dtype x) {
-  return (1 - x) * x;
-}
-static inline float hard_sigmoid(float x) {
-  return std::min(1., std::max(0., x * 0.2 + 0.5));
-}
-
-template <typename Dtype>
-void caffe_cpu_logistic_activate(Dtype *x, int n) {
-  caffe_cpu_sigmoid(n, x, x);
-}
-
 template <typename Dtype>
 void caffe_gpu_logistic_activate(int N, const Dtype *a, Dtype *y);
 
@@ -144,11 +124,11 @@ template <typename Dtype>
 void caffe_abs(int n, const Dtype *a, Dtype *y);
 
 template <typename Dtype>
-Dtype caffe_blas_dot(int n, const Dtype *x, const Dtype *y);
-
-template <typename Dtype>
 Dtype caffe_blas_strided_dot(int n, const Dtype *x, int incx, const Dtype *y,
                              int incy);
+
+template <typename Dtype>
+Dtype caffe_blas_dot(int n, const Dtype *x, const Dtype *y);
 
 // Returns the sum of the absolute values of the elements of vector x
 template <typename Dtype>
@@ -176,46 +156,6 @@ inline void caffe_clip(int N, const Dtype *src, Dtype *dst, Dtype min,
     dst[i] = caffe_clip(src[i], min, max);
   }
 }
-
-// The following two macros are modifications of DEFINE_VSL_UNARY_FUNC
-//   in include/caffe/util/mkl_alternate.hpp authored by @Rowland Depp.
-// Please refer to commit 7e8ef25c7 of the boost-eigen branch.
-// Git cherry picking that commit caused a conflict hard to resolve and
-//   copying that file in convenient for code reviewing.
-// So they have to be pasted here temporarily.
-#define DEFINE_CAFFE_CPU_UNARY_FUNC(name, operation)                           \
-  template <typename Dtype>                                                    \
-  void caffe_cpu_##name(const int n, const Dtype *x, Dtype *y) {               \
-    CHECK_GT(n, 0);                                                            \
-    CHECK(x);                                                                  \
-    CHECK(y);                                                                  \
-    for (int i = 0; i < n; ++i) {                                              \
-      operation;                                                               \
-    }                                                                          \
-  }                                                                            \
-  template <typename Dtype>                                                    \
-  void caffe_cpu_##name(const int n, int stride, const Dtype *x, Dtype *y) {   \
-    CHECK_GT(n, 0);                                                            \
-    CHECK_GT(stride, 0);                                                       \
-    CHECK(x);                                                                  \
-    CHECK(y);                                                                  \
-    for (int i = 0; i < n; ++i) {                                              \
-      i *= stride;                                                             \
-      operation;                                                               \
-    }                                                                          \
-  }
-
-// output is 1 for the positives, 0 for zero, and -1 for the negatives
-DEFINE_CAFFE_CPU_UNARY_FUNC(sign, y[i] = caffe_sign<Dtype>(x[i]))
-
-// This returns a nonzero value if the input has its sign bit set.
-// The name sngbit is meant to avoid conflicts with std::signbit in the macro.
-// The extra parens are needed because CUDA < 6.5 defines signbit as a macro,
-// and we don't want that to expand here when CUDA headers are also included.
-DEFINE_CAFFE_CPU_UNARY_FUNC(sgnbit,
-                            y[i] = static_cast<bool>((std::signbit)(x[i])))
-
-DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, y[i] = std::fabs(x[i]))
 
 unsigned int caffe_rng_rand();
 
@@ -361,48 +301,82 @@ void caffe_gpu_scale(int n, Dtype alpha, const Dtype *x, Dtype *y);
 
 #endif // !CPU_ONLY
 
+// The following two macros are modifications of DEFINE_VSL_UNARY_FUNC
+//   in include/caffe/util/mkl_alternate.hpp authored by @Rowland Depp.
+// Please refer to commit 7e8ef25c7 of the boost-eigen branch.
+// Git cherry picking that commit caused a conflict hard to resolve and
+//   copying that file in convenient for code reviewing.
+// So they have to be pasted here temporarily.
+#define DEFINE_CAFFE_CPU_UNARY_FUNC(name, function)                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
+    caffe_##name(n, 1, x, 1, y);                                               \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, int INCX, const Dtype *x, int INCY,    \
+                           Dtype *y) {                                         \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(INCX, 0);                                                         \
+    CHECK_GT(INCY, 0);                                                         \
+    CHECK(x);                                                                  \
+    CHECK(y);                                                                  \
+    int ix, iy;                                                                \
+    for (int i = 0; i < n; ++i) {                                              \
+      ix = i * INCX;                                                           \
+      iy = i * INCY;                                                           \
+      y[iy] = caffe_fn_##name(x[ix]);                                          \
+    }                                                                          \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline Dtype caffe_fn_##name(Dtype x) {                                      \
+    return function;                                                           \
+  }
+
+// output is 1 for the positives, 0 for zero, and -1 for the negatives
+DEFINE_CAFFE_CPU_UNARY_FUNC(sign, caffe_sign<Dtype>(x))
+
+// This returns a nonzero value if the input has its sign bit set.
+// The name sngbit is meant to avoid conflicts with std::signbit in the macro.
+// The extra parens are needed because CUDA < 6.5 defines signbit as a macro,
+// and we don't want that to expand here when CUDA headers are also included.
+DEFINE_CAFFE_CPU_UNARY_FUNC(sgnbit, static_cast<bool>((std::signbit)(x)))
+
+DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
+
+////////////////////////////////////////////////////////////////////// new added
+
+/**
+ * @brief This macro create a func that manipulate tensor with a scalar
+ */
 #define DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(name, operation)                   \
   template <typename Dtype>                                                    \
-  void caffe_##name##_scalar(const int n, const Dtype *x, Dtype b, Dtype *y) { \
+  inline void caffe_##name##_scalar(const int n, Dtype b, Dtype *x) {          \
+    caffe_##name##_scalar(n, b, 1, x, 1, x);                                   \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name##_scalar(const int n, Dtype b, const Dtype *x,      \
+                                    Dtype *y) {                                \
+    caffe_##name##_scalar(n, b, 1, x, 1, y);                                   \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name##_scalar(const int n, Dtype b, int INCX,            \
+                                    const Dtype *x, int INCY, Dtype *y) {      \
     CHECK_GT(n, 0);                                                            \
+    CHECK_GT(INCX, 0);                                                         \
+    CHECK_GT(INCY, 0);                                                         \
     CHECK(x);                                                                  \
     CHECK(y);                                                                  \
+    int ix, iy;                                                                \
     for (int i = 0; i < n; ++i) {                                              \
-      operation;                                                               \
-    }                                                                          \
-  }                                                                            \
-  template <typename Dtype>                                                    \
-  void caffe_##name##_scalar(const int n, int stride, const Dtype *x, Dtype b, \
-                             Dtype *y) {                                       \
-    CHECK_GT(n, 0);                                                            \
-    CHECK_GT(stride, 0);                                                       \
-    CHECK(x);                                                                  \
-    CHECK(y);                                                                  \
-    for (int i = 0; i < n; ++i) {                                              \
-      i *= stride;                                                             \
-      operation;                                                               \
-    }                                                                          \
-  }                                                                            \
-  template <typename Dtype>                                                    \
-  void caffe_##name##_scalar(const int n, Dtype b, Dtype *y) {                 \
-    CHECK_GT(n, 0);                                                            \
-    CHECK(y);                                                                  \
-    Dtype *x = y;                                                              \
-    for (int i = 0; i < n; ++i) {                                              \
-      operation;                                                               \
-    }                                                                          \
-  }                                                                            \
-  template <typename Dtype>                                                    \
-  void caffe_##name##_scalar(const int n, int stride, Dtype b, Dtype *y) {     \
-    CHECK_GT(n, 0);                                                            \
-    CHECK_GT(stride, 0);                                                       \
-    CHECK(y);                                                                  \
-    Dtype *x = y;                                                              \
-    for (int i = 0; i < n; ++i) {                                              \
-      i *= stride;                                                             \
+      ix = i * INCX;                                                           \
+      iy = i * INCY;                                                           \
       operation;                                                               \
     }                                                                          \
   }
+
+/**
+ * @brief This macro define a single math function like `y = f(x)`
+ */
 
 template <typename Dtype>
 void caffe_softmax(int N, const Dtype *a, Dtype *y);
@@ -410,13 +384,28 @@ void caffe_softmax(int N, const Dtype *a, Dtype *y);
 template <typename Dtype>
 void caffe_softmax(int N, const Dtype *a, int stride, Dtype *y);
 
-DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(add, y[i] = x[i] + b)
-DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(sub, y[i] = x[i] - b)
-DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(mul, y[i] = x[i] * b)
-DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(div, y[i] = x[i] / b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(add, y[iy] = x[ix] + b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(sub, y[iy] = x[ix] - b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(mul, y[iy] = x[ix] * b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(div, y[iy] = x[ix] / b)
 
-DEFINE_CAFFE_CPU_UNARY_FUNC(tanh, y[i] = std::tanh(x[i]))
-DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid, y[i] = logistic_activate(x[i]))
+DEFINE_CAFFE_CPU_UNARY_FUNC(tanh, tanh(x))
+DEFINE_CAFFE_CPU_UNARY_FUNC(tanh_grad, 1 - pow(tanh(x), 2))
+DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid, 1. / (1. + exp(-x)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid_grad_fast, (1 - x) * x)
+DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid_grad,
+                            (1 - caffe_fn_sigmoid(x)) * caffe_fn_sigmoid(x))
+DEFINE_CAFFE_CPU_UNARY_FUNC(hard_sigmoid,
+                            std::min(1., std::max(0., x * 0.2 + 0.5)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(softplus, std::log(1 + std::exp(x)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(softplus_grad, caffe_fn_sigmoid(x))
+DEFINE_CAFFE_CPU_UNARY_FUNC(mish, x *caffe_fn_tanh(caffe_fn_softplus(x)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(mish_grad, (exp(x) *
+                                        (4 * (x + 1) + 4 * exp(2 * x) +
+                                         exp(3 * x) + exp(x) * (4 * x + 6)) /
+                                        pow(2 * exp(x) + exp(2 * x) + 2, 2)))
+
+////////////////////////////////////////////////////////////////// end new added
 
 } // namespace caffe
 

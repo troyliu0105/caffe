@@ -31,7 +31,7 @@ void AbsValLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   if (propagate_down[0]) {
     const Dtype *bottom_data = bottom[0]->cpu_data();
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
-    caffe_cpu_sign(count, bottom_data, bottom_diff);
+    caffe_sign(count, bottom_data, bottom_diff);
     caffe_mul(count, bottom_diff, top_diff, bottom_diff);
   }
 }

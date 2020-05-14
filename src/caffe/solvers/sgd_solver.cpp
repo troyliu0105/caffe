@@ -185,7 +185,7 @@ void SGDSolver<Dtype>::Regularize(int param_id) {
                         net_params[param_id]->cpu_data(),
                         net_params[param_id]->mutable_cpu_diff());
       } else if (regularization_type == "L1") {
-        caffe_cpu_sign(net_params[param_id]->count(),
+        caffe_sign(net_params[param_id]->count(),
                        net_params[param_id]->cpu_data(),
                        temp_[param_id]->mutable_cpu_data());
         caffe_blas_axpy(net_params[param_id]->count(), local_decay,

@@ -15,6 +15,7 @@
 #include "caffe/layers/exp_layer.hpp"
 #include "caffe/layers/inner_product_layer.hpp"
 #include "caffe/layers/log_layer.hpp"
+#include "caffe/layers/mish_layer.hpp"
 #include "caffe/layers/power_layer.hpp"
 #include "caffe/layers/prelu_layer.hpp"
 #include "caffe/layers/relu_layer.hpp"

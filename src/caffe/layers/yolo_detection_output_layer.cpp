@@ -149,8 +149,8 @@ template <typename Dtype>
 void get_region_box(Dtype *x, PredictionResult<Dtype> &predict,
                     vector<Dtype> biases, int n, int index, int i, int j, int w,
                     int h) {
-  predict.x = (i + logistic_activate(x[index + 0])) / w;
-  predict.y = (j + logistic_activate(x[index + 1])) / h;
+  predict.x = (i + caffe_fn_sigmoid(x[index + 0])) / w;
+  predict.y = (j + caffe_fn_sigmoid(x[index + 1])) / h;
   predict.w = exp(x[index + 2]) * biases[2 * n] / w;
   predict.h = exp(x[index + 3]) * biases[2 * n + 1] / h;
 }
@@ -246,7 +246,7 @@ void YoloDetectionOutputLayer<Dtype>::Forward_cpu(
           CHECK_EQ(swap_data[index], swap.data_at(b, j * side_ + i, n, 0));
           get_region_box(swap_data, predict, biases_, n, index, i, j, side_,
                          side_);
-          predict.objScore = logistic_activate(swap_data[index + 4]);
+          predict.objScore = caffe_fn_sigmoid(swap_data[index + 4]);
           class_index_and_score(swap_data + index + 5, num_classes_, predict);
           predict.confidence = predict.objScore * predict.classScore;
           if (predict.confidence >= confidence_threshold_) {
@@ -287,7 +287,7 @@ void YoloDetectionOutputLayer<Dtype>::Forward_cpu(
             CHECK_EQ(swap_data[index], swap2.data_at(b, j * side_ + i, n, 0));
             get_region_box(swap_data, predict, biases_, n, index, i, j, side_,
                            side_);
-            predict.objScore = logistic_activate(swap_data[index + 4]);
+            predict.objScore = caffe_fn_sigmoid(swap_data[index + 4]);
             class_index_and_score(swap_data + index + 5, num_classes_, predict);
             predict.confidence = predict.objScore * predict.classScore;
             if (predict.confidence >= confidence_threshold_) {

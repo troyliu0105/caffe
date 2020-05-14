@@ -16,12 +16,7 @@ void MishLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   Dtype *output_data = t->mutable_cpu_data();
   const int count = b->count();
 
-  Dtype x;
-#pragma omp parallel for private(x)
-  for (int i = 0; i < count; ++i) {
-    x = input_data[i];
-    output_data[i] = x * tanh(log(1 + exp(x)));
-  }
+  caffe_mish(count, input_data, output_data);
 }
 template <typename Dtype>
 void MishLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
@@ -39,10 +34,7 @@ void MishLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 #pragma omp parallel for private(x)
     for (int i = 0; i < count; ++i) {
       x = input_data[i];
-      Dtype w =
-          4 * (x + 1) + (4 * exp(2 * x)) + exp(3 * x) + exp(x) * (4 * x + 6);
-      Dtype sigma = 2 * exp(x) + exp(2 * x) + 2;
-      out_diff[i] = (exp(x) * w / pow(sigma, 2)) * in_diff[i];
+      out_diff[i] = caffe_fn_mish_grad(x) * in_diff[i];
     }
   }
 }

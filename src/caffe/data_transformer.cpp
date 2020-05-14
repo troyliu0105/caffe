@@ -190,7 +190,7 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
       }
     }
   }
-//#endif
+  //#endif
 }
 
 template <typename Dtype>

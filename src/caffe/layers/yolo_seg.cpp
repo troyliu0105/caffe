@@ -69,7 +69,7 @@ void YoloSegLayer<Dtype>::visualization(const vector<Blob<Dtype> *> &bottom,
     for (int j = 0; j < w; j++) {
       // LOG(INFO)<<(int)(bottom_data[img_index1] * 255);
       ptr2[img_index2] =
-          (unsigned char)(logistic_activate(bottom_data[img_index1]) * 255);
+          (unsigned char)(caffe_fn_sigmoid(bottom_data[img_index1]) * 255);
 
       // ptr2[img_index2] = (unsigned char)((label_data[img_index1]) * 255);
       img_index1++;

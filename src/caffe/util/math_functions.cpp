@@ -10,18 +10,6 @@
 namespace caffe {
 
 template <>
-void caffe_cpu_logistic_activate(float *x, const int n) {
-  for (int i = 0; i < n; ++i) {
-    x[i] = logistic_activate(x[i]);
-  }
-}
-template <>
-void caffe_cpu_hard_sigmoid(float *x, const int n) {
-  for (int i = 0; i < n; ++i) {
-    x[i] = hard_sigmoid(x[i]);
-  }
-}
-template <>
 void caffe_blas_gemm<float>(const CBLAS_TRANSPOSE TransA,
                             const CBLAS_TRANSPOSE TransB, const int M,
                             const int N, const int K, const float alpha,
@@ -236,17 +224,6 @@ void caffe_abs<double>(const int n, const double *a, double *y) {
   vdAbs(n, a, y);
 }
 
-template <typename Dtype>
-Dtype caffe_blas_dot(const int n, const Dtype *x, const Dtype *y) {
-  return caffe_blas_strided_dot(n, x, 1, y, 1);
-}
-
-template float caffe_blas_dot<float>(const int n, const float *x,
-                                     const float *y);
-
-template double caffe_blas_dot<double>(const int n, const double *x,
-                                       const double *y);
-
 template <>
 float caffe_blas_strided_dot<float>(const int n, const float *x, const int incx,
                                     const float *y, const int incy) {
@@ -259,6 +236,17 @@ double caffe_blas_strided_dot<double>(const int n, const double *x,
                                       const int incy) {
   return cblas_ddot(n, x, incx, y, incy);
 }
+
+template <typename Dtype>
+Dtype caffe_blas_dot(const int n, const Dtype *x, const Dtype *y) {
+  return caffe_blas_strided_dot(n, x, 1, y, 1);
+}
+
+template float caffe_blas_dot<float>(const int n, const float *x,
+                                     const float *y);
+
+template double caffe_blas_dot<double>(const int n, const double *x,
+                                       const double *y);
 
 template <>
 int caffe_blas_asum<int>(const int n, const int *x) {
@@ -386,10 +374,10 @@ void caffe_softmax(const int N, const Dtype *a, Dtype *y) {
     if (a[i] > ele)
       ele = a[i];
   }
-  caffe_sub_scalar(N, a, ele, y);
+  caffe_sub_scalar(N, ele, a, y);
   caffe_exp(N, y, y);
   ele = caffe_blas_asum(N, y);
-  caffe_div_scalar(N, y, ele, y);
+  caffe_div_scalar(N, ele, y, y);
 }
 template void caffe_softmax(const int N, const float *a, float *y);
 template void caffe_softmax(const int N, const double *a, double *y);

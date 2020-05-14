@@ -106,7 +106,7 @@ void ReductionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
       caffe_set(dim_, bottom_coeff, bottom_diff);
       break;
     case ReductionParameter_ReductionOp_ASUM:
-      caffe_cpu_sign(dim_, bottom_data, bottom_diff);
+      caffe_sign(dim_, bottom_data, bottom_diff);
       caffe_blas_scal(dim_, bottom_coeff, bottom_diff);
       break;
     case ReductionParameter_ReductionOp_SUMSQ:

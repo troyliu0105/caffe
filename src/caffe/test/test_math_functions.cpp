@@ -65,7 +65,7 @@ TYPED_TEST(CPUMathFunctionsTest, TestAsum) {
 TYPED_TEST(CPUMathFunctionsTest, TestSign) {
   int n = this->blob_bottom_->count();
   const TypeParam *x = this->blob_bottom_->cpu_data();
-  caffe_cpu_sign<TypeParam>(n, x, this->blob_bottom_->mutable_cpu_diff());
+  caffe_sign<TypeParam>(n, x, this->blob_bottom_->mutable_cpu_diff());
   const TypeParam *signs = this->blob_bottom_->cpu_diff();
   for (int i = 0; i < n; ++i) {
     EXPECT_EQ(signs[i], x[i] > 0 ? 1 : (x[i] < 0 ? -1 : 0));
@@ -75,7 +75,7 @@ TYPED_TEST(CPUMathFunctionsTest, TestSign) {
 TYPED_TEST(CPUMathFunctionsTest, TestSgnbit) {
   int n = this->blob_bottom_->count();
   const TypeParam *x = this->blob_bottom_->cpu_data();
-  caffe_cpu_sgnbit<TypeParam>(n, x, this->blob_bottom_->mutable_cpu_diff());
+  caffe_sgnbit<TypeParam>(n, x, this->blob_bottom_->mutable_cpu_diff());
   const TypeParam *signbits = this->blob_bottom_->cpu_diff();
   for (int i = 0; i < n; ++i) {
     EXPECT_EQ(signbits[i], x[i] < 0 ? 1 : 0);

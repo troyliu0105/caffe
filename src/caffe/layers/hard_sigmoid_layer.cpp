@@ -14,7 +14,7 @@ void HardSigmoidLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   Dtype *top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
   for (int i = 0; i < count; ++i) {
-    top_data[i] = hard_sigmoid(bottom_data[i]);
+    top_data[i] = caffe_fn_hard_sigmoid(bottom_data[i]);
   }
 }
 
