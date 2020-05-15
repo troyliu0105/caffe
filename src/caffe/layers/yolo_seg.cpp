@@ -103,7 +103,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // caffe_set(diff_.count(), Dtype(0.0), diff);
 
   for (int i = 0; i < count; ++i) {
-    diff[i] = logistic_activate(bottom_data[i]);
+    diff[i] = caffe_fn_sigmoid(bottom_data[i]);
   }
   // caffe_copy(count,swap,diff);
 #endif

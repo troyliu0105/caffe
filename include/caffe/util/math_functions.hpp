@@ -309,8 +309,8 @@ void caffe_gpu_scale(int n, Dtype alpha, const Dtype *x, Dtype *y);
 // So they have to be pasted here temporarily.
 #define DEFINE_CAFFE_CPU_UNARY_FUNC(name, function)                            \
   template <typename Dtype>                                                    \
-  inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
-    caffe_##name(n, 1, x, 1, y);                                               \
+  inline Dtype caffe_fn_##name(Dtype x) {                                      \
+    return function;                                                           \
   }                                                                            \
   template <typename Dtype>                                                    \
   inline void caffe_##name(const int n, int INCX, const Dtype *x, int INCY,    \
@@ -328,8 +328,8 @@ void caffe_gpu_scale(int n, Dtype alpha, const Dtype *x, Dtype *y);
     }                                                                          \
   }                                                                            \
   template <typename Dtype>                                                    \
-  inline Dtype caffe_fn_##name(Dtype x) {                                      \
-    return function;                                                           \
+  inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
+    caffe_##name(n, 1, x, 1, y);                                               \
   }
 
 // output is 1 for the positives, 0 for zero, and -1 for the negatives
@@ -350,15 +350,6 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
  */
 #define DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(name, operation)                   \
   template <typename Dtype>                                                    \
-  inline void caffe_##name##_scalar(const int n, Dtype b, Dtype *x) {          \
-    caffe_##name##_scalar(n, b, 1, x, 1, x);                                   \
-  }                                                                            \
-  template <typename Dtype>                                                    \
-  inline void caffe_##name##_scalar(const int n, Dtype b, const Dtype *x,      \
-                                    Dtype *y) {                                \
-    caffe_##name##_scalar(n, b, 1, x, 1, y);                                   \
-  }                                                                            \
-  template <typename Dtype>                                                    \
   inline void caffe_##name##_scalar(const int n, Dtype b, int INCX,            \
                                     const Dtype *x, int INCY, Dtype *y) {      \
     CHECK_GT(n, 0);                                                            \
@@ -372,6 +363,15 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
       iy = i * INCY;                                                           \
       operation;                                                               \
     }                                                                          \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name##_scalar(const int n, Dtype b, Dtype *x) {          \
+    caffe_##name##_scalar(n, b, 1, x, 1, x);                                   \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name##_scalar(const int n, Dtype b, const Dtype *x,      \
+                                    Dtype *y) {                                \
+    caffe_##name##_scalar(n, b, 1, x, 1, y);                                   \
   }
 
 /**

@@ -373,7 +373,7 @@ void GaussianYolov3Layer<Dtype>::Forward_cpu(
           if (c == 4 || c == 6) {
             swap_data[index2] = (input_data[index2 + 0]);
           } else {
-            swap_data[index2] = logistic_activate(input_data[index2 + 0]);
+            swap_data[index2] = caffe_fn_sigmoid(input_data[index2 + 0]);
           }
         }
 #endif
@@ -670,8 +670,7 @@ void GaussianYolov3Layer<Dtype>::Backward_cpu(
               if (c == 4 || c == 6) {
                 diff[index2] = diff[index2 + 0];
               } else {
-                diff[index2] =
-                    diff[index2 + 0] *
+                diff[index2] = diff[index2 + 0] *
                                caffe_fn_sigmoid_grad_fast(top_data[index2 + 0]);
               }
             }

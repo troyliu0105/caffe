@@ -29,7 +29,7 @@ template <typename Dtype>
 void PermuteLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
   PermuteParameter permute_param = this->layer_param_.permute_param();
-  CHECK_EQ(bottom.size(), 1);
+  CHECK_EQ(bottom.size(), 1) << "Only 1 bottom is allowed";
   num_axes_ = bottom[0]->num_axes();
   vector<int> orders;
   // Push the specified new orders.
