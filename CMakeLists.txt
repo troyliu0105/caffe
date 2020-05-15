@@ -13,6 +13,10 @@ endif ()
 if (POLICY CMP0054)
     cmake_policy(SET CMP0054 NEW)
 endif ()
+if (POLICY CMP0025)
+    cmake_policy(SET CMP0025 NEW)
+endif ()
+
 
 # ---[ Caffe project
 project(Caffe LANGUAGES C CXX)

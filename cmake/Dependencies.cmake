@@ -17,6 +17,21 @@ else ()
     message(WARNING "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
 endif ()
 
+find_package(TBB COMPONENTS tbb)
+if (NOT TBB_tbb_FOUND)
+    set(TBB_ROOT ${PROJECT_SOURCE_DIR}/third_party/tbb)
+    include(${TBB_ROOT}/cmake/TBBBuild.cmake)
+    tbb_build(TBB_ROOT "${PROJECT_SOURCE_DIR}/third_party/tbb" CONFIG_DIR TBB_DIR)
+    find_package(TBB REQUIRED tbb)
+endif ()
+if (TBB_tbb_FOUND)
+    list(APPEND Caffe_LINKER_LIBS PUBLIC ${TBB_IMPORTED_TARGETS})
+    list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_TBB)
+    set(USE_TBB TRUE)
+else ()
+    set(USE_TBB FALSE)
+endif ()
+
 # ---[ Boost
 find_package(Boost 1.54 REQUIRED COMPONENTS system thread filesystem)
 list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${Boost_INCLUDE_DIRS})
@@ -33,7 +48,7 @@ find_package(Threads REQUIRED)
 list(APPEND Caffe_LINKER_LIBS PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
 # ---[ OpenMP
-if (USE_OPENMP)
+if (USE_OPENMP AND NOT USE_TBB)
     # Ideally, this should be provided by the BLAS library IMPORTED target. However,
     # nobody does this, so we need to link to OpenMP explicitly and have the maintainer
     # to flick the switch manually as needed.

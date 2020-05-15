@@ -3,6 +3,7 @@ builds
 build
 cmake-build*
 *CMakeFiles*
+third_party/*
 
 *.caffemodel
 *.solverstate
