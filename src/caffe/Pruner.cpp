@@ -333,20 +333,20 @@ void Pruner::pruningConvByratio(const precord r,
       num_temp_2.Reshape(sz);
       switch (convCalculateMode) {
       case Pruner::Variance:
-        caffe_cpu_gemv<double>(CblasNoTrans, num, spatial_dim, 1. / spatial_dim,
-                               filter_data_.cpu_data(),
-                               spatial_sum_multiplier_.cpu_data(), 0.,
-                               mean_.mutable_cpu_data());
-        caffe_cpu_gemm<double>(CblasNoTrans, CblasNoTrans, spatial_dim, num, 1,
-                               -1, spatial_sum_multiplier_.cpu_data(),
-                               mean_.cpu_data(), 1,
-                               num_temp_1.mutable_cpu_data());
+        caffe_blas_gemv<double>(CblasNoTrans, num, spatial_dim,
+                                1. / spatial_dim, filter_data_.cpu_data(),
+                                spatial_sum_multiplier_.cpu_data(), 0.,
+                                mean_.mutable_cpu_data());
+        caffe_blas_gemm<double>(CblasNoTrans, CblasNoTrans, spatial_dim, num, 1,
+                                -1, spatial_sum_multiplier_.cpu_data(),
+                                mean_.cpu_data(), 1,
+                                num_temp_1.mutable_cpu_data());
         caffe_powx(num_temp_1.count(), num_temp_1.cpu_data(), double(2),
                    num_temp_2.mutable_cpu_data());
-        caffe_cpu_gemv<double>(CblasNoTrans, num, spatial_dim, 1. / spatial_dim,
-                               num_temp_2.cpu_data(),
-                               spatial_sum_multiplier_.cpu_data(), 0.,
-                               variance_.mutable_cpu_data());
+        caffe_blas_gemv<double>(CblasNoTrans, num, spatial_dim,
+                                1. / spatial_dim, num_temp_2.cpu_data(),
+                                spatial_sum_multiplier_.cpu_data(), 0.,
+                                variance_.mutable_cpu_data());
         variance_.ToProto(&blobData1, false);
         for (size_t i = 0; i < variance_.count(); i++) {
           atom a = make_pair(i, blobData1.double_data(i));
@@ -372,10 +372,10 @@ void Pruner::pruningConvByratio(const precord r,
       case Pruner::L1:
         caffe_abs(filter_data_.count(), filter_data_.cpu_data(),
                   filter_data_.mutable_cpu_data());
-        caffe_cpu_gemv<double>(CblasNoTrans, num, spatial_dim, 1. / spatial_dim,
-                               filter_data_.cpu_data(),
-                               spatial_sum_multiplier_.cpu_data(), 0.,
-                               temp_.mutable_cpu_data());
+        caffe_blas_gemv<double>(CblasNoTrans, num, spatial_dim,
+                                1. / spatial_dim, filter_data_.cpu_data(),
+                                spatial_sum_multiplier_.cpu_data(), 0.,
+                                temp_.mutable_cpu_data());
         temp_.ToProto(&blobData1, false);
         for (size_t i = 0; i < temp_.count(); i++) {
           atom a = make_pair(i, blobData1.double_data(i));
@@ -385,10 +385,10 @@ void Pruner::pruningConvByratio(const precord r,
       case Pruner::L2:
         caffe_powx(filter_data_.count(), filter_data_.cpu_data(), double(2),
                    filter_data_.mutable_cpu_data());
-        caffe_cpu_gemv<double>(CblasNoTrans, num, spatial_dim, 1. / spatial_dim,
-                               filter_data_.cpu_data(),
-                               spatial_sum_multiplier_.cpu_data(), 0.,
-                               temp_.mutable_cpu_data());
+        caffe_blas_gemv<double>(CblasNoTrans, num, spatial_dim,
+                                1. / spatial_dim, filter_data_.cpu_data(),
+                                spatial_sum_multiplier_.cpu_data(), 0.,
+                                temp_.mutable_cpu_data());
         temp_.ToProto(&blobData1, false);
         for (size_t i = 0; i < temp_.count(); i++) {
           atom a = make_pair(i, blobData1.double_data(i));

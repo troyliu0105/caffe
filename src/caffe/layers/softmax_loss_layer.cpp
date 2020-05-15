@@ -94,7 +94,8 @@ void SoftmaxWithLossLayer<Dtype>::Forward_cpu(
   int dim = prob_.count() / outer_num_;
   int count = 0;
   Dtype loss = 0;
-#pragma omp parallel for reduction(- : loss) reduction(+ : count)
+#pragma omp parallel for default(none) reduction(- : loss) reduction(+ : count) \
+    shared(label, prob_data, dim)
   for (int i = 0; i < outer_num_; ++i) {
     for (int j = 0; j < inner_num_; j++) {
       const int label_value = static_cast<int>(label[i * inner_num_ + j]);
@@ -129,7 +130,8 @@ void SoftmaxWithLossLayer<Dtype>::Backward_cpu(
     const Dtype *label = bottom[1]->cpu_data();
     int dim = prob_.count() / outer_num_;
     int count = 0;
-#pragma omp parallel for reduction(+ : count)
+#pragma omp parallel for default(none) reduction(+ : count) \
+    shared(label, bottom, bottom_diff, dim)
     for (int i = 0; i < outer_num_; ++i) {
       for (int j = 0; j < inner_num_; ++j) {
         const int label_value = static_cast<int>(label[i * inner_num_ + j]);

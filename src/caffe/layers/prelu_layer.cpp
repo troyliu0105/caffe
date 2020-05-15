@@ -81,6 +81,8 @@ void PReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // if channel_shared, channel index in the following computation becomes
   // always zero.
   const int div_factor = channel_shared_ ? channels : 1;
+#pragma omp parallel for default(none) shared(                                 \
+    count, dim, channels, div_factor, top_data, bottom_data, slope_data)
   for (int i = 0; i < count; ++i) {
     int c = (i / dim) % channels / div_factor;
     top_data[i] = std::max(bottom_data[i], Dtype(0)) +
@@ -108,12 +110,14 @@ void PReLULayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   // always zero.
   const int div_factor = channel_shared_ ? channels : 1;
 
-  // Propagte to param
+  // Propagate to param
   // Since to write bottom diff will affect top diff if top and bottom blobs
   // are identical (in-place computaion), we first compute param backward to
   // keep top_diff unchanged.
   if (this->param_propagate_down_[0]) {
     Dtype *slope_diff = this->blobs_[0]->mutable_cpu_diff();
+#pragma omp parallel for default(none) shared(                                 \
+    count, dim, channels, div_factor, slope_diff, top_diff, bottom_data)
     for (int i = 0; i < count; ++i) {
       int c = (i / dim) % channels / div_factor;
       slope_diff[c] += top_diff[i] * bottom_data[i] * (bottom_data[i] <= 0);
@@ -122,6 +126,9 @@ void PReLULayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   // Propagate to bottom
   if (propagate_down[0]) {
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
+#pragma omp parallel for default(none)                                         \
+    shared(count, dim, channels, div_factor, bottom_diff, top_diff,            \
+           bottom_data, slope_data)
     for (int i = 0; i < count; ++i) {
       int c = (i / dim) % channels / div_factor;
       bottom_diff[i] = top_diff[i] * ((bottom_data[i] > 0) +
