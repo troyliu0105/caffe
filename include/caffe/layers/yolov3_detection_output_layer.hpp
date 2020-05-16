@@ -50,7 +50,7 @@ public:
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
                        const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char *type() const { return "DetectionOutput"; }
+  virtual inline const char *type() const { return "Yolov3DetectionOutput"; }
   virtual inline int MinBottomBlobs() const { return 1; }
   // virtual inline int MaxBottomBlobs() const { return 4; }
   virtual inline int ExactNumTopBlobs() const { return 1; }

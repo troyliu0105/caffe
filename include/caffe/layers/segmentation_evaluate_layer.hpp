@@ -40,7 +40,7 @@ public:
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
                        const vector<Blob<Dtype> *> &top);
 
-  virtual inline const char *type() const { return "DetectionEvaluate"; }
+  virtual inline const char *type() const { return "SegmentationEvaluate"; }
   virtual inline int ExactBottomBlobs() const { return 2; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 

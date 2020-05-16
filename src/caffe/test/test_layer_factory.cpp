@@ -33,7 +33,8 @@ TYPED_TEST(LayerFactoryTest, TestCreateLayer) {
     }
     LayerParameter layer_param;
     // Data layers expect a DB
-    if (iter->first == "Data") {
+    if (iter->first == "Data" || iter->first == "AnnotatedData" ||
+        iter->first == "LaneData" || iter->first == "WindowData") {
 #ifdef USE_LEVELDB
       string tmp;
       MakeTempDir(&tmp);

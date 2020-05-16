@@ -28,7 +28,7 @@ public:
                           const vector<Blob<Dtype> *> &top);
   virtual void Reshape(const vector<Blob<Dtype> *> &bottom,
                        const vector<Blob<Dtype> *> &top);
-  virtual inline const char *type() const { return "AssistedExcitationLayer"; }
+  virtual inline const char *type() const { return "AssistedExcitation"; }
   virtual inline int ExactNumBottomBlobs() const { return 3; }
 
 protected:
