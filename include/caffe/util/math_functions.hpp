@@ -10,6 +10,12 @@
 #include "caffe/util/device_alternate.hpp"
 #include "caffe/util/mkl_alternate.hpp"
 
+#ifdef USE_TBB
+#include <tbb/parallel_for.h>
+#include <tbb/parallel_for_each.h>
+#include <tbb/parallel_reduce.h>
+#endif
+
 namespace caffe {
 
 template <typename Dtype>
@@ -307,6 +313,38 @@ void caffe_gpu_scale(int n, Dtype alpha, const Dtype *x, Dtype *y);
 // Git cherry picking that commit caused a conflict hard to resolve and
 //   copying that file in convenient for code reviewing.
 // So they have to be pasted here temporarily.
+#ifdef USE_TBB
+#define DEFINE_CAFFE_CPU_UNARY_FUNC(name, function)                            \
+  template <typename Dtype>                                                    \
+  inline Dtype caffe_fn_##name(Dtype x) {                                      \
+    return function;                                                           \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, int INCX, const Dtype *x, int INCY,    \
+                           Dtype *y) {                                         \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(INCX, 0);                                                         \
+    CHECK_GT(INCY, 0);                                                         \
+    CHECK(x);                                                                  \
+    CHECK(y);                                                                  \
+    tbb::parallel_for(                                                         \
+        tbb::blocked_range<int>(0, n),                                         \
+        [&](tbb::blocked_range<int> r) {                                       \
+          int ix, iy;                                                          \
+          for (int i = r.begin(); i < r.end(); i++) {                          \
+            ix = i * INCX;                                                     \
+            iy = i * INCY;                                                     \
+            y[iy] = caffe_fn_##name(x[ix]);                                    \
+          }                                                                    \
+        },                                                                     \
+        tbb::auto_partitioner());                                              \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
+    caffe_##name(n, 1, x, 1, y);                                               \
+  }
+#elif USE_OMP
+#else
 #define DEFINE_CAFFE_CPU_UNARY_FUNC(name, function)                            \
   template <typename Dtype>                                                    \
   inline Dtype caffe_fn_##name(Dtype x) {                                      \
@@ -321,16 +359,17 @@ void caffe_gpu_scale(int n, Dtype alpha, const Dtype *x, Dtype *y);
     CHECK(x);                                                                  \
     CHECK(y);                                                                  \
     int ix, iy;                                                                \
-    for (int i = 0; i < n; ++i) {                                              \
+    for (int i = 0; i < n; i++) {                                              \
       ix = i * INCX;                                                           \
       iy = i * INCY;                                                           \
-      y[iy] = caffe_fn_##name(x[ix]);                                          \
+      function;                                                                \
     }                                                                          \
   }                                                                            \
   template <typename Dtype>                                                    \
   inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
     caffe_##name(n, 1, x, 1, y);                                               \
   }
+#endif
 
 // output is 1 for the positives, 0 for zero, and -1 for the negatives
 DEFINE_CAFFE_CPU_UNARY_FUNC(sign, caffe_sign<Dtype>(x))
@@ -348,6 +387,39 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
 /**
  * @brief This macro create a func that manipulate tensor with a scalar
  */
+#ifdef USE_TBB
+#define DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(name, operation)                   \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name##_scalar(const int n, Dtype b, int INCX,            \
+                                    const Dtype *x, int INCY, Dtype *y) {      \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(INCX, 0);                                                         \
+    CHECK_GT(INCY, 0);                                                         \
+    CHECK(x);                                                                  \
+    CHECK(y);                                                                  \
+    tbb::parallel_for(                                                         \
+        tbb::blocked_range<int>(0, n),                                         \
+        [&](tbb::blocked_range<int> r) {                                       \
+          int ix, iy;                                                          \
+          for (int i = r.begin(); i < r.end(); i++) {                          \
+            ix = i * INCX;                                                     \
+            iy = i * INCY;                                                     \
+            operation;                                                         \
+          }                                                                    \
+        },                                                                     \
+        tbb::auto_partitioner());                                              \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name##_scalar(const int n, Dtype b, Dtype *x) {          \
+    caffe_##name##_scalar(n, b, 1, x, 1, x);                                   \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name##_scalar(const int n, Dtype b, const Dtype *x,      \
+                                    Dtype *y) {                                \
+    caffe_##name##_scalar(n, b, 1, x, 1, y);                                   \
+  }
+#elif USE_OMP
+#else
 #define DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(name, operation)                   \
   template <typename Dtype>                                                    \
   inline void caffe_##name##_scalar(const int n, Dtype b, int INCX,            \
@@ -358,7 +430,7 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
     CHECK(x);                                                                  \
     CHECK(y);                                                                  \
     int ix, iy;                                                                \
-    for (int i = 0; i < n; ++i) {                                              \
+    for (int i = 0; i < n; i++) {                                              \
       ix = i * INCX;                                                           \
       iy = i * INCY;                                                           \
       operation;                                                               \
@@ -373,6 +445,7 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
                                     Dtype *y) {                                \
     caffe_##name##_scalar(n, b, 1, x, 1, y);                                   \
   }
+#endif
 
 /**
  * @brief This macro define a single math function like `y = f(x)`
