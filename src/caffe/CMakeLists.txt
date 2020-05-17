@@ -56,7 +56,7 @@ if (HAVE_CUDA)
 endif ()
 
 if (HAVE_CUDA)
-    project(caffe CXX CUDA)
+#    project(caffe CXX CUDA)
     add_library(caffe ${srcs})
     set_target_properties(caffe PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     target_compile_features(caffe PUBLIC cxx_std_17)

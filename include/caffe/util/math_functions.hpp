@@ -313,6 +313,9 @@ void caffe_gpu_scale(int n, Dtype alpha, const Dtype *x, Dtype *y);
 // Git cherry picking that commit caused a conflict hard to resolve and
 //   copying that file in convenient for code reviewing.
 // So they have to be pasted here temporarily.
+/**
+ * @brief This macro define a single math function like `y = f(x)`
+ */
 #ifdef USE_TBB
 #define DEFINE_CAFFE_CPU_UNARY_FUNC(name, function)                            \
   template <typename Dtype>                                                    \
@@ -448,8 +451,69 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
 #endif
 
 /**
- * @brief This macro define a single math function like `y = f(x)`
+ * @brief This macro define a binary function like y := f(x1, x2)
  */
+#ifdef USE_TBB
+#define DEFINE_CAFFE_CPU_BINARY_FUNC(name, function)                           \
+  template <typename Dtype>                                                    \
+  inline Dtype caffe_fn_##name(Dtype x1, Dtype x2) {                           \
+    return function;                                                           \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, int INCX1, const Dtype *x1, int INCX2, \
+                           const Dtype *x2, int INCY, Dtype *y) {              \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(INCX1, 0);                                                        \
+    CHECK_GT(INCX2, 0);                                                        \
+    CHECK_GT(INCY, 0);                                                         \
+    CHECK(x1);                                                                 \
+    CHECK(x2);                                                                 \
+    CHECK(y);                                                                  \
+    tbb::parallel_for(                                                         \
+        tbb::blocked_range<int>(0, n),                                         \
+        [&](tbb::blocked_range<int> r) {                                       \
+          int ix1, ix2, iy;                                                    \
+          for (int i = r.begin(); i < r.end(); i++) {                          \
+            ix1 = i * INCX1;                                                   \
+            ix2 = i * INCX2;                                                   \
+            iy = i * INCY;                                                     \
+            y[iy] = caffe_fn_##name(x1[ix1], x2[ix2]);                         \
+          }                                                                    \
+        },                                                                     \
+        tbb::auto_partitioner());                                              \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, const Dtype *x1, const Dtype *x2,      \
+                           Dtype *y) {                                         \
+    caffe_##name(n, 1, x1, 1, x2, 1, y);                                       \
+  }
+#elif USE_OMP
+#else
+#define DEFINE_CAFFE_CPU_UNARY_FUNC(name, function)                            \
+  template <typename Dtype>                                                    \
+  inline Dtype caffe_fn_##name(Dtype x) {                                      \
+    return function;                                                           \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, int INCX, const Dtype *x, int INCY,    \
+                           Dtype *y) {                                         \
+    CHECK_GT(n, 0);                                                            \
+    CHECK_GT(INCX, 0);                                                         \
+    CHECK_GT(INCY, 0);                                                         \
+    CHECK(x);                                                                  \
+    CHECK(y);                                                                  \
+    int ix, iy;                                                                \
+    for (int i = 0; i < n; i++) {                                              \
+      ix = i * INCX;                                                           \
+      iy = i * INCY;                                                           \
+      function;                                                                \
+    }                                                                          \
+  }                                                                            \
+  template <typename Dtype>                                                    \
+  inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
+    caffe_##name(n, 1, x, 1, y);                                               \
+  }
+#endif
 
 template <typename Dtype>
 void caffe_softmax(int N, const Dtype *a, Dtype *y);
@@ -461,6 +525,9 @@ DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(add, y[iy] = x[ix] + b)
 DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(sub, y[iy] = x[ix] - b)
 DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(mul, y[iy] = x[ix] * b)
 DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(div, y[iy] = x[ix] / b)
+DEFINE_CAFFE_CPU_BINARY_SCALAR_FUNC(mod, y[iy] = x[ix] % b)
+
+DEFINE_CAFFE_CPU_BINARY_FUNC(mod, x1 % x2)
 
 DEFINE_CAFFE_CPU_UNARY_FUNC(tanh, tanh(x))
 DEFINE_CAFFE_CPU_UNARY_FUNC(tanh_grad, 1 - pow(tanh(x), 2))

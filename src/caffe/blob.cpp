@@ -68,7 +68,8 @@ void Blob<Dtype>::Reshape(const int num, const int channels, const int height,
   Reshape(shape);
 }
 
-template <typename Dtype> void Blob<Dtype>::Reshape(const vector<int> &shape) {
+template <typename Dtype>
+void Blob<Dtype>::Reshape(const vector<int> &shape) {
   CHECK_LE(shape.size(), kMaxBlobAxes);
   count_ = 1;
   shape_.resize(shape.size());
@@ -121,17 +122,20 @@ Blob<Dtype>::Blob(const vector<int> &shape)
   Reshape(shape);
 }
 
-template <typename Dtype> const int *Blob<Dtype>::gpu_shape() const {
+template <typename Dtype>
+const int *Blob<Dtype>::gpu_shape() const {
   CHECK(shape_data_);
   return (const int *)shape_data_->gpu_data();
 }
 
-template <typename Dtype> const Dtype *Blob<Dtype>::cpu_data() const {
+template <typename Dtype>
+const Dtype *Blob<Dtype>::cpu_data() const {
   CHECK(data_);
   return (const Dtype *)data_->cpu_data();
 }
 
-template <typename Dtype> void Blob<Dtype>::set_cpu_data(Dtype *data) {
+template <typename Dtype>
+void Blob<Dtype>::set_cpu_data(Dtype *data) {
   CHECK(data);
   // Make sure CPU and GPU sizes remain equal
   size_t size = count_ * sizeof(Dtype);
@@ -142,12 +146,14 @@ template <typename Dtype> void Blob<Dtype>::set_cpu_data(Dtype *data) {
   data_->set_cpu_data(data);
 }
 
-template <typename Dtype> const Dtype *Blob<Dtype>::gpu_data() const {
+template <typename Dtype>
+const Dtype *Blob<Dtype>::gpu_data() const {
   CHECK(data_);
   return (const Dtype *)data_->gpu_data();
 }
 
-template <typename Dtype> void Blob<Dtype>::set_gpu_data(Dtype *data) {
+template <typename Dtype>
+void Blob<Dtype>::set_gpu_data(Dtype *data) {
   CHECK(data);
   // Make sure CPU and GPU sizes remain equal
   size_t size = count_ * sizeof(Dtype);
@@ -158,42 +164,50 @@ template <typename Dtype> void Blob<Dtype>::set_gpu_data(Dtype *data) {
   data_->set_gpu_data(data);
 }
 
-template <typename Dtype> const Dtype *Blob<Dtype>::cpu_diff() const {
+template <typename Dtype>
+const Dtype *Blob<Dtype>::cpu_diff() const {
   CHECK(diff_);
   return (const Dtype *)diff_->cpu_data();
 }
 
-template <typename Dtype> const Dtype *Blob<Dtype>::gpu_diff() const {
+template <typename Dtype>
+const Dtype *Blob<Dtype>::gpu_diff() const {
   CHECK(diff_);
   return (const Dtype *)diff_->gpu_data();
 }
 
-template <typename Dtype> Dtype *Blob<Dtype>::mutable_cpu_data() {
+template <typename Dtype>
+Dtype *Blob<Dtype>::mutable_cpu_data() {
   CHECK(data_);
   return static_cast<Dtype *>(data_->mutable_cpu_data());
 }
 
-template <typename Dtype> Dtype *Blob<Dtype>::mutable_gpu_data() {
+template <typename Dtype>
+Dtype *Blob<Dtype>::mutable_gpu_data() {
   CHECK(data_);
   return static_cast<Dtype *>(data_->mutable_gpu_data());
 }
 
-template <typename Dtype> Dtype *Blob<Dtype>::mutable_cpu_diff() {
+template <typename Dtype>
+Dtype *Blob<Dtype>::mutable_cpu_diff() {
   CHECK(diff_);
   return static_cast<Dtype *>(diff_->mutable_cpu_data());
 }
 
-template <typename Dtype> Dtype *Blob<Dtype>::mutable_gpu_diff() {
+template <typename Dtype>
+Dtype *Blob<Dtype>::mutable_gpu_diff() {
   CHECK(diff_);
   return static_cast<Dtype *>(diff_->mutable_gpu_data());
 }
 
-template <typename Dtype> void Blob<Dtype>::ShareData(const Blob &other) {
+template <typename Dtype>
+void Blob<Dtype>::ShareData(const Blob &other) {
   CHECK_EQ(count_, other.count());
   data_ = other.data();
 }
 
-template <typename Dtype> void Blob<Dtype>::ShareDiff(const Blob &other) {
+template <typename Dtype>
+void Blob<Dtype>::ShareDiff(const Blob &other) {
   CHECK_EQ(count_, other.count());
   diff_ = other.diff();
 }
@@ -205,7 +219,8 @@ template <> void Blob<unsigned int>::Update() { NOT_IMPLEMENTED; }
 template <> void Blob<int>::Update() { NOT_IMPLEMENTED; }
 template <> void Blob<bool>::Update() { NOT_IMPLEMENTED; }
 
-template <typename Dtype> void Blob<Dtype>::Update() {
+template <typename Dtype>
+void Blob<Dtype>::Update() {
   // We will perform update based on where the data is located.
   switch (data_->head()) {
   case SyncedMemory::HEAD_AT_CPU:
@@ -230,22 +245,26 @@ template <typename Dtype> void Blob<Dtype>::Update() {
   }
 }
 
-template <> unsigned int Blob<unsigned int>::asum_data() const {
+template <>
+unsigned int Blob<unsigned int>::asum_data() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> int Blob<int>::asum_data() const {
+template <>
+int Blob<int>::asum_data() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> bool Blob<bool>::asum_data() const {
+template <>
+bool Blob<bool>::asum_data() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <typename Dtype> Dtype Blob<Dtype>::asum_data() const {
+template <typename Dtype>
+Dtype Blob<Dtype>::asum_data() const {
   if (!data_) {
     return 0;
   }
@@ -271,22 +290,26 @@ template <typename Dtype> Dtype Blob<Dtype>::asum_data() const {
   return 0;
 }
 
-template <> unsigned int Blob<unsigned int>::asum_diff() const {
+template <>
+unsigned int Blob<unsigned int>::asum_diff() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> int Blob<int>::asum_diff() const {
+template <>
+int Blob<int>::asum_diff() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> bool Blob<bool>::asum_diff() const {
+template <>
+bool Blob<bool>::asum_diff() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <typename Dtype> Dtype Blob<Dtype>::asum_diff() const {
+template <typename Dtype>
+Dtype Blob<Dtype>::asum_diff() const {
   if (!diff_) {
     return 0;
   }
@@ -312,22 +335,26 @@ template <typename Dtype> Dtype Blob<Dtype>::asum_diff() const {
   return 0;
 }
 
-template <> unsigned int Blob<unsigned int>::sumsq_data() const {
+template <>
+unsigned int Blob<unsigned int>::sumsq_data() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> int Blob<int>::sumsq_data() const {
+template <>
+int Blob<int>::sumsq_data() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> bool Blob<bool>::sumsq_data() const {
+template <>
+bool Blob<bool>::sumsq_data() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <typename Dtype> Dtype Blob<Dtype>::sumsq_data() const {
+template <typename Dtype>
+Dtype Blob<Dtype>::sumsq_data() const {
   Dtype sumsq;
   const Dtype *data;
   if (!data_) {
@@ -355,22 +382,26 @@ template <typename Dtype> Dtype Blob<Dtype>::sumsq_data() const {
   return sumsq;
 }
 
-template <> unsigned int Blob<unsigned int>::sumsq_diff() const {
+template <>
+unsigned int Blob<unsigned int>::sumsq_diff() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> int Blob<int>::sumsq_diff() const {
+template <>
+int Blob<int>::sumsq_diff() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <> bool Blob<bool>::sumsq_diff() const {
+template <>
+bool Blob<bool>::sumsq_diff() const {
   NOT_IMPLEMENTED;
   return 0;
 }
 
-template <typename Dtype> Dtype Blob<Dtype>::sumsq_diff() const {
+template <typename Dtype>
+Dtype Blob<Dtype>::sumsq_diff() const {
   Dtype sumsq;
   const Dtype *diff;
   if (!diff_) {
@@ -406,7 +437,8 @@ template <> void Blob<int>::scale_data(int scale_factor) { NOT_IMPLEMENTED; }
 
 template <> void Blob<bool>::scale_data(bool scale_factor) { NOT_IMPLEMENTED; }
 
-template <typename Dtype> void Blob<Dtype>::scale_data(Dtype scale_factor) {
+template <typename Dtype>
+void Blob<Dtype>::scale_data(Dtype scale_factor) {
   Dtype *data;
   if (!data_) {
     return;
@@ -440,7 +472,8 @@ template <> void Blob<int>::scale_diff(int scale_factor) { NOT_IMPLEMENTED; }
 
 template <> void Blob<bool>::scale_diff(bool scale_factor) { NOT_IMPLEMENTED; }
 
-template <typename Dtype> void Blob<Dtype>::scale_diff(Dtype scale_factor) {
+template <typename Dtype>
+void Blob<Dtype>::scale_diff(Dtype scale_factor) {
   Dtype *diff;
   if (!diff_) {
     return;
@@ -575,8 +608,8 @@ void Blob<Dtype>::FromProto(const BlobProto &proto, bool reshape) {
 template <>
 void Blob<double>::ToProto(BlobProto *proto, bool write_diff) const {
   proto->clear_shape();
-  for (int i = 0; i < shape_.size(); ++i) {
-    proto->mutable_shape()->add_dim(shape_[i]);
+  for (int i : shape_) {
+    proto->mutable_shape()->add_dim(i);
   }
   proto->clear_double_data();
   proto->clear_double_diff();
@@ -592,7 +625,8 @@ void Blob<double>::ToProto(BlobProto *proto, bool write_diff) const {
   }
 }
 
-template <> void Blob<float>::ToProto(BlobProto *proto, bool write_diff) const {
+template <>
+void Blob<float>::ToProto(BlobProto *proto, bool write_diff) const {
   proto->clear_shape();
   for (int i : shape_) {
     proto->mutable_shape()->add_dim(i);

@@ -6,6 +6,7 @@ if (MSVC)
     # and https://cmake.org/cmake/help/v3.5/prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS.html
     # for details.
     cmake_minimum_required(VERSION 3.8)
+    include(InstallRequiredSystemLibraries)
 endif ()
 if (POLICY CMP0046)
     cmake_policy(SET CMP0046 NEW)
