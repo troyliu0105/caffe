@@ -14,6 +14,19 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 #include <tbb/parallel_reduce.h>
+#define TBB_SIMPLE_FOR(n, operation)                                           \
+  tbb::parallel_for(                                                           \
+      tbb::blocked_range<int>(0, n),                                           \
+      [&](tbb::blocked_range<int> r) {                                         \
+        for (int i = r.begin(); i < r.end(); i++)                              \
+          operation;                                                           \
+      },                                                                       \
+      tbb::auto_partitioner());
+#define FOR_LOOP(n, operation) TBB_SIMPLE_FOR(n, operation)
+#else
+#define FOR_LOOP(n, operation)                                                 \
+  for (int i = 0; i < n; ++i)                                                  \
+    operation;
 #endif
 
 namespace caffe {
@@ -489,29 +502,33 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
   }
 #elif USE_OMP
 #else
-#define DEFINE_CAFFE_CPU_UNARY_FUNC(name, function)                            \
+#define DEFINE_CAFFE_CPU_BINARY_FUNC(name, function)                           \
   template <typename Dtype>                                                    \
-  inline Dtype caffe_fn_##name(Dtype x) {                                      \
+  inline Dtype caffe_fn_##name(Dtype x1, Dtype x2) {                           \
     return function;                                                           \
   }                                                                            \
   template <typename Dtype>                                                    \
-  inline void caffe_##name(const int n, int INCX, const Dtype *x, int INCY,    \
-                           Dtype *y) {                                         \
+  inline void caffe_##name(const int n, int INCX1, const Dtype *x1, int INCX2, \
+                           const Dtype *x2, int INCY, Dtype *y) {              \
     CHECK_GT(n, 0);                                                            \
-    CHECK_GT(INCX, 0);                                                         \
+    CHECK_GT(INCX1, 0);                                                        \
+    CHECK_GT(INCX2, 0);                                                        \
     CHECK_GT(INCY, 0);                                                         \
-    CHECK(x);                                                                  \
+    CHECK(x1);                                                                 \
+    CHECK(x2);                                                                 \
     CHECK(y);                                                                  \
-    int ix, iy;                                                                \
+    int ix1, ix2, iy;                                                          \
     for (int i = 0; i < n; i++) {                                              \
-      ix = i * INCX;                                                           \
+      ix1 = i * INCX1;                                                         \
+      ix2 = i * INCX2;                                                         \
       iy = i * INCY;                                                           \
-      function;                                                                \
+      y[iy] = caffe_fn_##name(x1[ix1], x2[ix2]);                               \
     }                                                                          \
   }                                                                            \
   template <typename Dtype>                                                    \
-  inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
-    caffe_##name(n, 1, x, 1, y);                                               \
+  inline void caffe_##name(const int n, const Dtype *x1, const Dtype *x2,      \
+                           Dtype *y) {                                         \
+    caffe_##name(n, 1, x1, 1, x2, 1, y);                                       \
   }
 #endif
 
