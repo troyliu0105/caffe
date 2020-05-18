@@ -9,7 +9,7 @@ template <typename Dtype>
 void Permute(const int count, Dtype *bottom_data, const bool forward,
              const int *permute_order, const int *old_steps,
              const int *new_steps, const int num_axes, Dtype *top_data) {
-  FOR_LOOP(count, {
+  FOR_LOOP(count, i, {
     int old_idx = 0;
     int idx = i;
     for (int j = 0; j < num_axes; ++j) {

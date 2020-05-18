@@ -20,7 +20,7 @@ namespace caffe {
 template <typename Dtype>
 DataTransformer<Dtype>::DataTransformer(const TransformationParameter &param,
                                         Phase phase)
-    : param_(param), phase_(phase) {
+    : param_(param), phase_(phase), mirror_param_(false) {
   // check if we want to use mean_file
   if (param_.has_mean_file()) {
     CHECK_EQ(param_.mean_value_size(), 0)
@@ -161,8 +161,7 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   //#else
   Dtype datum_element;
   int top_index, data_index;
-  FOR_LOOP(datum_channels, {
-    int c = i;
+  FOR_LOOP(datum_channels, c, {
     for (int h = 0; h < height; ++h) {
       for (int w = 0; w < width; ++w) {
         data_index = (c * datum_height + h_off + h) * datum_width + w_off + w;
@@ -897,8 +896,7 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
   int top_index;
-  FOR_LOOP(height, {
-    int h = i;
+  FOR_LOOP(height, h, {
     const uchar *ptr = cv_cropped_img.ptr<uchar>(h);
     int img_index = 0;
     for (int w = 0; w < width; ++w) {
@@ -957,8 +955,7 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
     int top_index;
     // LOG(INFO) << do_mirror;
     int maxima = 0;
-    FOR_LOOP(height, {
-      int h = i;
+    FOR_LOOP(height, h, {
       const uchar *ptr = cv_img.ptr<uchar>(h);
       int img_index = 0;
       for (int w = 0; w < width; ++w) {
@@ -1094,8 +1091,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
   int top_index;
-  FOR_LOOP(height, {
-    int h = i;
+  FOR_LOOP(height, h, {
     const uchar *ptr = cv_cropped_image.ptr<uchar>(h);
     int img_index = 0;
     int h_idx = h;
@@ -1153,8 +1149,7 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
 
   const int img_type = channels == 3 ? CV_8UC3 : CV_8UC1;
   cv::Mat orig_img(height, width, img_type, cv::Scalar(0, 0, 0));
-  FOR_LOOP(height, {
-    int h = i;
+  FOR_LOOP(height, h, {
     auto *ptr = orig_img.ptr<uchar>(h);
     int img_idx = 0;
     for (int w = 0; w < width; ++w) {

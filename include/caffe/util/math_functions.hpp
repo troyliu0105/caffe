@@ -14,18 +14,18 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 #include <tbb/parallel_reduce.h>
-#define TBB_SIMPLE_FOR(n, operation)                                           \
+#define TBB_SIMPLE_FOR(n, iname, operation)                                    \
   tbb::parallel_for(                                                           \
       tbb::blocked_range<int>(0, n),                                           \
       [&](tbb::blocked_range<int> r) {                                         \
-        for (int i = r.begin(); i < r.end(); i++)                              \
+        for (int iname = r.begin(); iname < r.end(); iname++)                  \
           operation;                                                           \
       },                                                                       \
       tbb::auto_partitioner());
-#define FOR_LOOP(n, operation) TBB_SIMPLE_FOR(n, operation)
+#define FOR_LOOP(N, iname, operation) TBB_SIMPLE_FOR(N, iname, operation)
 #else
-#define FOR_LOOP(n, operation)                                                 \
-  for (int i = 0; i < n; ++i)                                                  \
+#define FOR_LOOP(n, iname, operation)                                          \
+  for (int iname = 0; iname < n; ++iname)                                      \
     operation;
 #endif
 
