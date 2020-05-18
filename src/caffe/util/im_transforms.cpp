@@ -681,30 +681,47 @@ void RandomOrderChannels(const cv::Mat &in_img, cv::Mat *out_img,
     *out_img = in_img;
   }
 }
-
+using RandomDistortFunction = void (*)(const cv::Mat &, cv::Mat *, const float,
+                                       const float);
 cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param) {
   cv::Mat out_img = in_img;
   float prob;
   caffe_rng_uniform(1, 0.f, 1.f, &prob);
 
-  // Do random brightness distortion.
-  RandomBrightness(out_img, &out_img, param.brightness_prob(),
-                   param.brightness_delta());
+  std::vector<std::function<void(void)>> distort_functions;
+  distort_functions.emplace_back([&]() -> void {
+    // Do random brightness distortion.
+    RandomBrightness(out_img, &out_img, param.brightness_prob(),
+                     param.brightness_delta());
+  });
+  distort_functions.emplace_back([&]() -> void {
+    // Do random hue distortion.
+    RandomHue(out_img, &out_img, param.hue_prob(), param.hue_delta());
+  });
 
-  // Do random hue distortion.
-  RandomHue(out_img, &out_img, param.hue_prob(), param.hue_delta());
+  distort_functions.emplace_back([&]() -> void {
+    // Do random contrast distortion.
+    RandomContrast(out_img, &out_img, param.contrast_prob(),
+                   param.contrast_lower(), param.contrast_upper());
+  });
 
-  // Do random contrast distortion.
-  RandomContrast(out_img, &out_img, param.contrast_prob(),
-                 param.contrast_lower(), param.contrast_upper());
+  distort_functions.emplace_back([&]() -> void {
+    // Do random saturation distortion.
+    RandomSaturation(out_img, &out_img, param.saturation_prob(),
+                     param.saturation_lower(), param.saturation_upper());
+  });
 
-  // Do random saturation distortion.
-  RandomSaturation(out_img, &out_img, param.saturation_prob(),
-                   param.saturation_lower(), param.saturation_upper());
+  distort_functions.emplace_back([&]() -> void {
+    // Do random reordering of the channels.
+    RandomOrderChannels(out_img, &out_img, param.random_order_prob());
+  });
 
-  // Do random reordering of the channels.
-  RandomOrderChannels(out_img, &out_img, param.random_order_prob());
-
+  if (param.has_random_order_prob() && prob < param.random_order_prob()) {
+    shuffle(distort_functions.begin(), distort_functions.end());
+  }
+  for (auto &f : distort_functions) {
+    f();
+  }
   return out_img;
 }
 #endif // USE_OPENCV
