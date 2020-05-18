@@ -943,8 +943,9 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
 
   // LOG(INFO) << scale << ","<< mean_values_[0] << ","<< mean_values_[1];
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
-  for (auto cv_img : cv_imgs) {
+  for (int i = 0; i < cv_imgs.size(); i++) {
     // LOG(INFO)<<i;
+    auto cv_img = cv_imgs[i];
     const int img_channels = cv_img.channels();
     const int img_height = cv_img.rows;
     const int img_width = cv_img.cols;

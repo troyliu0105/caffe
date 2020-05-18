@@ -16,11 +16,11 @@ namespace caffe {
 // Generate random number given the probablities for each number.
 int roll_weighted_die(const std::vector<float> &probabilities);
 
-void UpdateBBoxByResizePolicy(const ResizeParameter &param, const int old_width,
-                              const int old_height, NormalizedBBox *bbox);
+void UpdateBBoxByResizePolicy(const ResizeParameter &param, int old_width,
+                              int old_height, NormalizedBBox *bbox);
 
-void InferNewSize(const ResizeParameter &resize_param, const int old_width,
-                  const int old_height, int *new_width, int *new_height);
+void InferNewSize(const ResizeParameter &resize_param, int old_width,
+                  int old_height, int *new_width, int *new_height);
 
 #ifdef USE_OPENCV
 template <typename T>
@@ -34,52 +34,47 @@ cv::Mat colorReduce(const cv::Mat &image, int div = 64);
 
 void fillEdgeImage(const cv::Mat &edgesIn, cv::Mat *filledEdgesOut);
 
-void CenterObjectAndFillBg(const cv::Mat &in_img, const bool fill_bg,
+void CenterObjectAndFillBg(const cv::Mat &in_img, bool fill_bg,
                            cv::Mat *out_img);
 
-cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img, const int new_width,
-                                  const int new_height,
-                                  const int pad_type = cv::BORDER_CONSTANT,
-                                  const cv::Scalar pad = cv::Scalar(0, 0, 0),
-                                  const int interp_mode = cv::INTER_LINEAR);
+cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img, int new_width,
+                                  int new_height,
+                                  int pad_type = cv::BORDER_CONSTANT,
+                                  cv::Scalar pad = cv::Scalar(0, 0, 0),
+                                  int interp_mode = cv::INTER_LINEAR);
 
-cv::Mat AspectKeepingResizeBySmall(const cv::Mat &in_img, const int new_width,
-                                   const int new_height,
-                                   const int interp_mode = cv::INTER_LINEAR);
+cv::Mat AspectKeepingResizeBySmall(const cv::Mat &in_img, int new_width,
+                                   int new_height,
+                                   int interp_mode = cv::INTER_LINEAR);
 
-void constantNoise(const int n, const vector<uchar> &val, cv::Mat *image);
+void constantNoise(int n, const vector<uchar> &val, cv::Mat *image);
 
 cv::Mat ApplyResize(const cv::Mat &in_img, const ResizeParameter &param);
 
 cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param);
 
 void RandomBrightness(const cv::Mat &in_img, cv::Mat *out_img,
-                      const float brightness_prob,
-                      const float brightness_delta);
+                      float brightness_prob, float brightness_delta);
 
-void AdjustBrightness(const cv::Mat &in_img, const float delta,
-                      cv::Mat *out_img);
+void AdjustBrightness(const cv::Mat &in_img, float delta, cv::Mat *out_img);
 
 void RandomContrast(const cv::Mat &in_img, cv::Mat *out_img,
-                    const float contrast_prob, const float lower,
-                    const float upper);
+                    float contrast_prob, float lower, float upper);
 
-void AdjustContrast(const cv::Mat &in_img, const float delta, cv::Mat *out_img);
+void AdjustContrast(const cv::Mat &in_img, float delta, cv::Mat *out_img);
 
 void RandomSaturation(const cv::Mat &in_img, cv::Mat *out_img,
-                      const float saturation_prob, const float lower,
-                      const float upper);
+                      float saturation_prob, float lower, float upper);
 
-void AdjustSaturation(const cv::Mat &in_img, const float delta,
-                      cv::Mat *out_img);
+void AdjustSaturation(const cv::Mat &in_img, float delta, cv::Mat *out_img);
 
-void RandomHue(const cv::Mat &in_img, cv::Mat *out_img, const float hue_prob,
-               const float hue_delta);
+void RandomHue(const cv::Mat &in_img, cv::Mat *out_img, float hue_prob,
+               float hue_delta);
 
-void AdjustHue(const cv::Mat &in_img, const float delta, cv::Mat *out_img);
+void AdjustHue(const cv::Mat &in_img, float delta, cv::Mat *out_img);
 
 void RandomOrderChannels(const cv::Mat &in_img, cv::Mat *out_img,
-                         const float random_order_prob);
+                         float random_order_prob);
 
 cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param);
 #endif // USE_OPENCV
