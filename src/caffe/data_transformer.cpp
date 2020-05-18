@@ -161,7 +161,8 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   //#else
   Dtype datum_element;
   int top_index, data_index;
-  for (int c = 0; c < datum_channels; ++c) {
+  FOR_LOOP(datum_channels, {
+    int c = i;
     for (int h = 0; h < height; ++h) {
       for (int w = 0; w < width; ++w) {
         data_index = (c * datum_height + h_off + h) * datum_width + w_off + w;
@@ -189,7 +190,7 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
         }
       }
     }
-  }
+  })
   //#endif
 }
 
@@ -721,7 +722,7 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
 
   const Dtype scale = param_.scale();
   const bool has_mean_file = param_.has_mean_file();
-  const bool has_mean_values = mean_values_.size() > 0;
+  const bool has_mean_values = !mean_values_.empty();
 
   float current_prob;
 
@@ -852,7 +853,7 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
 
   CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
 
-  Dtype *mean = NULL;
+  Dtype *mean = nullptr;
   if (has_mean_file) {
     CHECK_EQ(img_channels, data_mean_.channels());
     CHECK_EQ(img_height, data_mean_.height());
@@ -896,7 +897,8 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
   int top_index;
-  for (int h = 0; h < height; ++h) {
+  FOR_LOOP(height, {
+    int h = i;
     const uchar *ptr = cv_cropped_img.ptr<uchar>(h);
     int img_index = 0;
     for (int w = 0; w < width; ++w) {
@@ -907,7 +909,7 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
           top_index = (c * height + h) * width + w;
         }
         // int top_index = (c * height + h) * width + w;
-        Dtype pixel = static_cast<Dtype>(ptr[img_index++]);
+        auto pixel = static_cast<Dtype>(ptr[img_index++]);
         if (has_mean_file) {
           int mean_index = (c * img_height + h_off + h) * img_width + w_off + w;
           transformed_data[top_index] = (pixel - mean[mean_index]) * scale;
@@ -920,11 +922,11 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
         }
       }
     }
-  }
+  })
 }
 
 template <typename Dtype>
-void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> cv_imgs,
+void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
                                         Blob<Dtype> *transformed_blob,
                                         bool preserve_pixel_vals) {
 
@@ -943,9 +945,8 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> cv_imgs,
 
   // LOG(INFO) << scale << ","<< mean_values_[0] << ","<< mean_values_[1];
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
-  for (int i = 0; i < cv_imgs.size(); i++) {
+  for (auto cv_img : cv_imgs) {
     // LOG(INFO)<<i;
-    cv::Mat cv_img = cv_imgs[i];
     const int img_channels = cv_img.channels();
     const int img_height = cv_img.rows;
     const int img_width = cv_img.cols;
@@ -956,7 +957,8 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> cv_imgs,
     int top_index;
     // LOG(INFO) << do_mirror;
     int maxima = 0;
-    for (int h = 0; h < height; ++h) {
+    FOR_LOOP(height, {
+      int h = i;
       const uchar *ptr = cv_img.ptr<uchar>(h);
       int img_index = 0;
       for (int w = 0; w < width; ++w) {
@@ -969,7 +971,7 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> cv_imgs,
         }
         // LOG(INFO) << top_index;
         // int top_index = (c * height + h) * width + w;
-        Dtype pixel = static_cast<Dtype>(ptr[img_index++]);
+        auto pixel = static_cast<Dtype>(ptr[img_index++]);
         // if(pixel>0)
         //  LOG(INFO) << pixel;
         transformed_data[top_index] = pixel * scale;
@@ -978,7 +980,7 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> cv_imgs,
           maxima = top_index;
         //}
       }
-    }
+    })
     // LOG(INFO)<<maxima;
   }
 }
@@ -1007,7 +1009,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   *do_mirror = param_.mirror() && Rand(2);
   mirror_param_ = *do_mirror;
   const bool has_mean_file = param_.has_mean_file();
-  const bool has_mean_values = mean_values_.size() > 0;
+  const bool has_mean_values = !mean_values_.empty();
 
   const int num_resize_policies = param_.resize_param_size();
   Dtype *mean = nullptr;
@@ -1092,7 +1094,8 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
   int top_index;
-  for (int h = 0; h < height; ++h) {
+  FOR_LOOP(height, {
+    int h = i;
     const uchar *ptr = cv_cropped_image.ptr<uchar>(h);
     int img_index = 0;
     int h_idx = h;
@@ -1105,7 +1108,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
       int w_idx_real = w_idx;
       for (int c = 0; c < img_channels; ++c) {
         top_index = (c * height + h_idx_real) * width + w_idx_real;
-        Dtype pixel = static_cast<Dtype>(ptr[img_index++]);
+        auto pixel = static_cast<Dtype>(ptr[img_index++]);
         if (has_mean_file) {
           int mean_index = (c * img_height + h_off + h_idx_real) * img_width +
                            w_off + w_idx_real;
@@ -1119,7 +1122,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
         }
       }
     }
-  }
+  })
 }
 
 template <typename Dtype>
@@ -1128,9 +1131,9 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
                                           const int channels) {
   const Dtype scale = param_.scale();
   const bool has_mean_file = param_.has_mean_file();
-  const bool has_mean_values = mean_values_.size() > 0;
+  const bool has_mean_values = !mean_values_.empty();
   LOG(INFO) << "test";
-  Dtype *mean = NULL;
+  Dtype *mean = nullptr;
   if (has_mean_file) {
     CHECK_EQ(channels, data_mean_.channels());
     CHECK_EQ(height, data_mean_.height());
@@ -1150,8 +1153,9 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
 
   const int img_type = channels == 3 ? CV_8UC3 : CV_8UC1;
   cv::Mat orig_img(height, width, img_type, cv::Scalar(0, 0, 0));
-  for (int h = 0; h < height; ++h) {
-    uchar *ptr = orig_img.ptr<uchar>(h);
+  FOR_LOOP(height, {
+    int h = i;
+    auto *ptr = orig_img.ptr<uchar>(h);
     int img_idx = 0;
     for (int w = 0; w < width; ++w) {
       for (int c = 0; c < channels; ++c) {
@@ -1168,7 +1172,7 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
         }
       }
     }
-  }
+  })
 
   if (param_.resize_param_size()) {
     *cv_img = ApplyResize(orig_img, param_.resize_param(0));

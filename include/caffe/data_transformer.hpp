@@ -100,8 +100,8 @@ public:
    *    Stores all transformed AnnotationGroup.
    */
   void TransformAnnotation(
-      const AnnotatedDatum &anno_datum, const bool do_resize,
-      const NormalizedBBox &crop_bbox, const bool do_mirror,
+      const AnnotatedDatum &anno_datum, bool do_resize,
+      const NormalizedBBox &crop_bbox, bool do_mirror,
       RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
       int policy_num = 0);
 
@@ -120,7 +120,7 @@ public:
   /**
    * @brief Expand the datum.
    */
-  void ExpandImage(const Datum &datum, const float expand_ratio,
+  void ExpandImage(const Datum &datum, float expand_ratio,
                    NormalizedBBox *expand_bbox, Datum *expanded_datum);
 
   /**
@@ -161,7 +161,7 @@ public:
    *    Use with dense label images to preserve the input pixel values
    *    which would be labels (and thus cannot be interpolated or scaled).
    */
-  void Transform2(const std::vector<cv::Mat> cv_imgs,
+  void Transform2(const std::vector<cv::Mat> &cv_imgs,
                   Blob<Dtype> *transformed_blob,
                   bool preserve_pixel_vals = false);
 
@@ -183,12 +183,12 @@ public:
   /**
    * @brief Expand img to include mean value as background.
    */
-  void ExpandImage(const cv::Mat &img, const float expand_ratio,
+  void ExpandImage(const cv::Mat &img, float expand_ratio,
                    NormalizedBBox *expand_bbox, cv::Mat *expand_img);
 
   void TransformInv(const Blob<Dtype> *blob, vector<cv::Mat> *cv_imgs);
-  void TransformInv(const Dtype *data, cv::Mat *cv_img, const int height,
-                    const int width, const int channels);
+  void TransformInv(const Dtype *data, cv::Mat *cv_img, int height, int width,
+                    int channels);
 #endif // USE_OPENCV
 
   /**
