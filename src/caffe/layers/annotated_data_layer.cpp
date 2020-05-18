@@ -273,7 +273,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   for (int item_id = 0; item_id < batch_size; ++item_id) {
     timer.Start();
     // get a anno_datum
-    anno_datum = *(reader_.full().pop("Waiting for data"));
+    AnnotatedDatum &anno_datum = *(reader_.full().pop("Waiting for data"));
     read_time += timer.MicroSeconds();
     timer.Start();
     // -------------------------------------------------------- distort & expand
@@ -574,8 +574,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
             caffe_set(300 * 5, Dtype(0), &top_label[idx]);
           }
 
-          for (int g = 0; g < anno_vec.size(); ++g) {
-            const AnnotationGroup &anno_group = anno_vec[g];
+          for (const auto &anno_group : anno_vec) {
             for (int a = 0; a < anno_group.annotation_size(); ++a) {
               if (anno_group.annotation_size() > 300) {
                 LOG(INFO) << "WARNING : gt box > 300 , "

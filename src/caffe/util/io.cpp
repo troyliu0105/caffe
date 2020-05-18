@@ -321,7 +321,7 @@ bool ReadRichImageToAnnotatedDatum(
   bool status =
       ReadImageToDatum(filename, -1, height, width, min_dim, max_dim, is_color,
                        encoding, anno_datum->mutable_datum());
-  if (status == false) {
+  if (!status) {
     return status;
   }
   anno_datum->clear_annotation_group();

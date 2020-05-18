@@ -5,8 +5,9 @@
 #include "caffe/util/math_functions.hpp"
 
 #ifdef USE_XTENSOR
-#include "xtensor/xadapt.hpp"
-#include "xtensor/xio.hpp"
+#include <xtensor/xadapt.hpp>
+#include <xtensor/xarray.hpp>
+#include <xtensor/xio.hpp>
 #endif
 
 namespace caffe {
@@ -16,46 +17,55 @@ namespace caffe {
 //@formatter:off
 template<>
 std::ostream &operator<<<>(std::ostream &out, const Blob<float> &blob) {
-  std::vector<size_t> shape;
-  for (size_t i = 0; i < blob.shape().size(); ++i) {
-    shape.push_back(blob.shape(i));
-  }
-  auto arr = xt::adapt(blob.cpu_data(), shape);
+  auto arr = ::xt::adapt(blob.cpu_data(), blob.count(),
+                       ::xt::no_ownership(), blob.shape_);
   out << "Shape: {";
   for (int d = 0; d  < arr.dimension(); d++) {
     out << arr.shape(d);
     if (d + 1 != arr.dimension()) out << ", ";
   }
   out << "}, ";
-  out << "Max: " << xt::amax(arr) << ", ";
-  out << "Min: " << xt::amin(arr) << ", ";
-  out << "Mean: " << xt::mean(arr) << "\n";
+  out << "Max: " << ::xt::amax(arr) << ", ";
+  out << "Min: " << ::xt::amin(arr) << ", ";
+  out << "Mean: " << ::xt::mean(arr) << "\n";
   out << arr;
   return out;
 }
 
 template<>
 std::ostream &operator<<<>(std::ostream &out, const Blob<double> &blob) {
-  std::vector<size_t> shape;
-  for (size_t i = 0; i < blob.shape().size(); ++i) {
-    shape.push_back(blob.shape(i));
-  }
-  auto arr = xt::adapt(blob.cpu_data(), shape);
+  auto arr = ::xt::adapt(blob.cpu_data(), blob.count(),
+                         ::xt::no_ownership(), blob.shape_);
   out << "Shape: {";
   for (int d = 0; d  < arr.dimension(); d++) {
     out << arr.shape(d);
     if (d + 1 != arr.dimension()) out << ", ";
   }
   out << "}, ";
-  out << "Max: " << xt::amax(arr) << ", ";
-  out << "Min: " << xt::amin(arr) << ", ";
-  out << "Mean: " << xt::mean(arr) << "\n";
+  out << "Max: " << ::xt::amax(arr) << ", ";
+  out << "Min: " << ::xt::amin(arr) << ", ";
+  out << "Mean: " << ::xt::mean(arr) << "\n";
   out << arr;
   return out;
 }
 //@formatter:on
 //clang-format on
 #endif
+
+template <typename Dtype>
+Blob<Dtype>::Blob(const int num, const int channels, const int height,
+                  const int width)
+// capacity_ must be initialized before calling Reshape
+    : capacity_(0) {
+  Reshape(num, channels, height, width);
+}
+
+template <typename Dtype>
+Blob<Dtype>::Blob(const vector<int> &shape)
+// capacity_ must be initialized before calling Reshape
+    : capacity_(0) {
+  Reshape(shape);
+}
 
 template <typename Dtype>
 void Blob<Dtype>::Reshape(const int num, const int channels, const int height,
@@ -93,7 +103,8 @@ void Blob<Dtype>::Reshape(const vector<int> &shape) {
   }
 }
 
-template <typename Dtype> void Blob<Dtype>::Reshape(const BlobShape &shape) {
+template <typename Dtype>
+void Blob<Dtype>::Reshape(const BlobShape &shape) {
   CHECK_LE(shape.dim_size(), kMaxBlobAxes);
   vector<int> shape_vec(shape.dim_size());
   for (int i = 0; i < shape.dim_size(); ++i) {
@@ -105,21 +116,6 @@ template <typename Dtype> void Blob<Dtype>::Reshape(const BlobShape &shape) {
 template <typename Dtype>
 void Blob<Dtype>::ReshapeLike(const Blob<Dtype> &other) {
   Reshape(other.shape());
-}
-
-template <typename Dtype>
-Blob<Dtype>::Blob(const int num, const int channels, const int height,
-                  const int width)
-    // capacity_ must be initialized before calling Reshape
-    : capacity_(0) {
-  Reshape(num, channels, height, width);
-}
-
-template <typename Dtype>
-Blob<Dtype>::Blob(const vector<int> &shape)
-    // capacity_ must be initialized before calling Reshape
-    : capacity_(0) {
-  Reshape(shape);
 }
 
 template <typename Dtype>
@@ -215,9 +211,18 @@ void Blob<Dtype>::ShareDiff(const Blob &other) {
 // The "update" method is used for parameter blobs in a Net, which are stored
 // as Blob<float> or Blob<double> -- hence we do not define it for
 // Blob<int> or Blob<unsigned int>.
-template <> void Blob<unsigned int>::Update() { NOT_IMPLEMENTED; }
-template <> void Blob<int>::Update() { NOT_IMPLEMENTED; }
-template <> void Blob<bool>::Update() { NOT_IMPLEMENTED; }
+template <>
+void Blob<unsigned int>::Update() {
+  NOT_IMPLEMENTED;
+}
+template <>
+void Blob<int>::Update() {
+  NOT_IMPLEMENTED;
+}
+template <>
+void Blob<bool>::Update() {
+  NOT_IMPLEMENTED;
+}
 
 template <typename Dtype>
 void Blob<Dtype>::Update() {
@@ -226,8 +231,8 @@ void Blob<Dtype>::Update() {
   case SyncedMemory::HEAD_AT_CPU:
     // perform computation on CPU
     caffe_blas_axpy<Dtype>(count_, Dtype(-1),
-                      static_cast<const Dtype *>(diff_->cpu_data()),
-                      static_cast<Dtype *>(data_->mutable_cpu_data()));
+                           static_cast<const Dtype *>(diff_->cpu_data()),
+                           static_cast<Dtype *>(data_->mutable_cpu_data()));
     break;
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
@@ -429,13 +434,20 @@ Dtype Blob<Dtype>::sumsq_diff() const {
   return sumsq;
 }
 
-template <> void Blob<unsigned int>::scale_data(unsigned int scale_factor) {
+template <>
+void Blob<unsigned int>::scale_data(unsigned int scale_factor) {
   NOT_IMPLEMENTED;
 }
 
-template <> void Blob<int>::scale_data(int scale_factor) { NOT_IMPLEMENTED; }
+template <>
+void Blob<int>::scale_data(int scale_factor) {
+  NOT_IMPLEMENTED;
+}
 
-template <> void Blob<bool>::scale_data(bool scale_factor) { NOT_IMPLEMENTED; }
+template <>
+void Blob<bool>::scale_data(bool scale_factor) {
+  NOT_IMPLEMENTED;
+}
 
 template <typename Dtype>
 void Blob<Dtype>::scale_data(Dtype scale_factor) {
@@ -464,13 +476,20 @@ void Blob<Dtype>::scale_data(Dtype scale_factor) {
   }
 }
 
-template <> void Blob<unsigned int>::scale_diff(unsigned int scale_factor) {
+template <>
+void Blob<unsigned int>::scale_diff(unsigned int scale_factor) {
   NOT_IMPLEMENTED;
 }
 
-template <> void Blob<int>::scale_diff(int scale_factor) { NOT_IMPLEMENTED; }
+template <>
+void Blob<int>::scale_diff(int scale_factor) {
+  NOT_IMPLEMENTED;
+}
 
-template <> void Blob<bool>::scale_diff(bool scale_factor) { NOT_IMPLEMENTED; }
+template <>
+void Blob<bool>::scale_diff(bool scale_factor) {
+  NOT_IMPLEMENTED;
+}
 
 template <typename Dtype>
 void Blob<Dtype>::scale_diff(Dtype scale_factor) {
