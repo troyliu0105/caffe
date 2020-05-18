@@ -667,7 +667,9 @@ message LayerParameter {
     optional UpsampleParameter upsample_param = 150; //old: nothing
     optional NNPACKConvolutionParameter nnpack_convolution_param = 151;
     optional ShuffleChannelParameter shuffle_channel_param = 152;
-    optional FocalLossParameter focal_loss_param = 154;
+    optional FocalLossParameter focal_loss_param = 153;
+    optional CenterLossParameter center_loss_param = 154;
+    optional MultiBoxCenterLossParameter multibox_center_loss_param = 155;
 }
 
 // Message that stores parameters used to apply transformation
@@ -2177,4 +2179,18 @@ message FocalLossParameter {
     optional int32 axis = 2 [default = 1];
     optional float alpha = 3 [default = 0.25];
     optional float gamma = 4 [default = 2.0];
+}
+
+message CenterLossParameter {
+    optional uint32 num_output = 1; // The number of outputs for the layer
+    optional FillerParameter center_filler = 2; // The filler for the centers
+    // The first axis to be lumped into a single inner product computation;
+    // all preceding axes are retained in the output.
+    // May be negative to index from the end (e.g., -1 for the last axis).
+    optional int32 axis = 3 [default = 1];
+}
+
+message MultiBoxCenterLossParameter {
+    //center_features represents the length of features that is equal to the length of object centers in each default box.
+    optional uint32 center_features = 1;
 }
