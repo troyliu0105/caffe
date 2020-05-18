@@ -72,7 +72,7 @@ void CenterLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             i * K_); // sub bottom_data + i * K_ with center + label_value * K_
   }
   Dtype dot =
-      caffe_cpu_dot(M_ * K_, distance_.cpu_data(), distance_.cpu_data());
+      caffe_blas_dot(M_ * K_, distance_.cpu_data(), distance_.cpu_data());
   Dtype loss = dot / M_ / Dtype(2);
   top[0]->mutable_cpu_data()[0] = loss;
 }
@@ -103,15 +103,15 @@ void CenterLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                     variation_sum_data + n * K_);
         }
       }
-      caffe_axpy(K_, (Dtype)1. / (count + (Dtype)1.),
-                 variation_sum_data + n * K_, center_diff + n * K_);
+      caffe_blas_axpy(K_, (Dtype)1. / (count + (Dtype)1.),
+                      variation_sum_data + n * K_, center_diff + n * K_);
     }
   }
   // Gradient with respect to bottom data
   if (propagate_down[0]) {
     caffe_copy(M_ * K_, distance_.cpu_data(), bottom[0]->mutable_cpu_diff());
-    caffe_scal(M_ * K_, top[0]->cpu_diff()[0] / M_,
-               bottom[0]->mutable_cpu_diff());
+    caffe_blas_scal(M_ * K_, top[0]->cpu_diff()[0] / M_,
+                    bottom[0]->mutable_cpu_diff());
   }
   if (propagate_down[1]) {
     LOG(FATAL) << this->type()

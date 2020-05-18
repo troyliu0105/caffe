@@ -1258,7 +1258,6 @@ void DataTransformer<Dtype>::ExpandImage(const cv::Mat &img,
     CHECK_EQ(height, data_mean_.height());
     CHECK_EQ(width, data_mean_.width());
     Dtype *mean = data_mean_.mutable_cpu_data();
-#pragma omp parallel for num_threads(img_channels)
     for (int h = 0; h < height; ++h) {
       auto *ptr = expand_img->ptr<uchar>(h);
       int img_index = 0;

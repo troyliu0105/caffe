@@ -23,7 +23,7 @@
 #include <opencv2/highgui/highgui_c.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #endif // USE_OPENCV
-#include <stdint.h>
+#include <cstdint>
 
 #include <algorithm>
 #include <fstream> // NOLINT(readability/streams)

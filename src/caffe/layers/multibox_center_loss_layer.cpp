@@ -62,7 +62,7 @@ void MultiBoxCenterLossLayer<Dtype>::LayerSetUp(
       CHECK_EQ(num_classes_, 1);
     }
   }
-  //��������train�Ϲ�һ����batch size�Ϲ�һ��������BN��
+  //是在整个train上归一还是batch size上归一，类似于BN层
   if (!this->layer_param_.loss_param().has_normalization() &&
       this->layer_param_.loss_param().has_normalize()) {
     normalization_ = this->layer_param_.loss_param().normalize()
@@ -457,7 +457,7 @@ void MultiBoxCenterLossLayer<Dtype>::Backward_cpu(
       Dtype loss_weight =
           top[0]->cpu_diff()[0] /
           normalizer; // top[0]->cpu_diff()[0]��ʾ���ݵ�diff,top[0]->cpu_diff[1]��ʾgt��diff
-      caffe_scal(
+      caffe_blas_scal(
           loc_pred_.count(), loss_weight,
           loc_pred_.mutable_cpu_diff()); //��һ�������ã� ��loc_pred���ݶȹ�һ��
       // Copy gradient back to bottom[0].
@@ -500,8 +500,8 @@ void MultiBoxCenterLossLayer<Dtype>::Backward_cpu(
       Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
           normalization_, num_, num_priors_, num_matches_);
       Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer;
-      caffe_scal(conf_pred_.count(), loss_weight,
-                 conf_pred_.mutable_cpu_diff());
+      caffe_blas_scal(conf_pred_.count(), loss_weight,
+                      conf_pred_.mutable_cpu_diff());
       // Copy gradient back to bottom[1].
       const Dtype *conf_pred_diff = conf_pred_.cpu_diff();
       if (do_neg_mining_) {
@@ -561,8 +561,8 @@ void MultiBoxCenterLossLayer<Dtype>::Backward_cpu(
       Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer;
 
       // center
-      caffe_scal(conf_center_pred_.count(), loss_weight,
-                 conf_center_pred_.mutable_cpu_diff());
+      caffe_blas_scal(conf_center_pred_.count(), loss_weight,
+                      conf_center_pred_.mutable_cpu_diff());
       // Copy gradient back to bottom[4].
 
       const Dtype *conf_center_pred_diff = conf_center_pred_.cpu_diff();

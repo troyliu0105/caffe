@@ -1471,6 +1471,8 @@ message MultiBoxLossParameter {
     optional ConfLossType conf_loss_type = 2 [default = SOFTMAX];
     // Weight for localization loss.
     optional float loc_weight = 3 [default = 1.0];
+    // Weight for center loss.
+    optional float center_loss_weight = 24 [default = 1.0];
     // Number of classes to be predicted. Required!
     optional uint32 num_classes = 4;
     // If true, bounding box are shared among different classes.
