@@ -35,7 +35,7 @@ DB *GetDB(const string &backend) {
   }
 #endif // USE_LMDB
   LOG(FATAL) << "Unknown database backend";
-  return NULL;
+  return nullptr;
 }
 
 } // namespace db

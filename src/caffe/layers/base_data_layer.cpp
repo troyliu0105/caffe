@@ -22,11 +22,7 @@ void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
     output_labels_ = false;
   } else {
     output_labels_ = true;
-    if (top.size() == 2) {
-      output_seg_labels_ = false;
-    } else {
-      output_seg_labels_ = true;
-    }
+    output_seg_labels_ = top.size() != 2;
   }
 
   data_transformer_.reset(
