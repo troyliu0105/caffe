@@ -31,11 +31,10 @@ void MishLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype *out_diff = b->mutable_cpu_diff();
 
     Dtype x;
-#pragma omp parallel for private(x)
-    for (int i = 0; i < count; ++i) {
+    FOR_LOOP(count, i, {
       x = input_data[i];
       out_diff[i] = caffe_fn_mish_grad(x) * in_diff[i];
-    }
+    })
   }
 }
 
