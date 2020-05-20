@@ -81,11 +81,11 @@ void PReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // if channel_shared, channel index in the following computation becomes
   // always zero.
   const int div_factor = channel_shared_ ? channels : 1;
-  for (int i = 0; i < count; ++i) {
+  FOR_LOOP(count, i, {
     int c = (i / dim) % channels / div_factor;
     top_data[i] = std::max(bottom_data[i], Dtype(0)) +
                   slope_data[c] * std::min(bottom_data[i], Dtype(0));
-  }
+  })
 }
 
 template <typename Dtype>
@@ -114,19 +114,19 @@ void PReLULayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   // keep top_diff unchanged.
   if (this->param_propagate_down_[0]) {
     Dtype *slope_diff = this->blobs_[0]->mutable_cpu_diff();
-    for (int i = 0; i < count; ++i) {
+    FOR_LOOP(count, i, {
       int c = (i / dim) % channels / div_factor;
       slope_diff[c] += top_diff[i] * bottom_data[i] * (bottom_data[i] <= 0);
-    }
+    })
   }
   // Propagate to bottom
   if (propagate_down[0]) {
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
-    for (int i = 0; i < count; ++i) {
+    FOR_LOOP(count, i, {
       int c = (i / dim) % channels / div_factor;
       bottom_diff[i] = top_diff[i] * ((bottom_data[i] > 0) +
                                       slope_data[c] * (bottom_data[i] <= 0));
-    }
+    })
   }
 }
 

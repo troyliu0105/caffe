@@ -13,9 +13,7 @@ void TanHLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const Dtype *bottom_data = bottom[0]->cpu_data();
   Dtype *top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
-  for (int i = 0; i < count; ++i) {
-    top_data[i] = tanh(bottom_data[i]);
-  }
+  caffe_tanh(count, bottom_data, top_data);
 }
 
 template <typename Dtype>
@@ -27,11 +25,13 @@ void TanHLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     const Dtype *top_diff = top[0]->cpu_diff();
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
     const int count = bottom[0]->count();
-    Dtype tanhx;
-    for (int i = 0; i < count; ++i) {
-      tanhx = top_data[i];
-      bottom_diff[i] = top_diff[i] * (1 - tanhx * tanhx);
-    }
+    FOR_LOOP(
+        count, i,
+        {
+          tanhx = top_data[i];
+          bottom_diff[i] = top_diff[i] * (1 - tanhx * tanhx);
+        },
+        Dtype tanhx)
   }
 }
 

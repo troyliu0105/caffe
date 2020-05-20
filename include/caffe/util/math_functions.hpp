@@ -30,7 +30,7 @@ void caffe_cpu_hard_sigmoid(Dtype *x, int n);
 // Caffe gemm provides a simpler interface to the gemm functions, with the
 // limitation that the data has to be contiguous in memory.
 /**
- * @brief 接收三个矩阵A, B, C
+ * @brief 接收三个矩阵A[MxK], B[K, N], C[M, N]
  * C:= alpha*A*B + beta*C
  * @tparam Dtype
  * @param TransA    对于矩阵 A 是否做转置（CBlasTrans, CBlasNoTrans）
