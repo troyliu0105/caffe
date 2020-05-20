@@ -13,10 +13,7 @@ void ClipLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
   Dtype min = this->layer_param_.clip_param().min();
   Dtype max = this->layer_param_.clip_param().max();
-
-  for (int i = 0; i < count; ++i) {
-    top_data[i] = std::max(min, std::min(bottom_data[i], max));
-  }
+  caffe_clip(count, bottom_data, top_data, min, max);
 }
 
 template <typename Dtype>
@@ -32,10 +29,10 @@ void ClipLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype min = this->layer_param_.clip_param().min();
     Dtype max = this->layer_param_.clip_param().max();
 
-    for (int i = 0; i < count; ++i) {
+    FOR_LOOP(count, i, {
       bottom_diff[i] =
           top_diff[i] * (bottom_data[i] >= min && bottom_data[i] <= max);
-    }
+    })
   }
 }
 

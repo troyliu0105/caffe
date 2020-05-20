@@ -219,11 +219,6 @@ void Yolov3DetectionOutputLayer<Dtype>::Reshape(
   top_shape.push_back(7);
   top[0]->Reshape(top_shape);
 }
-template <typename Dtype>
-bool BoxSortDecendScore(const PredictionResult<Dtype> &box1,
-                        const PredictionResult<Dtype> &box2) {
-  return box1.confidence > box2.confidence;
-}
 
 template <typename Dtype>
 void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
@@ -235,9 +230,12 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
     len = 8 + num_class_ + 1;
 
   if (Caffe::mode() == Caffe::CPU) {
+#ifdef USE_TBB
+    tbb::mutex mutex;
+#endif
     int mask_offset = 0;
     predicts_.clear();
-    auto *class_score = new Dtype[num_class_];
+    //    auto *class_score = new Dtype[num_class_];
     for (int t = 0; t < bottom.size(); t++) {
       side_w_ = bottom[t]->width();
       side_h_ = bottom[t]->height();
@@ -247,92 +245,100 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
       const Dtype *input_data = bottom[t]->cpu_data();
       int nw = side_w_ * anchors_scale_[t];
       int nh = side_w_ * anchors_scale_[t];
-      for (int b = 0; b < bottom[t]->num(); b++) {
-        for (int s = 0; s < side_w_ * side_h_; s++) {
-          // LOG(INFO) << s;
-          for (int n = 0; n < num_; n++) {
-            // LOG(INFO) << bottom[t]->count(1);
-            int index = n * len * stride + s + b * bottom[t]->count(1);
-            vector<Dtype> pred;
+      FOR_LOOP(
+          bottom[t]->num(), b,
+          {
+            for (int s = 0; s < side_w_ * side_h_; s++) {
+              // LOG(INFO) << s;
+              for (int n = 0; n < num_; n++) {
+                // LOG(INFO) << bottom[t]->count(1);
+                int index = n * len * stride + s + b * bottom[t]->count(1);
+                vector<Dtype> pred;
 
-            for (int c = 0; c < len; ++c) {
-              int index2 = c * stride + index;
-              // LOG(INFO)<<index2;
-              if (gaussian_box_) {
-                if (c == 4 || c == 6) {
-                  swap_data[index2] = (input_data[index2 + 0]);
-                } else {
-                  if (c > 7) {
-                    // LOG(INFO) << c - 5;
-                    class_score[c - 8] =
-                        caffe_fn_sigmoid(input_data[index2 + 0]);
+                for (int c = 0; c < len; ++c) {
+                  int index2 = c * stride + index;
+                  // LOG(INFO)<<index2;
+                  if (gaussian_box_) {
+                    if (c == 4 || c == 6) {
+                      swap_data[index2] = (input_data[index2 + 0]);
+                    } else {
+                      if (c > 7) {
+                        // LOG(INFO) << c - 5;
+                        class_score[c - 8] =
+                            caffe_fn_sigmoid(input_data[index2 + 0]);
+                      } else {
+                        swap_data[index2] =
+                            caffe_fn_sigmoid(input_data[index2 + 0]);
+                      }
+                    }
                   } else {
-                    swap_data[index2] =
-                        caffe_fn_sigmoid(input_data[index2 + 0]);
+                    if (c == 2 || c == 3) { // w, h
+                      swap_data[index2] = (input_data[index2 + 0]);
+                    } else {
+                      if (c > 4) { // clz_score
+                        // LOG(INFO) << c - 5;
+                        class_score[c - 5] =
+                            caffe_fn_sigmoid(input_data[index2 + 0]);
+                      } else { // obj_score
+                        swap_data[index2] =
+                            caffe_fn_sigmoid(input_data[index2 + 0]);
+                      }
+                    }
                   }
                 }
-              } else {
-                if (c == 2 || c == 3) { // w, h
-                  swap_data[index2] = (input_data[index2 + 0]);
-                } else {
-                  if (c > 4) { // clz_score
-                    // LOG(INFO) << c - 5;
-                    class_score[c - 5] =
-                        caffe_fn_sigmoid(input_data[index2 + 0]);
-                  } else { // obj_score
-                    swap_data[index2] =
-                        caffe_fn_sigmoid(input_data[index2 + 0]);
-                  }
-                }
-              }
-            }
-            int y2 = s / side_w_;
-            int x2 = s % side_w_;
-            Dtype obj_score;
-            if (gaussian_box_) {
-              Dtype uc_ver = 4.0 - swap_data[index + 1 * stride] -
-                             swap_data[index + 3 * stride] -
-                             swap_data[index + 5 * stride] -
-                             swap_data[index + 7 * stride];
-              obj_score = swap_data[index + 8 * stride] * uc_ver / 4.0;
-            } else {
-              obj_score = swap_data[index + 4 * stride];
-            }
-            PredictionResult<Dtype> predict{};
-            for (int c = 0; c < num_class_; ++c) {
-              class_score[c] *= obj_score;
-              // LOG(INFO) << class_score[c];
-              if (class_score[c] > confidence_threshold_) {
+                int y2 = s / side_w_;
+                int x2 = s % side_w_;
+                Dtype obj_score;
                 if (gaussian_box_) {
-                  get_gaussian_yolo_box(pred, swap_data, biases_,
-                                        mask_[n + mask_offset], index, x2, y2,
-                                        side_w_, side_h_, nw, nh, stride);
+                  Dtype uc_ver = 4.0 - swap_data[index + 1 * stride] -
+                                 swap_data[index + 3 * stride] -
+                                 swap_data[index + 5 * stride] -
+                                 swap_data[index + 7 * stride];
+                  obj_score = swap_data[index + 8 * stride] * uc_ver / 4.0;
                 } else {
-                  get_region_box(pred, swap_data, biases_,
-                                 mask_[n + mask_offset], index, x2, y2, side_w_,
-                                 side_h_, nw, nh, stride);
+                  obj_score = swap_data[index + 4 * stride];
                 }
+                PredictionResult<Dtype> predict{};
+                for (int c = 0; c < num_class_; ++c) {
+                  class_score[c] *= obj_score;
+                  // LOG(INFO) << class_score[c];
+                  if (class_score[c] > confidence_threshold_) {
+                    if (gaussian_box_) {
+                      get_gaussian_yolo_box(
+                          pred, swap_data, biases_, mask_[n + mask_offset],
+                          index, x2, y2, side_w_, side_h_, nw, nh, stride);
+                    } else {
+                      get_region_box(pred, swap_data, biases_,
+                                     mask_[n + mask_offset], index, x2, y2,
+                                     side_w_, side_h_, nw, nh, stride);
+                    }
 
-                predict.x = pred[0];
-                predict.y = pred[1];
-                predict.w = pred[2];
-                predict.h = pred[3];
-                predict.classType = c;
-                predict.confidence = class_score[c];
-                correct_yolo_boxes(predict, side_w_, side_h_, nw, nh, 1);
-                if (is_predict_valid(predict))
-                  predicts_.push_back(predict);
+                    predict.x = pred[0];
+                    predict.y = pred[1];
+                    predict.w = pred[2];
+                    predict.h = pred[3];
+                    predict.classType = c;
+                    predict.confidence = class_score[c];
+                    correct_yolo_boxes(predict, side_w_, side_h_, nw, nh, 1);
+                    if (is_predict_valid(predict))
+                      ATOMIC_UPDATE(mutex, predicts_.push_back(predict))
+                  }
+                }
               }
             }
-          }
-        }
-      }
+            delete[] class_score;
+          },
+          auto *class_score = new Dtype[num_class_])
       mask_offset += groups_num_;
     }
 
-    delete[] class_score;
+    //    delete[] class_score;
   }
-  std::sort(predicts_.begin(), predicts_.end(), BoxSortDecendScore<Dtype>);
+  SORT(predicts_.begin(), predicts_.end(),
+       [](const PredictionResult<Dtype> &box1,
+          const PredictionResult<Dtype> &box2) {
+         return box1.confidence > box2.confidence;
+       });
   vector<int> idxes;
   int num_kept = 0;
   if (!predicts_.empty()) {
@@ -384,9 +390,7 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
 template <typename Dtype>
 void Yolov3DetectionOutputLayer<Dtype>::Backward_cpu(
     const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
-    const vector<Blob<Dtype> *> &bottom) {
-  return;
-}
+    const vector<Blob<Dtype> *> &bottom) {}
 #ifdef CPU_ONLY
 template <typename Dtype>
 void Yolov3DetectionOutputLayer<Dtype>::Backward_gpu(

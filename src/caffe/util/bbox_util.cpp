@@ -348,18 +348,26 @@ void get_gaussian_yolo_box<double>(vector<double> &b, double *x,
 }
 
 template <typename Dtype>
-void get_region_box(box &b, Dtype *x, vector<Dtype> biases, int n, int index,
-                    int i, int j, int lw, int lh, int w, int h, int stride) {
+void get_region_box(box &b, const Dtype *x, vector<Dtype> biases, int n,
+                    int index, int i, int j, int lw, int lh, int w, int h,
+                    int stride) {
   b.x = ((i + (x[index + 0 * stride])) / lw);
   b.y = ((j + (x[index + 1 * stride])) / lh);
   b.w = (exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.h = (exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
 
+template void get_region_box(box &b, const float *x, vector<float> biases,
+                             int n, int index, int i, int j, int lw, int lh,
+                             int w, int h, int stride);
+template void get_region_box(box &b, const double *x, vector<double> biases,
+                             int n, int index, int i, int j, int lw, int lh,
+                             int w, int h, int stride);
+
 template <typename Dtype>
-void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n,
-                    int index, int i, int j, int lw, int lh, int w, int h,
-                    int stride) {
+void get_region_box(vector<Dtype> &b, const Dtype *x, vector<Dtype> biases,
+                    int n, int index, int i, int j, int lw, int lh, int w,
+                    int h, int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -367,28 +375,14 @@ void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n,
   b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
-template <>
-void get_region_box<float>(vector<float> &b, float *x, vector<float> biases,
-                           int n, int index, int i, int j, int lw, int lh,
-                           int w, int h, int stride) {
 
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 1 * stride])) / lh);
-  b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
-}
-template <>
-void get_region_box<double>(vector<double> &b, double *x, vector<double> biases,
-                            int n, int index, int i, int j, int lw, int lh,
-                            int w, int h, int stride) {
+template void get_region_box(vector<float> &b, const float *x,
+                             vector<float> biases, int n, int index, int i,
+                             int j, int lw, int lh, int w, int h, int stride);
+template void get_region_box(vector<double> &b, const double *x,
+                             vector<double> biases, int n, int index, int i,
+                             int j, int lw, int lh, int w, int h, int stride);
 
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 1 * stride])) / lh);
-  b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
-}
 bool SortBBoxAscend(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2) {
   return bbox1.score() < bbox2.score();
 }

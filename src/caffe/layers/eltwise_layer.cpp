@@ -47,9 +47,9 @@ void EltwiseLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
 template <typename Dtype>
 void EltwiseLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
-  int *mask = NULL;
-  const Dtype *bottom_data_a = NULL;
-  const Dtype *bottom_data_b = NULL;
+  int *mask = nullptr;
+  const Dtype *bottom_data_a = nullptr;
+  const Dtype *bottom_data_b = nullptr;
   const int count = top[0]->count();
   Dtype *top_data = top[0]->mutable_cpu_data();
   switch (op_) {
@@ -103,7 +103,7 @@ template <typename Dtype>
 void EltwiseLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                        const vector<bool> &propagate_down,
                                        const vector<Blob<Dtype> *> &bottom) {
-  const int *mask = NULL;
+  const int *mask = nullptr;
   const int count = top[0]->count();
   const Dtype *top_data = top[0]->cpu_data();
   const Dtype *top_diff = top[0]->cpu_diff();

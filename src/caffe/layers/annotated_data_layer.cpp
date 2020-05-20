@@ -227,7 +227,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       this->layer_param_.annotated_data_param();
   const TransformationParameter &transform_param =
       this->layer_param_.transform_param();
-  AnnotatedDatum &anno_datum = *(reader_.full().peek());
+  AnnotatedDatum &anno_datum_peek = *(reader_.full().peek());
   // Use data_transformer to infer the expected blob shape from anno_datum.
   int num_resize_policies = transform_param.resize_param_size();
   bool size_change = false;
@@ -246,8 +246,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     size_change = true;
   } else {
   }
-  vector<int> top_shape =
-      this->data_transformer_->InferBlobShape(anno_datum.datum(), policy_num_);
+  vector<int> top_shape = this->data_transformer_->InferBlobShape(
+      anno_datum_peek.datum(), policy_num_);
   // Reshape batch according to the batch_size.
   this->transformed_data_.Reshape(top_shape);
   top_shape[0] = batch_size;

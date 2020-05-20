@@ -505,6 +505,9 @@ int int_index(vector<Dtype> a, int val, int n) {
 template <typename Dtype>
 void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
+#ifdef USE_TBB
+  tbb::mutex mutex;
+#endif
   side_w_ = bottom[0]->width();
   side_h_ = bottom[0]->height();
   // LOG(INFO)<<"iou loss" << iou_loss_<<","<<GIOU;
@@ -585,7 +588,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       sprintf(buf, "out/out_%05d.jpg", idx);
       cv::imwrite(buf, cv_img);
     //}*/
-    for (int s = 0; s < stride; s++) {
+    FOR_LOOP(stride, s, {
       for (int n = 0; n < num_; n++) {
         int index = n * len * stride + s + b * bottom[0]->count(1);
         // LOG(INFO)<<index;
@@ -619,7 +622,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             best_truth = truth;
           }
         }
-        avg_anyobj += swap_data[index + 4 * stride];
+        ATOMIC_UPDATE(mutex, avg_anyobj += swap_data[index + 4 * stride])
         diff[index + 4 * stride] = (-1) * (0 - swap_data[index + 4 * stride]);
         // diff[index + 4 * stride] = (-1) * (0 - exp(input_data[index + 4 *
         // stride]-exp(input_data[index + 4 * stride]))); diff[index + 4 *
@@ -642,7 +645,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
               iou_loss_, iou_normalizer_, max_delta_, accumulate_);
         }
       }
-    }
+    }) // end for loop
     // vector<Dtype> used;
     // used.clear();
     for (int t = 0; t < 300; ++t) {
@@ -876,29 +879,28 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
       int len = 4 + num_class_ + 1;
       int stride = side_w_ * side_h_;
       // LOG(INFO)<<swap.count(1);
-      for (int b = 0; b < bottom[0]->num(); b++) {
+      FOR_LOOP(bottom[0]->num(), b, {
         for (int s = 0; s < stride; s++) {
           for (int n = 0; n < num_; n++) {
             int index = n * len * stride + s + b * bottom[0]->count(1);
             // LOG(INFO)<<index;
-            vector<Dtype> pred;
-            float best_iou = 0;
-            int best_class = -1;
-            vector<Dtype> best_truth;
+            //            vector<Dtype> pred;
+            //            float best_iou = 0;
+            //            int best_class = -1;
+            //            vector<Dtype> best_truth;
             for (int c = 0; c < len; ++c) {
               int index2 = c * stride + index;
               // LOG(INFO)<<index2;
               if (c == 2 || c == 3) {
                 diff[index2] = diff[index2 + 0];
               } else {
-                diff[index2] =
-                    diff[index2 + 0] *
+                diff[index2] = diff[index2 + 0] *
                                caffe_fn_sigmoid_grad_fast(top_data[index2 + 0]);
               }
             }
           }
         }
-      }
+      })
     } else {
       // non-logic_gradient formula
       // https://blog.csdn.net/yanzi6969/article/details/80505421

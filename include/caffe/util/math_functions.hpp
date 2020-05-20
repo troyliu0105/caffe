@@ -10,24 +10,6 @@
 #include "caffe/util/device_alternate.hpp"
 #include "caffe/util/mkl_alternate.hpp"
 
-#ifdef USE_TBB
-#include <tbb/parallel_for.h>
-#include <tbb/parallel_for_each.h>
-#include <tbb/parallel_reduce.h>
-#define TBB_SIMPLE_FOR(n, iname, operation)                                    \
-  tbb::parallel_for(                                                           \
-      tbb::blocked_range<int>(0, n),                                           \
-      [&](tbb::blocked_range<int> r) {                                         \
-        for (int iname = r.begin(); iname < r.end(); iname++)                  \
-          operation;                                                           \
-      },                                                                       \
-      tbb::auto_partitioner());
-#define FOR_LOOP(N, iname, operation) TBB_SIMPLE_FOR(N, iname, operation)
-#else
-#define FOR_LOOP(n, iname, operation)                                          \
-  for (int iname = 0; iname < n; ++iname)                                      \
-    operation;
-#endif
 
 namespace caffe {
 
@@ -171,9 +153,7 @@ inline Dtype caffe_clip(Dtype a, Dtype min, Dtype max) {
 template <typename Dtype>
 inline void caffe_clip(int N, const Dtype *src, Dtype *dst, Dtype min,
                        Dtype max) {
-  for (int i = 0; i < N; ++i) {
-    dst[i] = caffe_clip(src[i], min, max);
-  }
+  FOR_LOOP(N, i, dst[i] = caffe_clip(src[i], min, max))
 }
 
 unsigned int caffe_rng_rand();

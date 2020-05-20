@@ -11,12 +11,11 @@ namespace caffe {
 template <typename Dtype>
 void caffe_cpu_channel_softmax(const int len, const int grid_size,
                                const Dtype *input_data, Dtype *output_data) {
-#pragma omp parallel for
-  for (int s = 0; s < grid_size; ++s) {
+  FOR_LOOP(grid_size, s, {
     auto *pixel = input_data + s;
     auto *out_pixel = output_data + s;
     caffe_softmax(len, pixel, grid_size, out_pixel);
-  }
+  })
 }
 
 template void caffe_cpu_channel_softmax(const int len, const int grid_size,
@@ -50,7 +49,7 @@ void activate_yolo_cpu(int stride, int index, int num_classes,
     index += 2 * stride; // conf, clz
     if (arc == DEFAULT) {
       caffe_sigmoid((num_classes + 1) * stride, input_data + index,
-                        output_data + index);
+                    output_data + index);
     } else if (arc == CE) {
       // CE arc 使用 softmax 激活
       // io[..., 4:] = F.softmax(io[..., 4:], dim=4)
