@@ -312,9 +312,9 @@ double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
   return iou;
 }
 template <typename Dtype>
-void get_gaussian_yolo_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases,
-                           int n, int index, int i, int j, int lw, int lh,
-                           int w, int h, int stride) {
+void get_gaussian_yolo_box(vector<Dtype> &b, const Dtype *x,
+                           vector<Dtype> biases, int n, int index, int i, int j,
+                           int lw, int lh, int w, int h, int stride) {
 
   b.clear();
   b.push_back((i + (x[index + 0 * stride])) / lw);
@@ -322,30 +322,15 @@ void get_gaussian_yolo_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases,
   b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
   b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
 }
-template <>
-void get_gaussian_yolo_box<float>(vector<float> &b, float *x,
-                                  vector<float> biases, int n, int index, int i,
-                                  int j, int lw, int lh, int w, int h,
-                                  int stride) {
 
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 2 * stride])) / lh);
-  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
-}
-template <>
-void get_gaussian_yolo_box<double>(vector<double> &b, double *x,
-                                   vector<double> biases, int n, int index,
-                                   int i, int j, int lw, int lh, int w, int h,
-                                   int stride) {
-
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 2 * stride])) / lh);
-  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
-}
+template void get_gaussian_yolo_box(vector<float> &b, const float *x,
+                                    vector<float> biases, int n, int index,
+                                    int i, int j, int lw, int lh, int w, int h,
+                                    int stride);
+template void get_gaussian_yolo_box(vector<double> &b, const double *x,
+                                    vector<double> biases, int n, int index,
+                                    int i, int j, int lw, int lh, int w, int h,
+                                    int stride);
 
 template <typename Dtype>
 void get_region_box(box &b, const Dtype *x, vector<Dtype> biases, int n,
