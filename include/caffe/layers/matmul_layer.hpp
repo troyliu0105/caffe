@@ -37,6 +37,7 @@ private:
   int N_;
   int K_;
   int M_;
+  bool has_batch_;
 };
 } // namespace caffe
 

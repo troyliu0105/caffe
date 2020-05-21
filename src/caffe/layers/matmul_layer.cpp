@@ -22,6 +22,7 @@ void MatMulLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
     K_ = a_shape[2];
     Blob<Dtype> *top_blob = top[0];
     top_blob->Reshape({batch, M_, N_});
+    has_batch_ = true;
   } else {
     M_ = a_shape[0];
     N_ = b_shape[1];
@@ -36,26 +37,48 @@ void MatMulLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   const Dtype *a = bottom[0]->cpu_data();
   const Dtype *b = bottom[1]->cpu_data();
   Dtype *y = top[0]->mutable_cpu_data();
-  caffe_blas_gemm(CblasNoTrans, CblasNoTrans, M_, N_, K_, Dtype(1.0), a, b,
-                  Dtype(0.0), y);
+  if (has_batch_) {
+    int batch_size = top[0]->shape(0);
+    int y_inner = top[0]->count(1);
+    int a_inner = bottom[0]->count(1);
+    int b_inner = bottom[1]->count(1);
+    for (int i = 0; i < batch_size; ++i) {
+      caffe_blas_gemm(CblasNoTrans, CblasNoTrans, M_, N_, K_, Dtype(1.0),
+                      a + a_inner * i, b + b_inner * i, Dtype(0.0),
+                      y + y_inner * i);
+    }
+  } else {
+    caffe_blas_gemm(CblasNoTrans, CblasNoTrans, M_, N_, K_, Dtype(1.0), a, b,
+                    Dtype(0.0), y);
+  }
 }
 template <typename Dtype>
 void MatMulLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                       const vector<bool> &propagate_down,
                                       const vector<Blob<Dtype> *> &bottom) {
   const Dtype *top_diff = top[0]->cpu_diff();
-  caffe_blas_gemm(CblasNoTrans, CblasTrans, M_, K_, N_, Dtype(1.0), top_diff,
-                  bottom[1]->cpu_data(), Dtype(0.0),
-                  bottom[0]->mutable_cpu_diff());
-  caffe_blas_gemm(CblasTrans, CblasNoTrans, K_, N_, M_, Dtype(1.0),
-                  bottom[0]->cpu_data(), top_diff, Dtype(0.0),
-                  bottom[1]->mutable_cpu_diff());
-
-  for (Blob<Dtype> *blob : bottom) {
-    for (int i = 0; i < blob->count(); ++i) {
-      std::cout << blob->cpu_diff()[i] << " ";
+  const Dtype *a_data = bottom[0]->cpu_data();
+  const Dtype *b_data = bottom[1]->cpu_data();
+  Dtype *a_diff = bottom[0]->mutable_cpu_diff();
+  Dtype *b_diff = bottom[1]->mutable_cpu_diff();
+  if (has_batch_) {
+    int batch_size = top[0]->shape(0);
+    int y_inner = top[0]->count(1);
+    int a_inner = bottom[0]->count(1);
+    int b_inner = bottom[1]->count(1);
+    for (int i = 0; i < batch_size; ++i) {
+      caffe_blas_gemm(CblasNoTrans, CblasTrans, M_, K_, N_, Dtype(1.0),
+                      top_diff + y_inner * i, b_data + b_inner * i, Dtype(0.0),
+                      a_diff + a_inner * i);
+      caffe_blas_gemm(CblasTrans, CblasNoTrans, K_, N_, M_, Dtype(1.0),
+                      a_data + a_inner * i, top_diff + y_inner * i, Dtype(0.0),
+                      b_diff + b_inner * i);
     }
-    std::cout << std::endl;
+  } else {
+    caffe_blas_gemm(CblasNoTrans, CblasTrans, M_, K_, N_, Dtype(1.0), top_diff,
+                    b_data, Dtype(0.0), a_diff);
+    caffe_blas_gemm(CblasTrans, CblasNoTrans, K_, N_, M_, Dtype(1.0), a_data,
+                    top_diff, Dtype(0.0), b_diff);
   }
 }
 
