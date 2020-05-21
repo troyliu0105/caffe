@@ -1,0 +1,50 @@
+#=============== net
+train_net: "models/voc/mobilenetv2.train.prototxt"
+test_net: "models/voc/mobilenetv2.test.prototxt"
+
+#=============== iter
+# voc07 test has 4952 images
+test_iter: 4952
+test_interval: 1000
+max_iter: 120000
+iter_size: 4
+
+#=============== optimizer
+solver_mode: GPU
+type: "RMSProp"
+base_lr: 0.0005
+weight_decay: 0.000004
+lr_policy: "multistep"
+gamma: 0.2
+#momentum: 0.9
+stepvalue: 80000
+stepvalue: 100000
+stagelr: 0.000001
+stagelr: 0.00001
+stagelr: 0.0001
+stagelr: 0.001
+stagelr: 0.0001
+stagelr: 0.00001
+stageiter: 50
+stageiter: 100
+stageiter: 200
+stageiter: 80000
+stageiter: 100000
+stageiter: 120000
+
+#=============== snapshot
+snapshot: 1000
+snapshot_prefix: "models/voc/mobilenetv2"
+snapshot_after_train: true
+
+#=============== evaluate
+eval_type: "detection"
+ap_version: "11point"
+show_per_class_result: true
+
+#=============== misc
+display: 100
+debug_info: false
+test_initialization: false
+average_loss: 10
+random_seed: 3355411
