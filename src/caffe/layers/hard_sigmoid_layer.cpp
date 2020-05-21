@@ -25,7 +25,7 @@ void HardSigmoidLayer<Dtype>::Backward_cpu(
     const Dtype *top_diff = top[0]->cpu_diff();
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
     const int count = bottom[0]->count();
-    FOR_LOOP(
+    FOR_LOOP_WITH_PREPARE(
         count, i,
         {
           sigmoid_x = top_data[i];
