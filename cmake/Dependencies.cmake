@@ -4,6 +4,10 @@ set(Caffe_INCLUDE_DIRS "")
 set(Caffe_DEFINITIONS "")
 set(Caffe_COMPILE_OPTIONS "")
 
+if (MSVC)
+    list(APPEND Caffe_DEFINITIONS PUBLIC -DNOMINMAX)
+endif ()
+
 if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
