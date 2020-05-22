@@ -2,7 +2,7 @@
 #gflags/2.2.2
 #glog/0.4.0
 tbb/2020.1
-xtensor/0.21.4
+#xtensor/0.21.4
 eigen/3.3.7
 
 [options]

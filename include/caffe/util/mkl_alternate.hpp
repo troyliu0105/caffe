@@ -26,12 +26,7 @@
   FOR_LOOP_WITH_PREPARE(n, iname, operation, {})
 #else
 #include <algorithm>
-#if __cplusplus >= 201703L
-#include <execution>
-#define SORT(b, e, comp) std::sort(std::execution::par_unseq, b, e, comp)
-#else
 #define SORT(b, e, comp) std::sort(b, e, comp)
-#endif
 #define ATOMIC_UPDATE(mutex, operation)                                        \
   { operation; }
 #define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
