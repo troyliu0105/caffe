@@ -1,5 +1,5 @@
 #=============== net
-net: "models/voc/yolov3-tiny.train.test.prototxt"
+net: "models/voc/yolov3-darknet21.train.test.prototxt"
 
 #=============== iter
 # voc07 test has 4952 images
@@ -10,7 +10,7 @@ max_iter: 250000
 iter_size: 2
 
 #=============== optimizer
-solver_mode: GPU
+solver_mode: CPU
 type: "SGD"
 base_lr: 0.0001
 weight_decay: 0.00001
@@ -21,7 +21,7 @@ stepvalue: 225000
 
 #=============== snapshot
 snapshot: 50000
-snapshot_prefix: "models/voc/yolov3-tiny.train.test"
+snapshot_prefix: "models/voc/yolov3-darknet21.train.test"
 snapshot_after_train: true
 
 #=============== evaluate

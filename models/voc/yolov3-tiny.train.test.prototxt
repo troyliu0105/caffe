@@ -124,6 +124,7 @@ layer {
   data_param {
     source: "data/VOC0712/VOC0712_trainval_lmdb"
     batch_size: 8
+    prefetch: 8
     backend: LMDB
   }
   annotated_data_param {
@@ -192,7 +193,6 @@ layer {
     bottom: "block0-conv0"
     top: "block0-conv0"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -257,7 +257,6 @@ layer {
     bottom: "block1-conv0"
     top: "block1-conv0"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -322,7 +321,6 @@ layer {
     bottom: "block2-conv0"
     top: "block2-conv0"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -387,7 +385,6 @@ layer {
     bottom: "block3-conv0"
     top: "block3-conv0"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -452,7 +449,6 @@ layer {
     bottom: "block4-conv0"
     top: "block4-conv0"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -517,7 +513,6 @@ layer {
     name: "block5-bn0"
     type: "BatchNorm"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -582,7 +577,6 @@ layer {
     bottom: "block6-conv0"
     top: "block6-conv0"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -635,7 +629,6 @@ layer {
     bottom: "block6-conv1"
     top: "block6-conv1"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -688,7 +681,6 @@ layer {
     bottom: "block6-conv2"
     top: "block6-conv2"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -760,7 +752,6 @@ layer {
     bottom: "upsampler"
     top: "upsampler"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
@@ -829,7 +820,6 @@ layer {
     name: "block7-bn0"
     type: "BatchNorm"
     batch_norm_param {
-        eps: 0.0001
         moving_average_fraction: 0.1
     }
 }
