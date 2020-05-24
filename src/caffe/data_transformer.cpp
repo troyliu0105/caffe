@@ -159,37 +159,40 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   //    float_img *= scale;
   //  }
   //#else
-  Dtype datum_element;
-  int top_index, data_index;
-  FOR_LOOP(datum_channels, c, {
-    for (int h = 0; h < height; ++h) {
-      for (int w = 0; w < width; ++w) {
-        data_index = (c * datum_height + h_off + h) * datum_width + w_off + w;
-        if (*do_mirror) {
-          top_index = (c * height + h) * width + (width - 1 - w);
-        } else {
-          top_index = (c * height + h) * width + w;
-        }
-        if (has_uint8) {
-          datum_element =
-              static_cast<Dtype>(static_cast<uint8_t>(data[data_index]));
-        } else {
-          datum_element = datum.float_data(data_index);
-        }
-        if (has_mean_file) {
-          transformed_data[top_index] =
-              (datum_element - mean[data_index]) * scale;
-        } else {
-          if (has_mean_values) {
-            transformed_data[top_index] =
-                (datum_element - mean_values_[c]) * scale;
-          } else {
-            transformed_data[top_index] = datum_element * scale;
+  FOR_LOOP_WITH_PREPARE(
+      datum_channels, c,
+      {
+        for (int h = 0; h < height; ++h) {
+          for (int w = 0; w < width; ++w) {
+            data_index =
+                (c * datum_height + h_off + h) * datum_width + w_off + w;
+            if (*do_mirror) {
+              top_index = (c * height + h) * width + (width - 1 - w);
+            } else {
+              top_index = (c * height + h) * width + w;
+            }
+            if (has_uint8) {
+              datum_element =
+                  static_cast<Dtype>(static_cast<uint8_t>(data[data_index]));
+            } else {
+              datum_element = datum.float_data(data_index);
+            }
+            if (has_mean_file) {
+              transformed_data[top_index] =
+                  (datum_element - mean[data_index]) * scale;
+            } else {
+              if (has_mean_values) {
+                transformed_data[top_index] =
+                    (datum_element - mean_values_[c]) * scale;
+              } else {
+                transformed_data[top_index] = datum_element * scale;
+              }
+            }
           }
         }
-      }
-    }
-  })
+      },
+      Dtype datum_element;
+      int top_index; int data_index)
   //#endif
 }
 
@@ -244,10 +247,10 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   const int datum_width = datum.width();
 
   // Check dimensions.
+  const int num = transformed_blob->num();
   const int channels = transformed_blob->channels();
   const int height = transformed_blob->height();
   const int width = transformed_blob->width();
-  const int num = transformed_blob->num();
 
   CHECK_EQ(channels, datum_channels);
   CHECK_LE(height, datum_height);

@@ -26,8 +26,6 @@ public:
   // This method may not be overridden except by the BasePrefetchingDataLayer.
   virtual void LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                           const vector<Blob<Dtype> *> &top);
-  // Data layers should be shared by multiple solvers in parallel
-  virtual inline bool ShareInParallel() const { return true; }
   virtual void DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
                               const vector<Blob<Dtype> *> &top) {}
   // Data layers have no bottoms, so reshaping is trivial.
@@ -71,7 +69,7 @@ public:
                            const vector<Blob<Dtype> *> &top);
 
 protected:
-  virtual void InternalThreadEntry();
+  void InternalThreadEntry() override;
   virtual void load_batch(Batch<Dtype> *batch) = 0;
 
   vector<shared_ptr<Batch<Dtype>>> prefetch_;

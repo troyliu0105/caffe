@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "caffe/blob.hpp"
-#include "caffe/data_reader.hpp"
 #include "caffe/data_transformer.hpp"
 #include "caffe/internal_thread.hpp"
 #include "caffe/layer.hpp"
@@ -31,7 +30,13 @@ public:
 protected:
   virtual void load_batch(Batch<Dtype> *batch);
 
-  DataReader<AnnotatedDatum> reader_;
+  void Next();
+  bool Skip();
+
+  shared_ptr<db::DB> db_;
+  shared_ptr<db::Cursor> cursor_;
+  uint64_t offset_;
+
   bool has_anno_type_;
   AnnotatedDatum_AnnotationType anno_type_;
   vector<BatchSampler> batch_samplers_;

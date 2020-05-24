@@ -21,7 +21,11 @@ namespace caffe {
 
 template <typename Dtype>
 LaneDataLayer<Dtype>::LaneDataLayer(const LayerParameter &param)
-    : BasePrefetchingDataLayer<Dtype>(param), reader_(param) {}
+    : BasePrefetchingDataLayer<Dtype>(param), offset_() {
+  db_.reset(db::GetDB(param.data_param().backend()));
+  db_->Open(param.data_param().source(), db::READ);
+  cursor_.reset(db_->NewCursor());
+}
 
 template <typename Dtype>
 LaneDataLayer<Dtype>::~LaneDataLayer() {
@@ -57,7 +61,8 @@ void LaneDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   iters_ = 0;
   policy_num_ = 0;
   // Read a data point, and use it to initialize the top blob.
-  AnnotatedDatum &anno_datum = *(reader_.full().peek());
+  AnnotatedDatum anno_datum;
+  anno_datum.ParseFromString(cursor_->value());
 
   // Use data_transformer to infer the expected blob shape from anno_datum.
   vector<int> top_shape =
@@ -126,7 +131,8 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       this->layer_param_.annotated_data_param();
   const TransformationParameter &transform_param =
       this->layer_param_.transform_param();
-  AnnotatedDatum &anno_datum = *(reader_.full().peek());
+  AnnotatedDatum anno_datum;
+  anno_datum.ParseFromString(cursor_->value());
   // Use data_transformer to infer the expected blob shape from anno_datum.
   int num_resize_policies = transform_param.resize_param_size();
   bool size_change = false;
@@ -177,7 +183,10 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   for (int item_id = 0; item_id < batch_size; ++item_id) {
     timer.Start();
     // get a anno_datum
-    anno_datum = *(reader_.full().pop("Waiting for data"));
+    while (Skip()) {
+      Next();
+    }
+    anno_datum.ParseFromString(cursor_->value());
     read_time += timer.MicroSeconds();
     timer.Start();
     AnnotatedDatum distort_datum;
@@ -364,10 +373,29 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     }
     trans_time += timer.MicroSeconds();
 
-    reader_.free().push(const_cast<AnnotatedDatum *>(&anno_datum));
-  }
+    Next();
+  } // end load batch
 
   iters_++;
+}
+
+template <typename Dtype>
+void LaneDataLayer<Dtype>::Next() {
+  cursor_->Next();
+  if (!cursor_->valid()) {
+    LOG_IF(INFO, Caffe::root_solver())
+        << "Restarting data prefetching from start.";
+    cursor_->SeekToFirst();
+  }
+  offset_++;
+}
+
+template <typename Dtype>
+bool LaneDataLayer<Dtype>::Skip() {
+  int size = Caffe::solver_count();
+  int rank = Caffe::solver_rank();
+  bool keep = (offset_ % size) == rank || this->layer_param().phase() == TEST;
+  return !keep;
 }
 
 INSTANTIATE_CLASS(LaneDataLayer);

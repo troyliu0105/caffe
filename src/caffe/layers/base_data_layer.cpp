@@ -13,7 +13,8 @@ namespace caffe {
 
 template <typename Dtype>
 BaseDataLayer<Dtype>::BaseDataLayer(const LayerParameter &param)
-    : Layer<Dtype>(param), transform_param_(param.transform_param()) {}
+    : Layer<Dtype>(param), transform_param_(param.transform_param()),
+      output_labels_(false), output_seg_labels_(false) {}
 
 template <typename Dtype>
 void BaseDataLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
@@ -95,11 +96,11 @@ void BasePrefetchingDataLayer<Dtype>::InternalThreadEntry() {
       load_batch(batch);
 #ifndef CPU_ONLY
       if (Caffe::mode() == Caffe::GPU) {
-        batch->data_.data().get()->async_gpu_push(stream);
+        batch->data_.data()->async_gpu_push(stream);
         if (this->output_labels_) {
-          batch->label_.data().get()->async_gpu_push(stream);
+          batch->label_.data()->async_gpu_push(stream);
           if (this->output_seg_labels_) {
-            batch->seg_label_.data().get()->async_gpu_push(stream);
+            batch->seg_label_.data()->async_gpu_push(stream);
           }
         }
         CUDA_CHECK(cudaStreamSynchronize(stream));
