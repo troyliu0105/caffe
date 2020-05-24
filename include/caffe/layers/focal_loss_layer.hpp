@@ -116,9 +116,13 @@ protected:
   int ignore_label_;
   /// How to normalize the output loss.
   LossParameter_NormalizationMode normalization_;
+  int normalizer_;
 
-  int softmax_axis_, outer_num_, inner_num_;
+  /// save scale & origin loss when forward
+  Blob<Dtype> scale_;
+  int activate_axis_, outer_num_, inner_num_;
   float alpha_, gamma_;
+  FocalLossParameter_ActivateType activate_type_;
 };
 
 } // namespace caffe

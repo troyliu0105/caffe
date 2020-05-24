@@ -87,6 +87,7 @@ void FocalLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   Dtype normalizer = LossLayer<Dtype>::GetNormalizer(normalization_, outer_num_,
                                                      inner_num_, count);
   top[0]->mutable_cpu_data()[0] = loss / normalizer;
+  normalizer_ = normalizer;
   if (top.size() == 2) {
     top[1]->ShareData(prob_);
   }
