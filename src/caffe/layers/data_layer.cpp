@@ -72,7 +72,7 @@ void DataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   batch->data_.Reshape(top_shape);
 
   Dtype *top_data = batch->data_.mutable_cpu_data();
-  Dtype *top_label = NULL; // suppress warnings about uninitialized variables
+  Dtype *top_label = nullptr; // suppress warnings about uninitialized variables
 
   if (this->output_labels_) {
     top_label = batch->label_.mutable_cpu_data();

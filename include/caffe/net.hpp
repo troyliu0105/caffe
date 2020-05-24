@@ -35,9 +35,9 @@ public:
    * @brief Run Forward and return the result.
    *
    */
-  const vector<Blob<Dtype> *> &Forward(Dtype *loss = NULL);
+  const vector<Blob<Dtype> *> &Forward(Dtype *loss = nullptr);
   /// @brief DEPRECATED; use Forward() instead.
-  const vector<Blob<Dtype> *> &ForwardPrefilled(Dtype *loss = NULL) {
+  const vector<Blob<Dtype> *> &ForwardPrefilled(Dtype *loss = nullptr) {
     LOG_EVERY_N(WARNING, 1000)
         << "DEPRECATED: ForwardPrefilled() "
         << "will be removed in a future version. Use Forward().";
@@ -57,7 +57,7 @@ public:
   Dtype ForwardTo(int end);
   /// @brief DEPRECATED; set input blobs then use Forward() instead.
   const vector<Blob<Dtype> *> &Forward(const vector<Blob<Dtype> *> &bottom,
-                                       Dtype *loss = NULL);
+                                       Dtype *loss = nullptr);
 
   /**
    * @brief Zeroes out the diffs of all net parameters.

@@ -71,7 +71,7 @@ protected:
                                const int num_iters, const int iter_size = 1,
                                const int devices = 1,
                                const bool snapshot = false,
-                               const char *from_snapshot = NULL) {
+                               const char *from_snapshot = nullptr) {
     ostringstream proto;
     int device_id = 0;
 #ifndef CPU_ONLY

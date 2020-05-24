@@ -72,14 +72,14 @@ private:
 
 class LMDB : public DB {
 public:
-  LMDB() : mdb_env_(NULL) {}
+  LMDB() : mdb_env_(nullptr) {}
   virtual ~LMDB() { Close(); }
   virtual void Open(const string &source, Mode mode);
   virtual void Close() {
-    if (mdb_env_ != NULL) {
+    if (mdb_env_ != nullptr) {
       mdb_dbi_close(mdb_env_, mdb_dbi_);
       mdb_env_close(mdb_env_);
-      mdb_env_ = NULL;
+      mdb_env_ = nullptr;
     }
   }
   virtual LMDBCursor *NewCursor();

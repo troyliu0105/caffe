@@ -426,7 +426,7 @@ bool ReadXMLToAnnotatedDatum(const string &labelfile, const int img_height,
   BOOST_FOREACH (ptree::value_type &v1, pt.get_child("annotation")) {
     ptree pt1 = v1.second;
     if (v1.first == "object") {
-      Annotation *anno = NULL;
+      Annotation *anno = nullptr;
       bool difficult = false;
       ptree object = v1.second;
       BOOST_FOREACH (ptree::value_type &v2, object.get_child("")) {
@@ -530,13 +530,13 @@ bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
   std::vector<int> h_samples;
   BOOST_FOREACH (ptree::value_type &v1,
                  pt.get_child("h_samples")) { // h_samples
-    Annotation *anno = NULL;
+    Annotation *anno = nullptr;
     ptree object = v1.second;
     h_samples.push_back(object.get_value<int>());
   }
   // int count = 0;
   BOOST_FOREACH (ptree::value_type &v1, pt.get_child("lanes")) {
-    Annotation *anno = NULL;
+    Annotation *anno = nullptr;
     ptree object = v1.second;
     // LOG(INFO) << object.get_value<int>();
     // object.get_value<std::vector>;
@@ -598,7 +598,7 @@ bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
   // Get annotation info.
   int instance_id = 0;
   BOOST_FOREACH (ptree::value_type &v1, pt.get_child("annotation")) {
-    Annotation *anno = NULL;
+    Annotation *anno = nullptr;
     bool iscrowd = false;
     ptree object = v1.second;
     // Get category_id.
@@ -686,7 +686,7 @@ bool ReadTxtToAnnotatedDatum(const string &labelfile, const int height,
   int label;
   float xmin, ymin, xmax, ymax;
   while (infile >> label >> xmin >> ymin >> xmax >> ymax) {
-    Annotation *anno = NULL;
+    Annotation *anno = nullptr;
     int instance_id = 0;
     bool found_group = false;
     for (int g = 0; g < anno_datum->annotation_group_size(); ++g) {

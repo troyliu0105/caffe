@@ -242,7 +242,7 @@ void WindowDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   const bool mirror = this->transform_param_.mirror();
   const float fg_fraction =
       this->layer_param_.window_data_param().fg_fraction();
-  Dtype *mean = NULL;
+  Dtype *mean = nullptr;
   int mean_off = 0;
   int mean_width = 0;
   int mean_height = 0;

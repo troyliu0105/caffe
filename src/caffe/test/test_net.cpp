@@ -33,7 +33,7 @@ protected:
   virtual void
   InitNetFromProtoFileWithState(const string &proto, Phase phase = caffe::TRAIN,
                                 const int level = 0,
-                                const vector<string> *stages = NULL) {
+                                const vector<string> *stages = nullptr) {
     NetParameter param;
     CHECK(google::protobuf::TextFormat::ParseFromString(proto, &param));
     string param_file;
@@ -202,7 +202,7 @@ protected:
     InitNetFromProtoString(proto);
   }
 
-  virtual void InitTrickyNet(Dtype *loss_weight = NULL) {
+  virtual void InitTrickyNet(Dtype *loss_weight = nullptr) {
     ostringstream loss_weight_stream;
     if (loss_weight) {
       loss_weight_stream << "  loss_weight: " << *loss_weight << " ";
@@ -292,11 +292,14 @@ protected:
   // midnet_loss_weight is the loss weight for the first 'InnerProduct' layer
   // output.  Should both default to 0.0 if unspecified (i.e., if NULL is
   // passed to this function).
-  virtual void InitUnsharedWeightsNet(
-      const Dtype *loss_weight = NULL, const Dtype *midnet_loss_weight = NULL,
-      const bool force_backward = false, const bool bias_term = false,
-      const Dtype blobs_lr_w1 = 1, const Dtype blobs_lr_b1 = 2,
-      const Dtype blobs_lr_w2 = 1, const Dtype blobs_lr_b2 = 2) {
+  virtual void InitUnsharedWeightsNet(const Dtype *loss_weight = nullptr,
+                                      const Dtype *midnet_loss_weight = nullptr,
+                                      const bool force_backward = false,
+                                      const bool bias_term = false,
+                                      const Dtype blobs_lr_w1 = 1,
+                                      const Dtype blobs_lr_b1 = 2,
+                                      const Dtype blobs_lr_w2 = 1,
+                                      const Dtype blobs_lr_b2 = 2) {
     string bias_str = bias_term ? "true " : "false ";
     ostringstream proto;
     proto << "name: 'UnsharedWeightsNetwork' ";
@@ -770,7 +773,7 @@ protected:
   }
 
   virtual void InitAllInOneNet(Phase phase = caffe::TRAIN, const int level = 0,
-                               const vector<string> *stages = NULL) {
+                               const vector<string> *stages = nullptr) {
     string proto = "name: 'All-in-one Network'"
                    "layer { "
                    "  name: 'train-data' "
@@ -931,7 +934,7 @@ TYPED_TEST(NetTest, TestLossWeight) {
   vector<Blob<Dtype> *> bottom;
   Caffe::set_random_seed(this->seed_);
   const bool kForceBackward = true;
-  this->InitUnsharedWeightsNet(NULL, NULL, kForceBackward);
+  this->InitUnsharedWeightsNet(nullptr, nullptr, kForceBackward);
   const Dtype loss = this->net_->ForwardBackward();
   const bool kCopyDiff = true;
   vector<shared_ptr<Blob<Dtype>>> blob_grads;
@@ -946,7 +949,7 @@ TYPED_TEST(NetTest, TestLossWeight) {
   Dtype kLossWeights[kNumLossWeights] = {2, 0, 1, -1, -2.5, 3.7};
   for (int i = 0; i < kNumLossWeights; ++i) {
     Caffe::set_random_seed(this->seed_);
-    this->InitUnsharedWeightsNet(&kLossWeights[i], NULL, kForceBackward);
+    this->InitUnsharedWeightsNet(&kLossWeights[i], nullptr, kForceBackward);
     const Dtype weighted_loss = this->net_->ForwardBackward();
     const Dtype error_margin = kErrorMargin * fabs(kLossWeights[i]);
     EXPECT_NEAR(loss * kLossWeights[i], weighted_loss, error_margin)
@@ -1314,8 +1317,8 @@ TYPED_TEST(NetTest, TestSharedWeightsResume) {
   this->net_->CopyTrainedLayersFrom(net_param);
   ip1_weights = this->net_->layers()[1]->blobs()[0].get();
   ip2_weights = this->net_->layers()[2]->blobs()[0].get();
-  ASSERT_FALSE(NULL == ip1_weights);
-  ASSERT_FALSE(NULL == ip2_weights);
+  ASSERT_FALSE(nullptr == ip1_weights);
+  ASSERT_FALSE(nullptr == ip2_weights);
   EXPECT_NE(ip1_weights, ip2_weights);
   // Check that data and diff blobs of shared weights share the same memory
   // locations.
@@ -1329,8 +1332,8 @@ TYPED_TEST(NetTest, TestSharedWeightsResume) {
 TYPED_TEST(NetTest, TestParamPropagateDown) {
   typedef typename TypeParam::Dtype Dtype;
   const bool kBiasTerm = true, kForceBackward = false;
-  const Dtype *kLossWeight1 = NULL;
-  const Dtype *kLossWeight2 = NULL;
+  const Dtype *kLossWeight1 = nullptr;
+  const Dtype *kLossWeight2 = nullptr;
 
   // Run the net with all params learned; check that gradients are non-zero.
   Caffe::set_random_seed(this->seed_);

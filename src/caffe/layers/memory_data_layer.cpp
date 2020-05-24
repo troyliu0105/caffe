@@ -24,8 +24,8 @@ void MemoryDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   top[1]->Reshape(label_shape);
   added_data_.Reshape(batch_size_, channels_, height_, width_);
   added_label_.Reshape(label_shape);
-  data_ = NULL;
-  labels_ = NULL;
+  data_ = nullptr;
+  labels_ = nullptr;
   added_data_.cpu_data();
   added_label_.cpu_data();
 }

@@ -33,7 +33,7 @@ Net<Dtype>::Net(const string &param_file, Phase phase, const int level,
   ReadNetParamsFromTextFileOrDie(param_file, &param);
   // Set phase, stages and level
   param.mutable_state()->set_phase(phase);
-  if (stages != NULL) {
+  if (stages != nullptr) {
     for (int i = 0; i < stages->size(); i++) {
       param.mutable_state()->add_stage((*stages)[i]);
     }
@@ -115,7 +115,7 @@ void Net<Dtype>::Init(const NetParameter &in_param) {
         // Add "anonymous" top blobs -- do not modify available_blobs or
         // blob_name_to_idx as we don't want these blobs to be usable as input
         // to other layers.
-        AppendTop(param, layer_id, num_top, NULL, NULL);
+        AppendTop(param, layer_id, num_top, nullptr, nullptr);
       }
     }
     // After this layer is connected, set it up.
@@ -561,7 +561,7 @@ Dtype Net<Dtype>::ForwardTo(int end) {
 
 template <typename Dtype>
 const vector<Blob<Dtype> *> &Net<Dtype>::Forward(Dtype *loss) {
-  if (loss != NULL) {
+  if (loss != nullptr) {
     *loss = ForwardFromTo(0, layers_.size() - 1);
   } else {
     ForwardFromTo(0, layers_.size() - 1);
@@ -982,7 +982,7 @@ Net<Dtype>::blob_by_name(const string &blob_name) const {
   if (has_blob(blob_name)) {
     blob_ptr = blobs_[blob_names_index_.find(blob_name)->second];
   } else {
-    blob_ptr.reset((Blob<Dtype> *)(NULL));
+    blob_ptr.reset((Blob<Dtype> *)(nullptr));
     LOG(WARNING) << "Unknown blob name " << blob_name;
   }
   return blob_ptr;
@@ -1000,7 +1000,7 @@ Net<Dtype>::layer_by_name(const string &layer_name) const {
   if (has_layer(layer_name)) {
     layer_ptr = layers_[layer_names_index_.find(layer_name)->second];
   } else {
-    layer_ptr.reset((Layer<Dtype> *)(NULL));
+    layer_ptr.reset((Layer<Dtype> *)(nullptr));
     LOG(WARNING) << "Unknown layer name " << layer_name;
   }
   return layer_ptr;

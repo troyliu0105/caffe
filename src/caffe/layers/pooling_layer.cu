@@ -190,8 +190,8 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   int count = top[0]->count();
   // We'll output the mask to top[1] if it's of size >1.
   const bool use_top_mask = top.size() > 1;
-  int *mask = NULL;
-  Dtype *top_mask = NULL;
+  int *mask = nullptr;
+  Dtype *top_mask = nullptr;
   switch (this->layer_param_.pooling_param().pool()) {
   case PoolingParameter_PoolMethod_MAX:
     if (use_top_mask) {
@@ -389,8 +389,8 @@ void PoolingLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
   caffe_gpu_set(count, Dtype(0.), bottom_diff);
   // We'll output the mask to top[1] if it's of size >1.
   const bool use_top_mask = top.size() > 1;
-  const int *mask = NULL;
-  const Dtype *top_mask = NULL;
+  const int *mask = nullptr;
+  const Dtype *top_mask = nullptr;
   switch (this->layer_param_.pooling_param().pool()) {
   case PoolingParameter_PoolMethod_MAX:
     if (use_top_mask) {

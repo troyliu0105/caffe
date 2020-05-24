@@ -81,7 +81,7 @@ void ReductionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     return;
   }
   // Get bottom_data, if needed.
-  const Dtype *bottom_data = NULL;
+  const Dtype *bottom_data = nullptr;
   switch (op_) {
     // Operations that don't need bottom_data
   case ReductionParameter_ReductionOp_SUM:

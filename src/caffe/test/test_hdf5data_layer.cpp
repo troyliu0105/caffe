@@ -20,7 +20,7 @@ class HDF5DataLayerTest : public MultiDeviceTest<TypeParam> {
 
 protected:
   HDF5DataLayerTest()
-      : filename(NULL), blob_top_data_(new Blob<Dtype>()),
+      : filename(nullptr), blob_top_data_(new Blob<Dtype>()),
         blob_top_label_(new Blob<Dtype>()),
         blob_top_label2_(new Blob<Dtype>()) {}
   virtual void SetUp() {

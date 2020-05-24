@@ -41,7 +41,7 @@ public:
     while (p) {
       std::string s = p;
       res.push_back(s);
-      p = strtok(NULL, d);
+      p = strtok(nullptr, d);
     }
     return res;
   };

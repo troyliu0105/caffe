@@ -61,7 +61,7 @@ void InfogainLossLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
       << "label count (number of labels) must be N*H*W, "
       << "with integer values in {0, 1, ..., C-1}.";
   num_labels_ = bottom[0]->shape(infogain_axis_);
-  Blob<Dtype> *infogain = NULL;
+  Blob<Dtype> *infogain = nullptr;
   if (bottom.size() < 3) {
     infogain = &infogain_;
   } else {
@@ -130,7 +130,7 @@ void InfogainLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   softmax_layer_->Forward(softmax_bottom_vec_, softmax_top_vec_);
   const Dtype *prob_data = prob_.cpu_data();
   const Dtype *bottom_label = bottom[1]->cpu_data();
-  const Dtype *infogain_mat = NULL;
+  const Dtype *infogain_mat = nullptr;
   if (bottom.size() < 3) {
     infogain_mat = infogain_.cpu_data();
   } else {
@@ -178,7 +178,7 @@ void InfogainLossLayer<Dtype>::Backward_cpu(
   if (propagate_down[0]) {
     const Dtype *prob_data = prob_.cpu_data();
     const Dtype *bottom_label = bottom[1]->cpu_data();
-    const Dtype *infogain_mat = NULL;
+    const Dtype *infogain_mat = nullptr;
     if (bottom.size() < 3) {
       infogain_mat = infogain_.cpu_data();
     } else {

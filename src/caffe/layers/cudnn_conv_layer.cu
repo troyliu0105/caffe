@@ -64,13 +64,13 @@ template <typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Backward_gpu(
     const vector<Blob<Dtype> *> &top, const vector<bool> &propagate_down,
     const vector<Blob<Dtype> *> &bottom) {
-  const Dtype *weight = NULL;
-  Dtype *weight_diff = NULL;
+  const Dtype *weight = nullptr;
+  Dtype *weight_diff = nullptr;
   if (this->param_propagate_down_[0]) {
     weight = this->blobs_[0]->gpu_data();
     weight_diff = this->blobs_[0]->mutable_gpu_diff();
   }
-  Dtype *bias_diff = NULL;
+  Dtype *bias_diff = nullptr;
   if (this->bias_term_ && this->param_propagate_down_[1]) {
     bias_diff = this->blobs_[1]->mutable_gpu_diff();
   }
@@ -97,7 +97,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(
 
     // Gradient w.r.t. bottom data.
     if (propagate_down[i]) {
-      if (weight == NULL) {
+      if (weight == nullptr) {
         weight = this->blobs_[0]->gpu_data();
       }
       Dtype *bottom_diff = bottom[i]->mutable_gpu_diff();

@@ -43,7 +43,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 
   // workspace data
   workspaceSizeInBytes = 0;
-  workspaceData = NULL;
+  workspaceData = nullptr;
 #ifdef USE_CUDNN_GROUP_INTERNAL
   workspace = new void *[CUDNN_STREAMS_PER_GROUP];
 #else
@@ -66,7 +66,7 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     CUDA_CHECK(cudaStreamCreate(&stream_[g]));
     CUDNN_CHECK(cudnnCreate(&handle_[g]));
     CUDNN_CHECK(cudnnSetStream(handle_[g], stream_[g]));
-    workspace[g] = NULL;
+    workspace[g] = nullptr;
   }
 #else
   for (int g = 0; g < this->group_ * CUDNN_STREAMS_PER_GROUP; g++) {
@@ -250,7 +250,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
       // NULL out all workspace pointers
 #ifdef USE_CUDNN_GROUP_INTERNAL
       for (int g = 0; g < CUDNN_STREAMS_PER_GROUP; g++) {
-        workspace[g] = NULL;
+        workspace[g] = nullptr;
       }
 #else
       for (int g = 0; g < (this->group_ * CUDNN_STREAMS_PER_GROUP); g++) {
@@ -258,7 +258,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
       }
 #endif
       // NULL out underlying data
-      workspaceData = NULL;
+      workspaceData = nullptr;
       workspaceSizeInBytes = 0;
     }
 

@@ -35,7 +35,7 @@ public:
     if (pool_) {
       pthreadpool_destroy(pool_);
     }
-    pool_ = NULL;
+    pool_ = nullptr;
   }
 
   pthreadpool_t pool() { return pool_; };

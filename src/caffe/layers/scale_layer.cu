@@ -82,7 +82,7 @@ void ScaleLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
                                              : bottom[0]->mutable_gpu_diff()));
     caffe_gpu_mul(top[0]->count(), top_diff, bottom_data, product);
     if (!is_eltwise) {
-      Dtype *sum_result = NULL;
+      Dtype *sum_result = nullptr;
       if (inner_dim_ == 1) {
         sum_result = product;
       } else if (sum_result_.count() == 1) {

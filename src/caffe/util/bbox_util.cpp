@@ -1646,7 +1646,7 @@ void ComputeLocLoss(const Blob<Dtype> &loc_pred, const Blob<Dtype> &loc_gt,
   int loc_count = loc_pred.count();
   CHECK_EQ(loc_count, loc_gt.count());
   Blob<Dtype> diff;
-  const Dtype *diff_data = NULL;
+  const Dtype *diff_data = nullptr;
   if (loc_count != 0) {
     diff.Reshape(loc_pred.shape());
     caffe_sub(loc_count, loc_pred.cpu_data(), loc_gt.cpu_data(),

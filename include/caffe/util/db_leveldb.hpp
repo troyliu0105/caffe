@@ -50,13 +50,13 @@ private:
 
 class LevelDB : public DB {
 public:
-  LevelDB() : db_(NULL) {}
+  LevelDB() : db_(nullptr) {}
   virtual ~LevelDB() { Close(); }
   virtual void Open(const string &source, Mode mode);
   virtual void Close() {
-    if (db_ != NULL) {
+    if (db_ != nullptr) {
       delete db_;
-      db_ = NULL;
+      db_ = nullptr;
     }
   }
   virtual LevelDBCursor *NewCursor() {

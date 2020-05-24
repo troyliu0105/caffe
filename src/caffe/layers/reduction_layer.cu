@@ -9,7 +9,7 @@ template <typename Dtype>
 void ReductionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                         const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->gpu_data();
-  const Dtype *mult_data = NULL;
+  const Dtype *mult_data = nullptr;
   if (sum_multiplier_.count() > 0) {
     mult_data = sum_multiplier_.gpu_data();
   }
@@ -48,7 +48,7 @@ void ReductionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
     return;
   }
   // Get bottom_data, if needed.
-  const Dtype *bottom_data = NULL;
+  const Dtype *bottom_data = nullptr;
   switch (op_) {
     // Operations that don't need bottom_data
   case ReductionParameter_ReductionOp_SUM:

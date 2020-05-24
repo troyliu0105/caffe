@@ -290,7 +290,7 @@ Filler<Dtype> *GetFiller(const FillerParameter &param) {
   } else {
     CHECK(false) << "Unknown filler name: " << param.type();
   }
-  return (Filler<Dtype> *)(NULL);
+  return (Filler<Dtype> *)(nullptr);
 }
 
 } // namespace caffe

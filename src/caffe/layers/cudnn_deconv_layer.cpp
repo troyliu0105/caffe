@@ -34,7 +34,7 @@ void CuDNNDeconvolutionLayer<Dtype>::LayerSetUp(
 
   // workspace data
   workspaceSizeInBytes = 0;
-  workspaceData = NULL;
+  workspaceData = nullptr;
   workspace = new void *[this->group_ * CUDNN_STREAMS_PER_GROUP];
 
   for (size_t i = 0; i < bottom.size(); ++i) {
@@ -52,7 +52,7 @@ void CuDNNDeconvolutionLayer<Dtype>::LayerSetUp(
     CUDA_CHECK(cudaStreamCreate(&stream_[g]));
     CUDNN_CHECK(cudnnCreate(&handle_[g]));
     CUDNN_CHECK(cudnnSetStream(handle_[g], stream_[g]));
-    workspace[g] = NULL;
+    workspace[g] = nullptr;
   }
 
   // Set the indexing parameters.
@@ -218,10 +218,10 @@ void CuDNNDeconvolutionLayer<Dtype>::Reshape(
 
       // NULL out all workspace pointers
       for (int g = 0; g < (this->group_ * CUDNN_STREAMS_PER_GROUP); g++) {
-        workspace[g] = NULL;
+        workspace[g] = nullptr;
       }
       // NULL out underlying data
-      workspaceData = NULL;
+      workspaceData = nullptr;
       workspaceSizeInBytes = 0;
     }
 
