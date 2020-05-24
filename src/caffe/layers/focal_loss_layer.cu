@@ -60,7 +60,7 @@ __global__ void FocalLossSigmoidForwardGPU(
 template <typename Dtype>
 void FocalLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
                                         const vector<Blob<Dtype> *> &top) {
-  softmax_layer_->Forward(softmax_bottom_vec_, softmax_top_vec_);
+  activate_layer_->Forward(activate_bottom_vec_, activate_top_vec_);
   const Dtype *prob_data = prob_.gpu_data();
   const Dtype *label = bottom[1]->gpu_data();
   const int dim = prob_.count() / outer_num_;

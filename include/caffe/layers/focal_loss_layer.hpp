@@ -103,13 +103,13 @@ protected:
                             const vector<Blob<Dtype> *> &bottom);
 
   /// The internal SoftmaxLayer used to map predictions to a distribution.
-  shared_ptr<Layer<Dtype>> softmax_layer_;
+  shared_ptr<Layer<Dtype>> activate_layer_;
   /// prob stores the output probability predictions from the SoftmaxLayer.
   Blob<Dtype> prob_;
   /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector<Blob<Dtype> *> softmax_bottom_vec_;
+  vector<Blob<Dtype> *> activate_bottom_vec_;
   /// top vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector<Blob<Dtype> *> softmax_top_vec_;
+  vector<Blob<Dtype> *> activate_top_vec_;
   /// Whether to ignore instances with a certain label.
   bool has_ignore_label_;
   /// The label indicating that an instance should be ignored.
