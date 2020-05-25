@@ -29,6 +29,15 @@ void OneHotLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
       outer_num_, inner_num_, dim, bottom_data, top_data);
 }
 
-INSTANTIATE_LAYER_GPU_FORWARD(OneHotLayer);
+template <typename Dtype>
+void OneHotLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype> *> &top,
+                                      const vector<bool> &propagate_down,
+                                      const vector<Blob<Dtype> *> &bottom) {
+  if (propagate_down[0]) {
+    NOT_IMPLEMENTED;
+  }
+}
+
+INSTANTIATE_LAYER_GPU_FUNCS(OneHotLayer);
 
 } // namespace caffe
