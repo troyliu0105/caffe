@@ -35,11 +35,7 @@ protected:
   };
   void Backward_gpu(const vector<Blob<Dtype> *> &top,
                     const vector<bool> &propagate_down,
-                    const vector<Blob<Dtype> *> &bottom) override {
-    if (propagate_down[0]) {
-      NOT_IMPLEMENTED;
-    }
-  };
+                    const vector<Blob<Dtype> *> &bottom) override;
 
 private:
   int axis_;

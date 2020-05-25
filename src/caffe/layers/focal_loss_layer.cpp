@@ -190,7 +190,6 @@ void FocalLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
 
       //---------- oriloss * d(scale)
       // save result in scaler_.data
-      Dtype target;
       Dtype *scale_diff = scale_.mutable_cpu_diff(); // origin loss
       Dtype *scale_data = scale_.mutable_cpu_data(); // scale, but useless now
       FOR_LOOP_WITH_PREPARE(

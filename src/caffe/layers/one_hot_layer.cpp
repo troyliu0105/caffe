@@ -8,7 +8,7 @@ namespace caffe {
 template <typename Dtype>
 void OneHotLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                     const vector<Blob<Dtype> *> &top) {
-  Layer::LayerSetUp(bottom, top);
+  Layer<Dtype>::LayerSetUp(bottom, top);
   OneHotParameter param = this->layer_param().one_hot_param();
   num_class_ = param.num_class();
 }
