@@ -16,7 +16,7 @@ void PReLULayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   PReLUParameter prelu_param = this->layer_param().prelu_param();
   int channels = bottom[0]->channels();
   channel_shared_ = prelu_param.channel_shared();
-  if (this->blobs_.size() > 0) {
+  if (!this->blobs_.empty()) {
     LOG(INFO) << "Skipping parameter initialization";
   } else {
     this->blobs_.resize(1);
@@ -108,16 +108,16 @@ void PReLULayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
   // always zero.
   const int div_factor = channel_shared_ ? channels : 1;
 
-  // Propagte to param
+  // Propagate to param
   // Since to write bottom diff will affect top diff if top and bottom blobs
-  // are identical (in-place computaion), we first compute param backward to
+  // are identical (in-place computation), we first compute param backward to
   // keep top_diff unchanged.
   if (this->param_propagate_down_[0]) {
     Dtype *slope_diff = this->blobs_[0]->mutable_cpu_diff();
-    FOR_LOOP(count, i, {
+    for (int i = 0; i < count; ++i) {
       int c = (i / dim) % channels / div_factor;
       slope_diff[c] += top_diff[i] * bottom_data[i] * (bottom_data[i] <= 0);
-    })
+    }
   }
   // Propagate to bottom
   if (propagate_down[0]) {
