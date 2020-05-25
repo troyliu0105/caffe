@@ -15,22 +15,51 @@
   }
 #define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
   tbb::parallel_for(                                                           \
-      tbb::blocked_range<size_t>(0, n),                                        \
-      [&](tbb::blocked_range<size_t> r) {                                      \
+      tbb::blocked_range<int>(0, n),                                           \
+      [&](const tbb::blocked_range<int> &r) {                                  \
         prepare;                                                               \
-        for (int iname = r.begin(); iname < r.end(); iname++)                  \
+        for (int iname = r.begin(); iname != r.end(); ++iname)                 \
           operation;                                                           \
       },                                                                       \
       tbb::auto_partitioner());
 #define FOR_LOOP(n, iname, operation)                                          \
   FOR_LOOP_WITH_PREPARE(n, iname, operation, {})
+#elif defined(USE_OMP)
+#ifdef _MSC_VER
+#define OMP_PRAGMA_FOR(...) __pragma(omp parallel for __VA_ARGS__)
+#define OMP_PRAGMA(...) __pragma(omp __VA_ARGS__)
+#else
+#define _OMP_HELPER0(x) #x
+#define _OMP_HELPER1(x) _OMP_HELPER0(omp x)
+#define _OMP_HELPER2(y) _OMP_HELPER1(#y)
+
+#define OMP_PRAGMA_FOR(...) _Pragma(_OMP_HELPER2(parallel for __VA_ARGS__))
+#define OMP_PRAGMA(...) _Pragma(_OMP_HELPER2(__VA_ARGS__))
+#endif
+
+#define SORT(b, e, comp) tbb::parallel_sort(b, e, comp)
+
+#define ATOMIC_UPDATE(mutex, operation)                                        \
+  OMP_PRAGMA(critical(dataupdate)) { operation; }
+
+#define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
+  OMP_PRAGMA_FOR()                                                             \
+  for (int iname = 0; iname < n; ++iname) {                                    \
+    prepare;                                                                   \
+    operation;                                                                 \
+  }
+#define FOR_LOOP(n, iname, operation)                                          \
+  FOR_LOOP_WITH_PREPARE(n, iname, operation, )
+
 #else
 #include <algorithm>
 #define SORT(b, e, comp) std::sort(b, e, comp)
 #define ATOMIC_UPDATE(mutex, operation)                                        \
   { operation; }
 #define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
-  prepare for (int iname = 0; iname < n; ++iname) operation;
+  prepare;                                                                     \
+  for (int iname = 0; iname < n; ++iname)                                      \
+    operation;
 #define FOR_LOOP(n, iname, operation)                                          \
   FOR_LOOP_WITH_PREPARE(n, iname, operation, )
 #endif

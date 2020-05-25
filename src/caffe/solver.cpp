@@ -226,7 +226,7 @@ void Solver<Dtype>::Step(int iters) {
     // zero-init the params
     net_->ClearParamDiffs();
     net_->set_iter(iter_, stop_iter);
-    if (param_.test_interval() && iter_ % param_.test_interval() == 0 &&
+    if (param_.has_test_interval() && iter_ % param_.test_interval() == 0 &&
         (iter_ > 0 || param_.test_initialization())) {
       if (Caffe::root_solver()) {
         TestAll();
@@ -240,7 +240,7 @@ void Solver<Dtype>::Step(int iters) {
     for (int i = 0; i < callbacks_.size(); ++i) {
       callbacks_[i]->on_start();
     }
-    const bool display = param_.display() && iter_ % param_.display() == 0;
+    const bool display = param_.has_display() && iter_ % param_.display() == 0;
     net_->set_debug_info(display && param_.debug_info());
     // accumulate the loss and gradient
     Dtype loss = 0;

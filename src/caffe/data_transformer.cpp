@@ -898,32 +898,35 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
   CHECK(cv_cropped_img.data);
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
-  int top_index;
-  FOR_LOOP(height, h, {
-    const uchar *ptr = cv_cropped_img.ptr<uchar>(h);
-    int img_index = 0;
-    for (int w = 0; w < width; ++w) {
-      for (int c = 0; c < img_channels; ++c) {
-        if (do_mirror) {
-          top_index = (c * height + h) * width + (width - 1 - w);
-        } else {
-          top_index = (c * height + h) * width + w;
-        }
-        // int top_index = (c * height + h) * width + w;
-        auto pixel = static_cast<Dtype>(ptr[img_index++]);
-        if (has_mean_file) {
-          int mean_index = (c * img_height + h_off + h) * img_width + w_off + w;
-          transformed_data[top_index] = (pixel - mean[mean_index]) * scale;
-        } else {
-          if (has_mean_values) {
-            transformed_data[top_index] = (pixel - mean_values_[c]) * scale;
-          } else {
-            transformed_data[top_index] = pixel * scale;
+  FOR_LOOP_WITH_PREPARE(
+      height, h,
+      {
+        const uchar *ptr = cv_cropped_img.ptr<uchar>(h);
+        int img_index = 0;
+        for (int w = 0; w < width; ++w) {
+          for (int c = 0; c < img_channels; ++c) {
+            if (do_mirror) {
+              top_index = (c * height + h) * width + (width - 1 - w);
+            } else {
+              top_index = (c * height + h) * width + w;
+            }
+            // int top_index = (c * height + h) * width + w;
+            auto pixel = static_cast<Dtype>(ptr[img_index++]);
+            if (has_mean_file) {
+              int mean_index =
+                  (c * img_height + h_off + h) * img_width + w_off + w;
+              transformed_data[top_index] = (pixel - mean[mean_index]) * scale;
+            } else {
+              if (has_mean_values) {
+                transformed_data[top_index] = (pixel - mean_values_[c]) * scale;
+              } else {
+                transformed_data[top_index] = pixel * scale;
+              }
+            }
           }
         }
-      }
-    }
-  })
+      },
+      int top_index)
 }
 
 template <typename Dtype>
@@ -956,32 +959,34 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
     CHECK_LE(width, img_width);
     CHECK_GE(num, 1);
     CHECK_GT(img_channels, 0);
-    int top_index;
     // LOG(INFO) << do_mirror;
     int maxima = 0;
-    FOR_LOOP(height, h, {
-      const uchar *ptr = cv_img.ptr<uchar>(h);
-      int img_index = 0;
-      for (int w = 0; w < width; ++w) {
-        // for (int c = 0; c < img_channels; ++c) {
-        int c = i;
-        if (mirror_param_) {
-          top_index = (c * height + h) * width + (width - 1 - w);
-        } else {
-          top_index = (c * height + h) * width + w;
-        }
-        // LOG(INFO) << top_index;
-        // int top_index = (c * height + h) * width + w;
-        auto pixel = static_cast<Dtype>(ptr[img_index++]);
-        // if(pixel>0)
-        //  LOG(INFO) << pixel;
-        transformed_data[top_index] = pixel * scale;
-        // LOG(INFO) << transformed_data[top_index];
-        if (top_index > maxima)
-          maxima = top_index;
-        //}
-      }
-    })
+    FOR_LOOP_WITH_PREPARE(
+        height, h,
+        {
+          const uchar *ptr = cv_img.ptr<uchar>(h);
+          int img_index = 0;
+          for (int w = 0; w < width; ++w) {
+            // for (int c = 0; c < img_channels; ++c) {
+            int c = i;
+            if (mirror_param_) {
+              top_index = (c * height + h) * width + (width - 1 - w);
+            } else {
+              top_index = (c * height + h) * width + w;
+            }
+            // LOG(INFO) << top_index;
+            // int top_index = (c * height + h) * width + w;
+            auto pixel = static_cast<Dtype>(ptr[img_index++]);
+            // if(pixel>0)
+            //  LOG(INFO) << pixel;
+            transformed_data[top_index] = pixel * scale;
+            // LOG(INFO) << transformed_data[top_index];
+            if (top_index > maxima)
+              maxima = top_index;
+            //}
+          }
+        },
+        int top_index)
     // LOG(INFO)<<maxima;
   }
 }
@@ -1094,35 +1099,38 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   CHECK(cv_cropped_image.data);
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
-  int top_index;
-  FOR_LOOP(height, h, {
-    const uchar *ptr = cv_cropped_image.ptr<uchar>(h);
-    int img_index = 0;
-    int h_idx = h;
-    for (int w = 0; w < width; ++w) {
-      int w_idx = w;
-      if (*do_mirror) {
-        w_idx = (width - 1 - w);
-      }
-      int h_idx_real = h_idx;
-      int w_idx_real = w_idx;
-      for (int c = 0; c < img_channels; ++c) {
-        top_index = (c * height + h_idx_real) * width + w_idx_real;
-        auto pixel = static_cast<Dtype>(ptr[img_index++]);
-        if (has_mean_file) {
-          int mean_index = (c * img_height + h_off + h_idx_real) * img_width +
-                           w_off + w_idx_real;
-          transformed_data[top_index] = (pixel - mean[mean_index]) * scale;
-        } else {
-          if (has_mean_values) {
-            transformed_data[top_index] = (pixel - mean_values_[c]) * scale;
-          } else {
-            transformed_data[top_index] = pixel * scale;
+  FOR_LOOP_WITH_PREPARE(
+      height, h,
+      {
+        const uchar *ptr = cv_cropped_image.ptr<uchar>(h);
+        int img_index = 0;
+        int h_idx = h;
+        for (int w = 0; w < width; ++w) {
+          int w_idx = w;
+          if (*do_mirror) {
+            w_idx = (width - 1 - w);
+          }
+          int h_idx_real = h_idx;
+          int w_idx_real = w_idx;
+          for (int c = 0; c < img_channels; ++c) {
+            top_index = (c * height + h_idx_real) * width + w_idx_real;
+            auto pixel = static_cast<Dtype>(ptr[img_index++]);
+            if (has_mean_file) {
+              int mean_index =
+                  (c * img_height + h_off + h_idx_real) * img_width + w_off +
+                  w_idx_real;
+              transformed_data[top_index] = (pixel - mean[mean_index]) * scale;
+            } else {
+              if (has_mean_values) {
+                transformed_data[top_index] = (pixel - mean_values_[c]) * scale;
+              } else {
+                transformed_data[top_index] = pixel * scale;
+              }
+            }
           }
         }
-      }
-    }
-  })
+      },
+      int top_index)
 }
 
 template <typename Dtype>
