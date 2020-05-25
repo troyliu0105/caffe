@@ -960,7 +960,11 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
     CHECK_GE(num, 1);
     CHECK_GT(img_channels, 0);
     // LOG(INFO) << do_mirror;
+#if defined(USE_TBB) || defined(USE_OMP)
+    std::atomic<int> maxima = 0;
+#else
     int maxima = 0;
+#endif
     FOR_LOOP_WITH_PREPARE(
         height, h,
         {
@@ -1045,13 +1049,6 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   cv::Mat cv_resized_image, cv_noised_image, cv_cropped_image;
   if (param_.resize_param_size()) {
     cv_resized_image = ApplyResize(cv_img, param_.resize_param(policy_num));
-    /*char buf[1000];
-
-    sprintf(buf, "input/input_%05d.jpg",iter_count++);
-    if (*do_mirror) {
-        cv::flip(cv_resized_image, cv_resized_image, 1);
-    }
-    cv::imwrite(buf,cv_resized_image);*/
     // LOG(INFO) << *do_mirror << ",data";
   } else {
     cv_resized_image = cv_img;
@@ -1085,6 +1082,15 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   } else {
     cv_cropped_image = cv_noised_image;
   }
+  //
+  //#ifdef DEBUG
+  //  char buf[1000];
+  //  sprintf(buf, "input/input_%05d.jpg", iter_count++);
+  //  if (*do_mirror) {
+  //    cv::flip(cv_cropped_image, cv_cropped_image, 1);
+  //  }
+  //  cv::imwrite(buf, cv_resized_image);
+  //#endif
 
   // Return the normalized crop bbox.
   crop_bbox->set_xmin(Dtype(w_off) / img_width);
