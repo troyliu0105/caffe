@@ -33,6 +33,8 @@ public:
   virtual inline int ExactNumTopBlobs() const { return 2; }
 
 protected:
+  void Next() override;
+  bool Skip() override;
   shared_ptr<Caffe::RNG> prefetch_rng_;
   virtual void ShuffleImages();
   virtual void load_batch(Batch<Dtype> *batch);

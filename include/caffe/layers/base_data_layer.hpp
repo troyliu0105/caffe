@@ -71,6 +71,8 @@ public:
 protected:
   void InternalThreadEntry() override;
   virtual void load_batch(Batch<Dtype> *batch) = 0;
+  virtual void Next(){};
+  virtual bool Skip() { return false; };
 
   vector<shared_ptr<Batch<Dtype>>> prefetch_;
   BlockingQueue<Batch<Dtype> *> prefetch_free_;

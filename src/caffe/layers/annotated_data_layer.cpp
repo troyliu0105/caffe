@@ -3,7 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #endif // USE_OPENCV
-#include <stdint.h>
+#include <cstdint>
 
 #include <algorithm>
 #include <map>
@@ -115,8 +115,8 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
         label_shape[2] = std::max(num_bboxes, 1);
         label_shape[3] = 8;
         if (yolo_data_type_ == 1) {
-          label_shape[2] = 300;
           label_shape[0] = batch_size;
+          label_shape[2] = 300;
           label_shape[3] = 5;
         }
       } else {

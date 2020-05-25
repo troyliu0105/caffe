@@ -44,7 +44,7 @@ void ImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   while (std::getline(infile, line)) {
     pos = line.find_last_of(' ');
     label = atoi(line.substr(pos + 1).c_str());
-    lines_.push_back(std::make_pair(line.substr(0, pos), label));
+    lines_.emplace_back(line.substr(0, pos), label);
   }
 
   CHECK(!lines_.empty()) << "File is empty";
@@ -171,6 +171,14 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   DLOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
   DLOG(INFO) << "     Read time: " << read_time / 1000 << " ms.";
   DLOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
+}
+template <typename Dtype>
+void ImageDataLayer<Dtype>::Next() {
+  BasePrefetchingDataLayer<Dtype>::Next();
+}
+template <typename Dtype>
+bool ImageDataLayer<Dtype>::Skip() {
+  return BasePrefetchingDataLayer<Dtype>::Skip();
 }
 
 INSTANTIATE_CLASS(ImageDataLayer);
