@@ -15,15 +15,47 @@ if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${CONAN_INCLUDE_DIRS})
     list(APPEND Caffe_DEFINITIONS PUBLIC ${CONAN_DEFINES})
     if (DEFINED CONAN_XTENSOR_ROOT)
-        message(STATUS "Using XTensor")
+        message(STATUS "Using XTensor (conan ver. ${xtensor_VERSION})")
+        if (NOT USE_XTENSOR)
+            message(WARNING "Settings do not enable XTensor, but conan does...")
+        endif ()
         list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_XTENSOR)
     endif ()
     if (DEFINED CONAN_TBB_ROOT)
-        message(STATUS "Using TBB")
+        message(STATUS "Using TBB (conan ver. ${TBB_VERSION})")
+        if (NOT USE_TBB)
+            message(WARNING "Settings do not enable TBB, but conan does...")
+        endif ()
         list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_TBB)
     endif ()
 else ()
     message(WARNING "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
+endif ()
+
+# find xtensor from cmake side
+if (USE_XTENSOR AND NOT DEFINED CONAN_XTENSOR_ROOT)
+    find_package(xtensor)
+    if (xtensor_FOUND)
+        message(STATUS "Found XTensor (ver. ${xtensor_VERSION}) from system")
+        list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${xtensor_INCLUDE_DIRS})
+        list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_XTENSOR)
+    else ()
+        message(WARNING "Can't find xtensor, disabling...")
+        set(USE_XTENSOR FALSE)
+    endif ()
+endif ()
+
+# find tbb from cmake side
+if (USE_TBB AND NOT DEFINED CONAN_TBB_ROOT)
+    find_package(tbb COMPONENTS tbb)
+    if (TBB_tbb_FOUND)
+        message(STATUS "Found TBB (ver. ${TBB_VERSION}) from system")
+        list(APPEND Caffe_LINKER_LIBS PUBLIC ${TBB_IMPORTED_TARGETS})
+        list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_TBB)
+    else ()
+        message(WARNING "Can't find tbb, disabling...")
+        set(USE_TBB FALSE)
+    endif ()
 endif ()
 
 
@@ -43,7 +75,7 @@ find_package(Threads REQUIRED)
 list(APPEND Caffe_LINKER_LIBS PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
 # ---[ OpenMP
-if (USE_OPENMP AND NOT USE_TBB)
+if (USE_OPENMP)
     # Ideally, this should be provided by the BLAS library IMPORTED target. However,
     # nobody does this, so we need to link to OpenMP explicitly and have the maintainer
     # to flick the switch manually as needed.
@@ -81,13 +113,13 @@ if (USE_OPENMP AND NOT USE_TBB)
 endif ()
 
 # ---[ Google-glog
-#include("cmake/External/glog.cmake")
+include("cmake/External/glog.cmake")
 find_package(glog REQUIRED)
 list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GLOG_INCLUDE_DIRS})
 list(APPEND Caffe_LINKER_LIBS PUBLIC ${GLOG_LIBRARIES})
 
 # ---[ Google-gflags
-#include("cmake/External/gflags.cmake")
+include("cmake/External/gflags.cmake")
 find_package(gflags REQUIRED)
 list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GFLAGS_INCLUDE_DIRS})
 list(APPEND Caffe_LINKER_LIBS PUBLIC ${GFLAGS_LIBRARIES})
