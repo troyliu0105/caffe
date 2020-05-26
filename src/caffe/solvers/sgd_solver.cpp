@@ -27,6 +27,15 @@ template <typename Dtype>
 Dtype SGDSolver<Dtype>::GetLearningRate() {
   Dtype rate;
   const string &lr_policy = this->param_.lr_policy();
+  const bool should_burn_in =
+      this->param_.has_burn_in() && this->param_.burn_in() > 0;
+  if (should_burn_in && this->param_.burn_in() > this->iter_) {
+    const float burn_in = static_cast<float>(this->param_.burn_in());
+    rate =
+        this->param_.base_lr() * pow(static_cast<float>(this->iter_ / burn_in),
+                                     this->param_.burn_in_power());
+    return rate;
+  }
   if (lr_policy == "fixed") {
     rate = this->param_.base_lr();
   } else if (lr_policy == "multifixed") {
