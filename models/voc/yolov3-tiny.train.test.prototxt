@@ -16,7 +16,7 @@ layer {
 	force_color: true
  	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 608
       width: 608
       interp_mode: LINEAR
@@ -25,7 +25,7 @@ layer {
     }
     resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 416
       width: 416
       interp_mode: LINEAR
@@ -34,7 +34,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 320
       width: 320
       interp_mode: LINEAR
@@ -43,7 +43,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 352
       width: 352
       interp_mode: LINEAR
@@ -52,7 +52,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 384
       width: 384
       interp_mode: LINEAR
@@ -61,7 +61,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 448
       width: 448
       interp_mode: LINEAR
@@ -70,7 +70,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 480
       width: 480
       interp_mode: LINEAR
@@ -79,7 +79,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 512
       width: 512
       interp_mode: LINEAR
@@ -88,7 +88,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 544
       width: 544
       interp_mode: LINEAR
@@ -97,7 +97,7 @@ layer {
     }
 	resize_param {
       prob: 0.1
-      resize_mode: WARP
+          resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 576
       width: 576
       interp_mode: LINEAR
@@ -119,6 +119,16 @@ layer {
       saturation_lower: 0.5
       saturation_upper: 1.5
       random_order_prob: 0.5
+    }
+    noise_param {
+      prob: 0.3
+      hist_eq: false
+      inverse: false
+      decolorize: false
+      gauss_blur: true
+      posterize: false
+      saltpepper: true
+      convert_to_hsv: false
     }
   }
   data_param {

@@ -13,7 +13,9 @@
 #include "caffe/util/rng.hpp"
 const double prob_eps = 0.01;
 
-int iter_count = 0;
+#ifdef DEBUG
+static int iter_count = 0;
+#endif
 
 namespace caffe {
 
@@ -618,7 +620,8 @@ void DataTransformer<Dtype>::ExpandImage(const AnnotatedDatum &anno_datum,
 
 template <typename Dtype>
 void DataTransformer<Dtype>::DistortImage(const Datum &datum,
-                                          Datum *distort_datum) {
+                                          Datum *distort_datum,
+                                          bool apply_noise) {
   if (!param_.has_distort_param()) {
     distort_datum->CopyFrom(datum);
     return;
@@ -636,7 +639,19 @@ void DataTransformer<Dtype>::DistortImage(const Datum &datum,
       cv_img = DecodeDatumToCVMatNative(datum);
     }
     // Distort the image.
-    cv::Mat distort_img = ApplyDistort(cv_img, param_.distort_param());
+    cv::Mat noised_img;
+    if (param_.has_noise_param()) {
+      float prob;
+      caffe_rng_uniform(1, 0.f, 1.f, &prob);
+      if (prob > param_.noise_param().prob()) {
+        noised_img = ApplyNoise(cv_img, param_.noise_param());
+      } else {
+        noised_img = cv_img;
+      }
+    } else {
+      noised_img = cv_img;
+    }
+    cv::Mat distort_img = ApplyDistort(noised_img, param_.distort_param());
     // Save the image into datum.
     EncodeCVMatToDatum(distort_img, "jpg", distort_datum);
     distort_datum->set_label(datum.label());
@@ -960,11 +975,7 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
     CHECK_GE(num, 1);
     CHECK_GT(img_channels, 0);
     // LOG(INFO) << do_mirror;
-#if defined(USE_TBB) || defined(USE_OMP)
-    std::atomic<int> maxima = 0;
-#else
-    int maxima = 0;
-#endif
+    MAKE_ATOMIC_VAR(int, maxima)
     FOR_LOOP_WITH_PREPARE(
         height, h,
         {
@@ -1082,15 +1093,15 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   } else {
     cv_cropped_image = cv_noised_image;
   }
-  //
-  //#ifdef DEBUG
-  //  char buf[1000];
-  //  sprintf(buf, "input/input_%05d.jpg", iter_count++);
-  //  if (*do_mirror) {
-  //    cv::flip(cv_cropped_image, cv_cropped_image, 1);
-  //  }
-  //  cv::imwrite(buf, cv_resized_image);
-  //#endif
+
+#ifdef DEBUG
+  char buf[1000];
+  sprintf(buf, "input/input_%05d.jpg", iter_count++);
+  if (*do_mirror) {
+    cv::flip(cv_cropped_image, cv_cropped_image, 1);
+  }
+  cv::imwrite(buf, cv_resized_image);
+#endif
 
   // Return the normalized crop bbox.
   crop_bbox->set_xmin(Dtype(w_off) / img_width);

@@ -40,7 +40,7 @@ void CenterObjectAndFillBg(const cv::Mat &in_img, bool fill_bg,
 cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img, int new_width,
                                   int new_height,
                                   int pad_type = cv::BORDER_CONSTANT,
-                                  cv::Scalar pad = cv::Scalar(0, 0, 0),
+                                  const cv::Scalar& pad = cv::Scalar(0, 0, 0),
                                   int interp_mode = cv::INTER_LINEAR);
 
 cv::Mat AspectKeepingResizeBySmall(const cv::Mat &in_img, int new_width,

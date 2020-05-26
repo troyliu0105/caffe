@@ -291,7 +291,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     if (transform_param.has_distort_param()) {
       distort_datum.CopyFrom(anno_datum);
       this->data_transformer_->DistortImage(anno_datum.datum(),
-                                            distort_datum.mutable_datum());
+                                            distort_datum.mutable_datum(), true);
       if (transform_param.has_expand_param()) {
         expand_datum = new AnnotatedDatum();
         this->data_transformer_->ExpandImage(distort_datum, expand_datum);

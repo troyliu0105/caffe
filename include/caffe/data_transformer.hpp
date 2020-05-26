@@ -132,7 +132,7 @@ public:
   /**
    * @brief Apply distortion to the datum.
    */
-  void DistortImage(const Datum &datum, Datum *distort_datum);
+  void DistortImage(const Datum &datum, Datum *distort_datum, bool apply_noise = false);
 
 #ifdef USE_OPENCV
   /**

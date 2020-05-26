@@ -152,8 +152,8 @@ cv::Rect CropMask(const cv::Mat &src, T point, int padding) {
   cv::Mat edge;
   int nborder = 0;
   T color = src.at<T>(0, 0);
-  for (int i = 0; i < edges.size(); ++i) {
-    edge = src(edges[i]);
+  for (auto &i : edges) {
+    edge = src(i);
     nborder += is_border(edge, color);
   }
 
@@ -236,7 +236,6 @@ void fillEdgeImage(const cv::Mat &edgesIn, cv::Mat *filledEdgesOut) {
   cv::floodFill(edgesNeg, cv::Point(edgesIn.cols - 1, 0), val);
   cv::bitwise_not(edgesNeg, edgesNeg);
   *filledEdgesOut = (edgesNeg | edgesIn);
-  return;
 }
 
 void CenterObjectAndFillBg(const cv::Mat &in_img, const bool fill_bg,
@@ -265,7 +264,7 @@ void CenterObjectAndFillBg(const cv::Mat &in_img, const bool fill_bg,
 
 cv::Mat AspectKeepingResizeAndPad(const cv::Mat &in_img, const int new_width,
                                   const int new_height, const int pad_type,
-                                  const cv::Scalar pad_val,
+                                  const cv::Scalar &pad_val,
                                   const int interp_mode) {
   cv::Mat img_resized;
   float orig_aspect = static_cast<float>(in_img.cols) / in_img.rows;
@@ -431,7 +430,7 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
   }
 
   if (param.gauss_blur()) {
-    cv::GaussianBlur(out_img, out_img, cv::Size(7, 7), 1.5);
+    cv::GaussianBlur(out_img, out_img, cv::Size(5, 5), 1.5);
   }
 
   if (param.hist_eq()) {
@@ -716,7 +715,7 @@ cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param) {
     RandomOrderChannels(out_img, &out_img, param.random_order_prob());
   });
 
-  if (param.has_random_order_prob() && prob < param.random_order_prob()) {
+  if (param.has_random_order_prob() && prob > param.random_order_prob()) {
     shuffle(distort_functions.begin(), distort_functions.end());
   }
   for (auto &f : distort_functions) {
