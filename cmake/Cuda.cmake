@@ -60,7 +60,7 @@ endfunction()
 #   caffe_select_nvcc_arch_flags(out_variable)
 function(caffe_select_nvcc_arch_flags out_variable)
     # List of arch names
-    set(__archs_names "Fermi" "Kepler" "Maxwell" "Pascal" "All" "Manual")
+    set(__archs_names "Fermi" "Kepler" "Maxwell" "Pascal" "Turing" "All" "Manual")
     set(__archs_name_default "All")
     if (NOT CMAKE_CROSSCOMPILING)
         list(APPEND __archs_names "Auto")
