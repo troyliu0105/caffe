@@ -715,7 +715,7 @@ cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param) {
     RandomOrderChannels(out_img, &out_img, param.random_order_prob());
   });
 
-  if (param.has_random_order_prob() && prob > param.random_order_prob()) {
+  if (param.has_random_order_prob() && prob < param.random_order_prob()) {
     shuffle(distort_functions.begin(), distort_functions.end());
   }
   for (auto &f : distort_functions) {

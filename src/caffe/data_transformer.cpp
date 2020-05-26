@@ -643,7 +643,7 @@ void DataTransformer<Dtype>::DistortImage(const Datum &datum,
     if (param_.has_noise_param()) {
       float prob;
       caffe_rng_uniform(1, 0.f, 1.f, &prob);
-      if (prob > param_.noise_param().prob()) {
+      if (prob < param_.noise_param().prob()) {
         noised_img = ApplyNoise(cv_img, param_.noise_param());
       } else {
         noised_img = cv_img;

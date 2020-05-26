@@ -25,11 +25,10 @@ public:
 
   const vector<shared_ptr<Blob<Dtype>>> &history() { return history_; }
 
-  virtual void ApplyUpdate();
-  Dtype GetLearningRate();
-
 protected:
   void PreSolve();
+  Dtype GetLearningRate();
+  virtual void ApplyUpdate();
   virtual void Normalize(int param_id);
   virtual void Regularize(int param_id);
   virtual void ComputeUpdateValue(int param_id, Dtype rate);

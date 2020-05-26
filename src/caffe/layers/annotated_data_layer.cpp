@@ -338,7 +338,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     vector<int> shape = this->data_transformer_->InferBlobShape(
         sampled_datum->datum(), policy_num_);
     // ------------------------------------------------------------------ resize
-    // LOG(INFO) << shape[2] << "," << shape[3];
+    DLOG(INFO) << "Current shape: " << shape[0] << ", " << shape[1] << ", "
+               << shape[2] << ", " << shape[3];
     if (transform_param.resize_param_size()) {
       if (transform_param.resize_param(policy_num_).resize_mode() ==
           ResizeParameter_Resize_mode_FIT_SMALL_SIZE) {
@@ -347,8 +348,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         top_data = batch->data_.mutable_cpu_data();
       } else {
         // LOG(INFO) << top_shape;
-        // CHECK(std::equal(top_shape.begin() + 1, top_shape.begin() + 4,
-        //      shape.begin() + 1));
+        DCHECK(std::equal(top_shape.begin() + 1, top_shape.begin() + 4,
+                          shape.begin() + 1));
       }
     } else {
       CHECK(std::equal(top_shape.begin() + 1, top_shape.begin() + 4,
@@ -398,7 +399,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     }
     if (this->output_seg_labels_) {
       cv::Mat cv_lab = DecodeDatumToCVMatSeg(anno_datum.datum(), false);
-      // LOG(INFO)<<iters_*batch_size + item_id;
+      DLOG(INFO) << iters_ * batch_size + item_id;
       vector<int> seg_label_shape(4);
       seg_label_shape[0] = batch_size;
       seg_label_shape[1] = seg_label_maxima_;
@@ -410,13 +411,13 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         seg_label_shape[2] = seg_resize_height_;
         seg_label_shape[3] = seg_resize_width_;
       }
-      // LOG(INFO)<<seg_resize_width_<<","<<seg_resize_height_;
+      DLOG(INFO) << seg_resize_width_ << "," << seg_resize_height_;
       batch->seg_label_.Reshape(seg_label_shape);
       // caffe_set<Dtype>(8, 0, batch->seg_label_.mutable_cpu_data());
 
       cv::Mat crop_img;
-      // LOG(INFO) << crop_box.xmin()<<"," << crop_box.xmax() <<","<<
-      // crop_box.ymin() <<","<< crop_box.ymax();
+      DLOG(INFO) << crop_box.xmin() << "," << crop_box.xmax() << ","
+                 << crop_box.ymin() << "," << crop_box.ymax();
       const int img_height = cv_lab.rows;
       const int img_width = cv_lab.cols;
 
@@ -431,7 +432,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       int h_off = static_cast<int>(scaled_bbox.ymin());
       int width = static_cast<int>(scaled_bbox.xmax() - scaled_bbox.xmin());
       int height = static_cast<int>(scaled_bbox.ymax() - scaled_bbox.ymin());
-      // LOG(INFO) << w_off <<","<< h_off << "," << width << "," << height;
+      DLOG(INFO) << w_off << "," << h_off << "," << width << "," << height;
       cv::Rect bbox_roi(w_off, h_off, width, height);
 
       cv_lab(bbox_roi).copyTo(crop_img);
@@ -439,12 +440,12 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       if (single_class_) {
         std::vector<cv::Mat> channels;
         cv::Mat resized;
-        // LOG(INFO)<<type2str(crop_img.type());
+        DLOG(INFO) << type2str(crop_img.type());
         cv::resize(crop_img, resized,
                    cv::Size(seg_label_shape[2], seg_label_shape[3]),
                    cv::INTER_AREA);
         cv::threshold(resized, resized, 100, 255, cv::THRESH_BINARY);
-        // LOG(INFO)<<type2str(resized.type());
+        DLOG(INFO) << type2str(resized.type());
         this->transformed_label_.Reshape(seg_label_shape);
         int offset = batch->seg_label_.offset(item_id);
         this->transformed_label_.set_cpu_data(top_seg_label + offset);
@@ -457,7 +458,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         // batch->seg_label_.mutable_cpu_data());
         std::vector<cv::Mat> channels;
         channels.clear();
-        // LOG(INFO)<<type2str(crop_img.type());
+        DLOG(INFO) << type2str(crop_img.type());
         // cv::Mat lut_mat = cv::CreateMatHeader(1, 256, CV_8UC1);
         int maxima = seg_label_maxima_;
 
@@ -565,7 +566,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         // Reshape the label and store the annotation.
         if (yolo_data_type_ == 1) {
           label_shape[2] = 300;
-          // LOG(INFO) << "num_bboxes: " << num_bboxes;
+          DLOG(INFO) << "num_bboxes: " << num_bboxes;
           batch->label_.Reshape(label_shape);
 
         } else {
@@ -592,17 +593,17 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
               const Annotation &anno = anno_group.annotation(a);
               const NormalizedBBox &bbox = anno.bbox();
               if (yolo_data_type_ == 1) {
-                // LOG(INFO) << "difficult: " << bbox.difficult() << ",
-                // train_difficult: " << train_diffcult_;
+                DLOG(INFO) << "difficult: " << bbox.difficult()
+                           << ", train_difficult: " << train_diffcult_;
                 if (!bbox.difficult() ||
                     (train_diffcult_ && this->iter_ > this->max_iter_ / 10)) {
                   float x = (bbox.xmin() + bbox.xmax()) / 2.0;
                   float y = (bbox.ymin() + bbox.ymax()) / 2.0;
                   float w = bbox.xmax() - bbox.xmin();
                   float h = bbox.ymax() - bbox.ymin();
-                  // LOG(INFO) <<anno_group.group_label();
+                  DLOG(INFO) << anno_group.group_label();
                   top_label[idx++] = anno_group.group_label() - 1;
-                  // LOG(INFO) << "class: " << anno_group.group_label();
+                  DLOG(INFO) << "class: " << anno_group.group_label();
                   top_label[idx++] = x;
                   top_label[idx++] = y;
                   top_label[idx++] = w;

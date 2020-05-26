@@ -511,6 +511,13 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, std::fabs(x))
   }
 #endif
 
+#if defined(USE_TBB) || defined(USE_OMP)
+#include <atomic>
+#define MAKE_ATOMIC_VAR(type, name) std::atomic<type> name;
+#else
+#define MAKE_ATOMIC_VAR(type, name) type name;
+#endif
+
 template <typename Dtype>
 void caffe_softmax(int N, const Dtype *a, Dtype *y);
 
