@@ -30,11 +30,13 @@ void MishLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     const Dtype *in_diff = t->cpu_diff();
     Dtype *out_diff = b->mutable_cpu_diff();
 
-    Dtype x;
-    FOR_LOOP(count, i, {
-      x = input_data[i];
-      out_diff[i] = caffe_fn_mish_grad(x) * in_diff[i];
-    })
+    FOR_LOOP_WITH_PREPARE(
+        count, i,
+        {
+          x = input_data[i];
+          out_diff[i] = caffe_fn_mish_grad(x) * in_diff[i];
+        },
+        Dtype x)
   }
 }
 
