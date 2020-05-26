@@ -89,8 +89,10 @@ if (MSVC AND BUILD_SHARED_LIBS)
     message(WARNING "Some tests (solvers) will fail when building as a shared library with MSVC")
 endif ()
 
-# ---[ Prebuild dependencies on windows
-include(cmake/WindowsDownloadPrebuiltDependencies.cmake)
+if (WIN32)
+    # ---[ Prebuild dependencies on windows
+    include(cmake/WindowsDownloadPrebuiltDependencies.cmake)
+endif ()
 
 # ---[ Dependencies
 include(cmake/Dependencies.cmake)
@@ -98,6 +100,9 @@ include(cmake/Dependencies.cmake)
 # ---[ Flags
 if (UNIX OR APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall")
+    if (CMAKE_C_COMPILER_ID MATCHES "GCC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -all_load")
+    endif ()
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
 endif ()
@@ -107,6 +112,8 @@ caffe_set_caffe_link()
 if (USE_libstdcpp)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
     message("-- Warning: forcing libstdc++ (controlled by USE_libstdcpp option in cmake)")
+else ()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif ()
 
 # ---[ Warnings
