@@ -230,7 +230,7 @@ if (APPLE AND NOT DEFINED BLAS)
             list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_ACCELERATE)
         endif ()
     endif ()
-elseif ()
+else ()
     set(BLAS "Atlas" CACHE STRING "Selected BLAS library")
     set_property(CACHE BLAS PROPERTY STRINGS "Atlas;Open;MKL")
 

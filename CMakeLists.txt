@@ -112,7 +112,7 @@ caffe_set_caffe_link()
 if (USE_libstdcpp)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
     message("-- Warning: forcing libstdc++ (controlled by USE_libstdcpp option in cmake)")
-else ()
+elseif (NOT CMAKE_CXX_COMPILER_ID MATCHES "GCC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif ()
 

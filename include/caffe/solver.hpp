@@ -113,6 +113,9 @@ protected:
   void CheckType(SolverParameter *param);
 
   SolverParameter param_;
+  /**
+   * @brief The number of times the weights have been updated.
+   */
   int iter_;
   int current_step_;
   shared_ptr<Net<Dtype>> net_;
