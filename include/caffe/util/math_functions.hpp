@@ -10,7 +10,6 @@
 #include "caffe/util/device_alternate.hpp"
 #include "caffe/util/mkl_alternate.hpp"
 
-
 namespace caffe {
 
 template <typename Dtype>
@@ -541,6 +540,15 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(mish_grad, (exp(x) *
                                         (4 * (x + 1) + 4 * exp(2 * x) +
                                          exp(3 * x) + exp(x) * (4 * x + 6)) /
                                         pow(2 * exp(x) + exp(2 * x) + 2, 2)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(relu, std::max(x, Dtype(0.)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(relu_grad, (x > Dtype(0.)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(relu6, std::min(std::max(x, Dtype(0.)), Dtype(6.)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(relu6_grad, (x > Dtype(0.)) * (x < Dtype(6.)))
+DEFINE_CAFFE_CPU_UNARY_FUNC(hswish, x *caffe_fn_relu6(x + 3) / 6)
+DEFINE_CAFFE_CPU_UNARY_FUNC(
+    hswish_grad, (caffe_fn_relu6(x + 3) + x * (caffe_fn_relu6_grad(x + 3))) / 6)
+DEFINE_CAFFE_CPU_UNARY_FUNC(hsigmoid, caffe_fn_relu6(x + 3) / 6)
+DEFINE_CAFFE_CPU_UNARY_FUNC(hsigmoid_grad, caffe_fn_relu6_grad(x + 3) / 6)
 
 ////////////////////////////////////////////////////////////////// end new added
 
