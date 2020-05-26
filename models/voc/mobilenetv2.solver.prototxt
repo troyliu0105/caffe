@@ -5,36 +5,28 @@ test_net: "models/voc/mobilenetv2.test.prototxt"
 #=============== iter
 # voc07 test has 4952 images
 test_iter: 4952
-test_interval: 1000
-max_iter: 120000
-iter_size: 4
+#test_iter: 2476
+test_interval: 2000
+# 50,200 * 64(batch_size) -> 3,212,800
+# 3,212,800 / (8 batch * 8 iter_size) = 50200
+max_iter: 50200
+iter_size: 8
 
 #=============== optimizer
-solver_mode: GPU
-type: "RMSProp"
-base_lr: 0.0005
-weight_decay: 0.000004
+solver_mode: CPU
+type: "Adam"
+base_lr: 0.001
+weight_decay: 0.0005
 lr_policy: "multistep"
-gamma: 0.2
-#momentum: 0.9
-stepvalue: 80000
-stepvalue: 100000
-stagelr: 0.000001
-stagelr: 0.00001
-stagelr: 0.0001
-stagelr: 0.001
-stagelr: 0.0001
-stagelr: 0.00001
-stageiter: 50
-stageiter: 100
-stageiter: 200
-stageiter: 80000
-stageiter: 100000
-stageiter: 120000
+gamma: 0.1
+burn_in: 1000
+burn_in_power: 4
+stepvalue: 40000
+stepvalue: 45000
 
 #=============== snapshot
 snapshot: 1000
-snapshot_prefix: "models/voc/mobilenetv2"
+snapshot_prefix: "models/voc/checkpoints/mobilenetv2"
 snapshot_after_train: true
 
 #=============== evaluate
@@ -46,5 +38,5 @@ show_per_class_result: true
 display: 100
 debug_info: false
 test_initialization: false
-average_loss: 10
+average_loss: 25
 random_seed: 3355411

@@ -5,23 +5,27 @@ net: "models/voc/yolov3-tiny.train.test.prototxt"
 # voc07 test has 4952 images
 test_iter: 4952
 #test_iter: 2476
-test_interval: 100000
-max_iter: 250000
-iter_size: 2
+test_interval: 2000
+# 50,200 * 64(batch_size) -> 3,212,800
+# 3,212,800 / (8 batch * 8 iter_size) = 50200
+max_iter: 50200
+iter_size: 8
 
 #=============== optimizer
-solver_mode: GPU
-type: "SGD"
-base_lr: 0.0001
-weight_decay: 0.00001
+solver_mode: CPU
+type: "Adam"
+base_lr: 0.001
+weight_decay: 0.0005
 lr_policy: "multistep"
 gamma: 0.1
-stepvalue: 200000
-stepvalue: 225000
+burn_in: 1000
+burn_in_power: 4
+stepvalue: 40000
+stepvalue: 45000
 
 #=============== snapshot
-snapshot: 50000
-snapshot_prefix: "models/voc/yolov3-tiny.train.test"
+snapshot: 5000
+snapshot_prefix: "models/voc/checkpoints/yolov3-tiny"
 snapshot_after_train: true
 
 #=============== evaluate
@@ -33,5 +37,5 @@ show_per_class_result: true
 display: 100
 debug_info: false
 test_initialization: false
-average_loss: 10
+average_loss: 25
 random_seed: 3355411

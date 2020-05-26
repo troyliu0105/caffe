@@ -118,7 +118,7 @@ layer {
       saturation_prob: 0.5
       saturation_lower: 0.5
       saturation_upper: 1.5
-      random_order_prob: 0.0
+      random_order_prob: 0.5
     }
   }
   data_param {
@@ -868,79 +868,85 @@ layer {
 }
 
 layer {
-  name: "loss-s"
-  type: "Yolov3"
-  bottom: "yolo-out-s"
-  bottom: "label"
-  top: "loss-s"
-  loss_weight: 1
-  include {
-      phase: TRAIN
-  }
-  yolov3_param {
-    side: 13
-    num_class: 20
-    num: 3
-    object_scale: 5.0
-    noobject_scale: 1.0
-    class_scale: 1.0
-    coord_scale: 1.0
-    thresh: 0.5
-	anchors_scale : 16
-    biases: 10
-    biases: 14
-    biases: 23
-    biases: 27
-    biases: 37
-    biases: 58
-    biases: 81
-    biases: 82
-    biases: 135
-    biases: 169
-    biases: 344
-    biases: 319
-	mask:0
-	mask:1
-	mask:2
-  }
+    name: "loss-s"
+    type: "Yolov3"
+    bottom: "yolo-out-s"
+    bottom: "label"
+    top: "loss-s"
+    loss_weight: 1
+    include {
+        phase: TRAIN
+    }
+    yolov3_param {
+        side: 26
+        num_class: 20
+        num: 3
+        object_scale: 5.0
+        noobject_scale: 1.0
+        class_scale: 1.0
+        coord_scale: 1.0
+        thresh: 0.5
+        anchors_scale : 16
+        use_logic_gradient : false
+        iou_loss: MSE
+        label_smooth_eps: 0.0
+        biases: 23
+        biases: 29
+        biases: 48
+        biases: 65
+        biases: 68
+        biases: 144
+        biases: 126
+        biases: 203
+        biases: 204
+        biases: 265
+        biases: 326
+        biases: 188
+        mask:0
+        mask:1
+        mask:2
+    }
 }
 
 layer {
-  name: "loss-m"
-  type: "Yolov3"
-  bottom: "yolo-out-m"
-  bottom: "label"
-  top: "loss-m"
-  loss_weight: 1
-  include {
-      phase: TRAIN
-  }
-  yolov3_param {
-    side: 26
-    num_class: 20
-    num: 3
-    object_scale: 5.0
-    noobject_scale: 1.0
-    class_scale: 1.0
-    coord_scale: 1.0
-    thresh: 0.5
-	anchors_scale : 32
-    biases: 10
-    biases: 14
-    biases: 23
-    biases: 27
-    biases: 37
-    biases: 58
-    biases: 81
-    biases: 82
-    biases: 135
-    biases: 169
-    biases: 344
-    biases: 319
-	mask:3
-	mask:4
-	mask:5
-  }
+    name: "loss-m"
+    type: "Yolov3"
+    bottom: "yolo-out-m"
+    bottom: "label"
+    top: "loss-m"
+    loss_weight: 1
+    include {
+        phase: TRAIN
+    }
+    yolov3_param {
+        side: 13
+        num_class: 20
+        num: 3
+        object_scale: 5.0
+        noobject_scale: 1.0
+        class_scale: 1.0
+        coord_scale: 1.0
+        thresh: 0.5
+        anchors_scale : 32
+        use_logic_gradient : false
+        iou_loss: MSE
+        label_smooth_eps: 0.0
+        biases: 23
+        biases: 29
+        biases: 48
+        biases: 65
+        biases: 68
+        biases: 144
+        biases: 126
+        biases: 203
+        biases: 204
+        biases: 265
+        biases: 326
+        biases: 188
+        mask:3
+        mask:4
+        mask:5
+    }
 }
 
 layer {
@@ -956,18 +962,18 @@ layer {
         nms_threshold: 0.45
         num_classes: 20
         confidence_threshold: 0.01
-        biases: 10
-        biases: 14
         biases: 23
-        biases: 27
-        biases: 37
-        biases: 58
-        biases: 81
-        biases: 82
-        biases: 135
-        biases: 169
-        biases: 344
-        biases: 319
+        biases: 29
+        biases: 48
+        biases: 65
+        biases: 68
+        biases: 144
+        biases: 126
+        biases: 203
+        biases: 204
+        biases: 265
+        biases: 326
+        biases: 188
         mask: 0
         mask: 1
         mask: 2
@@ -980,18 +986,18 @@ layer {
     }
 }
 layer {
-  name: "yolo_eval"
-  type: "DetectionEvaluate"
-  bottom: "yolo_detection"
-  bottom: "label"
-  top: "detection_eval"
-  include {
-    phase: TEST
-  }
-  detection_evaluate_param {
-    num_classes: 21
-    background_label_id: 0
-    overlap_threshold: 0.3
-    evaluate_difficult_gt: false
-  }
+    name: "yolo_eval"
+    type: "DetectionEvaluate"
+    bottom: "yolo_detection"
+    bottom: "label"
+    top: "detection_eval"
+    include {
+        phase: TEST
+    }
+    detection_evaluate_param {
+        num_classes: 21
+        background_label_id: 0
+        overlap_threshold: 0.5
+        evaluate_difficult_gt: false
+    }
 }
