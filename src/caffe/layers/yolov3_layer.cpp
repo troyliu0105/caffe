@@ -20,12 +20,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif // USE_OPENCV
 
-#ifdef USE_TBB
-mutable static tbb::mutex mutex;
-#elif defined(USE_OMP)
-static int mutex;
-#endif
-
 namespace caffe {
 
 template <typename Dtype>
@@ -262,7 +256,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
     // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
 
     if (avg_cat)
-      ATOMIC_UPDATE(mutex, *avg_cat += input_data[index + stride * class_label])
+      *avg_cat += input_data[index + stride * class_label];
 
     // diff[index + stride*class_label] = (-1.0) * (1 - input_data[index +
     // stride*class_label]); *avg_cat += input_data[index +
@@ -293,7 +287,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
       diff[index + stride * n] *= alpha * grad;
 
       if (n == class_label) {
-        ATOMIC_UPDATE(mutex, *avg_cat += input_data[index + stride * n])
+        *avg_cat += input_data[index + stride * n];
       }
     }
 
@@ -308,8 +302,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
       // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
 
       if (n == class_label && avg_cat)
-        ATOMIC_UPDATE(mutex,
-                      *avg_cat += input_data[index + stride * class_label])
+        *avg_cat += input_data[index + stride * class_label];
       // diff[index + n*stride] = (-1.0) * scale * (((n == class_label) ? 1 : 0)
       // - input_data[index + n*stride]);
       //      diff[index + n * stride] =
@@ -550,7 +543,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     printf(label);
   }*/
 
-  FOR_LOOP(bottom[0]->num(), b, {
+  for (int b = 0; b < bottom[0]->num(); ++b) {
     /*//if (b == 0) {
       char buf[100];
       int idx = iter_*bottom[0]->num() + b;
@@ -629,7 +622,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             best_truth = truth;
           }
         }
-        ATOMIC_UPDATE(mutex, avg_anyobj += swap_data[index + 4 * stride])
+        avg_anyobj += swap_data[index + 4 * stride];
         diff[index + 4 * stride] = (-1) * (0 - swap_data[index + 4 * stride]);
         // diff[index + 4 * stride] = (-1) * (0 - exp(input_data[index + 4 *
         // stride]-exp(input_data[index + 4 * stride]))); diff[index + 4 *
@@ -658,11 +651,11 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     for (int t = 0; t < 300; ++t) {
       vector<Dtype> truth;
       truth.clear();
-      int class_label = label_data[t * 5 + b * 300 * 5 + 0];
-      float x = label_data[t * 5 + b * 300 * 5 + 1];
-      float y = label_data[t * 5 + b * 300 * 5 + 2];
-      float w = label_data[t * 5 + b * 300 * 5 + 3];
-      float h = label_data[t * 5 + b * 300 * 5 + 4];
+      int class_label = label_data[b * 300 * 5 + t * 5 + 0];
+      float x = label_data[b * 300 * 5 + t * 5 + 1];
+      float y = label_data[b * 300 * 5 + t * 5 + 2];
+      float w = label_data[b * 300 * 5 + t * 5 + 3];
+      float h = label_data[b * 300 * 5 + t * 5 + 4];
 
       if (!w)
         break;
@@ -703,7 +696,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         float iou;
         best_n = mask_n;
         // LOG(INFO) << best_n;
-        best_index = best_n * len * stride + pos + b * bottom[0]->count(1);
+        best_index = b * bottom[0]->count(1) + best_n * len * stride + pos;
 
         iou = delta_region_box(
             truth, swap_data, biases_, mask_[best_n], best_index, i, j, side_w_,
@@ -712,12 +705,12 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             iou_normalizer_, max_delta_, accumulate_);
 
         if (iou > 0.5)
-          ATOMIC_UPDATE(mutex, recall += 1)
+          recall += 1;
         if (iou > 0.75)
-          ATOMIC_UPDATE(mutex, recall75 += 1)
-        ATOMIC_UPDATE(mutex, avg_iou += iou)
-        ATOMIC_UPDATE(mutex, avg_iou_loss += (1 - iou))
-        ATOMIC_UPDATE(mutex, avg_obj += swap_data[best_index + 4 * stride])
+          recall75 += 1;
+        avg_iou += iou;
+        avg_iou_loss += (1 - iou);
+        avg_obj += swap_data[best_index + 4 * stride];
         if (use_logic_gradient_) {
           diff[best_index + 4 * stride] =
               (-1.0) * (1 - swap_data[best_index + 4 * stride]) * object_scale_;
@@ -736,9 +729,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                               class_label, num_class_, class_scale_, &avg_cat,
                               stride, use_focal_loss_,
                               label_smooth_eps_); // softmax_tree_
-
-        ATOMIC_UPDATE(mutex, ++count)
-        ATOMIC_UPDATE(mutex, ++class_count_)
+        ++count;
+        ++class_count_;
       }
 
       for (int n = 0; n < biases_size_; ++n) {
@@ -764,14 +756,13 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                 side_h_ * anchors_scale_, diff,
                 coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_,
                 iou_normalizer_, max_delta_, accumulate_);
-
             if (iou > 0.5)
-              ATOMIC_UPDATE(mutex, recall += 1)
+              recall += 1;
             if (iou > 0.75)
-              ATOMIC_UPDATE(mutex, recall75 += 1)
-            ATOMIC_UPDATE(mutex, avg_iou += iou)
-            ATOMIC_UPDATE(mutex, avg_iou_loss += (1 - iou))
-            ATOMIC_UPDATE(mutex, avg_obj += swap_data[best_index + 4 * stride])
+              recall75 += 1;
+            avg_iou += iou;
+            avg_iou_loss += (1 - iou);
+            avg_obj += swap_data[best_index + 4 * stride];
             if (use_logic_gradient_) {
               diff[best_index + 4 * stride] =
                   (-1.0) * (1 - swap_data[best_index + 4 * stride]) *
@@ -792,13 +783,13 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                   &avg_cat, stride, use_focal_loss_,
                                   label_smooth_eps_); // softmax_tree_
 
-            ATOMIC_UPDATE(mutex, ++count)
-            ATOMIC_UPDATE(mutex, ++class_count_)
+            ++count;
+            ++class_count_;
           }
         }
       }
     }
-  }) // end for loop
+  } // end for loop
   // LOG(INFO) << " ===================================================== " ;
   if (iou_loss_ == MSE) {
     for (int i = 0; i < diff_.count(); ++i) {
@@ -833,7 +824,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // bottom[0]->num());
   iter_++;
   // LOG(INFO) << "iter: " << iter <<" loss: " << loss;
-  if (!(iter_ % 16)) {
+  if (!(iter_ % 32)) {
     if (time_count_ > 0) {
       LOG(INFO) << "noobj: " << score_.avg_anyobj / time_count_
                 << " obj: " << score_.avg_obj / 16
