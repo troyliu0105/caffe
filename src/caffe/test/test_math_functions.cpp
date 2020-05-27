@@ -1,6 +1,6 @@
-#include <cmath>    // for std::fabs
-#include <stdint.h> // for uint32_t & uint64_t
-#include <time.h>
+#include <cmath>   // for std::fabs
+#include <cstdint> // for uint32_t & uint64_t
+#include <ctime>
 
 #include "gtest/gtest.h"
 
@@ -10,6 +10,7 @@
 #include "caffe/util/math_functions.hpp"
 
 #include "caffe/test/test_caffe_main.hpp"
+#include "caffe/test/test_gradient_check_util.hpp"
 
 namespace caffe {
 
@@ -116,6 +117,108 @@ TYPED_TEST(CPUMathFunctionsTest, TestCopy) {
   }
 }
 
+TYPED_TEST(CPUMathFunctionsTest, TestTanH) {
+  const int n = this->blob_bottom_->count();
+  const TypeParam *bottom_data = this->blob_bottom_->cpu_data();
+  TypeParam *top_data = this->blob_top_->mutable_cpu_data();
+  caffe_tanh<TypeParam>(n, bottom_data, top_data);
+  for (int i = 0; i < n; ++i) {
+    EXPECT_NEAR(tanh(bottom_data[i]), top_data[i], 0.00005);
+  }
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestTanHGradients) {
+  GradientChecker<TypeParam> checker(1e-2, 1e-3, 1701, 0., 0.01);
+  checker.CheckGradientMathFunc(caffe_tanh, caffe_tanh_grad,
+                                {this->blob_bottom_});
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestSigmoid) {
+  const int n = this->blob_bottom_->count();
+  const TypeParam *bottom_data = this->blob_bottom_->cpu_data();
+  TypeParam *top_data = this->blob_top_->mutable_cpu_data();
+  caffe_sigmoid<TypeParam>(n, bottom_data, top_data);
+  for (int i = 0; i < n; ++i) {
+    EXPECT_NEAR(TypeParam(1) / (TypeParam(1) + std::exp(-bottom_data[i])),
+                top_data[i], 0.00005);
+  }
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestSigmoidGradients) {
+  GradientChecker<TypeParam> checker(1e-2, 1e-3, 1701, 0., 0.01);
+  checker.CheckGradientMathFunc(caffe_sigmoid, caffe_sigmoid_grad,
+                                {this->blob_bottom_});
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestSoftplus) {
+  const int n = this->blob_bottom_->count();
+  const TypeParam *bottom_data = this->blob_bottom_->cpu_data();
+  TypeParam *top_data = this->blob_top_->mutable_cpu_data();
+  caffe_softplus<TypeParam>(n, bottom_data, top_data);
+  for (int i = 0; i < n; ++i) {
+    EXPECT_NEAR(log(TypeParam(1) + exp(bottom_data[i])), top_data[i], 0.00005);
+  }
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestSoftplusGradients) {
+  GradientChecker<TypeParam> checker(1e-2, 1e-3, 1701, 0., 0.01);
+  checker.CheckGradientMathFunc(caffe_softplus, caffe_softplus_grad,
+                                {this->blob_bottom_});
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestMish) {
+  const int n = this->blob_bottom_->count();
+  const TypeParam *bottom_data = this->blob_bottom_->cpu_data();
+  TypeParam *top_data = this->blob_top_->mutable_cpu_data();
+  caffe_mish<TypeParam>(n, bottom_data, top_data);
+  for (int i = 0; i < n; ++i) {
+    EXPECT_NEAR(bottom_data[i] * tanh(log(TypeParam(1) + exp(bottom_data[i]))),
+                top_data[i], 0.00005);
+  }
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestMishGradients) {
+  GradientChecker<TypeParam> checker(1e-2, 1e-3, 1701, 0., 0.01);
+  checker.CheckGradientMathFunc(caffe_mish, caffe_mish_grad,
+                                {this->blob_bottom_});
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestHSwish) {
+  const int n = this->blob_bottom_->count();
+  const TypeParam *bottom_data = this->blob_bottom_->cpu_data();
+  TypeParam *top_data = this->blob_top_->mutable_cpu_data();
+  caffe_hswish<TypeParam>(n, bottom_data, top_data);
+  for (int i = 0; i < n; ++i) {
+    EXPECT_NEAR(
+        bottom_data[i] *
+            std::min<TypeParam>(std::max<TypeParam>(0, bottom_data[i] + 3), 6) /
+            6,
+        top_data[i], 0.00005);
+  }
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestHSwishGradients) {
+  GradientChecker<TypeParam> checker(1e-5, 1e-2, 1701, 0., 0.01);
+  checker.CheckGradientMathFunc(caffe_hswish, caffe_hswish_grad,
+                                {this->blob_bottom_});
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestRelu) {
+  const int n = this->blob_bottom_->count();
+  const TypeParam *bottom_data = this->blob_bottom_->cpu_data();
+  TypeParam *top_data = this->blob_top_->mutable_cpu_data();
+  caffe_relu<TypeParam>(n, bottom_data, top_data);
+  for (int i = 0; i < n; ++i) {
+    EXPECT_NEAR(std::max<TypeParam>(bottom_data[i], TypeParam(0)), top_data[i],
+                0.00005);
+  }
+}
+
+TYPED_TEST(CPUMathFunctionsTest, TestReluGradients) {
+  GradientChecker<TypeParam> checker(1e-4, 1e-1, 1701, 0., 0.01);
+  checker.CheckGradientMathFunc(caffe_relu, caffe_relu_grad,
+                                {this->blob_bottom_});
+}
 #ifndef CPU_ONLY
 
 template <typename Dtype>

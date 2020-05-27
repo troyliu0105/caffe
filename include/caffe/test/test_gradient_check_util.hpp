@@ -1,6 +1,7 @@
 #ifndef CAFFE_TEST_GRADIENT_CHECK_UTIL_H_
 #define CAFFE_TEST_GRADIENT_CHECK_UTIL_H_
 
+#include <boost/scoped_ptr.hpp>
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
@@ -10,6 +11,8 @@
 
 #include "caffe/layer.hpp"
 #include "caffe/net.hpp"
+
+using boost::scoped_ptr;
 
 namespace caffe {
 
@@ -64,6 +67,16 @@ public:
   void CheckGradientNet(const Net<Dtype> &net,
                         const vector<Blob<Dtype> *> &input);
 
+  using MathFunc = void (*)(const int, const Dtype *, Dtype *);
+  void CheckGradientMathFunc(MathFunc fn, MathFunc fn_grad,
+                             const vector<Blob<Dtype> *> &bottom);
+
+private:
+  void Numeric_Gradient(MathFunc fn, const Blob<Dtype> &bottom_data,
+                        Dtype *grads);
+  void Analytical_Gradient(MathFunc fn, const Blob<Dtype> &bottom_data,
+                           Dtype *grads);
+
 protected:
   Dtype GetObjAndGradient(const Layer<Dtype> &layer,
                           const vector<Blob<Dtype> *> &top, int top_id = -1,
@@ -74,6 +87,62 @@ protected:
   Dtype kink_;
   Dtype kink_range_;
 };
+
+template <typename Dtype>
+void GradientChecker<Dtype>::Numeric_Gradient(GradientChecker::MathFunc fn,
+                                              const Blob<Dtype> &bottom_data,
+                                              Dtype *grads) {
+  const int count = bottom_data.count();
+  scoped_ptr<Blob<Dtype>> diff, ipt;
+  diff.reset(new Blob<Dtype>());
+  diff->ReshapeLike(bottom_data);
+  ipt.reset(new Blob<Dtype>());
+  ipt->CopyFrom(bottom_data, false, true);
+
+  // f(x - h) -> diff.mutable_cpu_data
+  caffe_sub_scalar(count, stepsize_, ipt->cpu_data(), ipt->mutable_cpu_data());
+  fn(count, ipt->cpu_data(), diff->mutable_cpu_data());
+
+  // f(x + h) -> diff.mutable_cpu_diff
+  caffe_add_scalar(count, stepsize_ * 2, ipt->cpu_data(),
+                   ipt->mutable_cpu_data());
+  fn(count, ipt->cpu_data(), diff->mutable_cpu_diff());
+
+  // f(x + h) - f(x - h) -> ipt.mutable_cpu_diff
+  caffe_sub(count, diff->cpu_diff(), diff->cpu_data(), ipt->mutable_cpu_diff());
+
+  caffe_div_scalar(count, stepsize_ * 2, ipt->cpu_diff(), grads);
+}
+template <typename Dtype>
+void GradientChecker<Dtype>::Analytical_Gradient(
+    GradientChecker::MathFunc fn_grad, const Blob<Dtype> &bottom_data,
+    Dtype *grads) {
+  const int count = bottom_data.count();
+  fn_grad(count, bottom_data.cpu_data(), grads);
+}
+
+template <typename Dtype>
+void GradientChecker<Dtype>::CheckGradientMathFunc(
+    MathFunc fn, MathFunc fn_grad, const vector<Blob<Dtype> *> &bottom) {
+  scoped_ptr<Blob<Dtype>> diffs;
+  diffs.reset(new Blob<Dtype>());
+  for (Blob<Dtype> *blob : bottom) {
+    diffs->ReshapeLike(*blob);
+    const int count = blob->count();
+    Dtype *numeric_diff = diffs->mutable_cpu_data();
+    Dtype *analyti_diff = diffs->mutable_cpu_diff();
+    Numeric_Gradient(fn, *blob, numeric_diff);
+    Analytical_Gradient(fn_grad, *blob, analyti_diff);
+    Dtype scale, numeric_grad, analyti_grad;
+    for (int i = 0; i < count; ++i) {
+      numeric_grad = numeric_diff[i];
+      analyti_grad = analyti_diff[i];
+      scale = std::max<Dtype>(std::max(fabs(numeric_grad), fabs(numeric_grad)),
+                              Dtype(1.));
+      EXPECT_NEAR(analyti_grad, numeric_grad, threshold_ * scale);
+    }
+  }
+}
 
 template <typename Dtype>
 void GradientChecker<Dtype>::CheckGradientSingle(
