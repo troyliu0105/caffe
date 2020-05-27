@@ -26,24 +26,21 @@
   FOR_LOOP_WITH_PREPARE(n, iname, operation, {})
 #elif defined(USE_OMP)
 #ifdef _MSC_VER
-#define OMP_PRAGMA_FOR(...) __pragma(omp parallel for __VA_ARGS__)
-#define OMP_PRAGMA(...) __pragma(omp __VA_ARGS__)
+#define OMP_PRAGMA_FOR __pragma(omp parallel for)
+#define OMP_PRAGMA __pragma(omp)
 #else
-#define _OMP_HELPER0(x) #x
-#define _OMP_HELPER1(x) _OMP_HELPER0(omp x)
-#define _OMP_HELPER2(y) _OMP_HELPER1(#y)
-
-#define OMP_PRAGMA_FOR(...) _Pragma(_OMP_HELPER2(parallel for __VA_ARGS__))
-#define OMP_PRAGMA(...) _Pragma(_OMP_HELPER2(__VA_ARGS__))
+#define OMP_PRAGMA_FOR _Pragma("omp parallel for")
+#define OMP_PRAGMA _Pragma(omp)
 #endif
 
-#define SORT(b, e, comp) tbb::parallel_sort(b, e, comp)
+#include <algorithm>
+#define SORT(b, e, comp) std::sort(b, e, comp)
 
 #define ATOMIC_UPDATE(mutex, operation)                                        \
-  OMP_PRAGMA(critical(dataupdate)) { operation; }
+  _Pragma("omp critical(dataupdate)") { operation; }
 
 #define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
-  OMP_PRAGMA_FOR()                                                             \
+  OMP_PRAGMA_FOR                                                               \
   for (int iname = 0; iname < n; ++iname) {                                    \
     prepare;                                                                   \
     operation;                                                                 \
