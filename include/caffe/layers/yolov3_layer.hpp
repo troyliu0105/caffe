@@ -66,7 +66,7 @@ protected:
   vector<Dtype> biases_;
   vector<Dtype> mask_;
   Blob<Dtype> diff_;
-  Blob<Dtype> real_diff_;
+  //  Blob<Dtype> real_diff_;
   Blob<Dtype> swap_;
   AvgRegionScore score_;
   bool use_focal_loss_;
