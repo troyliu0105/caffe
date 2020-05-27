@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -19,6 +20,12 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #endif // USE_OPENCV
+
+#ifdef USE_TBB
+static tbb::mutex mutex;
+#elif defined(USE_OMP)
+int mutext;
+#endif
 
 namespace caffe {
 
@@ -256,7 +263,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
     // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
 
     if (avg_cat)
-      *avg_cat += input_data[index + stride * class_label];
+      ATOMIC_UPDATE(mutex, *avg_cat += input_data[index + stride * class_label])
 
     // diff[index + stride*class_label] = (-1.0) * (1 - input_data[index +
     // stride*class_label]); *avg_cat += input_data[index +
@@ -287,7 +294,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
       diff[index + stride * n] *= alpha * grad;
 
       if (n == class_label) {
-        *avg_cat += input_data[index + stride * n];
+        ATOMIC_UPDATE(mutex, *avg_cat += input_data[index + stride * n])
       }
     }
 
@@ -302,7 +309,8 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
       // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
 
       if (n == class_label && avg_cat)
-        *avg_cat += input_data[index + stride * class_label];
+        ATOMIC_UPDATE(mutex,
+                      *avg_cat += input_data[index + stride * class_label])
       // diff[index + n*stride] = (-1.0) * scale * (((n == class_label) ? 1 : 0)
       // - input_data[index + n*stride]);
       //      diff[index + n * stride] =
@@ -544,7 +552,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     printf(label);
   }*/
 
-  for (int b = 0; b < bottom[0]->num(); ++b) {
+  FOR_LOOP(bottom[0]->num(), b, {
     /*//if (b == 0) {
       char buf[100];
       int idx = iter_*bottom[0]->num() + b;
@@ -623,7 +631,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             best_truth = truth;
           }
         }
-        avg_anyobj += swap_data[index + 4 * stride];
+        ATOMIC_UPDATE(mutex, avg_anyobj += swap_data[index + 4 * stride])
         diff[index + 4 * stride] = (-1) * (0 - swap_data[index + 4 * stride]);
         // diff[index + 4 * stride] = (-1) * (0 - exp(input_data[index + 4 *
         // stride]-exp(input_data[index + 4 * stride]))); diff[index + 4 *
@@ -678,7 +686,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       truth_shift.push_back(h);
 
       // LOG(INFO) << j << "," << i << "," << anchors_scale_;
-
+      // find the best anchor matches label
       for (int n = 0; n < biases_size_; ++n) {
         vector<Dtype> pred(4);
         pred[0] = 0;
@@ -705,13 +713,15 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_,
             iou_normalizer_, max_delta_, accumulate_);
 
-        if (iou > 0.5)
-          recall += 1;
-        if (iou > 0.75)
-          recall75 += 1;
-        avg_iou += iou;
-        avg_iou_loss += (1 - iou);
-        avg_obj += swap_data[best_index + 4 * stride];
+        ATOMIC_UPDATE(mutex, {
+          if (iou > 0.5)
+            recall += 1;
+          if (iou > 0.75)
+            recall75 += 1;
+          avg_iou += iou;
+          avg_iou_loss += (1 - iou);
+          avg_obj += swap_data[best_index + 4 * stride];
+        })
         if (use_logic_gradient_) {
           diff[best_index + 4 * stride] =
               (-1.0) * (1 - swap_data[best_index + 4 * stride]) * object_scale_;
@@ -730,8 +740,10 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                               class_label, num_class_, class_scale_, &avg_cat,
                               stride, use_focal_loss_,
                               label_smooth_eps_); // softmax_tree_
-        ++count;
-        ++class_count_;
+        ATOMIC_UPDATE(mutex, {
+          ++count;
+          ++class_count_;
+        })
       }
 
       for (int n = 0; n < biases_size_; ++n) {
@@ -757,13 +769,15 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                 side_h_ * anchors_scale_, diff,
                 coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_,
                 iou_normalizer_, max_delta_, accumulate_);
-            if (iou > 0.5)
-              recall += 1;
-            if (iou > 0.75)
-              recall75 += 1;
-            avg_iou += iou;
-            avg_iou_loss += (1 - iou);
-            avg_obj += swap_data[best_index + 4 * stride];
+            ATOMIC_UPDATE(mutex, {
+              if (iou > 0.5)
+                recall += 1;
+              if (iou > 0.75)
+                recall75 += 1;
+              avg_iou += iou;
+              avg_iou_loss += (1 - iou);
+              avg_obj += swap_data[best_index + 4 * stride];
+            })
             if (use_logic_gradient_) {
               diff[best_index + 4 * stride] =
                   (-1.0) * (1 - swap_data[best_index + 4 * stride]) *
@@ -784,13 +798,15 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                   &avg_cat, stride, use_focal_loss_,
                                   label_smooth_eps_); // softmax_tree_
 
-            ++count;
-            ++class_count_;
+            ATOMIC_UPDATE(mutex, {
+              ++count;
+              ++class_count_;
+            })
           }
         }
       }
     }
-  } // end for loop
+  }) // end for loop
   // LOG(INFO) << " ===================================================== " ;
   if (iou_loss_ == MSE) {
     for (int i = 0; i < diff_.count(); ++i) {
@@ -827,7 +843,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // LOG(INFO) << "iter: " << iter <<" loss: " << loss;
   if (!(iter_ % display_)) {
     if (time_count_ > 0) {
-      LOG(INFO) << "noobj: " << score_.avg_anyobj / time_count_
+      LOG(INFO) << std::fixed << std::setprecision(4)
+                << "noobj: " << score_.avg_anyobj / time_count_
                 << " obj: " << score_.avg_obj / time_count_
                 << " iou: " << score_.avg_iou / time_count_
                 << " cat: " << score_.avg_cat / time_count_
