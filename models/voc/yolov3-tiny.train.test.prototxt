@@ -888,6 +888,7 @@ layer {
         phase: TRAIN
     }
     yolov3_param {
+        display: 800
         side: 26
         num_class: 20
         num: 3
@@ -929,6 +930,7 @@ layer {
         phase: TRAIN
     }
     yolov3_param {
+        display: 800
         side: 13
         num_class: 20
         num: 3

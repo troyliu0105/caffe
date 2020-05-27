@@ -446,6 +446,7 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   LossLayer<Dtype>::LayerSetUp(bottom, top);
   Yolov3Parameter param = this->layer_param_.yolov3_param();
   iter_ = 0;
+  display_ = param.display();
   num_class_ = param.num_class(); // 20
   num_ = param.num();             // 5
   side_w_ = bottom[0]->width();
@@ -824,10 +825,10 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // bottom[0]->num());
   iter_++;
   // LOG(INFO) << "iter: " << iter <<" loss: " << loss;
-  if (!(iter_ % 32)) {
+  if (!(iter_ % display_)) {
     if (time_count_ > 0) {
       LOG(INFO) << "noobj: " << score_.avg_anyobj / time_count_
-                << " obj: " << score_.avg_obj / 16
+                << " obj: " << score_.avg_obj / time_count_
                 << " iou: " << score_.avg_iou / time_count_
                 << " cat: " << score_.avg_cat / time_count_
                 << " recall: " << score_.recall / time_count_

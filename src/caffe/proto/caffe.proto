@@ -523,6 +523,7 @@ message Yolov3Parameter {
         CE = 1;
     }
     optional ARC arc = 21 [default = DEFAULT];
+    optional uint32 display = 22 [default = 64];
 }
 message RegionLossParameter {
     //Yolo 9000
