@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "caffe/filler.hpp"
-#include "caffe/layers/memory_data_layer.hpp"
+#include "caffe/layers/data/memory_data_layer.hpp"
 
 #include "caffe/test/test_caffe_main.hpp"
 

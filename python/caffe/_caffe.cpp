@@ -13,7 +13,7 @@
 #include <fstream>  // NOLINT
 
 #include "caffe/caffe.hpp"
-#include "caffe/layers/memory_data_layer.hpp"
+#include "caffe/layers/data/memory_data_layer.hpp"
 #include "caffe/layers/python_layer.hpp"
 #include "caffe/sgd_solvers.hpp"
 

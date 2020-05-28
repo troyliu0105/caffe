@@ -6,7 +6,7 @@ net: "models/voc/yolov3-tiny.train.test.prototxt"
 test_iter: 4952
 #test_iter: 2476
 test_interval: 2000
-# 50,200 * 64(batch_size) -> 3,212,800
+# 50,200 * 64(batch_size <-> (4 * 16)) -> 3,212,800
 # 3,212,800 / (8 batch * 8 iter_size) = 50200
 max_iter: 50200
 iter_size: 8
