@@ -53,25 +53,34 @@ template <typename Dtype>
 Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2);
 template <typename Dtype>
 Dtype box_intersection(vector<Dtype> a, vector<Dtype> b);
+float box_intersection(const box &a, const box &b);
 template <typename Dtype>
 Dtype box_union(vector<Dtype> a, vector<Dtype> b);
+float box_union(const box &a, const box &b);
 template <typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b);
+float box_iou(const box &a, const box &b);
 template <typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type);
+float box_iou(const box &a, const box &b, IOU_LOSS type);
 template <typename Dtype>
 boxabs box_c(vector<Dtype> a, vector<Dtype> b);
+float box_c(const box &a, const box &b);
 template <typename Dtype>
 boxabs to_tblr(vector<Dtype> a);
+boxabs to_tblr(const box &a);
 template <typename Dtype>
 Dtype box_giou(vector<Dtype> a, vector<Dtype> b);
+float box_giou(const box &a, const box &b);
 template <typename Dtype>
 Dtype box_diou(vector<Dtype> a, vector<Dtype> b);
+float box_diou(const box &a, const box &b);
 template <typename Dtype>
 Dtype box_ciou(vector<Dtype> a, vector<Dtype> b);
+float box_ciou(const box &a, const box &b);
 
 template <typename Dtype>
-void get_region_box(box &b, const Dtype *x, vector<Dtype> biases, int n,
+void get_region_box(box *b, const Dtype *x, vector<Dtype> biases, int n,
                     int index, int i, int j, int lw, int lh, int w, int h,
                     int stride);
 template <typename Dtype>

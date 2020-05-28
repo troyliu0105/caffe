@@ -29,8 +29,7 @@ int mutext;
 
 namespace caffe {
 
-template <typename Dtype>
-dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
+dxrep dx_box_iou(const box &pred, const box &truth, IOU_LOSS iou_loss) {
   boxabs pred_tblr = to_tblr(pred);
   float pred_t = fmin(pred_tblr.top, pred_tblr.bot);
   float pred_b = fmax(pred_tblr.top, pred_tblr.bot);
@@ -58,8 +57,7 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
   float Iw = fmin(pred_r, truth_tblr.right) - fmax(pred_l, truth_tblr.left);
   float I = Iw * Ih;
   float U = X + Xhat - I;
-  float S = (pred[0] - truth[0]) * (pred[0] - truth[0]) +
-            (pred[1] - truth[1]) * (pred[1] - truth[1]);
+  float S = powf(pred.x - truth.x, 2) + powf(pred.y - truth.y, 2);
   float giou_Cw =
       fmax(pred_r, truth_tblr.right) - fmin(pred_l, truth_tblr.left);
   float giou_Ch = fmax(pred_b, truth_tblr.bot) - fmin(pred_t, truth_tblr.top);
@@ -123,10 +121,10 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
     }
   }
 
-  float Ct = fmin(pred[1] - pred[3] / 2, truth[1] - truth[3] / 2);
-  float Cb = fmax(pred[1] + pred[3] / 2, truth[1] + truth[3] / 2);
-  float Cl = fmin(pred[0] - pred[2] / 2, truth[0] - truth[2] / 2);
-  float Cr = fmax(pred[0] + pred[2] / 2, truth[0] + truth[2] / 2);
+  float Ct = fmin(pred.y - pred.h / 2, truth.y - truth.h / 2);
+  float Cb = fmax(pred.y + pred.h / 2, truth.y + truth.h / 2);
+  float Cl = fmin(pred.x - pred.w / 2, truth.x - truth.w / 2);
+  float Cr = fmax(pred.x + pred.w / 2, truth.x + truth.w / 2);
   float Cw = Cr - Cl;
   float Ch = Cb - Ct;
   float C = Cw * Cw + Ch * Ch;
@@ -185,20 +183,20 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
   // https://arxiv.org/abs/1911.08287
   if (iou_loss == DIOU) {
     if (C > 0) {
-      p_dx += (2 * (truth[0] - pred[0]) * C -
+      p_dx += (2 * (truth.x - pred.x) * C -
                (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
               (C * C);
-      p_dy += (2 * (truth[1] - pred[1]) * C -
+      p_dy += (2 * (truth.y - pred.y) * C -
                (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
               (C * C);
       p_dw += (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C);
       p_dh += (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C);
     }
     if (Iw <= 0 || Ih <= 0) {
-      p_dx = (2 * (truth[0] - pred[0]) * C -
+      p_dx = (2 * (truth.x - pred.x) * C -
               (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
              (C * C);
-      p_dy = (2 * (truth[1] - pred[1]) * C -
+      p_dy = (2 * (truth.y - pred.y) * C -
               (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
              (C * C);
       p_dw = (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C);
@@ -208,29 +206,29 @@ dxrep dx_box_iou(vector<Dtype> pred, vector<Dtype> truth, IOU_LOSS iou_loss) {
   // The following codes are calculating the gradient of ciou.
 
   if (iou_loss == CIOU) {
-    float ar_gt = truth[2] / truth[3];
-    float ar_pred = pred[2] / pred[3];
+    float ar_gt = truth.w / truth.h;
+    float ar_pred = pred.w / pred.h;
     float ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
                     (atan(ar_gt) - atan(ar_pred));
     float alpha = ar_loss / (1 - I / U + ar_loss + 0.000001);
-    float ar_dw = 8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred[3];
-    float ar_dh = -8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred[2];
+    float ar_dw = 8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred.h;
+    float ar_dh = -8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred.w;
     if (C > 0) {
       // dar*
-      p_dx += (2 * (truth[0] - pred[0]) * C -
+      p_dx += (2 * (truth.x - pred.x) * C -
                (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
               (C * C);
-      p_dy += (2 * (truth[1] - pred[1]) * C -
+      p_dy += (2 * (truth.h - pred.h) * C -
                (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
               (C * C);
       p_dw += (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C) + alpha * ar_dw;
       p_dh += (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C) + alpha * ar_dh;
     }
     if (Iw <= 0 || Ih <= 0) {
-      p_dx = (2 * (truth[0] - pred[0]) * C -
+      p_dx = (2 * (truth.x - pred.x) * C -
               (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
              (C * C);
-      p_dy = (2 * (truth[1] - pred[1]) * C -
+      p_dy = (2 * (truth.y - pred.y) * C -
               (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
              (C * C);
       p_dw = (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C) + alpha * ar_dw;
@@ -342,15 +340,13 @@ static inline float clip_value(float val, const float max_val) {
 }
 
 template <typename Dtype>
-Dtype delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases,
-                       int n, int index, int i, int j, int lw, int lh, int w,
-                       int h, Dtype *delta, float scale, int stride,
-                       IOU_LOSS iou_loss, float iou_normalizer, float max_delta,
-                       bool accumulate) {
-  vector<Dtype> pred;
-  pred.clear();
+Dtype delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
+                       int index, int i, int j, int lw, int lh, int w, int h,
+                       Dtype *delta, float scale, int stride, IOU_LOSS iou_loss,
+                       float iou_normalizer, float max_delta, bool accumulate) {
+  box pred;
 
-  get_region_box(pred, x, biases, n, index, i, j, lw, lh, w, h, stride);
+  get_region_box(&pred, x, biases, n, index, i, j, lw, lh, w, h, stride);
 
   if (iou_loss == MSE) // old loss
   {
@@ -358,10 +354,10 @@ Dtype delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases,
     // LOG(INFO) << pred[0] << "," << pred[1] << "," << pred[2] << "," <<
     // pred[3] << ";"<< truth[0] << "," << truth[1] << "," << truth[2] << "," <<
     // truth[3];
-    float tx = truth[0] * lw - i;                 // 0.5
-    float ty = truth[1] * lh - j;                 // 0.5
-    float tw = log(truth[2] * w / biases[2 * n]); // truth[2]=biases/w tw = 0
-    float th = log(truth[3] * h / biases[2 * n + 1]); // th = 0
+    float tx = truth.x * lw - i;                     // 0.5
+    float ty = truth.y * lh - j;                     // 0.5
+    float tw = log(truth.w * w / biases[2 * n]);     // truth[2]=biases/w tw = 0
+    float th = log(truth.h * h / biases[2 * n + 1]); // th = 0
 
     // delta[index + 0] = (-1) * scale * (tx - sigmoid(x[index + 0 * stride])) *
     // sigmoid(x[index + 0 * stride]) * (1 - sigmoid(x[index + 0 * stride]));
@@ -388,11 +384,11 @@ Dtype delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases,
     all_ious.diou = box_diou(pred, truth);
     all_ious.ciou = box_ciou(pred, truth);
     // all_ious.ciou = box_ciou(pred, truth);
-    if (pred[2] == 0) {
-      pred[2] = 1.0;
+    if (pred.w == 0) {
+      pred.w = 1.0;
     }
-    if (pred[3] == 0) {
-      pred[3] = 1.0;
+    if (pred.h == 0) {
+      pred.h = 1.0;
     }
     // i - step in layer width
     // j - step in layer height
@@ -474,12 +470,10 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   max_delta_ = param.max_delta();
   accumulate_ = param.accumulate();
   label_smooth_eps_ = param.label_smooth_eps();
-  for (int c = 0; c < param.biases_size(); ++c) {
-    biases_.push_back(param.biases(c));
-  }
-  for (int c = 0; c < param.mask_size(); ++c) {
-    mask_.push_back(param.mask(c));
-  }
+  std::copy(param.biases().begin(), param.biases().end(),
+            std::back_inserter(biases_));
+  std::copy(param.mask().begin(), param.mask().end(),
+            std::back_inserter(mask_));
   biases_size_ = param.biases_size() / 2;
   int input_count =
       bottom[0]->count(1); // h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
@@ -601,17 +595,17 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       for (int n = 0; n < num_; n++) {
         int index = b * bottom[0]->count(1) + n * len * stride + s;
         // LOG(INFO)<<index;
-        vector<Dtype> pred;
+        box pred;
         float best_iou = 0;
         int best_class = -1;
-        vector<Dtype> best_truth;
+        box best_truth;
         int x2 = s % side_w_;
         int y2 = s / side_w_;
-        get_region_box(pred, swap_data, biases_, mask_[n], index, x2, y2,
+        get_region_box(&pred, swap_data, biases_, mask_[n], index, x2, y2,
                        side_w_, side_h_, side_w_ * anchors_scale_,
                        side_h_ * anchors_scale_, stride);
         for (int t = 0; t < 300; ++t) {
-          vector<Dtype> truth;
+          box truth;
           Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
           Dtype y = label_data[b * 300 * 5 + t * 5 + 2];
           Dtype w = label_data[b * 300 * 5 + t * 5 + 3];
@@ -620,10 +614,10 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
           if (!x)
             break;
 
-          truth.push_back(x);
-          truth.push_back(y);
-          truth.push_back(w);
-          truth.push_back(h);
+          truth.x = x;
+          truth.y = y;
+          truth.w = w;
+          truth.h = h;
           float iou = box_iou(pred, truth, iou_loss_);
           if (iou > best_iou) {
             best_class = label_data[b * 300 * 5 + t * 0];
@@ -650,7 +644,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
           delta_region_box(
               best_truth, swap_data, biases_, mask_[n], index, x2, y2, side_w_,
               side_h_, side_w_ * anchors_scale_, side_h_ * anchors_scale_, diff,
-              coord_scale_ * (2 - best_truth[2] * best_truth[3]), stride,
+              coord_scale_ * (2 - best_truth.w * best_truth.h), stride,
               iou_loss_, iou_normalizer_, max_delta_, accumulate_);
         }
       }
@@ -658,8 +652,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     // vector<Dtype> used;
     // used.clear();
     for (int t = 0; t < 300; ++t) {
-      vector<Dtype> truth;
-      truth.clear();
+      box truth;
       int class_label = label_data[b * 300 * 5 + t * 5 + 0];
       float x = label_data[b * 300 * 5 + t * 5 + 1];
       float y = label_data[b * 300 * 5 + t * 5 + 2];
@@ -668,31 +661,30 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
       if (!w)
         break;
-      truth.push_back(x);
-      truth.push_back(y);
-      truth.push_back(w);
-      truth.push_back(h);
+      truth.x = x;
+      truth.y = y;
+      truth.w = w;
+      truth.h = h;
       float best_iou = 0;
       int best_index = 0;
       int best_n = -1;
-      int i = truth[0] * side_w_;
-      int j = truth[1] * side_h_;
+      int i = truth.x * side_w_;
+      int j = truth.y * side_h_;
       int pos = j * side_w_ + i;
-      vector<Dtype> truth_shift;
-      truth_shift.clear();
-      truth_shift.push_back(0);
-      truth_shift.push_back(0);
-      truth_shift.push_back(w);
-      truth_shift.push_back(h);
+      box truth_shift;
+      truth_shift.x = 0;
+      truth_shift.y = 0;
+      truth_shift.w = w;
+      truth_shift.h = h;
 
       // LOG(INFO) << j << "," << i << "," << anchors_scale_;
       // find the best anchor matches label
       for (int n = 0; n < biases_size_; ++n) {
-        vector<Dtype> pred(4);
-        pred[0] = 0;
-        pred[1] = 0;
-        pred[2] = biases_[2 * n] / (float)(side_w_ * anchors_scale_);
-        pred[3] = biases_[2 * n + 1] / (float)(side_h_ * anchors_scale_);
+        box pred;
+        pred.x = 0;
+        pred.y = 0;
+        pred.w = biases_[2 * n] / (float)(side_w_ * anchors_scale_);
+        pred.h = biases_[2 * n + 1] / (float)(side_h_ * anchors_scale_);
         float iou = box_iou(pred, truth_shift, iou_loss_);
         if (iou > best_iou) {
           best_n = n;
@@ -710,7 +702,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         iou = delta_region_box(
             truth, swap_data, biases_, mask_[best_n], best_index, i, j, side_w_,
             side_h_, side_w_ * anchors_scale_, side_h_ * anchors_scale_, diff,
-            coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_,
+            coord_scale_ * (2 - truth.w * truth.h), stride, iou_loss_,
             iou_normalizer_, max_delta_, accumulate_);
 
         ATOMIC_UPDATE(mutex, {
@@ -749,12 +741,11 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       for (int n = 0; n < biases_size_; ++n) {
         int mask_n = int_index(mask_, n, num_);
         if (mask_n >= 0 && n != best_n && iou_thresh_ < 1.0f) {
-          vector<Dtype> pred(4);
-          pred[2] = biases_[2 * n] / (float)(side_w_ * anchors_scale_);
-          pred[3] = biases_[2 * n + 1] / (float)(side_h_ * anchors_scale_);
-
-          pred[0] = 0;
-          pred[1] = 0;
+          box pred;
+          pred.x = 0;
+          pred.y = 0;
+          pred.w = biases_[2 * n] / (float)(side_w_ * anchors_scale_);
+          pred.h = biases_[2 * n + 1] / (float)(side_h_ * anchors_scale_);
           float iou = box_iou(pred, truth_shift, iou_loss_);
 
           if (iou > iou_thresh_) {
@@ -767,7 +758,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                 truth, swap_data, biases_, mask_[mask_n], best_index, i, j,
                 side_w_, side_h_, side_w_ * anchors_scale_,
                 side_h_ * anchors_scale_, diff,
-                coord_scale_ * (2 - truth[2] * truth[3]), stride, iou_loss_,
+                coord_scale_ * (2 - truth.w * truth.h), stride, iou_loss_,
                 iou_normalizer_, max_delta_, accumulate_);
             ATOMIC_UPDATE(mutex, {
               if (iou > 0.5)

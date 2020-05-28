@@ -24,6 +24,9 @@ Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
   float right = r1 < r2 ? r1 : r2;
   return right - left;
 }
+template float overlap(float, float, float, float);
+template double overlap(double, double, double, double);
+
 template <typename Dtype>
 Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float w = overlap(a[0], a[2], b[0], b[2]);
@@ -33,15 +36,53 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
+template float box_intersection(vector<float> a, vector<float> b);
+template double box_intersection(vector<double> a, vector<double> b);
+
+float box_intersection(const box &a, const box &b) {
+  return box_intersection({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+}
+
 template <typename Dtype>
 Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
+template float box_union(vector<float> a, vector<float> b);
+template double box_union(vector<double> a, vector<double> b);
+float box_union(const box &a, const box &b) {
+  return box_union({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+}
 template <typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
   return box_intersection(a, b) / box_union(a, b);
+}
+template float box_iou(vector<float> a, vector<float> b);
+template double box_iou(vector<double> a, vector<double> b);
+float box_iou(const box &a, const box &b) {
+  return box_iou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+}
+
+template <typename Dtype>
+Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
+  Dtype iou;
+  if (type == GIOU) {
+    iou = box_giou(a, b);
+  } else if (type == DIOU) {
+    iou = box_diou(a, b);
+  } else if (type == CIOU) {
+    iou = box_ciou(a, b);
+  } else {
+    iou = box_iou(a, b);
+  }
+  return iou;
+}
+template float box_iou(vector<float> a, vector<float> b, IOU_LOSS type);
+template double box_iou(vector<double> a, vector<double> b, IOU_LOSS type);
+
+float box_iou(const box &a, const box &b, IOU_LOSS type) {
+  return box_iou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h}, type);
 }
 
 template <typename Dtype>
@@ -52,6 +93,12 @@ boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
   ba.left = fmin(a[0] - a[2] / 2, b[0] - b[2] / 2);
   ba.right = fmax(a[0] + a[2] / 2, b[0] + b[2] / 2);
   return ba;
+}
+template boxabs box_c(vector<float> a, vector<float> b);
+template boxabs box_c(vector<double> a, vector<double> b);
+
+float box_c(const box &a, const box &b) {
+  return box_c({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
 }
 
 // representation from x, y, w, h to top, left, bottom, right
@@ -68,32 +115,10 @@ boxabs to_tblr(vector<Dtype> a) {
   tblr.right = r;
   return tblr;
 }
-template <>
-boxabs to_tblr(vector<float> a) {
-  boxabs tblr = {0};
-  float t = a[1] - (a[3] / 2);
-  float b = a[1] + (a[3] / 2);
-  float l = a[0] - (a[2] / 2);
-  float r = a[0] + (a[2] / 2);
-  tblr.top = t;
-  tblr.bot = b;
-  tblr.left = l;
-  tblr.right = r;
-  return tblr;
-}
-template <>
-boxabs to_tblr(vector<double> a) {
-  boxabs tblr = {0};
-  float t = a[1] - (a[3] / 2);
-  float b = a[1] + (a[3] / 2);
-  float l = a[0] - (a[2] / 2);
-  float r = a[0] + (a[2] / 2);
-  tblr.top = t;
-  tblr.bot = b;
-  tblr.left = l;
-  tblr.right = r;
-  return tblr;
-}
+template boxabs to_tblr(vector<float>);
+template boxabs to_tblr(vector<double>);
+boxabs to_tblr(const box &a) { return to_tblr({a.x, a.y, a.w, a.h}); }
+
 template <typename Dtype>
 Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
   boxabs ba = box_c(a, b);
@@ -109,37 +134,13 @@ Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
 
   return iou - giou_term;
 }
+template float box_giou(vector<float> a, vector<float> b);
+template double box_giou(vector<double> a, vector<double> b);
 
-template <>
-float box_giou(vector<float> a, vector<float> b) {
-  boxabs ba = box_c(a, b);
-  float w = ba.right - ba.left;
-  float h = ba.bot - ba.top;
-  float c = w * h;
-  float iou = box_iou(a, b);
-  if (c == 0) {
-    return iou;
-  }
-  float u = box_union(a, b);
-  float giou_term = (c - u) / c;
-
-  return iou - giou_term;
+float box_giou(const box &a, const box &b) {
+  return box_giou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
 }
-template <>
-double box_giou(vector<double> a, vector<double> b) {
-  boxabs ba = box_c(a, b);
-  double w = ba.right - ba.left;
-  double h = ba.bot - ba.top;
-  double c = w * h;
-  double iou = box_iou(a, b);
-  if (c == 0) {
-    return iou;
-  }
-  double u = box_union(a, b);
-  double giou_term = (c - u) / c;
 
-  return iou - giou_term;
-}
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
 template <typename Dtype>
@@ -158,55 +159,13 @@ Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
 
   return iou - diou_term;
 }
-template <>
-float box_diou(vector<float> a, vector<float> b) {
-  boxabs ba = box_c(a, b);
-  float w = ba.right - ba.left;
-  float h = ba.bot - ba.top;
-  float c = w * w + h * h;
-  float iou = box_iou(a, b);
-  if (c == 0) {
-    return iou;
-  }
-  float d = (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]);
-  float u = pow(d / c, 0.6);
-  float diou_term = u;
+template float box_diou(vector<float> a, vector<float> b);
+template double box_diou(vector<double> a, vector<double> b);
 
-  return iou - diou_term;
+float box_diou(const box &a, const box &b) {
+  return box_giou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
 }
-template <>
-double box_diou(vector<double> a, vector<double> b) {
-  boxabs ba = box_c(a, b);
-  double w = ba.right - ba.left;
-  double h = ba.bot - ba.top;
-  double c = w * w + h * h;
-  double iou = box_iou(a, b);
-  if (c == 0) {
-    return iou;
-  }
-  double d = (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]);
-  double u = pow(d / c, 0.6);
-  double diou_term = u;
 
-  return iou - diou_term;
-}
-float box_diounms(vector<float> a, vector<float> b, float beta1) {
-  boxabs ba = box_c(a, b);
-  float w = ba.right - ba.left;
-  float h = ba.bot - ba.top;
-  float c = w * w + h * h;
-  float iou = box_iou(a, b);
-  if (c == 0) {
-    return iou;
-  }
-  float d = (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]);
-  float u = pow(d / c, beta1);
-  float diou_term = u;
-#ifdef DEBUG_PRINTS
-  printf("  c: %f, u: %f, riou_term: %f\n", c, u, diou_term);
-#endif
-  return iou - diou_term;
-}
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
 template <typename Dtype>
@@ -229,8 +188,14 @@ Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   Dtype ciou_term = d + alpha * ar_loss; // ciou
   return iou - ciou_term;
 }
-template <>
-float box_ciou(vector<float> a, vector<float> b) {
+template float box_ciou(vector<float> a, vector<float> b);
+template double box_ciou(vector<double> a, vector<double> b);
+
+float box_ciou(const box &a, const box &b) {
+  return box_giou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+}
+
+float box_diounms(vector<float> a, vector<float> b, float beta1) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -239,78 +204,15 @@ float box_ciou(vector<float> a, vector<float> b) {
   if (c == 0) {
     return iou;
   }
-  float u = (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]);
-  float d = u / c;
-  float ar_gt = b[2] / b[3];
-  float ar_pred = a[2] / a[3];
-  float ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
-                  (atan(ar_gt) - atan(ar_pred));
-  float alpha = ar_loss / (1 - iou + ar_loss + 0.000001);
-  float ciou_term = d + alpha * ar_loss; // ciou
-  return iou - ciou_term;
+  float d = (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]);
+  float u = pow(d / c, beta1);
+  float diou_term = u;
+#ifdef DEBUG_PRINTS
+  printf("  c: %f, u: %f, riou_term: %f\n", c, u, diou_term);
+#endif
+  return iou - diou_term;
 }
-template <>
-double box_ciou(vector<double> a, vector<double> b) {
-  boxabs ba = box_c(a, b);
-  double w = ba.right - ba.left;
-  double h = ba.bot - ba.top;
-  double c = w * w + h * h;
-  double iou = box_iou(a, b);
-  if (c == 0) {
-    return iou;
-  }
-  double u = (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]);
-  double d = u / c;
-  double ar_gt = b[2] / b[3];
-  double ar_pred = a[2] / a[3];
-  double ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
-                   (atan(ar_gt) - atan(ar_pred));
-  double alpha = ar_loss / (1 - iou + ar_loss + 0.000001);
-  double ciou_term = d + alpha * ar_loss; // ciou
-  return iou - ciou_term;
-}
-template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
-  Dtype iou;
-  if (type == GIOU) {
-    iou = box_giou(a, b);
-  } else if (type == DIOU) {
-    iou = box_diou(a, b);
-  } else if (type == CIOU) {
-    iou = box_ciou(a, b);
-  } else {
-    iou = box_iou(a, b);
-  }
-  return iou;
-}
-template <>
-float box_iou(vector<float> a, vector<float> b, IOU_LOSS type) {
-  float iou;
-  if (type == GIOU) {
-    iou = box_giou(a, b);
-  } else if (type == DIOU) {
-    iou = box_diou(a, b);
-  } else if (type == CIOU) {
-    iou = box_ciou(a, b);
-  } else {
-    iou = box_iou(a, b);
-  }
-  return iou;
-}
-template <>
-double box_iou(vector<double> a, vector<double> b, IOU_LOSS type) {
-  double iou;
-  if (type == GIOU) {
-    iou = box_giou(a, b);
-  } else if (type == DIOU) {
-    iou = box_diou(a, b);
-  } else if (type == CIOU) {
-    iou = box_ciou(a, b);
-  } else {
-    iou = box_iou(a, b);
-  }
-  return iou;
-}
+
 template <typename Dtype>
 void get_gaussian_yolo_box(vector<Dtype> &b, const Dtype *x,
                            vector<Dtype> biases, int n, int index, int i, int j,
@@ -333,19 +235,19 @@ template void get_gaussian_yolo_box(vector<double> &b, const double *x,
                                     int stride);
 
 template <typename Dtype>
-void get_region_box(box &b, const Dtype *x, vector<Dtype> biases, int n,
+void get_region_box(box *b, const Dtype *x, vector<Dtype> biases, int n,
                     int index, int i, int j, int lw, int lh, int w, int h,
                     int stride) {
-  b.x = ((i + (x[index + 0 * stride])) / lw);
-  b.y = ((j + (x[index + 1 * stride])) / lh);
-  b.w = (exp(x[index + 2 * stride]) * biases[2 * n] / (w));
-  b.h = (exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
+  b->x = ((i + (x[index + 0 * stride])) / lw);
+  b->y = ((j + (x[index + 1 * stride])) / lh);
+  b->w = (exp(x[index + 2 * stride]) * biases[2 * n] / (w));
+  b->h = (exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
 }
 
-template void get_region_box(box &b, const float *x, vector<float> biases,
+template void get_region_box(box *b, const float *x, vector<float> biases,
                              int n, int index, int i, int j, int lw, int lh,
                              int w, int h, int stride);
-template void get_region_box(box &b, const double *x, vector<double> biases,
+template void get_region_box(box *b, const double *x, vector<double> biases,
                              int n, int index, int i, int j, int lw, int lh,
                              int w, int h, int stride);
 
