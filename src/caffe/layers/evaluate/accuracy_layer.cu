@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "caffe/layers/accuracy_layer.hpp"
+#include "caffe/layers/evaluate/accuracy_layer.hpp"
 #include "caffe/util/math_functions.hpp"
 
 namespace caffe {

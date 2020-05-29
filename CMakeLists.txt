@@ -105,7 +105,7 @@ if (UNIX OR APPLE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -all_load")
     endif ()
 else ()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS /wd4244 /wd4661 /wd4819 /wd4267 /wd4996 /wd4305 /wd4018")
 endif ()
 
 caffe_set_caffe_link()

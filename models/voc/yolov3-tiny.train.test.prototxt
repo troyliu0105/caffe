@@ -14,24 +14,6 @@ layer {
     mean_value: 127.5
     mean_value: 127.5
 	  force_color: true
- 	  resize_param {
-      prob: 0.1
-      resize_mode: FIT_LARGE_SIZE_AND_PAD
-      height: 608
-      width: 608
-      interp_mode: LINEAR
-      interp_mode: AREA
-      interp_mode: LANCZOS4
-    }
-    resize_param {
-      prob: 0.1
-      resize_mode: FIT_LARGE_SIZE_AND_PAD
-      height: 416
-      width: 416
-      interp_mode: LINEAR
-      interp_mode: AREA
-      interp_mode: LANCZOS4
-    }
 	  resize_param {
       prob: 0.1
       resize_mode: FIT_LARGE_SIZE_AND_PAD
@@ -55,6 +37,15 @@ layer {
       resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 384
       width: 384
+      interp_mode: LINEAR
+      interp_mode: AREA
+      interp_mode: LANCZOS4
+    }
+    resize_param {
+      prob: 0.1
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
+      height: 416
+      width: 416
       interp_mode: LINEAR
       interp_mode: AREA
       interp_mode: LANCZOS4
@@ -100,6 +91,15 @@ layer {
       resize_mode: FIT_LARGE_SIZE_AND_PAD
       height: 576
       width: 576
+      interp_mode: LINEAR
+      interp_mode: AREA
+      interp_mode: LANCZOS4
+    }
+    resize_param {
+      prob: 0.1
+      resize_mode: FIT_LARGE_SIZE_AND_PAD
+      height: 608
+      width: 608
       interp_mode: LINEAR
       interp_mode: AREA
       interp_mode: LANCZOS4
@@ -161,7 +161,6 @@ layer {
     resize_param {
       prob: 1.0
       resize_mode: WARP
-      #resize_mode: WARP
       height: 416
       width: 416
       interp_mode: LINEAR

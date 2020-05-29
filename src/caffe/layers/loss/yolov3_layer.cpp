@@ -24,7 +24,7 @@
 #ifdef USE_TBB
 static tbb::mutex mutex;
 #elif defined(USE_OMP)
-int mutext;
+int mutex;
 #endif
 
 namespace caffe {

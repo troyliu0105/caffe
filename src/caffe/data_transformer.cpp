@@ -959,7 +959,7 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
 
   // CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
   const int crop_size = param_.crop_size();
-  const float scale = 1 / 255.0;
+  const float scale = 1 / 255.0F;
   const bool do_mirror = param_.mirror() && Rand(2);
 
   // LOG(INFO) << scale << ","<< mean_values_[0] << ","<< mean_values_[1];

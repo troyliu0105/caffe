@@ -1,11 +1,11 @@
 #ifndef CAFFE_INNER_PRODUCT_LAYER_HPP_
 #define CAFFE_INNER_PRODUCT_LAYER_HPP_
 
-#include "../../../../../../.conda/envs/ml/Cellar/llvm@9/9.0.1_2/include/c++/v1/vector"
+#include <vector>
 
-#include "../../../builds/release/include/caffe/proto/caffe.pb.h"
-#include "../blob.hpp"
-#include "../layer.hpp"
+#include "caffe/proto/caffe.pb.h"
+#include "caffe/blob.hpp"
+#include "caffe/layer.hpp"
 
 namespace caffe {
 

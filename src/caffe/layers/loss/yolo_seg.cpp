@@ -88,7 +88,8 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // LOG(INFO)<<bottom[1]->channels()<<","<<bottom[1]->num()<<","<<bottom[1]->width()<<","<<bottom[1]->height();
 
   Dtype *diff;
-  const Dtype *label_data;
+  const Dtype *label_data = bottom[1]->cpu_data();
+  ;
   Dtype loss(0.0);
 #ifdef CPU_ONLY
   const Dtype *bottom_data = bottom[0]->cpu_data();
@@ -133,7 +134,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
   if (enable_weighting_) {
     diff = diff_.mutable_cpu_data();
-    label_data = bottom[1]->cpu_data();
+    //    label_data = bottom[1]->cpu_data();
 
     for (int i = 0; i < classes_num; i++) {
 
@@ -162,7 +163,7 @@ void YoloSegLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
   diff = diff_.mutable_cpu_data();
   Dtype obj(0.0), no_obj(0.0);
-  label_data = bottom[1]->cpu_data();
+
   const Dtype *swap_cpu = swap_.cpu_data();
   float mIOU = 0.0;
   int pos_count_total = 0;

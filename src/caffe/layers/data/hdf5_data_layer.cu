@@ -10,7 +10,7 @@ TODO:
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#include "caffe/layers/hdf5_data_layer.hpp"
+#include "caffe/layers/data/hdf5_data_layer.hpp"
 
 namespace caffe {
 
