@@ -22,14 +22,14 @@ void CenterLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   // and axis == 1, N inner products with dimension CHW are performed.
   K_ = bottom[0]->count(axis);
   // Check if we need to set up the weights
-  if (this->blobs_.size() > 0) {
+  if (!this->blobs_.empty()) {
     LOG(INFO) << "Skipping parameter initialization";
   } else {
     this->blobs_.resize(1);
     // Intialize the weight
     vector<int> center_shape(2);
-    center_shape[0] = N_;
-    center_shape[1] = K_;
+    center_shape[0] = N_; // class_num
+    center_shape[1] = K_; // feat_num
     this->blobs_[0].reset(new Blob<Dtype>(center_shape));
     // fill the weights
     shared_ptr<Filler<Dtype>> center_filler(GetFiller<Dtype>(
@@ -43,10 +43,8 @@ void CenterLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
 template <typename Dtype>
 void CenterLossLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
-  CHECK_EQ(bottom[1]->channels(), 1);
-  CHECK_EQ(bottom[1]->height(), 1);
-  CHECK_EQ(bottom[1]->width(), 1);
   M_ = bottom[0]->num();
+  CHECK_EQ(bottom[1]->count(), M_);
   // The top shape will be the bottom shape with the flattened axes dropped,
   // and replaced by a single axis with dimension num_output (N_).
   LossLayer<Dtype>::Reshape(bottom, top);
@@ -66,10 +64,9 @@ void CenterLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   for (int i = 0; i < M_; i++) {
     const int label_value = static_cast<int>(label[i]);
     // D(i,:) = X(i,:) - C(y(i),:)
-    caffe_sub(
-        K_, bottom_data + i * K_, center + label_value * K_,
-        distance_data +
-            i * K_); // sub bottom_data + i * K_ with center + label_value * K_
+    caffe_sub(K_, bottom_data + i * K_, center + label_value * K_,
+              distance_data + i * K_);
+    // sub bottom_data + i * K_ with center + label_value * K_
   }
   Dtype dot =
       caffe_blas_dot(M_ * K_, distance_.cpu_data(), distance_.cpu_data());
@@ -92,10 +89,10 @@ void CenterLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     caffe_set(
         N_ * K_, (Dtype)0.,
         variation_sum_.mutable_cpu_data()); // initialize each value in
-                                            // variation_sum_ using (Dtype)0
-    for (int n = 0; n < N_; n++) {
+                                            // variation_sum_ using Dtype(0)
+    for (int n = 0; n < N_; n++) {          // class
       int count = 0;
-      for (int m = 0; m < M_; m++) {
+      for (int m = 0; m < M_; m++) { // batch
         const int label_value = static_cast<int>(label[m]);
         if (label_value == n) {
           count++;

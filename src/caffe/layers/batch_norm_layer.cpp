@@ -19,7 +19,7 @@ void BatchNormLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   else
     channels_ = bottom[0]->shape(1);
   eps_ = param.eps();
-  if (this->blobs_.size() > 0) {
+  if (!this->blobs_.empty()) {
     LOG(INFO) << "Skipping parameter initialization";
   } else {
     this->blobs_.resize(3);

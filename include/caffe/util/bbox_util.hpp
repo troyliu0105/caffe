@@ -79,6 +79,22 @@ template <typename Dtype>
 Dtype box_ciou(vector<Dtype> a, vector<Dtype> b);
 float box_ciou(const box &a, const box &b);
 
+/**
+ * @brief get bbox from feature maps
+ * @tparam Dtype    feature map data type
+ * @param b         'box' instance
+ * @param x         feature map pointer
+ * @param biases    all anchors in vector, N_anchor x 2
+ * @param n         anchor index
+ * @param index     (x, y) dot index in feat map
+ * @param i         cx in grid
+ * @param j         cy in grid
+ * @param lw        feat map width
+ * @param lh        feat map height
+ * @param w         original input image width
+ * @param h         original input image height
+ * @param stride    stride to jump, = lw * lh
+ */
 template <typename Dtype>
 void get_region_box(box *b, const Dtype *x, vector<Dtype> biases, int n,
                     int index, int i, int j, int lw, int lh, int w, int h,

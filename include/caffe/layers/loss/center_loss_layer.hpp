@@ -41,8 +41,11 @@ protected:
                             const vector<bool> &propagate_down,
                             const vector<Blob<Dtype> *> &bottom);
 
+  // batch_size
   int M_;
+  // class_num
   int K_;
+  // feat_num
   int N_;
 
   Blob<Dtype> distance_;
