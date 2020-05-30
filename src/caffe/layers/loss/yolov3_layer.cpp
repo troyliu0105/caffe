@@ -27,6 +27,25 @@ static tbb::mutex mutex;
 int mutex;
 #endif
 
+using Statistic = struct {
+  float tot_iou = 0.F;
+  float tot_giou = 0.F;
+  float tot_diou = 0.F;
+  float tot_ciou = 0.F;
+  float tot_iou_loss = 0.F;
+  float tot_giou_loss = 0.F;
+  float tot_diou_loss = 0.F;
+  float tot_ciou_loss = 0.F;
+
+  float recall = 0.F;
+  float recall75 = 0.F;
+  float avg_cat = 0.F;
+  float avg_obj = 0.F;
+  float avg_anyobj = 0.F;
+  int count = 0;
+  int class_count = 0;
+};
+
 namespace caffe {
 
 dxrep dx_box_iou(const box &pred, const box &truth, IOU_LOSS iou_loss) {
@@ -246,27 +265,29 @@ dxrep dx_box_iou(const box &pred, const box &truth, IOU_LOSS iou_loss) {
 }
 
 template <typename Dtype>
-void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
+void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
                            int class_label, int classes, float scale,
-                           Dtype *avg_cat, int stride, bool use_focal_loss,
+                           float *avg_cat, int stride, bool use_focal_loss,
                            float label_smooth_eps) {
-  if (diff[index + stride * class_label]) {
+  if (diff[class_index + stride * class_label]) {
 
     float y_true = 1;
     if (label_smooth_eps)
       y_true = y_true * (1 - label_smooth_eps) + 0.5 * label_smooth_eps;
-    float result_delta = y_true - input_data[index + stride * class_label];
+    float result_delta =
+        y_true - input_data[class_index + stride * class_label];
     if (!isnan(result_delta) && !isinf(result_delta))
-      diff[index + stride * class_label] = (-1.0) * scale * result_delta;
-    // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
+      diff[class_index + stride * class_label] = (-1.0) * scale * result_delta;
+    // delta[class_index + stride*class_id] = 1 - output[class_index +
+    // stride*class_id];
 
     if (avg_cat)
-      ATOMIC_UPDATE(mutex, *avg_cat += input_data[index + stride * class_label])
+      ATOMIC_UPDATE(mutex,
+                    *avg_cat += input_data[class_index + stride * class_label])
 
-    // diff[index + stride*class_label] = (-1.0) * (1 - input_data[index +
-    // stride*class_label]); *avg_cat += input_data[index +
-    // stride*class_label]*scale;
-    // LOG(INFO) << "test";
+    // diff[class_index + stride*class_label] = (-1.0) * (1 -
+    // input_data[class_index + stride*class_label]); *avg_cat +=
+    // input_data[class_index + stride*class_label]*scale; LOG(INFO) << "test";
     return;
   }
   if (use_focal_loss) {
@@ -275,7 +296,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
     float alpha = 0.5; // 0.25 or 0.5
     // float gamma = 2;    // hardcoded in many places of the grad-formula
 
-    int ti = index + stride * class_label;
+    int ti = class_index + stride * class_label;
     float pt = input_data[ti] + 0.000000000000001F;
     // http://fooplot.com/#W3sidHlwZSI6MCwiZXEiOiItKDEteCkqKDIqeCpsb2coeCkreC0xKSIsImNvbG9yIjoiIzAwMDAwMCJ9LHsidHlwZSI6MTAwMH1d
     float grad = -(1 - pt) *
@@ -285,14 +306,14 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
     // https://github.com/unsky/focal-loss
 
     for (int n = 0; n < classes; ++n) {
-      diff[index + stride * n] =
+      diff[class_index + stride * n] =
           (-1.0) * scale *
-          (((n == class_label) ? 1 : 0) - input_data[index + n * stride]);
+          (((n == class_label) ? 1 : 0) - input_data[class_index + n * stride]);
 
-      diff[index + stride * n] *= alpha * grad;
+      diff[class_index + stride * n] *= alpha * grad;
 
       if (n == class_label) {
-        ATOMIC_UPDATE(mutex, *avg_cat += input_data[index + stride * n])
+        ATOMIC_UPDATE(mutex, *avg_cat += input_data[class_index + stride * n])
       }
     }
 
@@ -301,24 +322,26 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int index,
       float y_true = ((n == class_label) ? 1 : 0);
       if (label_smooth_eps)
         y_true = y_true * (1 - label_smooth_eps) + 0.5 * label_smooth_eps;
-      float result_delta = y_true - input_data[index + stride * n];
+      float result_delta = y_true - input_data[class_index + stride * n];
       if (!isnan(result_delta) && !isinf(result_delta))
-        diff[index + stride * n] = (-1.0) * scale * result_delta;
-      // delta[index + stride*class_id] = 1 - output[index + stride*class_id];
+        diff[class_index + stride * n] = (-1.0) * scale * result_delta;
+      // delta[class_index + stride*class_id] = 1 - output[class_index +
+      // stride*class_id];
 
       if (n == class_label && avg_cat)
-        ATOMIC_UPDATE(mutex,
-                      *avg_cat += input_data[index + stride * class_label])
-      // diff[index + n*stride] = (-1.0) * scale * (((n == class_label) ? 1 : 0)
-      // - input_data[index + n*stride]);
-      //      diff[index + n * stride] =
+        ATOMIC_UPDATE(mutex, *avg_cat +=
+                             input_data[class_index + stride * class_label])
+      // diff[class_index + n*stride] = (-1.0) * scale * (((n == class_label) ?
+      // 1 : 0)
+      // - input_data[class_index + n*stride]);
+      //      diff[class_index + n * stride] =
       //          (-1.0) * scale *
-      //          (((n == class_label) ? 1 : 0) - input_data[index + n *
+      //          (((n == class_label) ? 1 : 0) - input_data[class_index + n *
       //          stride]);
-      // std::cout<<diff[index+n]<<",";
+      // std::cout<<diff[class_index+n]<<",";
       //      if (n == class_label) {
-      //        *avg_cat += input_data[index + n * stride];
-      // std::cout<<"avg_cat:"<<input_data[index+n]<<std::endl;
+      //        *avg_cat += input_data[class_index + n * stride];
+      // std::cout<<"avg_cat:"<<input_data[class_index+n]<<std::endl;
       //      }
     }
   }
@@ -340,13 +363,39 @@ static inline float clip_value(float val, const float max_val) {
 }
 
 template <typename Dtype>
-Dtype delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
-                       int index, int i, int j, int lw, int lh, int w, int h,
-                       Dtype *delta, float scale, int stride, IOU_LOSS iou_loss,
-                       float iou_normalizer, float max_delta, bool accumulate) {
+ious delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
+                      int index, int i, int j, int lw, int lh, int w, int h,
+                      Dtype *delta, float scale, int stride, IOU_LOSS iou_loss,
+                      float iou_normalizer, float max_delta, bool accumulate) {
   box pred;
-
   get_region_box(&pred, x, biases, n, index, i, j, lw, lh, w, h, stride);
+
+  if (!accumulate) {
+    delta[index + 0 * stride] = 0;
+    delta[index + 1 * stride] = 0;
+    delta[index + 2 * stride] = 0;
+    delta[index + 3 * stride] = 0;
+  }
+
+  ious all_ious = {0};
+  all_ious.iou = box_iou(pred, truth);
+  all_ious.giou = box_giou(pred, truth);
+  all_ious.diou = box_diou(pred, truth);
+  all_ious.ciou = box_ciou(pred, truth);
+
+  if (pred.w == 0) {
+    pred.w = 1.0;
+  }
+  if (pred.h == 0) {
+    pred.h = 1.0;
+  }
+
+  if (!accumulate) {
+    delta[index + 0 * stride] = 0;
+    delta[index + 1 * stride] = 0;
+    delta[index + 2 * stride] = 0;
+    delta[index + 3 * stride] = 0;
+  }
 
   if (iou_loss == MSE) // old loss
   {
@@ -364,11 +413,10 @@ Dtype delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
     // delta[index + 1 * stride] = (-1) * scale * (ty - sigmoid(x[index + 1 *
     // stride])) * sigmoid(x[index + 1 * stride]) * (1 - sigmoid(x[index + 1 *
     // stride]));
-    delta[index + 0 * stride] = (-1) * scale * (tx - x[index + 0 * stride]);
-    delta[index + 1 * stride] = (-1) * scale * (ty - x[index + 1 * stride]);
-    delta[index + 2 * stride] = (-1) * scale * (tw - x[index + 2 * stride]);
-    delta[index + 3 * stride] = (-1) * scale * (th - x[index + 3 * stride]);
-    return iou;
+    delta[index + 0 * stride] += (-1) * scale * (tx - x[index + 0 * stride]);
+    delta[index + 1 * stride] += (-1) * scale * (ty - x[index + 1 * stride]);
+    delta[index + 2 * stride] += (-1) * scale * (tw - x[index + 2 * stride]);
+    delta[index + 3 * stride] += (-1) * scale * (th - x[index + 3 * stride]);
   } else {
     // Reference code :
     // https://github.com/AlexeyAB/darknet/blob/master/src/yolo_layer.c
@@ -377,19 +425,6 @@ Dtype delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
     // https://arxiv.org/abs/1902.09630v2
     // https://giou.stanford.edu/
 
-    // float giou = box_giou(pred, truth);
-    ious all_ious = {0};
-    all_ious.iou = box_iou(pred, truth);
-    all_ious.giou = box_giou(pred, truth);
-    all_ious.diou = box_diou(pred, truth);
-    all_ious.ciou = box_ciou(pred, truth);
-    // all_ious.ciou = box_ciou(pred, truth);
-    if (pred.w == 0) {
-      pred.w = 1.0;
-    }
-    if (pred.h == 0) {
-      pred.h = 1.0;
-    }
     // i - step in layer width
     // j - step in layer height
     //  Returns a box in absolute coordinates
@@ -424,25 +459,13 @@ Dtype delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
       dh = clip_value(dh, max_delta);
     }
 
-    if (!accumulate) {
-      delta[index + 0 * stride] = 0;
-      delta[index + 1 * stride] = 0;
-      delta[index + 2 * stride] = 0;
-      delta[index + 3 * stride] = 0;
-    }
-
     // accumulate delta
     delta[index + 0 * stride] += -dx;
     delta[index + 1 * stride] += -dy;
     delta[index + 2 * stride] += -dw;
     delta[index + 3 * stride] += -dh;
-    if (iou_loss == GIOU)
-      return all_ious.giou;
-    else if (iou_loss == CIOU)
-      return all_ious.ciou;
-    else
-      return all_ious.diou;
   }
+  return all_ious;
 }
 template <typename Dtype>
 void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
@@ -461,6 +484,9 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   class_scale_ = param.class_scale();       // 1.0
   coord_scale_ = param.coord_scale();       // 1.0
   thresh_ = param.thresh();                 // 0.6
+
+  adversarial_ = false;
+  objectness_smooth_ = true;
   use_logic_gradient_ = param.use_logic_gradient();
   use_focal_loss_ = param.use_focal_loss();
   iou_loss_ = (IOU_LOSS)param.iou_loss();
@@ -506,6 +532,40 @@ int int_index(vector<Dtype> a, int val, int n) {
 }
 
 template <typename Dtype>
+bool compare_yolo_class(const Dtype *swap_data, int class_num, int class_index,
+                        int stride, float objectness, int class_id,
+                        float conf_thresh) {
+  int prob;
+  for (int j = 0; j < class_num; ++j) {
+    // float prob = objectness * output[class_index + stride*j];
+    prob = swap_data[class_index + j * stride];
+    if (prob > conf_thresh) {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <typename Dtype>
+void averages_yolo_deltas(int class_index, int box_index, int stride,
+                          int classes, Dtype *delta) {
+
+  int classes_in_one_box = 0;
+  int c;
+  for (c = 0; c < classes; ++c) {
+    if (delta[class_index + c * stride] > 0)
+      classes_in_one_box++;
+  }
+
+  if (classes_in_one_box > 0) {
+    delta[box_index + 0 * stride] /= classes_in_one_box;
+    delta[box_index + 1 * stride] /= classes_in_one_box;
+    delta[box_index + 2 * stride] /= classes_in_one_box;
+    delta[box_index + 3 * stride] /= classes_in_one_box;
+  }
+}
+
+template <typename Dtype>
 void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                      const vector<Blob<Dtype> *> &top) {
   side_w_ = bottom[0]->width();
@@ -518,9 +578,9 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   Dtype *diff = diff_.mutable_cpu_data();
   caffe_set<Dtype>(diff_.count(), 0.0, diff);
 
-  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0),
-      avg_iou_loss(0.0), recall(0.0), recall75(0.0), loss(0.0);
-  int count = 0;
+  //  Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0),
+  //      avg_iou_loss(0.0), recall(0.0), recall75(0.0), loss(0.0);
+  Statistic statistic;
 
   const Dtype *input_data = bottom[0]->cpu_data();
   const Dtype *label_data = bottom[1]->cpu_data(); //[label,x,y,w,h]
@@ -596,17 +656,25 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     for (int s = 0; s < stride; ++s) {
       for (int n = 0; n < num_; n++) {
         int index = b * bottom[0]->count(1) + n * len * stride + s;
+        int coord_index = index;
+        int obj_index = index + 4 * stride;
+        int class_index = index + 5 * stride;
         // LOG(INFO)<<index;
         float best_iou = 0;
         int best_class = -1;
+        int best_match_class = -1;
         box best_truth;
+
+        float best_match_iou;
+        box best_match_truth;
         int x2 = s % side_w_;
         int y2 = s / side_w_;
-        get_region_box(&pred, swap_data, biases_, mask_[n], index, x2, y2,
+        get_region_box(&pred, swap_data, biases_, mask_[n], coord_index, x2, y2,
                        side_w_, side_h_, side_w_ * anchors_scale_,
                        side_h_ * anchors_scale_, stride);
         // responds every object in image
         for (int t = 0; t < 300; ++t) {
+          int class_id = label_data[b * 300 * 5 + t * 0];
           Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
           Dtype y = label_data[b * 300 * 5 + t * 5 + 2];
           Dtype w = label_data[b * 300 * 5 + t * 5 + 3];
@@ -614,35 +682,78 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
           if (!x)
             break;
+          Dtype objectness = swap_data[obj_index];
+          if (isnan(objectness) || isinf(objectness))
+            swap_data[obj_index] = 0;
 
           truth.x = x;
           truth.y = y;
           truth.w = w;
           truth.h = h;
           float iou = box_iou(pred, truth, iou_loss_);
+          if (iou > best_match_iou &&
+              compare_yolo_class(swap_data, num_class_, class_index, stride,
+                                 objectness, class_id, 0.25)) {
+            best_match_iou = iou;
+            best_match_truth = truth;
+            best_match_class = class_id;
+          }
           if (iou > best_iou) {
-            best_class = label_data[b * 300 * 5 + t * 0];
+            best_class = class_id;
             best_iou = iou;
             best_truth = truth;
           }
         }
-        ATOMIC_UPDATE(mutex, avg_anyobj += swap_data[index + 4 * stride])
-        diff[index + 4 * stride] =
-            (-1) * (0 - swap_data[index + 4 * stride]) * noobject_scale_;
+        ATOMIC_UPDATE(mutex, statistic.avg_anyobj += swap_data[obj_index])
+        diff[obj_index] = (-1) * (0 - swap_data[obj_index]) * noobject_scale_;
         if (best_iou > thresh_) {
-          diff[index + 4 * stride] = 0;
+          if (objectness_smooth_) {
+            const float iou_multiplier = best_match_iou * best_match_iou;
+            diff[obj_index] = (-1) * (iou_multiplier - swap_data[obj_index]) *
+                              noobject_scale_;
+            diff[class_index + best_match_class * stride] =
+                (-1) * (iou_multiplier -
+                        swap_data[class_index + best_match_class * stride]);
+          } else {
+            diff[index + 4 * stride] = 0;
+          }
+        } else if (adversarial_) {
+          float scale = pred.w * pred.h;
+          if (scale > 0)
+            scale = sqrt(scale);
+          diff[obj_index] =
+              (-1) * scale * noobject_scale_ * (0 - swap_data[obj_index]);
+          for (int clz_id = 0; clz_id < num_class_; ++clz_id) {
+            if (swap_data[class_index + clz_id * stride] *
+                    swap_data[obj_index] >
+                0.25) {
+              diff[class_index + clz_id * stride] =
+                  (-1) * scale * (0 - swap_data[class_index + clz_id * stride]);
+            }
+          }
         }
         if (best_iou > 1) {
           LOG(INFO) << "best_iou > 1"; // plz tell me ..
-          diff[index + 4 * stride] =
-              (-1) * (1 - swap_data[index + 4 * stride]) * object_scale_;
+          const float iou_multiplier = best_iou * best_iou;
+          if (objectness_smooth_) {
+            diff[obj_index] =
+                (-1) * object_scale_ * (iou_multiplier - swap_data[obj_index]);
+          } else {
+            diff[obj_index] = (-1) * object_scale_ * (1 - swap_data[obj_index]);
+          }
 
-          delta_region_class_v3(swap_data, diff, index + 5 * stride, best_class,
-                                num_class_, class_scale_, &avg_cat, stride,
+          delta_region_class_v3(swap_data, diff, class_index, best_class,
+                                num_class_, class_scale_, nullptr, stride,
                                 use_focal_loss_, label_smooth_eps_);
+          if (objectness_smooth_) {
+            diff[class_index + best_class * stride] =
+                (-1) *
+                (iou_multiplier - swap_data[class_index + best_class * stride]);
+          }
           delta_region_box(
-              best_truth, swap_data, biases_, mask_[n], index, x2, y2, side_w_,
-              side_h_, side_w_ * anchors_scale_, side_h_ * anchors_scale_, diff,
+              best_truth, swap_data, biases_, mask_[n], coord_index, x2, y2,
+              side_w_, side_h_, side_w_ * anchors_scale_,
+              side_h_ * anchors_scale_, diff,
               coord_scale_ * (2 - best_truth.w * best_truth.h), stride,
               iou_loss_, iou_normalizer_, max_delta_, accumulate_);
         }
@@ -655,17 +766,14 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     int mask_n;
     for (int t = 0; t < 300; ++t) {
       int class_label = label_data[b * 300 * 5 + t * 5 + 0];
-      float x = label_data[b * 300 * 5 + t * 5 + 1];
-      float y = label_data[b * 300 * 5 + t * 5 + 2];
-      float w = label_data[b * 300 * 5 + t * 5 + 3];
-      float h = label_data[b * 300 * 5 + t * 5 + 4];
+      truth.x = label_data[b * 300 * 5 + t * 5 + 1];
+      truth.y = label_data[b * 300 * 5 + t * 5 + 2];
+      truth.w = label_data[b * 300 * 5 + t * 5 + 3];
+      truth.h = label_data[b * 300 * 5 + t * 5 + 4];
 
-      if (!w)
+      if (!truth.w)
         break;
-      truth.x = x;
-      truth.y = y;
-      truth.w = w;
-      truth.h = h;
+
       float best_iou = 0;
       int best_index = 0;
       int best_n = -1;
@@ -674,8 +782,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       int pos = j * side_w_ + i;
       truth_shift.x = 0;
       truth_shift.y = 0;
-      truth_shift.w = w;
-      truth_shift.h = h;
+      truth_shift.w = truth.w;
+      truth_shift.h = truth.h;
 
       // LOG(INFO) << j << "," << i << "," << anchors_scale_;
       // find the best anchor matches label,
@@ -698,31 +806,37 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         // LOG(INFO) << best_n;
         best_index = b * bottom[0]->count(1) + best_n * len * stride + pos;
 
-        iou = delta_region_box(
+        ious all_ious = delta_region_box(
             truth, swap_data, biases_, mask_[best_n], best_index, i, j, side_w_,
             side_h_, side_w_ * anchors_scale_, side_h_ * anchors_scale_, diff,
             coord_scale_ * (2 - truth.w * truth.h), stride, iou_loss_,
             iou_normalizer_, max_delta_, accumulate_);
 
-        ATOMIC_UPDATE(mutex, {
-          if (iou > 0.5)
-            recall += 1;
-          if (iou > 0.75)
-            recall75 += 1;
-          avg_iou += iou;
-          avg_iou_loss += (1 - iou);
-          avg_obj += swap_data[best_index + 4 * stride];
-        })
         diff[best_index + 4 * stride] =
             (-1.0) * (1 - swap_data[best_index + 4 * stride]) * object_scale_;
 
         delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
-                              class_label, num_class_, class_scale_, &avg_cat,
-                              stride, use_focal_loss_,
+                              class_label, num_class_, class_scale_,
+                              &statistic.avg_cat, stride, use_focal_loss_,
                               label_smooth_eps_); // softmax_tree_
+
         ATOMIC_UPDATE(mutex, {
-          ++count;
-          ++class_count_;
+          ++statistic.count;
+          ++statistic.class_count;
+          if (all_ious.iou > 0.5)
+            statistic.recall += 1;
+          if (all_ious.iou > 0.75)
+            statistic.recall75 += 1;
+          statistic.tot_iou += all_ious.iou;
+          statistic.tot_iou_loss += 1 - all_ious.iou;
+          statistic.tot_giou += all_ious.giou;
+          statistic.tot_giou_loss += 1 - all_ious.giou;
+          statistic.tot_ciou += all_ious.ciou;
+          statistic.tot_ciou_loss += 1 - all_ious.ciou;
+          statistic.tot_diou += all_ious.diou;
+          statistic.tot_diou_loss += 1 - all_ious.diou;
+
+          statistic.avg_obj += swap_data[best_index + 4 * stride];
         })
       }
 
@@ -740,23 +854,14 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
           if (iou > iou_thresh_) {
             bool overlap = false;
             // LOG(INFO) << best_n;
-            best_index = mask_n * len * stride + pos + b * bottom[0]->count(1);
+            best_index = b * bottom[0]->count(1) + mask_n * len * stride + pos;
 
-            iou = delta_region_box(
+            ious all_ious = delta_region_box(
                 truth, swap_data, biases_, mask_[mask_n], best_index, i, j,
                 side_w_, side_h_, side_w_ * anchors_scale_,
                 side_h_ * anchors_scale_, diff,
                 coord_scale_ * (2 - truth.w * truth.h), stride, iou_loss_,
                 iou_normalizer_, max_delta_, accumulate_);
-            ATOMIC_UPDATE(mutex, {
-              if (iou > 0.5)
-                recall += 1;
-              if (iou > 0.75)
-                recall75 += 1;
-              avg_iou += iou;
-              avg_iou_loss += (1 - iou);
-              avg_obj += swap_data[best_index + 4 * stride];
-            })
             diff[best_index + 4 * stride] =
                 (-1.0) * (1 - swap_data[best_index + 4 * stride]) *
                 object_scale_;
@@ -766,81 +871,125 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
             delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
                                   class_label, num_class_, class_scale_,
-                                  &avg_cat, stride, use_focal_loss_,
+                                  &statistic.avg_cat, stride, use_focal_loss_,
                                   label_smooth_eps_); // softmax_tree_
 
             ATOMIC_UPDATE(mutex, {
-              ++count;
-              ++class_count_;
+              ++statistic.count;
+              ++statistic.class_count;
+              if (all_ious.iou > 0.5)
+                statistic.recall += 1;
+              if (all_ious.iou > 0.75)
+                statistic.recall75 += 1;
+              statistic.tot_iou += all_ious.iou;
+              statistic.tot_iou_loss += 1 - all_ious.iou;
+              statistic.tot_giou += all_ious.giou;
+              statistic.tot_giou_loss += 1 - all_ious.giou;
+              statistic.tot_ciou += all_ious.ciou;
+              statistic.tot_ciou_loss += 1 - all_ious.ciou;
+              statistic.tot_diou += all_ious.diou;
+              statistic.tot_diou_loss += 1 - all_ious.diou;
+
+              statistic.avg_obj += swap_data[best_index + 4 * stride];
             })
           }
         }
       }
     }
-  }) // end for loop
-  // LOG(INFO) << " ===================================================== " ;
-  if (iou_loss_ == MSE) {
-    for (int i = 0; i < diff_.count(); ++i) {
-      loss += diff[i] * diff[i];
-    }
-    top[0]->mutable_cpu_data()[0] = loss / bottom[0]->num();
-  } else {
-    for (int b = 0; b < bottom[0]->num(); b++) {
-      for (int s = 0; s < stride; s++) {
-        for (int n = 0; n < num_; n++) {
-          int index = n * len * stride + s + b * bottom[0]->count(1);
-          for (int c = 0; c < len; ++c) {
-            int index2 = c * stride + index;
-            // LOG(INFO)<<index2;
-            if (c < 4) {
-              swap_data[index2] = (input_data[index2 + 0]);
-            } else {
-              loss += diff[index2] * diff[index2];
-            }
-          }
-        }
+
+    // averages the deltas obtained by the function: delta_yolo_box()_accumulate
+    for (int s = 0; s < stride; ++s) {
+      for (int n = 0; n < num_; n++) {
+        int index = b * bottom[0]->count(1) + n * len * stride + s;
+        averages_yolo_deltas(index + 5 * stride, index + 0 * stride, stride,
+                             num_class_, diff);
       }
     }
-    // LOG(INFO) << avg_iou_loss;
-    if (count > 0) {
-      loss += iou_normalizer_ * avg_iou_loss / count;
+  }) // end for loop
+  if (statistic.count == 0)
+    statistic.count = 1;
+  if (statistic.class_count == 0)
+    statistic.class_count = 1;
+  // LOG(INFO) << " ===================================================== " ;
+  Dtype *no_iou_loss_delta = swap_.mutable_cpu_diff();
+  caffe_copy(swap_.count(), diff_.cpu_data(), no_iou_loss_delta);
+  for (int b = 0; b < swap_.num(); ++b) {
+    for (int s = 0; s < stride; ++s) {
+      for (int n = 0; n < num_; ++n) {
+        int index = b * swap_.count(1) + n * len * stride + s;
+        no_iou_loss_delta[index + 0 * stride] = 0;
+        no_iou_loss_delta[index + 1 * stride] = 0;
+        no_iou_loss_delta[index + 2 * stride] = 0;
+        no_iou_loss_delta[index + 3 * stride] = 0;
+      }
     }
-
-    top[0]->mutable_cpu_data()[0] = loss / bottom[0]->num();
   }
+  caffe_powx<Dtype>(swap_.count(), no_iou_loss_delta, 2, no_iou_loss_delta);
+  Dtype clz_loss = caffe_blas_asum(swap_.count(), no_iou_loss_delta);
+  // use this data again to prevent alloc mem
+  caffe_powx<Dtype>(swap_.count(), diff, 2, no_iou_loss_delta);
+  Dtype loss = caffe_blas_asum(swap_.count(), no_iou_loss_delta);
+  Dtype iou_loss = loss - clz_loss;
+  if (iou_loss_ == MSE) {
+    top[0]->mutable_cpu_data()[0] = loss / bottom[0]->num();
+  } else {
+    Dtype avg_iou_loss = 0;
+    if (iou_loss_ == GIOU) {
+      avg_iou_loss =
+          statistic.count > 0
+              ? iou_normalizer_ * (statistic.tot_giou_loss / statistic.count)
+              : 0;
+    } else {
+      avg_iou_loss =
+          statistic.count > 0
+              ? iou_normalizer_ * (statistic.tot_iou_loss / statistic.count)
+              : 0;
+    }
+    // LOG(INFO) << avg_iou_loss;
+    top[0]->mutable_cpu_data()[0] =
+        (avg_iou_loss + clz_loss) / bottom[0]->num();
+  }
+  loss /= bottom[0]->num();
+  clz_loss /= bottom[0]->num();
+  iou_loss /= bottom[0]->num();
   // LOG(INFO) << "avg_noobj: " << avg_anyobj / (side_ * side_ * num_ *
   // bottom[0]->num());
   iter_++;
   // LOG(INFO) << "iter: " << iter <<" loss: " << loss;
-  if (!(iter_ % display_)) {
-    if (time_count_ > 0) {
-      LOG(INFO) << std::fixed << std::setprecision(4)
-                << "noobj: " << score_.avg_anyobj / time_count_
-                << " obj: " << score_.avg_obj / time_count_
-                << " iou: " << score_.avg_iou / time_count_
-                << " cat: " << score_.avg_cat / time_count_
-                << " recall: " << score_.recall / time_count_
-                << " recall75: " << score_.recall75 / time_count_
-                << " count: " << class_count_ / time_count_;
-      // LOG(INFO) << "avg_noobj: "<<
-      // avg_anyobj/(side_*side_*num_*bottom[0]->num()) << " avg_obj: " <<
-      // avg_obj/count <<" avg_iou: " << avg_iou/count << " avg_cat: " <<
-      // avg_cat/class_count << " recall: " << recall/count << " recall75: " <<
-      // recall75 / count;
-      score_.avg_anyobj = score_.avg_obj = score_.avg_iou = score_.avg_cat =
-          score_.recall = score_.recall75 = 0;
-      class_count_ = 0;
-      time_count_ = 0;
-    }
+  if (!(iter_ % display_) && time_count_ > 0) {
+    LOG(INFO) << std::fixed << std::setprecision(4)
+              << "anyobj: " << score_.avg_anyobj / time_count_
+              << " obj: " << score_.avg_obj / time_count_
+              << " iou: " << score_.avg_iou / time_count_
+              << " cat: " << score_.avg_cat / time_count_
+              << " count: " << class_count_ / time_count_;
+    LOG(INFO) << std::fixed << std::setprecision(4)
+              << "recall: " << score_.recall / time_count_
+              << " recall75: " << score_.recall75 / time_count_
+              << " iou_loss: " << score_.iou_loss / time_count_
+              << " clz_loss: " << score_.clz_loss / time_count_
+              << " loss: " << score_.loss / time_count_;
+    // LOG(INFO) << "avg_noobj: "<<
+    // avg_anyobj/(side_*side_*num_*bottom[0]->num()) << " avg_obj: " <<
+    // avg_obj/count <<" avg_iou: " << avg_iou/count << " avg_cat: " <<
+    // avg_cat/class_count << " recall: " << recall/count << " recall75: " <<
+    // recall75 / count;
+    score_.avg_anyobj = score_.avg_obj = score_.avg_iou = score_.avg_cat =
+        score_.recall = score_.recall75 = 0;
+    class_count_ = 0;
+    time_count_ = 0;
   } else {
     score_.avg_anyobj +=
-        avg_anyobj / (side_w_ * side_h_ * num_ * bottom[0]->num());
-    if (count > 0) {
-      score_.avg_obj += avg_obj / count;
-      score_.avg_iou += avg_iou / count;
-      score_.avg_cat += avg_cat / count;
-      score_.recall += recall / count;
-      score_.recall75 += recall75 / count;
+        statistic.avg_anyobj / (side_w_ * side_h_ * num_ * bottom[0]->num());
+    if (statistic.count > 0) {
+      score_.avg_obj += statistic.avg_obj / statistic.count;
+      score_.avg_iou += statistic.tot_iou / statistic.count;
+      score_.avg_cat += statistic.avg_cat / statistic.count;
+      score_.recall += statistic.recall / statistic.count;
+      score_.recall75 += statistic.recall75 / statistic.count;
+      score_.loss += loss;
+      score_.clz_loss += clz_loss;
+      score_.iou_loss += iou_loss;
       time_count_++;
     }
   }
@@ -878,10 +1027,10 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
               int index2 = c * stride + index;
               // LOG(INFO)<<index2;
               if (c == 2 || c == 3) {
-                diff[index2] = diff[index2 + 0];
+                diff[index2] = diff[index2];
               } else {
-                diff[index2] = diff[index2 + 0] *
-                               caffe_fn_sigmoid_grad_fast(top_data[index2 + 0]);
+                diff[index2] =
+                    diff[index2] * caffe_fn_sigmoid_grad_fast(top_data[index2]);
               }
             }
           }

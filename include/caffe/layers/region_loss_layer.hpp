@@ -58,7 +58,10 @@ public:
   float avg_iou;
   float avg_cat;
   float recall;
-  float recall75, loss;
+  float recall75;
+  float loss;
+  float iou_loss;
+  float clz_loss;
 };
 
 template <typename Dtype>

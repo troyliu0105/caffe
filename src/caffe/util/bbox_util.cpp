@@ -40,7 +40,8 @@ template float box_intersection(vector<float> a, vector<float> b);
 template double box_intersection(vector<double> a, vector<double> b);
 
 float box_intersection(const box &a, const box &b) {
-  return box_intersection({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+  return box_intersection(vector<float>{a.x, a.y, a.w, a.h},
+                          vector<float>{b.x, b.y, b.w, b.h});
 }
 
 template <typename Dtype>
@@ -52,7 +53,8 @@ Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
 template float box_union(vector<float> a, vector<float> b);
 template double box_union(vector<double> a, vector<double> b);
 float box_union(const box &a, const box &b) {
-  return box_union({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+  return box_union(vector<float>{a.x, a.y, a.w, a.h},
+                   vector<float>{b.x, b.y, b.w, b.h});
 }
 template <typename Dtype>
 Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
@@ -61,7 +63,8 @@ Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
 template float box_iou(vector<float> a, vector<float> b);
 template double box_iou(vector<double> a, vector<double> b);
 float box_iou(const box &a, const box &b) {
-  return box_iou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+  return box_iou(vector<float>{a.x, a.y, a.w, a.h},
+                 vector<float>{b.x, b.y, b.w, b.h});
 }
 
 template <typename Dtype>
@@ -82,7 +85,8 @@ template float box_iou(vector<float> a, vector<float> b, IOU_LOSS type);
 template double box_iou(vector<double> a, vector<double> b, IOU_LOSS type);
 
 float box_iou(const box &a, const box &b, IOU_LOSS type) {
-  return box_iou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h}, type);
+  return box_iou(vector<float>{a.x, a.y, a.w, a.h},
+                 vector<float>{b.x, b.y, b.w, b.h}, type);
 }
 
 template <typename Dtype>
@@ -97,8 +101,9 @@ boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
 template boxabs box_c(vector<float> a, vector<float> b);
 template boxabs box_c(vector<double> a, vector<double> b);
 
-float box_c(const box &a, const box &b) {
-  return box_c({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+boxabs box_c(const box &a, const box &b) {
+  return box_c(vector<float>{a.x, a.y, a.w, a.h},
+               vector<float>{b.x, b.y, b.w, b.h});
 }
 
 // representation from x, y, w, h to top, left, bottom, right
@@ -117,7 +122,9 @@ boxabs to_tblr(vector<Dtype> a) {
 }
 template boxabs to_tblr(vector<float>);
 template boxabs to_tblr(vector<double>);
-boxabs to_tblr(const box &a) { return to_tblr({a.x, a.y, a.w, a.h}); }
+boxabs to_tblr(const box &a) {
+  return to_tblr(vector<float>{a.x, a.y, a.w, a.h});
+}
 
 template <typename Dtype>
 Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
@@ -138,7 +145,8 @@ template float box_giou(vector<float> a, vector<float> b);
 template double box_giou(vector<double> a, vector<double> b);
 
 float box_giou(const box &a, const box &b) {
-  return box_giou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+  return box_giou(vector<float>{a.x, a.y, a.w, a.h},
+                  vector<float>{b.x, b.y, b.w, b.h});
 }
 
 // https://github.com/Zzh-tju/DIoU-darknet
@@ -163,7 +171,8 @@ template float box_diou(vector<float> a, vector<float> b);
 template double box_diou(vector<double> a, vector<double> b);
 
 float box_diou(const box &a, const box &b) {
-  return box_giou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+  return box_giou(vector<float>{a.x, a.y, a.w, a.h},
+                  vector<float>{b.x, b.y, b.w, b.h});
 }
 
 // https://github.com/Zzh-tju/DIoU-darknet
@@ -192,7 +201,8 @@ template float box_ciou(vector<float> a, vector<float> b);
 template double box_ciou(vector<double> a, vector<double> b);
 
 float box_ciou(const box &a, const box &b) {
-  return box_giou({a.x, a.y, a.w, a.h}, {b.x, b.y, b.w, b.h});
+  return box_giou(vector<float>{a.x, a.y, a.w, a.h},
+                  vector<float>{b.x, b.y, b.w, b.h});
 }
 
 float box_diounms(vector<float> a, vector<float> b, float beta1) {

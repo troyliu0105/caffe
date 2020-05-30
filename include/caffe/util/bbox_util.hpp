@@ -39,11 +39,15 @@ typedef struct dxrep {
 
 // box.h
 typedef struct box {
+public:
+  explicit box() : x(0.F), y(0.F), w(0.F), h(0.F){};
+  explicit box(float x, float y, float w, float h) : x(x), y(y), w(y), h(h){};
   float x, y, w, h;
 } box;
 typedef struct ious {
   float iou, giou, diou, ciou;
   dxrep dx_iou;
+  dxrep dx_giou;
 } ious;
 typedef struct boxabs {
   float left, right, top, bot;
@@ -65,7 +69,7 @@ Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type);
 float box_iou(const box &a, const box &b, IOU_LOSS type);
 template <typename Dtype>
 boxabs box_c(vector<Dtype> a, vector<Dtype> b);
-float box_c(const box &a, const box &b);
+boxabs box_c(const box &a, const box &b);
 template <typename Dtype>
 boxabs to_tblr(vector<Dtype> a);
 boxabs to_tblr(const box &a);
