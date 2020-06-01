@@ -665,7 +665,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         int best_match_class = -1;
         box best_truth;
 
-        float best_match_iou;
+        float best_match_iou = 0;
         box best_match_truth;
         int x2 = s % side_w_;
         int y2 = s / side_w_;
@@ -974,8 +974,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     // avg_obj/count <<" avg_iou: " << avg_iou/count << " avg_cat: " <<
     // avg_cat/class_count << " recall: " << recall/count << " recall75: " <<
     // recall75 / count;
-    score_.avg_anyobj = score_.avg_obj = score_.avg_iou = score_.avg_cat =
-        score_.recall = score_.recall75 = 0;
+    score_ = {0};
     class_count_ = 0;
     time_count_ = 0;
   } else {
