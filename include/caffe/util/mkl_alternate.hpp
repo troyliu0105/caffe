@@ -23,7 +23,7 @@
       },                                                                       \
       tbb::auto_partitioner());
 #define FOR_LOOP(n, iname, operation)                                          \
-  FOR_LOOP_WITH_PREPARE(n, iname, operation, {})
+  FOR_LOOP_WITH_PREPARE(n, iname, operation, )
 #elif defined(USE_OMP)
 #ifdef _MSC_VER
 #define OMP_PRAGMA_FOR __pragma(omp parallel for)

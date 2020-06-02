@@ -2,10 +2,6 @@
 #include <io.h>
 #endif
 
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
@@ -34,6 +30,10 @@
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
 #include "caffe/util/io.hpp"
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 const int kProtoReadBytesLimit = INT_MAX; // Max size of 2 GB minus 1 byte.
 

@@ -4,6 +4,8 @@ build
 cmake-build*
 *CMakeFiles*
 third_party/*
+input
+out
 
 *.caffemodel
 *.solverstate

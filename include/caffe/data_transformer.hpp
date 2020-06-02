@@ -132,7 +132,9 @@ public:
   /**
    * @brief Apply distortion to the datum.
    */
-  void DistortImage(const Datum &datum, Datum *distort_datum, bool apply_noise = false);
+  void DistortImage(const Datum &datum, Datum *distort_datum);
+
+  void NoiseImage(const Datum &datum, Datum *noise_datum);
 
 #ifdef USE_OPENCV
   /**
@@ -274,6 +276,7 @@ protected:
   Phase phase_;
   Blob<Dtype> data_mean_;
   vector<Dtype> mean_values_;
+  shared_ptr<cv::Mat> cv_mean_;
 };
 
 } // namespace caffe

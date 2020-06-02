@@ -232,8 +232,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       this->layer_param_.annotated_data_param();
   const TransformationParameter &transform_param =
       this->layer_param_.transform_param();
-  AnnotatedDatum anno_datum;
-  anno_datum.ParseFromString(cursor_->value());
+  AnnotatedDatum anno_datum_peek;
+  anno_datum_peek.ParseFromString(cursor_->value());
   // Use data_transformer to infer the expected blob shape from anno_datum.
   int num_resize_policies = transform_param.resize_param_size();
   bool size_change = false;
@@ -252,8 +252,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     size_change = true;
   } else {
   }
-  vector<int> top_shape =
-      this->data_transformer_->InferBlobShape(anno_datum.datum(), policy_num_);
+  vector<int> top_shape = this->data_transformer_->InferBlobShape(
+      anno_datum_peek.datum(), policy_num_);
   // Reshape batch according to the batch_size.
   this->transformed_data_.Reshape(top_shape);
   top_shape[0] = batch_size;
@@ -276,6 +276,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   map<int, vector<AnnotationGroup>> all_anno;
   int num_bboxes = 0;
   NormalizedBBox crop_box;
+  AnnotatedDatum anno_datum;
   for (int item_id = 0; item_id < batch_size; ++item_id) {
     timer.Start();
     // get a anno_datum
@@ -286,28 +287,21 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     read_time += timer.MicroSeconds();
     timer.Start();
     // -------------------------------------------------------- distort & expand
-    AnnotatedDatum distort_datum;
-    AnnotatedDatum *expand_datum = nullptr;
-    if (transform_param.has_distort_param()) {
-      distort_datum.CopyFrom(anno_datum);
-      this->data_transformer_->DistortImage(anno_datum.datum(),
-                                            distort_datum.mutable_datum(), true);
-      if (transform_param.has_expand_param()) {
-        expand_datum = new AnnotatedDatum();
-        this->data_transformer_->ExpandImage(distort_datum, expand_datum);
-      } else {
-        expand_datum = &distort_datum;
-      }
+    AnnotatedDatum distort_datum(anno_datum);
+    AnnotatedDatum *expand_datum;
+    this->data_transformer_->DistortImage(anno_datum.datum(),
+                                          distort_datum.mutable_datum());
+    // Noise is used in Transform
+    //    this->data_transformer_->NoiseImage(distort_datum.datum(),
+    //                                        distort_datum.mutable_datum());
+    if (transform_param.has_expand_param()) {
+      expand_datum = new AnnotatedDatum();
+      this->data_transformer_->ExpandImage(anno_datum, expand_datum);
     } else {
-      if (transform_param.has_expand_param()) {
-        expand_datum = new AnnotatedDatum();
-        this->data_transformer_->ExpandImage(anno_datum, expand_datum);
-      } else {
-        expand_datum = &anno_datum;
-      }
+      expand_datum = &anno_datum;
     }
     // ------------------------------------------------------------------ sample
-    AnnotatedDatum *sampled_datum = nullptr;
+    AnnotatedDatum *sampled_datum;
     bool has_sampled = false;
     if (!batch_samplers_.empty() || yolo_data_jitter_) {
       // Generate sampled bboxes from expand_datum.
@@ -634,9 +628,9 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   iters_++;
   timer.Stop();
   batch_timer.Stop();
-  DLOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
-  DLOG(INFO) << "     Read time: " << read_time / 1000 << " ms.";
-  DLOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
+  LOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
+  LOG(INFO) << "     Read time: " << read_time / 1000 << " ms.";
+  LOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
 }
 template <typename Dtype>
 void AnnotatedDataLayer<Dtype>::Next() {

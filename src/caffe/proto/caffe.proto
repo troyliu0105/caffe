@@ -524,6 +524,7 @@ message Yolov3Parameter {
     }
     optional ARC arc = 21 [default = DEFAULT];
     optional uint32 display = 22 [default = 64];
+    optional bool objectness_smooth = 23 [default = false];
 }
 message RegionLossParameter {
     //Yolo 9000

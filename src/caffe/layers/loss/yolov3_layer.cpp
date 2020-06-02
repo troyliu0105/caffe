@@ -486,7 +486,7 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   thresh_ = param.thresh();                 // 0.6
 
   adversarial_ = false;
-  objectness_smooth_ = true;
+  objectness_smooth_ = param.objectness_smooth();
   use_logic_gradient_ = param.use_logic_gradient();
   use_focal_loss_ = param.use_focal_loss();
   iou_loss_ = (IOU_LOSS)param.iou_loss();
@@ -672,7 +672,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         get_region_box(&pred, swap_data, biases_, mask_[n], coord_index, x2, y2,
                        side_w_, side_h_, side_w_ * anchors_scale_,
                        side_h_ * anchors_scale_, stride);
-        // responds every object in image
+        // find best respond gt box in image
         for (int t = 0; t < 300; ++t) {
           int class_id = label_data[b * 300 * 5 + t * 0];
           Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
@@ -707,6 +707,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         ATOMIC_UPDATE(mutex, statistic.avg_anyobj += swap_data[obj_index])
         diff[obj_index] = (-1) * (0 - swap_data[obj_index]) * noobject_scale_;
         if (best_iou > thresh_) {
+          // ================================================== alexeyAB version
           if (objectness_smooth_) {
             const float iou_multiplier = best_match_iou * best_match_iou;
             diff[obj_index] = (-1) * (iou_multiplier - swap_data[obj_index]) *
@@ -716,20 +717,6 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                         swap_data[class_index + best_match_class * stride]);
           } else {
             diff[index + 4 * stride] = 0;
-          }
-        } else if (adversarial_) {
-          float scale = pred.w * pred.h;
-          if (scale > 0)
-            scale = sqrt(scale);
-          diff[obj_index] =
-              (-1) * scale * noobject_scale_ * (0 - swap_data[obj_index]);
-          for (int clz_id = 0; clz_id < num_class_; ++clz_id) {
-            if (swap_data[class_index + clz_id * stride] *
-                    swap_data[obj_index] >
-                0.25) {
-              diff[class_index + clz_id * stride] =
-                  (-1) * scale * (0 - swap_data[class_index + clz_id * stride]);
-            }
           }
         }
         if (best_iou > 1) {
@@ -842,6 +829,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
       // if the rest anchor, which iou is larger than threshold,
       // it is also the positive sample
+      // ====================================================== alexeyAB version
       for (int n = 0; n < biases_size_; ++n) {
         mask_n = int_index(mask_, n, num_);
         if (mask_n >= 0 && n != best_n && iou_thresh_ < 1.0f) {
@@ -989,6 +977,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       score_.loss += loss;
       score_.clz_loss += clz_loss;
       score_.iou_loss += iou_loss;
+      class_count_ += statistic.class_count;
       time_count_++;
     }
   }

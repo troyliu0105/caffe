@@ -5,8 +5,10 @@
 
 #include <boost/thread.hpp>
 #include <cstdio>
+#include <cstdlib>
 #include <ctime>
 #include <glog/logging.h>
+#include <opencv2/opencv.hpp>
 
 #include "caffe/common.hpp"
 #include "caffe/util/rng.hpp"
@@ -59,13 +61,27 @@ void GlobalInit(int *pargc, char ***pargv) {
 
 Caffe::Caffe()
     : random_generator_(), mode_(Caffe::CPU), solver_count_(1), solver_rank_(0),
-      multiprocess_(false) {}
+      multiprocess_(false) {
+  int nt = 1;
+  char *num_threads = nullptr;
+  if (num_threads = std::getenv("OMP_NUM_THREADS")) {
+  } else if (num_threads = std::getenv("TBB_NUM_THREADS")) {
+  } else if (num_threads = std::getenv("OPENBLAS_NUM_THREADS")) {
+  }
+  if (num_threads) {
+    nt = std::atoi(num_threads);
+  }
+
+  cv::setNumThreads(nt);
+  cv::setUseOptimized(true);
+}
 
 Caffe::~Caffe() = default;
 
 void Caffe::set_random_seed(const unsigned int seed) {
   // RNG seed
   Get().random_generator_.reset(new RNG(seed));
+  cv::setRNGSeed(seed);
 }
 
 void Caffe::SetDevice(const int device_id) { NO_GPU; }
@@ -121,6 +137,18 @@ Caffe::Caffe()
           curand_generator_, cluster_seedgen()) != CURAND_STATUS_SUCCESS) {
     LOG(ERROR) << "Cannot create Curand generator. Curand won't be available.";
   }
+  int nt = 1;
+  char *num_threads = nullptr;
+  if (num_threads = std::getenv("OMP_NUM_THREADS")) {
+  } else if (num_threads = std::getenv("TBB_NUM_THREADS")) {
+  } else if (num_threads = std::getenv("OPENBLAS_NUM_THREADS")) {
+  }
+  if (num_threads) {
+    nt = std::atoi(num_threads);
+  }
+
+  cv::setNumThreads(nt);
+  cv::setUseOptimized(true);
 }
 
 Caffe::~Caffe() {
@@ -145,6 +173,7 @@ void Caffe::set_random_seed(const unsigned int seed) {
   }
   // RNG seed
   Get().random_generator_.reset(new RNG(seed));
+  cv::setRNGSeed(seed);
 }
 
 void Caffe::SetDevice(const int device_id) {
