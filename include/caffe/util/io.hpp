@@ -322,6 +322,8 @@ void EncodeCVMatToDatumSeg(const cv::Mat &cv_img, const string &encoding,
                            Datum *datum);
 void CVMatToDatum(const cv::Mat &cv_img, Datum *datum);
 void CVMatToDatumSeg(const cv::Mat &cv_img, Datum *datum);
+
+cv::Mat DatumToCVMat(const Datum &datum);
 #endif // USE_OPENCV
 
 } // namespace caffe

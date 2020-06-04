@@ -944,16 +944,14 @@ void CVMatToDatumSeg(const cv::Mat &cv_img, Datum *datum) {
   int datum_width = datum->width();
   int datum_size = datum_channels * datum_height * datum_width;
   std::string buffer(datum_size, ' ');
-  for (int h = 0; h < datum_height; ++h) {
-    const uchar *ptr = cv_img.ptr<uchar>(h);
-    int img_index = 0;
-    for (int w = 0; w < datum_width; ++w) {
-      for (int c = 0; c < datum_channels; ++c) {
-        int datum_index = (c * datum_height + h) * datum_width + w;
-        buffer[datum_index] = static_cast<char>(ptr[img_index++]);
-      }
-    }
+
+  vector<cv::Mat> mats;
+  mats.reserve(datum_channels);
+  for (int c = 0; c < datum_channels; ++c) {
+    mats.emplace_back(datum_height, datum_width, CV_8UC1,
+                      &buffer[0] + c * datum_height * datum_width);
   }
+  cv::split(cv_img, mats);
   datum->set_seg_label(buffer);
 }
 void CVMatToDatum(const cv::Mat &cv_img, Datum *datum) {
@@ -969,17 +967,45 @@ void CVMatToDatum(const cv::Mat &cv_img, Datum *datum) {
   int datum_width = datum->width();
   int datum_size = datum_channels * datum_height * datum_width;
   std::string buffer(datum_size, ' ');
-  for (int h = 0; h < datum_height; ++h) {
-    const uchar *ptr = cv_img.ptr<uchar>(h);
-    int img_index = 0;
-    for (int w = 0; w < datum_width; ++w) {
-      for (int c = 0; c < datum_channels; ++c) {
-        int datum_index = (c * datum_height + h) * datum_width + w;
-        buffer[datum_index] = static_cast<char>(ptr[img_index++]);
-      }
+
+  vector<cv::Mat> mats;
+  mats.reserve(datum_channels);
+  for (int c = 0; c < datum_channels; ++c) {
+    mats.emplace_back(datum_height, datum_width, CV_8UC1,
+                      &buffer[0] + c * datum_height * datum_width);
+  }
+  cv::split(cv_img, mats);
+  datum->set_data(buffer);
+}
+
+cv::Mat DatumToCVMat(const Datum &datum) {
+  CHECK(datum.has_data() || datum.float_data_size() > 0)
+      << "Datum must have data or float_data";
+  CHECK_EQ(datum.channels(), 3);
+  if (datum.encoded()) {
+    return DecodeDatumToCVMatNative(datum);
+  }
+  cv::Mat mat;
+  const int channel = datum.channels();
+  const int height = datum.height();
+  const int width = datum.width();
+  vector<cv::Mat> channel_mats;
+  channel_mats.reserve(channel);
+  if (datum.has_data()) {
+    auto data = datum.data();
+    for (int c = 0; c < channel; ++c) {
+      channel_mats.emplace_back(height, width, CV_8UC1,
+                                &data[0] + c * height * width);
+    }
+  } else {
+    auto data = datum.float_data().data();
+    for (int c = 0; c < channel; ++c) {
+      channel_mats.emplace_back(height, width, CV_32FC1,
+                                const_cast<float *>(data + c * height * width));
     }
   }
-  datum->set_data(buffer);
+  cv::merge(channel_mats, mat);
+  return mat;
 }
 #endif // USE_OPENCV
 } // namespace caffe

@@ -147,6 +147,7 @@ Caffe::Caffe()
     nt = std::atoi(num_threads);
   }
 
+  LOG(INFO) << "Set Opencv threads: " << nt;
   cv::setNumThreads(nt);
   cv::setUseOptimized(true);
 }

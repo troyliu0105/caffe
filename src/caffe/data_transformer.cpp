@@ -19,26 +19,54 @@ static int iter_count = 0;
 
 namespace caffe {
 
-void convert_datum2mat(const Datum &datum, cv::Mat *mat, bool use_uint8) {
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
-  const int datum_channels = datum.channels();
-  vector<cv::Mat> datum_mats;
-  for (int c = 0; c < datum_channels; ++c) {
-    if (use_uint8) {
-      datum_mats.emplace_back(
-          datum_height, datum_width, CV_8UC1,
-          const_cast<char *>(datum.data().c_str() +
-                             c * datum_height * datum_width));
-    } else {
-      datum_mats.emplace_back(
-          datum_height, datum_width, CV_32FC1,
-          const_cast<float *>(datum.float_data().data() +
-                              c * datum_height * datum_width));
-    }
-  }
-  cv::merge(datum_mats, *mat);
+#pragma region helpers
+static void rotate(cv::Mat &src, int angle) {
+  // get rotation matrix for rotating the image around its center
+  cv::Point2f center(src.cols / 2.0, src.rows / 2.0);
+  cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
+  // determine bounding rectangle
+  cv::Rect bbox = cv::RotatedRect(center, src.size(), angle).boundingRect();
+  // adjust transformation matrix
+  rot.at<double>(0, 2) += bbox.width / 2.0 - center.x;
+  rot.at<double>(1, 2) += bbox.height / 2.0 - center.y;
+  cv::warpAffine(src, src, rot, bbox.size());
 }
+
+static void resize(cv::Mat &cv_img, int smallest_side) {
+  int cur_width = cv_img.cols;
+  int cur_height = cv_img.rows;
+  cv::Size dsize;
+  if (cur_height <= cur_width) {
+    double k = ((double)cur_height) / smallest_side;
+    int new_size = (int)ceil(cur_width / k);
+    dsize = cv::Size(new_size, smallest_side);
+  } else {
+    double k = ((double)cur_width) / smallest_side;
+    int new_size = (int)ceil(cur_height / k);
+    dsize = cv::Size(smallest_side, new_size);
+  }
+  cv::resize(cv_img, cv_img, dsize);
+}
+
+template <typename T>
+static std::tuple<int, int> get_cv_type(int channels) {
+  int type, ctype;
+  switch (sizeof(T)) {
+  case 4:
+    ctype = CV_32FC(channels);
+    type = CV_32FC1;
+    break;
+  case 8:
+    ctype = CV_64FC(channels);
+    type = CV_64FC1;
+    break;
+  default:
+    LOG(FATAL) << "DataTransformer Dtype can only be float or double";
+    break;
+  }
+  return std::make_tuple(type, ctype);
+}
+#pragma endregion
 
 template <typename Dtype>
 DataTransformer<Dtype>::DataTransformer(const TransformationParameter &param,
@@ -57,23 +85,13 @@ DataTransformer<Dtype>::DataTransformer(const TransformationParameter &param,
     data_mean_.FromProto(blob_proto);
     cv_mean_.reset(new cv::Mat());
     Dtype *mean_data = data_mean_.mutable_cpu_data();
+    auto [type, ctype] = get_cv_type<Dtype>(blob_proto.channels());
     vector<cv::Mat> mats;
-    int type;
-    switch (sizeof(Dtype)) {
-    case 4:
-      type = CV_32FC1;
-      break;
-    case 8:
-      type = CV_64FC1;
-      break;
-    default:
-      LOG(FATAL) << "DataTransformer Dtype can only be float or double";
-      break;
-    }
+    mats.reserve(blob_proto.channels());
     for (int c = 0; c < blob_proto.channels(); ++c) {
-      cv::Mat channel(blob_proto.height(), blob_proto.width(), type, mean_data);
-      mats.push_back(channel);
-      mean_data += blob_proto.height() * blob_proto.width();
+      mats.emplace_back(blob_proto.height(), blob_proto.width(), type,
+                        mean_data +
+                            c * blob_proto.height() * blob_proto.width());
     }
     cv::merge(mats, *cv_mean_);
   }
@@ -84,18 +102,7 @@ DataTransformer<Dtype>::DataTransformer(const TransformationParameter &param,
     for (int c = 0; c < param_.mean_value_size(); ++c) {
       mean_values_.push_back(param_.mean_value(c));
     }
-    int type;
-    switch (sizeof(Dtype)) {
-    case 4:
-      type = CV_32FC(mean_values_.size());
-      break;
-    case 8:
-      type = CV_64FC(mean_values_.size());
-      break;
-    default:
-      LOG(FATAL) << "DataTransformer Dtype can only be float or double";
-      break;
-    }
+    auto [type, ctype] = get_cv_type<Dtype>(mean_values_.size());
     cv_mean_.reset(new cv::Mat(1, 1, type, mean_values_.data()));
   }
   // if (param_.has_resize_param()) {
@@ -106,6 +113,11 @@ DataTransformer<Dtype>::DataTransformer(const TransformationParameter &param,
     CHECK_GT(param_.expand_param().max_expand_ratio(), 1.);
   }
 }
+
+#pragma region datum_trans
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// Datum ↓↓↓ Transforms /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename Dtype>
 void DataTransformer<Dtype>::Transform(const Datum &datum,
@@ -128,21 +140,7 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   CHECK_GT(datum_channels, 0);
   CHECK_GE(datum_height, crop_size);
   CHECK_GE(datum_width, crop_size);
-
-  int type, ctype;
-  switch (sizeof(Dtype)) {
-  case 4:
-    ctype = CV_32FC(datum_channels);
-    type = CV_32FC1;
-    break;
-  case 8:
-    ctype = CV_64FC(datum_channels);
-    type = CV_64FC1;
-    break;
-  default:
-    LOG(FATAL) << "DataTransformer Dtype can only be float or double";
-    break;
-  }
+  auto [type, ctype] = get_cv_type<Dtype>(datum_channels);
   //  Dtype *mean = nullptr;
   if (has_mean_file) {
     //    CHECK_EQ(datum_channels, data_mean_.channels());
@@ -190,11 +188,11 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
   crop_bbox->set_xmax(Dtype(w_off + width) / datum_width);
   crop_bbox->set_ymax(Dtype(h_off + height) / datum_height);
 
-  cv::Mat datum_mat;
-  convert_datum2mat(datum, &datum_mat, has_uint8);
-  datum_mat.convertTo(datum_mat, ctype);
+  cv::Mat cv_img = DatumToCVMat(datum);
+  cv_img.convertTo(cv_img, ctype);
 
   vector<cv::Mat> transformed_mats;
+  transformed_mats.reserve(datum_channels);
   for (int c = 0; c < datum_channels; ++c) {
     transformed_mats.emplace_back(height, width, type,
                                   transformed_data + c * height * width);
@@ -204,20 +202,19 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
                crop_bbox->ymin() * datum_height,
                (crop_bbox->xmax() - crop_bbox->xmin()) * datum_width,
                (crop_bbox->ymax() - crop_bbox->ymin()) * datum_height);
-  datum_mat = datum_mat(roi);
+  cv_img = cv_img(roi);
   if (*do_mirror) {
-    cv::flip(datum_mat, datum_mat, 1);
+    cv::flip(cv_img, cv_img, 1);
   }
 
   if (has_mean_file || has_mean_values) {
-    if (datum_mat.size != cv_mean_->size) {
-      cv::resize(*cv_mean_, *cv_mean_,
-                 cv::Size(datum_mat.cols, datum_mat.rows));
+    if (cv_img.size != cv_mean_->size) {
+      cv::resize(*cv_mean_, *cv_mean_, cv::Size(cv_img.cols, cv_img.rows));
     }
-    cv::subtract(datum_mat, *cv_mean_, datum_mat);
+    cv_img -= *cv_mean_;
   }
-  datum_mat *= scale;
-  cv::split(datum_mat, transformed_mats);
+  cv_img *= scale;
+  cv::split(cv_img, transformed_mats);
 }
 
 template <typename Dtype>
@@ -236,61 +233,65 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
                                        bool *do_mirror, int policy_num) {
   // LOG(INFO) << policy_num;
   // If datum is encoded, decoded and transform the cv::image.
-  if (datum.encoded()) {
+  CHECK(!(param_.force_color() && param_.force_gray()))
+      << "cannot set both force_color and force_gray";
+
 #ifdef USE_OPENCV
-    CHECK(!(param_.force_color() && param_.force_gray()))
-        << "cannot set both force_color and force_gray";
-    cv::Mat cv_img;
+  cv::Mat cv_img;
+
+  if (datum.encoded()) {
     if (param_.force_color() || param_.force_gray()) {
       // If force_color then decode in color otherwise decode in gray.
       cv_img = DecodeDatumToCVMat(datum, param_.force_color());
     } else {
       cv_img = DecodeDatumToCVMatNative(datum);
     }
-    const bool aug_type = param_.enable_classf_aug();
-    // LOG(INFO) << aug_type;
-    // Transform the cv::image into blob.
-    if (aug_type) {
-      return Transform3(cv_img, transformed_blob);
-    } else {
-      return Transform(cv_img, transformed_blob, crop_bbox, do_mirror,
-                       policy_num);
+  } else {
+    cv_img = DatumToCVMat(datum);
+    if (param_.force_gray() && cv_img.channels() == 3) {
+      cv::cvtColor(cv_img, cv_img, cv::COLOR_BGR2GRAY);
     }
+    if (param_.force_color() && cv_img.channels() == 1) {
+      cv::cvtColor(cv_img, cv_img, cv::COLOR_GRAY2BGR);
+    }
+  }
+
+  if (param_.enable_classf_aug()) {
+    return Transform3(cv_img, transformed_blob);
+  } else {
+    return Transform(cv_img, transformed_blob, crop_bbox, do_mirror,
+                     policy_num);
+  }
 #else
-    LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
+  LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
 #endif // USE_OPENCV
-  } else {
-    if (param_.force_color() || param_.force_gray()) {
-      LOG(ERROR) << "force_color and force_gray only for encoded datum";
-    }
-  }
   // LOG(INFO) << "test";
-  const int crop_size = param_.crop_size();
-  const int datum_channels = datum.channels();
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
-
-  // Check dimensions.
-  const int num = transformed_blob->num();
-  const int channels = transformed_blob->channels();
-  const int height = transformed_blob->height();
-  const int width = transformed_blob->width();
-
-  CHECK_EQ(channels, datum_channels);
-  CHECK_LE(height, datum_height);
-  CHECK_LE(width, datum_width);
-  CHECK_GE(num, 1);
-
-  if (crop_size) {
-    CHECK_EQ(crop_size, height);
-    CHECK_EQ(crop_size, width);
-  } else {
-    CHECK_EQ(datum_height, height);
-    CHECK_EQ(datum_width, width);
-  }
-
-  Dtype *transformed_data = transformed_blob->mutable_cpu_data();
-  Transform(datum, transformed_data, crop_bbox, do_mirror);
+  //  const int crop_size = param_.crop_size();
+  //  const int datum_channels = datum.channels();
+  //  const int datum_height = datum.height();
+  //  const int datum_width = datum.width();
+  //
+  //  // Check dimensions.
+  //  const int num = transformed_blob->num();
+  //  const int channels = transformed_blob->channels();
+  //  const int height = transformed_blob->height();
+  //  const int width = transformed_blob->width();
+  //
+  //  CHECK_EQ(channels, datum_channels);
+  //  CHECK_LE(height, datum_height);
+  //  CHECK_LE(width, datum_width);
+  //  CHECK_GE(num, 1);
+  //
+  //  if (crop_size) {
+  //    CHECK_EQ(crop_size, height);
+  //    CHECK_EQ(crop_size, width);
+  //  } else {
+  //    CHECK_EQ(datum_height, height);
+  //    CHECK_EQ(datum_width, width);
+  //  }
+  //
+  //  Dtype *transformed_data = transformed_blob->mutable_cpu_data();
+  //  Transform(datum, transformed_data, crop_bbox, do_mirror);
 }
 
 template <typename Dtype>
@@ -322,399 +323,14 @@ void DataTransformer<Dtype>::Transform(const vector<Datum> &datum_vector,
     Transform(datum_vector[item_id], &uni_blob);
   }
 }
+////////////////////////////////////////////////////////////////////////////////
+#pragma endregion
 
-template <typename Dtype>
-void DataTransformer<Dtype>::Transform(
-    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
-    RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
-    bool *do_mirror, int policy_num) {
-  // Transform datum.
-  const Datum &datum = anno_datum.datum();
-  NormalizedBBox crop_bbox;
+#pragma region mat_trans
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// cvMat ↓↓↓ Transforms /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-  Transform(datum, transformed_blob, &crop_bbox, do_mirror, policy_num);
-
-  // Transform annotation.
-  const bool do_resize = true;
-  TransformAnnotation(anno_datum, do_resize, crop_bbox, *do_mirror,
-                      transformed_anno_group_all, policy_num);
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::Transform(
-    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
-    RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
-    int policy_num) {
-  bool do_mirror;
-
-  Transform(anno_datum, transformed_blob, transformed_anno_group_all,
-            &do_mirror, policy_num);
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::Transform(
-    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
-    vector<AnnotationGroup> *transformed_anno_vec, bool *do_mirror,
-    int policy_num) {
-  // LOG(INFO) << policy_num;
-  RepeatedPtrField<AnnotationGroup> transformed_anno_group_all;
-  Transform(anno_datum, transformed_blob, &transformed_anno_group_all,
-            do_mirror, policy_num);
-  for (int g = 0; g < transformed_anno_group_all.size(); ++g) {
-    transformed_anno_vec->push_back(transformed_anno_group_all.Get(g));
-  }
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::Transform(
-    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
-    vector<AnnotationGroup> *transformed_anno_vec, int policy_num) {
-  bool do_mirror;
-  // LOG(INFO) << policy_num;
-  Transform(anno_datum, transformed_blob, transformed_anno_vec, &do_mirror,
-            policy_num);
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::TransformAnnotation(
-    const AnnotatedDatum &anno_datum, const bool do_resize,
-    const NormalizedBBox &crop_bbox, const bool do_mirror,
-    RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
-    int policy_num) {
-  const int img_height = anno_datum.datum().height();
-  const int img_width = anno_datum.datum().width();
-  const int num_resize_policies = param_.resize_param_size();
-  // LOG(INFO) << policy_num;
-  // LOG(INFO) << img_width << "," << img_height;
-  if (anno_datum.type() == AnnotatedDatum_AnnotationType_BBOX ||
-      anno_datum.type() == AnnotatedDatum_AnnotationType_BBOXandSeg) {
-    // Go through each AnnotationGroup.
-    for (int g = 0; g < anno_datum.annotation_group_size(); ++g) {
-      const AnnotationGroup &anno_group = anno_datum.annotation_group(g);
-      AnnotationGroup transformed_anno_group;
-      // Go through each Annotation.
-      bool has_valid_annotation = false;
-      for (int a = 0; a < anno_group.annotation_size(); ++a) {
-        const Annotation &anno = anno_group.annotation(a);
-        const NormalizedBBox &bbox = anno.bbox();
-        // Adjust bounding box annotation.
-        NormalizedBBox resize_bbox = bbox;
-        if (do_resize && param_.resize_param_size()) {
-          CHECK_GT(img_height, 0);
-          CHECK_GT(img_width, 0);
-          UpdateBBoxByResizePolicy(param_.resize_param(policy_num), img_width,
-                                   img_height, &resize_bbox);
-        }
-        if (param_.has_emit_constraint() &&
-            !MeetEmitConstraint(crop_bbox, resize_bbox,
-                                param_.emit_constraint())) {
-          continue;
-        }
-        NormalizedBBox proj_bbox;
-        if (ProjectBBox(crop_bbox, resize_bbox, &proj_bbox)) {
-          has_valid_annotation = true;
-          Annotation *transformed_anno =
-              transformed_anno_group.add_annotation();
-          transformed_anno->set_instance_id(anno.instance_id());
-          NormalizedBBox *transformed_bbox = transformed_anno->mutable_bbox();
-          transformed_bbox->CopyFrom(proj_bbox);
-          if (do_mirror) {
-            Dtype temp = transformed_bbox->xmin();
-            transformed_bbox->set_xmin(1 - transformed_bbox->xmax());
-            transformed_bbox->set_xmax(1 - temp);
-          }
-          if (do_resize && param_.resize_param_size()) {
-            ExtrapolateBBox(param_.resize_param(policy_num), img_height,
-                            img_width, crop_bbox, transformed_bbox);
-          }
-        }
-        // LOG(INFO) << num_resize_policies;
-      }
-      // Save for output.
-      if (has_valid_annotation) {
-        transformed_anno_group.set_group_label(anno_group.group_label());
-        transformed_anno_group_all->Add()->CopyFrom(transformed_anno_group);
-      }
-    }
-  } else {
-    LOG(FATAL) << "Unknown annotation type.";
-  }
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::CropImage(const Datum &datum,
-                                       const NormalizedBBox &bbox,
-                                       Datum *crop_datum) {
-  // If datum is encoded, decode and crop the cv::image.
-  if (datum.encoded()) {
-#ifdef USE_OPENCV
-    CHECK(!(param_.force_color() && param_.force_gray()))
-        << "cannot set both force_color and force_gray";
-    cv::Mat cv_img;
-    if (param_.force_color() || param_.force_gray()) {
-      // If force_color then decode in color otherwise decode in gray.
-      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
-    } else {
-      cv_img = DecodeDatumToCVMatNative(datum);
-    }
-    // Crop the image.
-    cv::Mat crop_img;
-    CropImage(cv_img, bbox, &crop_img);
-    // Save the image into datum.
-    EncodeCVMatToDatum(crop_img, "jpg", crop_datum);
-    crop_datum->set_label(datum.label());
-
-    return;
-#else
-    LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
-#endif // USE_OPENCV
-  } else {
-    if (param_.force_color() || param_.force_gray()) {
-      LOG(ERROR) << "force_color and force_gray only for encoded datum";
-    }
-  }
-
-  const int datum_channels = datum.channels();
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
-
-  // Get the bbox dimension.
-  NormalizedBBox clipped_bbox;
-  ClipBBox(bbox, &clipped_bbox);
-  NormalizedBBox scaled_bbox;
-  ScaleBBox(clipped_bbox, datum_height, datum_width, &scaled_bbox);
-  const int w_off = static_cast<int>(scaled_bbox.xmin());
-  const int h_off = static_cast<int>(scaled_bbox.ymin());
-  const int width = static_cast<int>(scaled_bbox.xmax() - scaled_bbox.xmin());
-  const int height = static_cast<int>(scaled_bbox.ymax() - scaled_bbox.ymin());
-
-  // Crop the image using bbox.
-  crop_datum->set_channels(datum_channels);
-  crop_datum->set_height(height);
-  crop_datum->set_width(width);
-  crop_datum->set_label(datum.label());
-  crop_datum->clear_data();
-  crop_datum->clear_float_data();
-  crop_datum->set_encoded(false);
-
-  const int crop_datum_size = datum_channels * height * width;
-  std::string buffer(crop_datum_size, ' ');
-  vector<cv::Mat> crop_mats;
-  for (int c = 0; c < datum_channels; ++c) {
-    crop_mats.emplace_back(
-        height, width, CV_8UC1,
-        const_cast<char *>(buffer.c_str() + c * height * width));
-  }
-
-  cv::Mat datum_mat;
-  convert_datum2mat(datum, &datum_mat, true);
-  datum_mat = datum_mat(cv::Rect(w_off, h_off, w_off + width, h_off + height));
-
-  cv::split(datum_mat, crop_mats);
-
-  crop_datum->set_data(buffer);
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::CropImage(const AnnotatedDatum &anno_datum,
-                                       const NormalizedBBox &bbox,
-                                       AnnotatedDatum *cropped_anno_datum,
-                                       bool has_anno) {
-  // Crop the datum.
-  CropImage(anno_datum.datum(), bbox, cropped_anno_datum->mutable_datum());
-  if (has_anno) {
-    cropped_anno_datum->set_type(anno_datum.type());
-
-    // Transform the annotation according to crop_bbox.
-    const bool do_resize = false;
-    const bool do_mirror = false;
-    NormalizedBBox crop_bbox;
-    ClipBBox(bbox, &crop_bbox);
-    TransformAnnotation(anno_datum, do_resize, crop_bbox, do_mirror,
-                        cropped_anno_datum->mutable_annotation_group());
-  }
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::ExpandImage(const Datum &datum,
-                                         const float expand_ratio,
-                                         NormalizedBBox *expand_bbox,
-                                         Datum *expand_datum) {
-  // If datum is encoded, decode and crop the cv::image.
-  if (datum.encoded()) {
-#ifdef USE_OPENCV
-    CHECK(!(param_.force_color() && param_.force_gray()))
-        << "cannot set both force_color and force_gray";
-    cv::Mat cv_img;
-    if (param_.force_color() || param_.force_gray()) {
-      // If force_color then decode in color otherwise decode in gray.
-      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
-    } else {
-      cv_img = DecodeDatumToCVMatNative(datum);
-    }
-    // Expand the image.
-    cv::Mat expand_img;
-    ExpandImage(cv_img, expand_ratio, expand_bbox, &expand_img);
-    // Save the image into datum.
-    EncodeCVMatToDatum(expand_img, "jpg", expand_datum);
-    expand_datum->set_label(datum.label());
-    return;
-#else
-    LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
-#endif // USE_OPENCV
-  } else {
-    if (param_.force_color() || param_.force_gray()) {
-      LOG(ERROR) << "force_color and force_gray only for encoded datum";
-    }
-  }
-
-  const int datum_channels = datum.channels();
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
-
-  // Get the bbox dimension.
-  int height = static_cast<int>(datum_height * expand_ratio);
-  int width = static_cast<int>(datum_width * expand_ratio);
-  float h_off, w_off;
-  caffe_rng_uniform(1, 0.f, static_cast<float>(height - datum_height), &h_off);
-  caffe_rng_uniform(1, 0.f, static_cast<float>(width - datum_width), &w_off);
-  h_off = floor(h_off);
-  w_off = floor(w_off);
-  expand_bbox->set_xmin(-w_off / datum_width);
-  expand_bbox->set_ymin(-h_off / datum_height);
-  expand_bbox->set_xmax((width - w_off) / datum_width);
-  expand_bbox->set_ymax((height - h_off) / datum_height);
-
-  // Crop the image using bbox.
-  expand_datum->set_channels(datum_channels);
-  expand_datum->set_height(height);
-  expand_datum->set_width(width);
-  expand_datum->set_label(datum.label());
-  expand_datum->clear_data();
-  expand_datum->clear_float_data();
-  expand_datum->set_encoded(false);
-
-  const int expand_datum_size = datum_channels * height * width;
-  std::string buffer(expand_datum_size, ' ');
-  vector<cv::Mat> expand_mats;
-  cv::Mat expand_mat;
-  for (int c = 0; c < datum_channels; ++c) {
-    expand_mats.emplace_back(
-        height, width, CV_8UC1,
-        const_cast<char *>(buffer.c_str() + c * height * width));
-  }
-  cv::merge(expand_mats, expand_mat);
-
-  cv::Mat datum_mat;
-  convert_datum2mat(datum, &datum_mat, true);
-  datum_mat.copyTo(
-      expand_mat(cv::Rect(w_off, h_off, datum_width, datum_height)));
-
-  expand_datum->set_data(buffer);
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::ExpandImage(const AnnotatedDatum &anno_datum,
-                                         AnnotatedDatum *expanded_anno_datum) {
-  if (!param_.has_expand_param()) {
-    expanded_anno_datum->CopyFrom(anno_datum);
-    return;
-  }
-  const ExpansionParameter &expand_param = param_.expand_param();
-  const float expand_prob = expand_param.prob();
-  float prob;
-  caffe_rng_uniform(1, 0.f, 1.f, &prob);
-  if (prob > expand_prob) {
-    expanded_anno_datum->CopyFrom(anno_datum);
-    return;
-  }
-  const float max_expand_ratio = expand_param.max_expand_ratio();
-  if (fabs(max_expand_ratio - 1.) < 1e-2) {
-    expanded_anno_datum->CopyFrom(anno_datum);
-    return;
-  }
-  float expand_ratio;
-  caffe_rng_uniform(1, 1.f, max_expand_ratio, &expand_ratio);
-  // Expand the datum.
-  NormalizedBBox expand_bbox;
-  ExpandImage(anno_datum.datum(), expand_ratio, &expand_bbox,
-              expanded_anno_datum->mutable_datum());
-  expanded_anno_datum->set_type(anno_datum.type());
-
-  // Transform the annotation according to crop_bbox.
-  const bool do_resize = false;
-  const bool do_mirror = false;
-  TransformAnnotation(anno_datum, do_resize, expand_bbox, do_mirror,
-                      expanded_anno_datum->mutable_annotation_group());
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::DistortImage(const Datum &datum,
-                                          Datum *distort_datum) {
-  if (!param_.has_distort_param()) {
-    distort_datum->CopyFrom(datum);
-    return;
-  }
-  // If datum is encoded, decode and crop the cv::image.
-  if (datum.encoded()) {
-#ifdef USE_OPENCV
-    CHECK(!(param_.force_color() && param_.force_gray()))
-        << "cannot set both force_color and force_gray";
-    cv::Mat cv_img;
-    if (param_.force_color() || param_.force_gray()) {
-      // If force_color then decode in color otherwise decode in gray.
-      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
-    } else {
-      cv_img = DecodeDatumToCVMatNative(datum);
-    }
-    // Distort the image.
-    cv::Mat distort_img = ApplyDistort(cv_img, param_.distort_param());
-    // Save the image into datum.
-    EncodeCVMatToDatum(distort_img, "jpg", distort_datum);
-    distort_datum->set_label(datum.label());
-    return;
-#else
-    LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
-#endif // USE_OPENCV
-  } else {
-    LOG(ERROR) << "Only support encoded datum now";
-  }
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::NoiseImage(const Datum &datum,
-                                        Datum *noise_datum) {
-  if (!param_.has_noise_param()) {
-    noise_datum->CopyFrom(datum);
-    return;
-  }
-  // If datum is encoded, decode and crop the cv::image.
-  if (datum.encoded()) {
-#ifdef USE_OPENCV
-    CHECK(!(param_.force_color() && param_.force_gray()))
-        << "cannot set both force_color and force_gray";
-    cv::Mat cv_img;
-    if (param_.force_color() || param_.force_gray()) {
-      // If force_color then decode in color otherwise decode in gray.
-      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
-    } else {
-      cv_img = DecodeDatumToCVMatNative(datum);
-    }
-    // Noise the image.
-    cv::Mat noise_img = ApplyNoise(cv_img, param_.noise_param());
-    // Save the image into datum.
-    EncodeCVMatToDatum(noise_img, "jpg", noise_datum);
-    noise_datum->set_label(datum.label());
-    return;
-#else
-    LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
-#endif // USE_OPENCV
-  } else {
-    LOG(ERROR) << "Only support encoded datum now";
-  }
-}
-
-#ifdef USE_OPENCV
 template <typename Dtype>
 void DataTransformer<Dtype>::Transform(const vector<cv::Mat> &mat_vector,
                                        Blob<Dtype> *transformed_blob) {
@@ -733,34 +349,6 @@ void DataTransformer<Dtype>::Transform(const vector<cv::Mat> &mat_vector,
     uni_blob.set_cpu_data(transformed_blob->mutable_cpu_data() + offset);
     Transform(mat_vector[item_id], &uni_blob);
   }
-}
-
-void rotate(cv::Mat &src, int angle) {
-  // get rotation matrix for rotating the image around its center
-  cv::Point2f center(src.cols / 2.0, src.rows / 2.0);
-  cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
-  // determine bounding rectangle
-  cv::Rect bbox = cv::RotatedRect(center, src.size(), angle).boundingRect();
-  // adjust transformation matrix
-  rot.at<double>(0, 2) += bbox.width / 2.0 - center.x;
-  rot.at<double>(1, 2) += bbox.height / 2.0 - center.y;
-  cv::warpAffine(src, src, rot, bbox.size());
-}
-
-void resize(cv::Mat &cv_img, int smallest_side) {
-  int cur_width = cv_img.cols;
-  int cur_height = cv_img.rows;
-  cv::Size dsize;
-  if (cur_height <= cur_width) {
-    double k = ((double)cur_height) / smallest_side;
-    int new_size = (int)ceil(cur_width / k);
-    dsize = cv::Size(new_size, smallest_side);
-  } else {
-    double k = ((double)cur_width) / smallest_side;
-    int new_size = (int)ceil(cur_height / k);
-    dsize = cv::Size(smallest_side, new_size);
-  }
-  cv::resize(cv_img, cv_img, dsize);
 }
 
 template <typename Dtype>
@@ -921,20 +509,7 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
 
   CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
 
-  int type, ctype;
-  switch (sizeof(Dtype)) {
-  case 4:
-    ctype = CV_32FC(img_channels);
-    type = CV_32FC1;
-    break;
-  case 8:
-    ctype = CV_64FC(img_channels);
-    type = CV_64FC1;
-    break;
-  default:
-    LOG(FATAL) << "DataTransformer Dtype can only be float or double";
-    break;
-  }
+  auto [type, ctype] = get_cv_type<Dtype>(img_channels);
 
   //  Dtype *mean = nullptr;
   if (has_mean_file) {
@@ -991,12 +566,13 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
       cv::resize(*cv_mean_, *cv_mean_,
                  cv::Size(cv_cropped_img.cols, cv_cropped_img.rows));
     }
-    cv::subtract(cv_cropped_img, *cv_mean_, cv_cropped_img);
+    cv_cropped_img -= *cv_mean_;
   }
   cv_cropped_img *= scale;
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
   vector<cv::Mat> transformed_mats;
+  transformed_mats.reserve(img_channels);
   for (int c = 0; c < img_channels; ++c) {
     transformed_mats.emplace_back(height, width, type,
                                   transformed_data + c * height * width);
@@ -1035,33 +611,31 @@ void DataTransformer<Dtype>::Transform2(const std::vector<cv::Mat> &cv_imgs,
     CHECK_GE(num, 1);
     CHECK_GT(img_channels, 0);
     // LOG(INFO) << do_mirror;
-    MAKE_ATOMIC_VAR(int, maxima)
-    FOR_LOOP_WITH_PREPARE(
-        height, h,
-        {
-          const uchar *ptr = cv_img.ptr<uchar>(h);
-          int img_index = 0;
-          for (int w = 0; w < width; ++w) {
-            // for (int c = 0; c < img_channels; ++c) {
-            int c = i;
-            if (mirror_param_) {
-              top_index = (c * height + h) * width + (width - 1 - w);
-            } else {
-              top_index = (c * height + h) * width + w;
-            }
-            // LOG(INFO) << top_index;
-            // int top_index = (c * height + h) * width + w;
-            auto pixel = static_cast<Dtype>(ptr[img_index++]);
-            // if(pixel>0)
-            //  LOG(INFO) << pixel;
-            transformed_data[top_index] = pixel * scale;
-            // LOG(INFO) << transformed_data[top_index];
-            if (top_index > maxima)
-              maxima = top_index;
-            //}
-          }
-        },
-        int top_index)
+    int maxima = 0;
+    int top_index;
+    for (int h = 0; h < height; ++h) {
+      const uchar *ptr = cv_img.ptr<uchar>(h);
+      int img_index = 0;
+      for (int w = 0; w < width; ++w) {
+        // for (int c = 0; c < img_channels; ++c) {
+        int c = i;
+        if (mirror_param_) {
+          top_index = (c * height + h) * width + (width - 1 - w);
+        } else {
+          top_index = (c * height + h) * width + w;
+        }
+        // LOG(INFO) << top_index;
+        // int top_index = (c * height + h) * width + w;
+        auto pixel = static_cast<Dtype>(ptr[img_index++]);
+        // if(pixel>0)
+        //  LOG(INFO) << pixel;
+        transformed_data[top_index] = pixel * scale;
+        // LOG(INFO) << transformed_data[top_index];
+        if (top_index > maxima)
+          maxima = top_index;
+        //}
+      }
+    }
     // LOG(INFO)<<maxima;
   }
 }
@@ -1073,10 +647,10 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   // LOG(INFO) << policy_num;
   // Check dimensions.
   const int img_channels = cv_img.channels();
+  const int num = transformed_blob->num();
   const int channels = transformed_blob->channels();
   const int height = transformed_blob->height();
   const int width = transformed_blob->width();
-  const int num = transformed_blob->num();
   const bool cvt = param_.cvt_bgr2rgb();
   CHECK_GT(img_channels, 0);
   CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
@@ -1094,20 +668,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
 
   const int num_resize_policies = param_.resize_param_size();
 
-  int type, ctype;
-  switch (sizeof(Dtype)) {
-  case 4:
-    ctype = CV_32FC(img_channels);
-    type = CV_32FC1;
-    break;
-  case 8:
-    ctype = CV_64FC(img_channels);
-    type = CV_64FC1;
-    break;
-  default:
-    LOG(FATAL) << "DataTransformer Dtype can only be float or double";
-    break;
-  }
+  auto [type, ctype] = get_cv_type<Dtype>(img_channels);
   //  Dtype *mean = nullptr;
   if (has_mean_file) {
     //    CHECK_EQ(img_channels, data_mean_.channels());
@@ -1186,10 +747,10 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   crop_bbox->set_xmax(Dtype(w_off + width) / img_width);
   crop_bbox->set_ymax(Dtype(h_off + height) / img_height);
   // LOG(INFO)<<width <<","<<height;
-  if (has_mean_file) {
-    CHECK_EQ(cv_cropped_image.rows, data_mean_.height());
-    CHECK_EQ(cv_cropped_image.cols, data_mean_.width());
-  }
+  //  if (has_mean_file) {
+  //    CHECK_EQ(cv_cropped_image.rows, data_mean_.height());
+  //    CHECK_EQ(cv_cropped_image.cols, data_mean_.width());
+  //  }
   CHECK(cv_cropped_image.data);
 
   if (*do_mirror) {
@@ -1201,12 +762,13 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
       cv::resize(*cv_mean_, *cv_mean_,
                  cv::Size(cv_cropped_image.cols, cv_cropped_image.rows));
     }
-    cv::subtract(cv_cropped_image, *cv_mean_, cv_cropped_image);
+    cv_cropped_image -= *cv_mean_;
   }
   cv_cropped_image *= scale;
 
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
   vector<cv::Mat> transformed_mats;
+  transformed_mats.reserve(img_channels);
   for (int c = 0; c < img_channels; ++c) {
     transformed_mats.emplace_back(height, width, type,
                                   transformed_data + c * height * width);
@@ -1214,6 +776,430 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
 
   cv::split(cv_cropped_image, transformed_mats);
 }
+
+template <typename Dtype>
+void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
+                                       Blob<Dtype> *transformed_blob) {
+  NormalizedBBox crop_bbox;
+  bool do_mirror;
+  Transform(cv_img, transformed_blob, &crop_bbox, &do_mirror);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+#pragma endregion
+
+#pragma region annotation_trans
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////// Annotation ↓↓↓ Transforms ///////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename Dtype>
+void DataTransformer<Dtype>::Transform(
+    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
+    RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
+    bool *do_mirror, int policy_num) {
+  // Transform datum.
+  const Datum &datum = anno_datum.datum();
+  NormalizedBBox crop_bbox;
+
+  Transform(datum, transformed_blob, &crop_bbox, do_mirror, policy_num);
+
+  // Transform annotation.
+  const bool do_resize = true;
+  TransformAnnotation(anno_datum, do_resize, crop_bbox, *do_mirror,
+                      transformed_anno_group_all, policy_num);
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::Transform(
+    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
+    RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
+    int policy_num) {
+  bool do_mirror;
+
+  Transform(anno_datum, transformed_blob, transformed_anno_group_all,
+            &do_mirror, policy_num);
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::Transform(
+    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
+    vector<AnnotationGroup> *transformed_anno_vec, bool *do_mirror,
+    int policy_num) {
+  // LOG(INFO) << policy_num;
+  RepeatedPtrField<AnnotationGroup> transformed_anno_group_all;
+  Transform(anno_datum, transformed_blob, &transformed_anno_group_all,
+            do_mirror, policy_num);
+  for (int g = 0; g < transformed_anno_group_all.size(); ++g) {
+    transformed_anno_vec->push_back(transformed_anno_group_all.Get(g));
+  }
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::Transform(
+    const AnnotatedDatum &anno_datum, Blob<Dtype> *transformed_blob,
+    vector<AnnotationGroup> *transformed_anno_vec, int policy_num) {
+  bool do_mirror;
+  // LOG(INFO) << policy_num;
+  Transform(anno_datum, transformed_blob, transformed_anno_vec, &do_mirror,
+            policy_num);
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::TransformAnnotation(
+    const AnnotatedDatum &anno_datum, const bool do_resize,
+    const NormalizedBBox &crop_bbox, const bool do_mirror,
+    RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
+    int policy_num) {
+  const int img_height = anno_datum.datum().height();
+  const int img_width = anno_datum.datum().width();
+  const int num_resize_policies = param_.resize_param_size();
+  // LOG(INFO) << policy_num;
+  // LOG(INFO) << img_width << "," << img_height;
+  if (anno_datum.type() == AnnotatedDatum_AnnotationType_BBOX ||
+      anno_datum.type() == AnnotatedDatum_AnnotationType_BBOXandSeg) {
+    // Go through each AnnotationGroup.
+    for (int g = 0; g < anno_datum.annotation_group_size(); ++g) {
+      const AnnotationGroup &anno_group = anno_datum.annotation_group(g);
+      AnnotationGroup transformed_anno_group;
+      // Go through each Annotation.
+      bool has_valid_annotation = false;
+      for (int a = 0; a < anno_group.annotation_size(); ++a) {
+        const Annotation &anno = anno_group.annotation(a);
+        const NormalizedBBox &bbox = anno.bbox();
+        // Adjust bounding box annotation.
+        NormalizedBBox resize_bbox = bbox;
+        if (do_resize && param_.resize_param_size()) {
+          CHECK_GT(img_height, 0);
+          CHECK_GT(img_width, 0);
+          UpdateBBoxByResizePolicy(param_.resize_param(policy_num), img_width,
+                                   img_height, &resize_bbox);
+        }
+        if (param_.has_emit_constraint() &&
+            !MeetEmitConstraint(crop_bbox, resize_bbox,
+                                param_.emit_constraint())) {
+          continue;
+        }
+        NormalizedBBox proj_bbox;
+        if (ProjectBBox(crop_bbox, resize_bbox, &proj_bbox)) {
+          has_valid_annotation = true;
+          Annotation *transformed_anno =
+              transformed_anno_group.add_annotation();
+          transformed_anno->set_instance_id(anno.instance_id());
+          NormalizedBBox *transformed_bbox = transformed_anno->mutable_bbox();
+          transformed_bbox->CopyFrom(proj_bbox);
+          if (do_mirror) {
+            Dtype temp = transformed_bbox->xmin();
+            transformed_bbox->set_xmin(1 - transformed_bbox->xmax());
+            transformed_bbox->set_xmax(1 - temp);
+          }
+          if (do_resize && param_.resize_param_size()) {
+            ExtrapolateBBox(param_.resize_param(policy_num), img_height,
+                            img_width, crop_bbox, transformed_bbox);
+          }
+        }
+        // LOG(INFO) << num_resize_policies;
+      }
+      // Save for output.
+      if (has_valid_annotation) {
+        transformed_anno_group.set_group_label(anno_group.group_label());
+        transformed_anno_group_all->Add()->CopyFrom(transformed_anno_group);
+      }
+    }
+  } else {
+    LOG(FATAL) << "Unknown annotation type.";
+  }
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::CropImage(const AnnotatedDatum &anno_datum,
+                                       const NormalizedBBox &bbox,
+                                       AnnotatedDatum *cropped_anno_datum,
+                                       bool has_anno) {
+  // Crop the datum.
+  CropImage(anno_datum.datum(), bbox, cropped_anno_datum->mutable_datum());
+  if (has_anno) {
+    cropped_anno_datum->set_type(anno_datum.type());
+
+    // Transform the annotation according to crop_bbox.
+    const bool do_resize = false;
+    const bool do_mirror = false;
+    NormalizedBBox crop_bbox;
+    ClipBBox(bbox, &crop_bbox);
+    TransformAnnotation(anno_datum, do_resize, crop_bbox, do_mirror,
+                        cropped_anno_datum->mutable_annotation_group());
+  }
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::ExpandImage(const AnnotatedDatum &anno_datum,
+                                         AnnotatedDatum *expanded_anno_datum) {
+  if (!param_.has_expand_param()) {
+    expanded_anno_datum->CopyFrom(anno_datum);
+    return;
+  }
+  const ExpansionParameter &expand_param = param_.expand_param();
+  const float expand_prob = expand_param.prob();
+  float prob;
+  caffe_rng_uniform(1, 0.f, 1.f, &prob);
+  if (prob > expand_prob) {
+    expanded_anno_datum->CopyFrom(anno_datum);
+    return;
+  }
+  const float max_expand_ratio = expand_param.max_expand_ratio();
+  if (fabs(max_expand_ratio - 1.) < 1e-2) {
+    expanded_anno_datum->CopyFrom(anno_datum);
+    return;
+  }
+  float expand_ratio;
+  caffe_rng_uniform(1, 1.f, max_expand_ratio, &expand_ratio);
+  // Expand the datum.
+  NormalizedBBox expand_bbox;
+  ExpandImage(anno_datum.datum(), expand_ratio, &expand_bbox,
+              expanded_anno_datum->mutable_datum());
+  expanded_anno_datum->set_type(anno_datum.type());
+
+  // Transform the annotation according to crop_bbox.
+  const bool do_resize = false;
+  const bool do_mirror = false;
+  TransformAnnotation(anno_datum, do_resize, expand_bbox, do_mirror,
+                      expanded_anno_datum->mutable_annotation_group());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+#pragma endregion
+
+template <typename Dtype>
+void DataTransformer<Dtype>::CropImage(const Datum &datum,
+                                       const NormalizedBBox &bbox,
+                                       Datum *crop_datum) {
+  // If datum is encoded, decode and crop the cv::image.
+#ifdef USE_OPENCV
+  cv::Mat cv_img, crop_img;
+
+  if (datum.encoded()) {
+    CHECK(!(param_.force_color() && param_.force_gray()))
+        << "cannot set both force_color and force_gray";
+    if (param_.force_color() || param_.force_gray()) {
+      // If force_color then decode in color otherwise decode in gray.
+      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+    } else {
+      cv_img = DecodeDatumToCVMatNative(datum);
+    }
+    // Crop the image.
+    CropImage(cv_img, bbox, &crop_img);
+    // Save the image into datum.
+    EncodeCVMatToDatum(crop_img, "jpg", crop_datum);
+  } else {
+    //    if (param_.force_color() || param_.force_gray()) {
+    //      LOG(ERROR) << "force_color and force_gray only for encoded datum";
+    //    }
+    cv_img = DatumToCVMat(datum);
+    if (param_.force_gray() && cv_img.channels() == 3) {
+      cv::cvtColor(cv_img, cv_img, cv::COLOR_BGR2GRAY);
+    }
+    if (param_.force_color() && cv_img.channels() == 1) {
+      cv::cvtColor(cv_img, cv_img, cv::COLOR_GRAY2BGR);
+    }
+    CropImage(cv_img, bbox, &crop_img);
+    CVMatToDatum(crop_img, crop_datum);
+  }
+  crop_datum->set_label(datum.label());
+#else
+  LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
+#endif // USE_OPENCV
+  //  const int datum_channels = datum.channels();
+  //  const int datum_height = datum.height();
+  //  const int datum_width = datum.width();
+  //
+  //  // Get the bbox dimension.
+  //  NormalizedBBox clipped_bbox;
+  //  ClipBBox(bbox, &clipped_bbox);
+  //  NormalizedBBox scaled_bbox;
+  //  ScaleBBox(clipped_bbox, datum_height, datum_width, &scaled_bbox);
+  //  const int w_off = static_cast<int>(scaled_bbox.xmin());
+  //  const int h_off = static_cast<int>(scaled_bbox.ymin());
+  //  const int width = static_cast<int>(scaled_bbox.xmax() -
+  //  scaled_bbox.xmin()); const int height =
+  //  static_cast<int>(scaled_bbox.ymax() - scaled_bbox.ymin());
+  //
+  //  // Crop the image using bbox.
+  //  crop_datum->set_channels(datum_channels);
+  //  crop_datum->set_height(height);
+  //  crop_datum->set_width(width);
+  //  crop_datum->set_label(datum.label());
+  //  crop_datum->clear_data();
+  //  crop_datum->clear_float_data();
+  //  crop_datum->set_encoded(false);
+  //
+  //  const int crop_datum_size = datum_channels * height * width;
+  //  std::string buffer(crop_datum_size, ' ');
+  //  vector<cv::Mat> crop_mats;
+  //  for (int c = 0; c < datum_channels; ++c) {
+  //    crop_mats.emplace_back(height, width, CV_8UC1,
+  //                           &buffer[0] + c * height * width);
+  //  }
+  //
+  //  cv::Mat datum_mat = DatumToCVMat(datum);
+  //  datum_mat = datum_mat(cv::Rect(w_off, h_off, width, height));
+  //
+  //  cv::split(datum_mat, crop_mats);
+  //
+  //  crop_datum->set_data(buffer);
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::ExpandImage(const Datum &datum,
+                                         const float expand_ratio,
+                                         NormalizedBBox *expand_bbox,
+                                         Datum *expand_datum) {
+  // If datum is encoded, decode and crop the cv::image.
+#ifdef USE_OPENCV
+  cv::Mat cv_img, expand_img;
+  if (datum.encoded()) {
+    CHECK(!(param_.force_color() && param_.force_gray()))
+        << "cannot set both force_color and force_gray";
+    if (param_.force_color() || param_.force_gray()) {
+      // If force_color then decode in color otherwise decode in gray.
+      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+    } else {
+      cv_img = DecodeDatumToCVMatNative(datum);
+    }
+    // Expand the image.
+    ExpandImage(cv_img, expand_ratio, expand_bbox, &expand_img);
+    // Save the image into datum.
+    EncodeCVMatToDatum(expand_img, "jpg", expand_datum);
+  } else {
+    //    if (param_.force_color() || param_.force_gray()) {
+    //      LOG(ERROR) << "force_color and force_gray only for encoded datum";
+    //    }
+    cv_img = DatumToCVMat(datum);
+    if (param_.force_gray() && cv_img.channels() == 3) {
+      cv::cvtColor(cv_img, cv_img, cv::COLOR_BGR2GRAY);
+    }
+    if (param_.force_color() && cv_img.channels() == 1) {
+      cv::cvtColor(cv_img, cv_img, cv::COLOR_GRAY2BGR);
+    }
+    ExpandImage(cv_img, expand_ratio, expand_bbox, &expand_img);
+    CVMatToDatum(expand_img, expand_datum);
+  }
+  expand_datum->set_label(datum.label());
+#else
+  LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
+#endif // USE_OPENCV
+  //  const int datum_channels = datum.channels();
+  //  const int datum_height = datum.height();
+  //  const int datum_width = datum.width();
+  //
+  //  // Get the bbox dimension.
+  //  int height = static_cast<int>(datum_height * expand_ratio);
+  //  int width = static_cast<int>(datum_width * expand_ratio);
+  //  float h_off, w_off;
+  //  caffe_rng_uniform(1, 0.f, static_cast<float>(height - datum_height),
+  //  &h_off); caffe_rng_uniform(1, 0.f, static_cast<float>(width -
+  //  datum_width), &w_off); h_off = floor(h_off); w_off = floor(w_off);
+  //  expand_bbox->set_xmin(-w_off / datum_width);
+  //  expand_bbox->set_ymin(-h_off / datum_height);
+  //  expand_bbox->set_xmax((width - w_off) / datum_width);
+  //  expand_bbox->set_ymax((height - h_off) / datum_height);
+  //
+  //  // Crop the image using bbox.
+  //  expand_datum->set_channels(datum_channels);
+  //  expand_datum->set_height(height);
+  //  expand_datum->set_width(width);
+  //  expand_datum->set_label(datum.label());
+  //  expand_datum->clear_data();
+  //  expand_datum->clear_float_data();
+  //  expand_datum->set_encoded(false);
+  //
+  //  const int expand_datum_size = datum_channels * height * width;
+  //  std::string buffer(expand_datum_size, ' ');
+  //  vector<cv::Mat> expand_mats;
+  //  cv::Mat expand_mat;
+  //  for (int c = 0; c < datum_channels; ++c) {
+  //    expand_mats.emplace_back(height, width, CV_8UC1,
+  //                             &buffer[0] + c * height * width);
+  //  }
+  //  cv::merge(expand_mats, expand_mat);
+  //
+  //  cv::Mat datum_mat = DatumToCVMat(datum);
+  //  datum_mat.copyTo(
+  //      expand_mat(cv::Rect(w_off, h_off, datum_width, datum_height)));
+  //  cv::split(expand_mat, expand_mats);
+  //  expand_datum->set_data(buffer);
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::DistortImage(const Datum &datum,
+                                          Datum *distort_datum) {
+  if (!param_.has_distort_param()) {
+    distort_datum->CopyFrom(datum);
+    return;
+  }
+#ifdef USE_OPENCV
+  cv::Mat cv_img, distort_img;
+  // If datum is encoded, decode and crop the cv::image.
+  if (datum.encoded()) {
+    CHECK(!(param_.force_color() && param_.force_gray()))
+        << "cannot set both force_color and force_gray";
+    if (param_.force_color() || param_.force_gray()) {
+      // If force_color then decode in color otherwise decode in gray.
+      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+    } else {
+      cv_img = DecodeDatumToCVMatNative(datum);
+    }
+    // Distort the image.
+    distort_img = ApplyDistort(cv_img, param_.distort_param());
+    // Save the image into datum.
+    EncodeCVMatToDatum(distort_img, "jpg", distort_datum);
+  } else {
+    cv_img = DatumToCVMat(datum);
+    distort_img = ApplyDistort(cv_img, param_.distort_param());
+    CVMatToDatum(distort_img, distort_datum);
+  }
+  distort_datum->set_label(datum.label());
+#else
+  LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
+#endif // USE_OPENCV
+}
+
+template <typename Dtype>
+void DataTransformer<Dtype>::NoiseImage(const Datum &datum,
+                                        Datum *noise_datum) {
+  if (!param_.has_noise_param()) {
+    noise_datum->CopyFrom(datum);
+    return;
+  }
+#ifdef USE_OPENCV
+  cv::Mat cv_img, noise_img;
+  // If datum is encoded, decode and crop the cv::image.
+  if (datum.encoded()) {
+    CHECK(!(param_.force_color() && param_.force_gray()))
+        << "cannot set both force_color and force_gray";
+    if (param_.force_color() || param_.force_gray()) {
+      // If force_color then decode in color otherwise decode in gray.
+      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+    } else {
+      cv_img = DecodeDatumToCVMatNative(datum);
+    }
+    // Noise the image.
+    noise_img = ApplyNoise(cv_img, param_.noise_param());
+    // Save the image into datum.
+    EncodeCVMatToDatum(noise_img, "jpg", noise_datum);
+    noise_datum->set_label(datum.label());
+    return;
+  } else {
+    cv_img = DatumToCVMat(datum);
+    noise_img = ApplyNoise(cv_img, param_.noise_param());
+    CVMatToDatum(noise_img, noise_datum);
+    noise_datum->set_label(datum.label());
+  }
+#else
+  LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
+#endif // USE_OPENCV
+}
+
+#ifdef USE_OPENCV
 
 template <typename Dtype>
 void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
@@ -1224,20 +1210,7 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
   const bool has_mean_values = !mean_values_.empty();
   LOG(INFO) << "test";
 
-  int type, ctype;
-  switch (sizeof(Dtype)) {
-  case 4:
-    ctype = CV_32FC(channels);
-    type = CV_32FC1;
-    break;
-  case 8:
-    ctype = CV_64FC(channels);
-    type = CV_64FC1;
-    break;
-  default:
-    LOG(FATAL) << "DataTransformer Dtype can only be float or double";
-    break;
-  }
+  auto [type, ctype] = get_cv_type<Dtype>(channels);
   //  Dtype *mean = nullptr;
   if (has_mean_file) {
     //    CHECK_EQ(channels, data_mean_.channels());
@@ -1264,22 +1237,22 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
   cv::Mat orig_img(height, width, img_type, cv::Scalar(0, 0, 0));
 
   cv::Mat transformed_mat;
-  vector<cv::Mat> transformed_mats(channels);
+  vector<cv::Mat> transformed_mats;
+  transformed_mats.reserve(channels);
   for (int c = 0; c < channels; ++c) {
     transformed_mats.emplace_back(
         height, width, type, const_cast<Dtype *>(data + c * height * width));
   }
   cv::merge(transformed_mats, transformed_mat);
-  transformed_mat.copyTo(orig_img);
 
   transformed_mat /= scale;
   if (has_mean_file || has_mean_values) {
     if (transformed_mat.size != cv_mean_->size) {
-      cv::resize(*cv_mean_, *cv_mean_,
-                 cv::Size(transformed_mat.cols, transformed_mat.rows));
+      cv::resize(*cv_mean_, *cv_mean_, cv::Size(orig_img.cols, orig_img.rows));
     }
     transformed_mat += *cv_mean_;
   }
+  transformed_mat.convertTo(orig_img, img_type);
 
   if (param_.resize_param_size()) {
     *cv_img = ApplyResize(orig_img, param_.resize_param(0));
@@ -1304,14 +1277,6 @@ void DataTransformer<Dtype>::TransformInv(const Blob<Dtype> *blob,
     cv_imgs->push_back(cv_img);
     image_data += blob->offset(1);
   }
-}
-
-template <typename Dtype>
-void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
-                                       Blob<Dtype> *transformed_blob) {
-  NormalizedBBox crop_bbox;
-  bool do_mirror;
-  Transform(cv_img, transformed_blob, &crop_bbox, &do_mirror);
 }
 
 template <typename Dtype>
@@ -1364,6 +1329,7 @@ void DataTransformer<Dtype>::ExpandImage(const cv::Mat &img,
   const bool has_mean_file = param_.has_mean_file();
   const bool has_mean_values = !mean_values_.empty();
 
+  auto [type, ctype] = get_cv_type<Dtype>(img_channels);
   if (has_mean_file) {
     //    CHECK_EQ(img_channels, data_mean_.channels());
     //    CHECK_EQ(height, data_mean_.height());
@@ -1371,7 +1337,6 @@ void DataTransformer<Dtype>::ExpandImage(const cv::Mat &img,
     CHECK_EQ(img_channels, cv_mean_->channels());
     CHECK_EQ(height, cv_mean_->rows);
     CHECK_EQ(width, cv_mean_->cols);
-    cv_mean_->copyTo(*expand_img);
   }
   if (has_mean_values) {
     CHECK(mean_values_.size() == 1 || mean_values_.size() == img_channels)
@@ -1382,16 +1347,10 @@ void DataTransformer<Dtype>::ExpandImage(const cv::Mat &img,
       for (int c = 1; c < img_channels; ++c) {
         mean_values_.push_back(mean_values_[0]);
       }
+      cv_mean_.reset(new cv::Mat(1, 1, ctype, mean_values_.data()));
     }
-    vector<cv::Mat> channels(img_channels);
-    cv::split(*expand_img, channels);
-    CHECK_EQ(channels.size(), mean_values_.size());
-    for (int c = 0; c < img_channels; ++c) {
-      channels[c] = mean_values_[c];
-    }
-    cv::merge(channels, *expand_img);
   }
-
+  cv_mean_->convertTo(*expand_img, ctype);
   cv::Rect bbox_roi(w_off, h_off, img_width, img_height);
   img.copyTo((*expand_img)(bbox_roi));
 }

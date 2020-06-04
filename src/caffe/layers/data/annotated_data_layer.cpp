@@ -284,6 +284,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       Next();
     }
     anno_datum.ParseFromString(cursor_->value());
+    DecodeDatum(anno_datum.mutable_datum(), transform_param_.force_color());
     read_time += timer.MicroSeconds();
     timer.Start();
     // -------------------------------------------------------- distort & expand
@@ -628,9 +629,9 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   iters_++;
   timer.Stop();
   batch_timer.Stop();
-  LOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
-  LOG(INFO) << "     Read time: " << read_time / 1000 << " ms.";
-  LOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
+  DLOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
+  DLOG(INFO) << "     Read time: " << read_time / 1000 << " ms.";
+  DLOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
 }
 template <typename Dtype>
 void AnnotatedDataLayer<Dtype>::Next() {
