@@ -284,7 +284,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       Next();
     }
     anno_datum.ParseFromString(cursor_->value());
-    DecodeDatum(anno_datum.mutable_datum(), transform_param_.force_color());
+    DecodeDatum(anno_datum.mutable_datum(),
+                this->transform_param_.force_color());
     read_time += timer.MicroSeconds();
     timer.Start();
     // -------------------------------------------------------- distort & expand
@@ -297,9 +298,9 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     //                                        distort_datum.mutable_datum());
     if (transform_param.has_expand_param()) {
       expand_datum = new AnnotatedDatum();
-      this->data_transformer_->ExpandImage(anno_datum, expand_datum);
+      this->data_transformer_->ExpandImage(distort_datum, expand_datum);
     } else {
-      expand_datum = &anno_datum;
+      expand_datum = &distort_datum;
     }
     // ------------------------------------------------------------------ sample
     AnnotatedDatum *sampled_datum;
@@ -333,8 +334,9 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     vector<int> shape = this->data_transformer_->InferBlobShape(
         sampled_datum->datum(), policy_num_);
     // ------------------------------------------------------------------ resize
-    DLOG(INFO) << "Current shape: " << shape[0] << ", " << shape[1] << ", "
-               << shape[2] << ", " << shape[3];
+    //    DLOG(INFO) << "Current shape: " << shape[0] << ", " << shape[1] << ",
+    //    "
+    //               << shape[2] << ", " << shape[3];
     if (transform_param.resize_param_size()) {
       if (transform_param.resize_param(policy_num_).resize_mode() ==
           ResizeParameter_Resize_mode_FIT_SMALL_SIZE) {

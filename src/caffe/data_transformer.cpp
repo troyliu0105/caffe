@@ -13,10 +13,6 @@
 #include "caffe/util/rng.hpp"
 const double prob_eps = 0.01;
 
-#ifdef DEBUG
-static int iter_count = 0;
-#endif
-
 namespace caffe {
 
 #pragma region helpers
@@ -84,16 +80,17 @@ DataTransformer<Dtype>::DataTransformer(const TransformationParameter &param,
     ReadProtoFromBinaryFileOrDie(mean_file.c_str(), &blob_proto);
     data_mean_.FromProto(blob_proto);
     cv_mean_.reset(new cv::Mat());
-    Dtype *mean_data = data_mean_.mutable_cpu_data();
+    const Dtype *mean_data = data_mean_.cpu_data();
     auto [type, ctype] = get_cv_type<Dtype>(blob_proto.channels());
     vector<cv::Mat> mats;
     mats.reserve(blob_proto.channels());
     for (int c = 0; c < blob_proto.channels(); ++c) {
       mats.emplace_back(blob_proto.height(), blob_proto.width(), type,
-                        mean_data +
+                        const_cast<Dtype *>(mean_data) +
                             c * blob_proto.height() * blob_proto.width());
     }
     cv::merge(mats, *cv_mean_);
+    CHECK_EQ(cv_mean_->type(), ctype);
   }
   // check if we want to use mean_value
   if (param_.mean_value_size() > 0) {
@@ -103,7 +100,8 @@ DataTransformer<Dtype>::DataTransformer(const TransformationParameter &param,
       mean_values_.push_back(param_.mean_value(c));
     }
     auto [type, ctype] = get_cv_type<Dtype>(mean_values_.size());
-    cv_mean_.reset(new cv::Mat(1, 1, type, mean_values_.data()));
+    cv_mean_.reset(new cv::Mat(1, 1, ctype, mean_values_.data()));
+    CHECK_EQ(cv_mean_->type(), ctype);
   }
   // if (param_.has_resize_param()) {
   //  CHECK_GT(param_.resize_param().height(), 0);
@@ -211,6 +209,7 @@ void DataTransformer<Dtype>::Transform(const Datum &datum,
     if (cv_img.size != cv_mean_->size) {
       cv::resize(*cv_mean_, *cv_mean_, cv::Size(cv_img.cols, cv_img.rows));
     }
+    CHECK_EQ(cv_mean_->type(), cv_img.type());
     cv_img -= *cv_mean_;
   }
   cv_img *= scale;
@@ -556,11 +555,11 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
   }
 
   CHECK(cv_cropped_img.data);
+  cv_cropped_img.convertTo(cv_cropped_img, ctype);
 
   if (do_mirror) {
     cv::flip(cv_cropped_img, cv_cropped_img, 1);
   }
-  cv_cropped_img.convertTo(cv_cropped_img, ctype);
   if (has_mean_file || has_mean_values) {
     if (cv_cropped_img.size != cv_mean_->size) {
       cv::resize(*cv_mean_, *cv_mean_,
@@ -732,15 +731,6 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
     cv_cropped_image = cv_noised_image;
   }
 
-#ifdef DEBUG
-  char buf[1000];
-  sprintf(buf, "input/input_%05d.jpg", iter_count++);
-  if (*do_mirror) {
-    cv::flip(cv_cropped_image, cv_cropped_image, 1);
-  }
-  cv::imwrite(buf, cv_resized_image);
-#endif
-
   // Return the normalized crop bbox.
   crop_bbox->set_xmin(Dtype(w_off) / img_width);
   crop_bbox->set_ymin(Dtype(h_off) / img_height);
@@ -753,10 +743,20 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   //  }
   CHECK(cv_cropped_image.data);
 
+  cv_cropped_image.convertTo(cv_cropped_image, ctype);
   if (*do_mirror) {
     cv::flip(cv_cropped_image, cv_cropped_image, 1);
   }
-  cv_cropped_image.convertTo(cv_cropped_image, ctype);
+
+#if defined(DEBUG) && defined(DRAW)
+  cv::Mat debug_mat;
+  cv_cropped_image.convertTo(debug_mat, CV_8UC(channels));
+  char buf[1000];
+  static int iter_count = 0;
+  sprintf(buf, "input/input_%05d.jpg", iter_count++);
+  cv::imwrite(buf, debug_mat);
+#endif
+
   if (has_mean_file || has_mean_values) {
     if (cv_cropped_image.size != cv_mean_->size) {
       cv::resize(*cv_mean_, *cv_mean_,
@@ -1241,7 +1241,7 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
   transformed_mats.reserve(channels);
   for (int c = 0; c < channels; ++c) {
     transformed_mats.emplace_back(
-        height, width, type, const_cast<Dtype *>(data + c * height * width));
+        height, width, type, const_cast<Dtype *>(data) + c * height * width);
   }
   cv::merge(transformed_mats, transformed_mat);
 

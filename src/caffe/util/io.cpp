@@ -949,7 +949,8 @@ void CVMatToDatumSeg(const cv::Mat &cv_img, Datum *datum) {
   mats.reserve(datum_channels);
   for (int c = 0; c < datum_channels; ++c) {
     mats.emplace_back(datum_height, datum_width, CV_8UC1,
-                      &buffer[0] + c * datum_height * datum_width);
+                      const_cast<char *>(buffer.c_str()) +
+                          c * datum_height * datum_width);
   }
   cv::split(cv_img, mats);
   datum->set_seg_label(buffer);
@@ -972,7 +973,8 @@ void CVMatToDatum(const cv::Mat &cv_img, Datum *datum) {
   mats.reserve(datum_channels);
   for (int c = 0; c < datum_channels; ++c) {
     mats.emplace_back(datum_height, datum_width, CV_8UC1,
-                      &buffer[0] + c * datum_height * datum_width);
+                      const_cast<char *>(buffer.c_str()) +
+                          c * datum_height * datum_width);
   }
   cv::split(cv_img, mats);
   datum->set_data(buffer);
@@ -992,16 +994,17 @@ cv::Mat DatumToCVMat(const Datum &datum) {
   vector<cv::Mat> channel_mats;
   channel_mats.reserve(channel);
   if (datum.has_data()) {
-    auto data = datum.data();
+    const auto &data = datum.data();
     for (int c = 0; c < channel; ++c) {
       channel_mats.emplace_back(height, width, CV_8UC1,
-                                &data[0] + c * height * width);
+                                const_cast<char *>(data.c_str()) +
+                                    c * height * width);
     }
   } else {
     auto data = datum.float_data().data();
     for (int c = 0; c < channel; ++c) {
       channel_mats.emplace_back(height, width, CV_32FC1,
-                                const_cast<float *>(data + c * height * width));
+                                const_cast<float *>(data) + c * height * width);
     }
   }
   cv::merge(channel_mats, mat);
