@@ -27,6 +27,30 @@ static tbb::mutex mutex;
 int mutex;
 #endif
 
+#if defined(DEBUG) && defined(DRAW)
+char *CLASSES[21] = {"__background__",
+                     "aeroplane",
+                     "bicycle",
+                     "bird",
+                     "boat",
+                     "bottle",
+                     "bus",
+                     "car",
+                     "cat",
+                     "chair",
+                     "cow",
+                     "diningtable",
+                     "dog",
+                     "horse",
+                     "motorbike",
+                     "person",
+                     "pottedplant",
+                     "sheep",
+                     "sofa",
+                     "train",
+                     "tvmonitor"};
+#endif
+
 using Statistic = struct {
   float tot_iou = 0.F;
   float tot_giou = 0.F;
@@ -522,7 +546,7 @@ void Yolov3Layer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   //  real_diff_.ReshapeLike(*bottom[0]);
 }
 template <typename Dtype>
-int int_index(vector<Dtype> a, int val, int n) {
+int int_index(const vector<Dtype> &a, int val, int n) {
   int i;
   for (i = 0; i < n; ++i) {
     if (a[i] == val)
@@ -535,7 +559,7 @@ template <typename Dtype>
 bool compare_yolo_class(const Dtype *swap_data, int class_num, int class_index,
                         int stride, float objectness, int class_id,
                         float conf_thresh) {
-  int prob;
+  float prob;
   for (int j = 0; j < class_num; ++j) {
     // float prob = objectness * output[class_index + stride*j];
     prob = swap_data[class_index + j * stride];
@@ -600,6 +624,56 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
       }
     }
   }
+#if defined(DEBUG) && defined(DRAW)
+  for (int b = 0; b < bottom[0]->num(); ++b) {
+    if (b == 0) {
+      char buf[100];
+      int idx = iter_ * bottom[0]->num() + b;
+      sprintf(buf, "input/input_%05d.jpg", idx + 1);
+      // int idx = (iter*swap.num() % 200) + b;
+      cv::Mat cv_img = cv::imread(buf);
+      for (int t = 0; t < 300; ++t) {
+        vector<Dtype> truth;
+        Dtype c = label_data[b * 300 * 5 + t * 5 + 0];
+        Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
+        Dtype y = label_data[b * 300 * 5 + t * 5 + 2];
+        Dtype w = label_data[b * 300 * 5 + t * 5 + 3];
+        Dtype h = label_data[b * 300 * 5 + t * 5 + 4];
+        if (!x)
+          break;
+        float left = (x - w / 2.);
+        float right = (x + w / 2.);
+        float top = (y - h / 2.);
+        float bot = (y + h / 2.);
+
+        cv::Point pt1;
+        cv::Point pt2;
+        pt1.x = left * cv_img.cols;
+        pt1.y = top * cv_img.rows;
+        pt2.x = right * cv_img.cols;
+        pt2.y = bot * cv_img.rows;
+
+        cv::rectangle(cv_img, pt1, pt2, cv::Scalar(0, 255, 0), 1, 8, 0);
+        char label[100];
+        sprintf(label, "%s", CLASSES[static_cast<int>(c + 1)]);
+        int baseline;
+        cv::Size size =
+            cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 0, &baseline);
+        cv::Point pt3;
+        pt3.x = pt1.x + size.width;
+        pt3.y = pt1.y - size.height;
+        cv::rectangle(cv_img, pt1, pt3, cv::Scalar(0, 255, 0), -1);
+
+        cv::putText(cv_img, label, pt1, cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    cv::Scalar(0, 0, 0));
+        LOG(INFO) << "Truth box"
+                  << "," << c << "," << x << "," << y << "," << w << "," << h;
+      }
+      sprintf(buf, "out/out_%05d.jpg", idx);
+      cv::imwrite(buf, cv_img);
+    }
+  }
+#endif
   /*for (int i = 0; i < 81; i++) {
     char label[100];
     sprintf(label, "%d,%s\n",i, CLASSES[static_cast<int>(i )]);
@@ -607,56 +681,13 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }*/
 
   FOR_LOOP(bottom[0]->num(), b, {
-    /*//if (b == 0) {
-      char buf[100];
-      int idx = iter_*bottom[0]->num() + b;
-      sprintf(buf, "input/input_%05d.jpg", idx+1 );
-      //int idx = (iter*swap.num() % 200) + b;
-      cv::Mat cv_img = cv::imread(buf);
-      for (int t = 0; t < 300; ++t) {
-        vector<Dtype> truth;
-        Dtype c = label_data[b * 300 * 5 + t * 5 + 0];
-        Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
-
-        Dtype y = label_data[b * 300 * 5 + t * 5 + 2];
-        Dtype w = label_data[b * 300 * 5 + t * 5 + 3];
-        Dtype h = label_data[b * 300 * 5 + t * 5 + 4];
-        if (!x) break;
-        float left = (x - w / 2.);
-        float right = (x + w / 2.);
-        float top = (y - h / 2.);
-        float bot = (y + h / 2.);
-
-        cv::Point pt1, pt2;
-        pt1.x = left*cv_img.cols;
-        pt1.y = top*cv_img.rows;
-        pt2.x = right*cv_img.cols;
-        pt2.y = bot*cv_img.rows;
-
-        cv::rectangle(cv_img, pt1, pt2, cvScalar(0, 255, 0), 1, 8, 0);
-        char label[100];
-        sprintf(label, "%s", CLASSES[static_cast<int>(c + 1)]);
-        int baseline;
-        cv::Size size = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 0,
-    &baseline); cv::Point pt3; pt3.x = pt1.x + size.width; pt3.y = pt1.y -
-    size.height; cv::rectangle(cv_img, pt1, pt3, cvScalar(0, 255, 0), -1);
-
-
-        cv::putText(cv_img, label, pt1, cv::FONT_HERSHEY_SIMPLEX, 0.5,
-    cv::Scalar(0, 0, 0));
-        //LOG(INFO) << "Truth box" << "," << c << "," << x << "," << y << "," <<
-    w << "," << h;
-      }
-      sprintf(buf, "out/out_%05d.jpg", idx);
-      cv::imwrite(buf, cv_img);
-    //}*/
     // Assume that all detections are negative samples
     box pred;
     box truth;
     for (int s = 0; s < stride; ++s) {
       for (int n = 0; n < num_; n++) {
         int index = b * bottom[0]->count(1) + n * len * stride + s;
-        int coord_index = index;
+        int box_index = index;
         int obj_index = index + 4 * stride;
         int class_index = index + 5 * stride;
         // LOG(INFO)<<index;
@@ -669,7 +700,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         box best_match_truth;
         int x2 = s % side_w_;
         int y2 = s / side_w_;
-        get_region_box(&pred, swap_data, biases_, mask_[n], coord_index, x2, y2,
+        get_region_box(&pred, swap_data, biases_, mask_[n], box_index, x2, y2,
                        side_w_, side_h_, side_w_ * anchors_scale_,
                        side_h_ * anchors_scale_, stride);
         // find best respond gt box in image
@@ -706,7 +737,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         }
         ATOMIC_UPDATE(mutex, statistic.avg_anyobj += swap_data[obj_index])
         diff[obj_index] = (-1) * (0 - swap_data[obj_index]) * noobject_scale_;
-        if (best_iou > thresh_) {
+        if (best_match_iou > thresh_) {
           // ================================================== alexeyAB version
           if (objectness_smooth_) {
             const float iou_multiplier = best_match_iou * best_match_iou;
@@ -716,7 +747,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                 (-1) * (iou_multiplier -
                         swap_data[class_index + best_match_class * stride]);
           } else {
-            diff[index + 4 * stride] = 0;
+            diff[obj_index] = 0;
           }
         }
         if (best_iou > 1) {
@@ -737,12 +768,12 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                 (-1) *
                 (iou_multiplier - swap_data[class_index + best_class * stride]);
           }
-          delta_region_box(
-              best_truth, swap_data, biases_, mask_[n], coord_index, x2, y2,
-              side_w_, side_h_, side_w_ * anchors_scale_,
-              side_h_ * anchors_scale_, diff,
-              coord_scale_ * (2 - best_truth.w * best_truth.h), stride,
-              iou_loss_, iou_normalizer_, max_delta_, accumulate_);
+          delta_region_box(best_truth, swap_data, biases_, mask_[n], box_index,
+                           x2, y2, side_w_, side_h_, side_w_ * anchors_scale_,
+                           side_h_ * anchors_scale_, diff,
+                           coord_scale_ * (2 - best_truth.w * best_truth.h),
+                           stride, iou_loss_, iou_normalizer_, max_delta_,
+                           accumulate_);
         }
       }
     }
