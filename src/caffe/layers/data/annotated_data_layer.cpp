@@ -598,9 +598,9 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
                   float y = (bbox.ymin() + bbox.ymax()) / 2.0;
                   float w = bbox.xmax() - bbox.xmin();
                   float h = bbox.ymax() - bbox.ymin();
-                  DLOG(INFO) << anno_group.group_label();
+                  // DLOG(INFO) << anno_group.group_label();
                   top_label[idx++] = anno_group.group_label() - 1;
-                  DLOG(INFO) << "class: " << anno_group.group_label();
+                  // DLOG(INFO) << "class: " << anno_group.group_label();
                   top_label[idx++] = x;
                   top_label[idx++] = y;
                   top_label[idx++] = w;

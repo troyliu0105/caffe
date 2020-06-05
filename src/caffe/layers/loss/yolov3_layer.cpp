@@ -629,7 +629,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     if (b == 0) {
       char buf[100];
       int idx = iter_ * bottom[0]->num() + b;
-      sprintf(buf, "input/input_%05d.jpg", idx + 1);
+      sprintf(buf, "input/input_%05d.jpg", idx);
       // int idx = (iter*swap.num() % 200) + b;
       cv::Mat cv_img = cv::imread(buf);
       for (int t = 0; t < 300; ++t) {
@@ -667,7 +667,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         cv::putText(cv_img, label, pt1, cv::FONT_HERSHEY_SIMPLEX, 0.5,
                     cv::Scalar(0, 0, 0));
         LOG(INFO) << "Truth box"
-                  << "," << c << "," << x << "," << y << "," << w << "," << h;
+                  << ", " << c << std::fixed << std::setprecision(2) << ", "
+                  << x << ", " << y << ", " << w << ", " << h;
       }
       sprintf(buf, "out/out_%05d.jpg", idx);
       cv::imwrite(buf, cv_img);
