@@ -793,35 +793,46 @@ message NoiseParameter {
     optional float prob = 1 [default = 0];
     // Histogram equalized
     optional bool hist_eq = 2 [default = false];
+    optional float hist_eq_prob = 14 [default = 1.0];
     // Color inversion
     optional bool inverse = 3 [default = false];
+    optional float inverse_prob = 15 [default = 1.0];
     // Grayscale
     optional bool decolorize = 4 [default = false];
+    optional float decolorize_prob = 16 [default = 1.0];
     // Gaussian blur
     optional bool gauss_blur = 5 [default = false];
+    optional float gauss_blur_prob = 17 [default = 1.0];
 
     // JPEG compression quality (-1 = no compression)
     optional float jpeg = 6 [default = -1];
+    optional float jpeg_prob = 18 [default = 1.0];
 
     // Posterization
     optional bool posterize = 7 [default = false];
+    optional float posterize_prob = 19 [default = 1.0];
 
     // Erosion
     optional bool erode = 8 [default = false];
+    optional float erode_prob = 20 [default = 1.0];
 
     // Salt-and-pepper noise
     optional bool saltpepper = 9 [default = false];
+    optional float saltpepper_prob = 21 [default = 1.0];
 
     optional SaltPepperParameter saltpepper_param = 10;
 
     // Local histogram equalization
     optional bool clahe = 11 [default = false];
+    optional float clahe_prob = 22 [default = 1.0];
 
     // Color space conversion
     optional bool convert_to_hsv = 12 [default = false];
+    optional float convert_to_hsv_prob = 23 [default = 1.0];
 
     // Color space conversion
     optional bool convert_to_lab = 13 [default = false];
+    optional float convert_to_lab_prob = 24 [default = 1.0];
 }
 
 // Message that stores parameters used by data transformer for distortion policy

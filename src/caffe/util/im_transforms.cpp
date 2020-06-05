@@ -420,8 +420,11 @@ cv::Mat ApplyResize(const cv::Mat &in_img, const ResizeParameter &param) {
 
 cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
   cv::Mat out_img;
+  static constexpr int NOISE_NUM = 11;
+  auto *prob = new float[NOISE_NUM];
 
-  if (param.decolorize()) {
+  caffe_rng_uniform(NOISE_NUM, 0.f, 1.f, prob);
+  if (param.decolorize() && param.decolorize_prob() > prob[0]) {
     cv::Mat grayscale_img;
     cv::cvtColor(in_img, grayscale_img, CV_BGR2GRAY);
     cv::cvtColor(grayscale_img, out_img, CV_GRAY2BGR);
@@ -429,11 +432,11 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
     out_img = in_img;
   }
 
-  if (param.gauss_blur()) {
+  if (param.gauss_blur() && param.gauss_blur_prob() > prob[1]) {
     cv::GaussianBlur(out_img, out_img, cv::Size(5, 5), 1.5);
   }
 
-  if (param.hist_eq()) {
+  if (param.hist_eq() && param.hist_eq_prob() > prob[2]) {
     if (out_img.channels() > 1) {
       cv::Mat ycrcb_image;
       cv::cvtColor(out_img, ycrcb_image, CV_BGR2YCrCb);
@@ -454,7 +457,7 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
     }
   }
 
-  if (param.clahe()) {
+  if (param.clahe() && param.clahe_prob() > prob[3]) {
     cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
     clahe->setClipLimit(4);
     if (out_img.channels() > 1) {
@@ -479,7 +482,7 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
     }
   }
 
-  if (param.jpeg() > 0) {
+  if (param.jpeg() > 0 && param.jpeg_prob() > prob[4]) {
     vector<uchar> buf;
     vector<int> params;
     params.push_back(CV_IMWRITE_JPEG_QUALITY);
@@ -488,58 +491,66 @@ cv::Mat ApplyNoise(const cv::Mat &in_img, const NoiseParameter &param) {
     out_img = cv::imdecode(buf, CV_LOAD_IMAGE_COLOR);
   }
 
-  if (param.erode()) {
+  if (param.erode() && param.erode_prob() > prob[5]) {
     cv::Mat element =
         cv::getStructuringElement(2, cv::Size(3, 3), cv::Point(1, 1));
     cv::erode(out_img, out_img, element);
   }
 
-  if (param.posterize()) {
+  if (param.posterize() && param.posterize_prob() > prob[6]) {
     cv::Mat tmp_img;
     tmp_img = colorReduce(out_img);
     out_img = tmp_img;
   }
 
-  if (param.inverse()) {
+  if (param.inverse() && param.inverse_prob() > prob[7]) {
     cv::Mat tmp_img;
     cv::bitwise_not(out_img, tmp_img);
     out_img = tmp_img;
   }
 
-  vector<uchar> noise_values;
-  if (param.saltpepper_param().value_size() > 0) {
-    CHECK(param.saltpepper_param().value_size() == 1 ||
-          param.saltpepper_param().value_size() == out_img.channels())
-        << "Specify either 1 pad_value or as many as channels: "
-        << out_img.channels();
+  if (param.saltpepper() && param.saltpepper_prob() > prob[8]) {
+    vector<uchar> noise_values;
+    if (param.saltpepper_param().value_size() > 0) {
+      CHECK(param.saltpepper_param().value_size() == 1 ||
+            param.saltpepper_param().value_size() == out_img.channels())
+          << "Specify either 1 pad_value or as many as channels: "
+          << out_img.channels();
 
-    for (int i = 0; i < param.saltpepper_param().value_size(); i++) {
-      noise_values.push_back(uchar(param.saltpepper_param().value(i)));
-    }
-    if (out_img.channels() > 1 && param.saltpepper_param().value_size() == 1) {
-      // Replicate the pad_value for simplicity
-      for (int c = 1; c < out_img.channels(); ++c) {
-        noise_values.push_back(uchar(noise_values[0]));
+      for (int i = 0; i < param.saltpepper_param().value_size(); i++) {
+        noise_values.push_back(uchar(param.saltpepper_param().value(i)));
+      }
+      if (out_img.channels() > 1 &&
+          param.saltpepper_param().value_size() == 1) {
+        // Replicate the pad_value for simplicity
+        for (int c = 1; c < out_img.channels(); ++c) {
+          noise_values.push_back(uchar(noise_values[0]));
+        }
+      }
+    } else {
+      for (int c = 0; c < out_img.channels(); ++c) {
+        noise_values.push_back(0);
       }
     }
-  }
-  if (param.saltpepper()) {
     const int noise_pixels_num = floor(param.saltpepper_param().fraction() *
                                        out_img.cols * out_img.rows);
     constantNoise(noise_pixels_num, noise_values, &out_img);
   }
 
-  if (param.convert_to_hsv()) {
+  if (param.convert_to_hsv() && param.convert_to_hsv_prob() > prob[9]) {
     cv::Mat hsv_image;
     cv::cvtColor(out_img, hsv_image, CV_BGR2HSV);
     out_img = hsv_image;
   }
-  if (param.convert_to_lab()) {
+
+  if (param.convert_to_lab() && param.convert_to_lab_prob() > prob[10]) {
     cv::Mat lab_image;
     out_img.convertTo(lab_image, CV_32F);
     lab_image *= 1.0 / 255;
     cv::cvtColor(lab_image, out_img, CV_BGR2Lab);
   }
+
+  delete[] prob;
   return out_img;
 }
 
