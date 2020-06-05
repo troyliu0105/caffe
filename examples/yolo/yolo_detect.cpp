@@ -816,9 +816,8 @@ int main(int argc, char **argv) {
       LOG(INFO) << "Computing time: " << batch_timer.MilliSeconds() << " ms.";
       /* Print the detection results. */
       if (detect_mode < 2) {
-        for (int i = 0; i < detections.size(); ++i) {
+        for (auto &d : detections) {
 
-          const vector<float> &d = detections[i];
           // Detection format: [image_id, label, score, xmin, ymin, xmax, ymax].
           CHECK_EQ(d.size(), 7);
           const float score = d[2];
@@ -890,9 +889,9 @@ int main(int argc, char **argv) {
     vector<cv::Mat> data;
     cv::glob(path, fn, true); // recurse
 
-    for (size_t k = 0; k < fn.size(); ++k) {
-      out << fn[k] << std::endl;
-      cv::VideoCapture cap(fn[k]);
+    for (auto &k : fn) {
+      out << k << std::endl;
+      cv::VideoCapture cap(k);
 
       if (!cap.isOpened()) {
         LOG(FATAL) << "Failed to open video: " << file;
@@ -927,8 +926,7 @@ int main(int argc, char **argv) {
           detections = detector.Detect(img);
         }
         /* Print the detection results. */
-        for (int i = 0; i < detections.size(); ++i) {
-          const vector<float> &d = detections[i];
+        for (auto &d : detections) {
           // Detection format: [image_id, label, score, xmin, ymin, xmax, ymax].
           CHECK_EQ(d.size(), 7);
           const float score = d[2];
@@ -981,7 +979,7 @@ int main(int argc, char **argv) {
           static cv::VideoWriter writer; // cv::VideoWriter output_video;
           if (count == 0) {
             char fname[256];
-            sprintf(fname, "%s.mp4", fn[k].c_str());
+            sprintf(fname, "%s.mp4", k.c_str());
             printf(fname);
             writer.open(fname, cv::VideoWriter::fourcc('M', 'P', '4', 'V'), 30,
                         size);

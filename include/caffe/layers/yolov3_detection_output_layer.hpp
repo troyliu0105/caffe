@@ -55,7 +55,7 @@ public:
   // virtual inline int MaxBottomBlobs() const { return 4; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
   void correct_yolo_boxes(PredictionResult<Dtype> &det, int w, int h, int netw,
-                          int neth, int relative);
+                          int neth, bool relative);
 
 protected:
   /**

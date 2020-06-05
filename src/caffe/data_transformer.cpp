@@ -1210,7 +1210,7 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
   const Dtype scale = param_.scale();
   const bool has_mean_file = param_.has_mean_file();
   const bool has_mean_values = !mean_values_.empty();
-  LOG(INFO) << "test";
+  //  LOG(INFO) << "test";
 
   auto [type, ctype] = get_cv_type<Dtype>(channels);
   //  Dtype *mean = nullptr;

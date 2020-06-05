@@ -15,38 +15,10 @@
 //#include "caffe/layers/region_loss_layer.hpp"
 #include "caffe/layers/yolov3_detection_output_layer.hpp"
 #include "caffe/util/io.hpp"
+#include "caffe/util/yolo_utils.hpp"
 
 namespace caffe {
 
-template <typename Dtype>
-Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
-  float l1 = x1 - w1 / 2;
-  float l2 = x2 - w2 / 2;
-  float left = l1 > l2 ? l1 : l2;
-  float r1 = x1 + w1 / 2;
-  float r2 = x2 + w2 / 2;
-  float right = r1 < r2 ? r1 : r2;
-  return right - left;
-}
-template <typename Dtype>
-Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
-  float w = overlap(a[0], a[2], b[0], b[2]);
-  float h = overlap(a[1], a[3], b[1], b[3]);
-  if (w < 0 || h < 0)
-    return 0;
-  float area = w * h;
-  return area;
-}
-template <typename Dtype>
-Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
-  float i = box_intersection(a, b);
-  float u = a[2] * a[3] + b[2] * b[3] - i;
-  return u;
-}
-template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
-  return box_intersection(a, b) / box_union(a, b);
-}
 template <typename Dtype>
 void setNormalizedBBox(NormalizedBBox &bbox, Dtype x, Dtype y, Dtype w,
                        Dtype h) {
@@ -152,7 +124,7 @@ void class_index_and_score(Dtype *input, int classes,
 template <typename Dtype>
 void Yolov3DetectionOutputLayer<Dtype>::correct_yolo_boxes(
     PredictionResult<Dtype> &det, int w, int h, int netw, int neth,
-    int relative) {
+    bool relative) {
   int i;
   int new_w = 0;
   int new_h = 0;
@@ -245,6 +217,13 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
       const Dtype *input_data = bottom[t]->cpu_data();
       int nw = side_w_ * anchors_scale_[t];
       int nh = side_w_ * anchors_scale_[t];
+      for (int b = 0; b < bottom[t]->num(); ++b) {
+        for (int n = 0; n < num_; ++n) {
+          int index = bottom[0]->count(1) * b + n * len * stride;
+          activate_yolo_cpu(stride, index, num_class_, input_data, swap_data,
+                            DEFAULT, false, false);
+        }
+      }
       FOR_LOOP_WITH_PREPARE(
           bottom[t]->num(), b,
           {
@@ -253,37 +232,14 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
               for (int n = 0; n < num_; n++) {
                 // LOG(INFO) << bottom[t]->count(1);
                 int index = n * len * stride + s + b * bottom[t]->count(1);
-                vector<Dtype> pred;
 
-                for (int c = 0; c < len; ++c) {
-                  int index2 = c * stride + index;
-                  // LOG(INFO)<<index2;
-                  if (gaussian_box_) {
-                    if (c == 4 || c == 6) {
-                      swap_data[index2] = (input_data[index2 + 0]);
-                    } else {
-                      if (c > 7) {
-                        // LOG(INFO) << c - 5;
-                        class_score[c - 8] =
-                            caffe_fn_sigmoid(input_data[index2 + 0]);
-                      } else {
-                        swap_data[index2] =
-                            caffe_fn_sigmoid(input_data[index2 + 0]);
-                      }
-                    }
-                  } else {
-                    if (c == 2 || c == 3) { // w, h
-                      swap_data[index2] = (input_data[index2 + 0]);
-                    } else {
-                      if (c > 4) { // clz_score
-                        // LOG(INFO) << c - 5;
-                        class_score[c - 5] =
-                            caffe_fn_sigmoid(input_data[index2 + 0]);
-                      } else { // obj_score
-                        swap_data[index2] =
-                            caffe_fn_sigmoid(input_data[index2 + 0]);
-                      }
-                    }
+                if (gaussian_box_) {
+                  for (int c = 9; c < len; ++c) {
+                    class_score[c - 9] = swap_data[index + c * stride];
+                  }
+                } else {
+                  for (int c = 5; c < len; ++c) {
+                    class_score[c - 5] = swap_data[index + c * stride];
                   }
                 }
                 int y2 = s / side_w_;
@@ -305,18 +261,18 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
                   if (class_score[c] > confidence_threshold_) {
                     if (gaussian_box_) {
                       get_gaussian_yolo_box(
-                          pred, swap_data, biases_, mask_[n + mask_offset],
+                          &pred, swap_data, biases_, mask_[n + mask_offset],
                           index, x2, y2, side_w_, side_h_, nw, nh, stride);
                     } else {
-                      get_region_box(pred, swap_data, biases_,
+                      get_region_box(&pred, swap_data, biases_,
                                      mask_[n + mask_offset], index, x2, y2,
                                      side_w_, side_h_, nw, nh, stride);
                     }
 
-                    predict.x = pred[0];
-                    predict.y = pred[1];
-                    predict.w = pred[2];
-                    predict.h = pred[3];
+                    predict.x = pred.x;
+                    predict.y = pred.y;
+                    predict.w = pred.w;
+                    predict.h = pred.h;
                     predict.classType = c;
                     predict.confidence = class_score[c];
                     correct_yolo_boxes(predict, side_w_, side_h_, nw, nh, 1);
@@ -328,7 +284,8 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
             }
             delete[] class_score;
           },
-          auto *class_score = new Dtype[num_class_])
+          auto *class_score = new Dtype[num_class_];
+          box pred;)
       mask_offset += groups_num_;
     }
 

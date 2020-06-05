@@ -83,36 +83,6 @@ template <typename Dtype>
 Dtype box_ciou(vector<Dtype> a, vector<Dtype> b);
 float box_ciou(const box &a, const box &b);
 
-/**
- * @brief get bbox from feature maps
- * @tparam Dtype    feature map data type
- * @param b         'box' instance
- * @param x         feature map pointer
- * @param biases    all anchors in vector, N_anchor x 2
- * @param n         anchor index
- * @param index     (x, y) dot index in feat map
- * @param i         cx in grid
- * @param j         cy in grid
- * @param lw        feat map width
- * @param lh        feat map height
- * @param w         original input image width
- * @param h         original input image height
- * @param stride    stride to jump, = lw * lh
- */
-template <typename Dtype>
-void get_region_box(box *b, const Dtype *x, vector<Dtype> biases, int n,
-                    int index, int i, int j, int lw, int lh, int w, int h,
-                    int stride);
-template <typename Dtype>
-void get_region_box(vector<Dtype> &b, const Dtype *x, vector<Dtype> biases,
-                    int n, int index, int i, int j, int lw, int lh, int w,
-                    int h, int stride);
-
-template <typename Dtype>
-void get_gaussian_yolo_box(vector<Dtype> &b, const Dtype *x,
-                           vector<Dtype> biases, int n, int index, int i, int j,
-                           int lw, int lh, int w, int h, int stride);
-
 typedef EmitConstraint_EmitType EmitType;
 typedef PriorBoxParameter_CodeType CodeType;
 typedef MultiBoxLossParameter_MatchType MatchType;
@@ -435,12 +405,16 @@ void GetPriorBBoxes(const Dtype *prior_data, int num_priors,
                     vector<NormalizedBBox> *prior_bboxes,
                     vector<vector<float>> *prior_variances);
 
-// Get detection results from det_data.
-//    det_data: 1 x 1 x num_det x 7 blob.
-//    num_det: the number of detections.
-//    background_label_id: the label for background class which is used to do
-//      santity check so that no detection contains it.
-//    all_detections: stores detection results for each class from each image.
+/**
+ * @brief Get detection results from det_data.
+ * @tparam Dtype
+ * @param det_data              1 x 1 x num_det x 7 blob.
+ * @param num_det               the number of detections.
+ * @param background_label_id   the label for background class which is used to
+ * do santity check so that no detection contains it.
+ * @param all_detections        stores detection results for each class from
+ * each image.
+ */
 template <typename Dtype>
 void GetDetectionResults(const Dtype *det_data, int num_det,
                          int background_label_id,
@@ -471,14 +445,6 @@ void GetMaxScoreIndex(const vector<float> &scores, float threshold, int top_k,
 template <typename Dtype>
 void GetMaxScoreIndex(const Dtype *scores, int num, float threshold, int top_k,
                       vector<pair<Dtype, int>> *score_index_vec);
-
-// Get max scores with corresponding indices.
-//    scores: a set of scores.
-//    threshold: only consider scores higher than the threshold.
-//    top_k: if -1, keep all; otherwise, keep at most top_k.
-//    score_index_vec: store the sorted (score, index) pair.
-void GetMaxScoreIndex(const vector<float> &scores, float threshold, int top_k,
-                      vector<pair<float, int>> *score_index_vec);
 
 // Do non maximum suppression given bboxes and scores.
 //    bboxes: a set of bounding boxes.

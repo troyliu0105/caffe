@@ -5,9 +5,6 @@
  * @https://github.com/eric612/MobileNet-YOLO
  * Avisonic
  */
-#include "caffe/layers/loss/gaussian_yolov3_layer.hpp"
-#include "caffe/layers/sigmoid_layer.hpp"
-#include "caffe/util/math_functions.hpp"
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -16,9 +13,10 @@
 #include <sstream>
 #include <vector>
 
-#include <algorithm>
-#include <cfloat>
-#include <vector>
+#include "caffe/layers/loss/gaussian_yolov3_layer.hpp"
+#include "caffe/layers/sigmoid_layer.hpp"
+#include "caffe/util/math_functions.hpp"
+#include "caffe/util/yolo_utils.hpp"
 
 #ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>

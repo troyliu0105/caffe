@@ -443,7 +443,7 @@ int map() {
   if (!gpus.empty()) {
     LOG(INFO) << "Use GPU with device ID " << gpus[0];
 #ifndef CPU_ONLY
-    cudaDeviceProp device_prop;
+    cudaDeviceProp device_prop{};
     cudaGetDeviceProperties(&device_prop, gpus[0]);
     LOG(INFO) << "GPU device name: " << device_prop.name;
 #endif
@@ -458,11 +458,14 @@ int map() {
   caffe_net.CopyTrainedLayersFrom(FLAGS_weights);
   LOG(INFO) << "Running for " << FLAGS_iterations << " iterations.";
 
+  // <eval_id, <label, [(score, tp)]>>
   std::map<int, std::map<int, vector<pair<float, int>>>> all_true_pos;
+  // <eval_id, <label, [(score, fp)]>>
   std::map<int, std::map<int, vector<pair<float, int>>>> all_false_pos;
+  // <eval_id, <label, count>>
   std::map<int, std::map<int, int>> all_num_pos;
   float loss = 0;
-  MAKE_PROGRESSBAR(FLAGS_iterations, "Running mAP\n");
+  MAKE_PROGRESSBAR(FLAGS_iterations, "Running mAP\n")
   for (int i = 0; i < FLAGS_iterations; ++i) {
     float iter_loss;
     const vector<Blob<float> *> &result = caffe_net.Forward(&iter_loss);

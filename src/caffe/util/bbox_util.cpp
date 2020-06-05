@@ -223,63 +223,6 @@ float box_diounms(vector<float> a, vector<float> b, float beta1) {
   return iou - diou_term;
 }
 
-template <typename Dtype>
-void get_gaussian_yolo_box(vector<Dtype> &b, const Dtype *x,
-                           vector<Dtype> biases, int n, int index, int i, int j,
-                           int lw, int lh, int w, int h, int stride) {
-
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 2 * stride])) / lh);
-  b.push_back(exp(x[index + 4 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 6 * stride]) * biases[2 * n + 1] / (h));
-}
-
-template void get_gaussian_yolo_box(vector<float> &b, const float *x,
-                                    vector<float> biases, int n, int index,
-                                    int i, int j, int lw, int lh, int w, int h,
-                                    int stride);
-template void get_gaussian_yolo_box(vector<double> &b, const double *x,
-                                    vector<double> biases, int n, int index,
-                                    int i, int j, int lw, int lh, int w, int h,
-                                    int stride);
-
-template <typename Dtype>
-void get_region_box(box *b, const Dtype *x, vector<Dtype> biases, int n,
-                    int index, int i, int j, int lw, int lh, int w, int h,
-                    int stride) {
-  b->x = ((i + (x[index + 0 * stride])) / lw);
-  b->y = ((j + (x[index + 1 * stride])) / lh);
-  b->w = (exp(x[index + 2 * stride]) * biases[2 * n] / (w));
-  b->h = (exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
-}
-
-template void get_region_box(box *b, const float *x, vector<float> biases,
-                             int n, int index, int i, int j, int lw, int lh,
-                             int w, int h, int stride);
-template void get_region_box(box *b, const double *x, vector<double> biases,
-                             int n, int index, int i, int j, int lw, int lh,
-                             int w, int h, int stride);
-
-template <typename Dtype>
-void get_region_box(vector<Dtype> &b, const Dtype *x, vector<Dtype> biases,
-                    int n, int index, int i, int j, int lw, int lh, int w,
-                    int h, int stride) {
-
-  b.clear();
-  b.push_back((i + (x[index + 0 * stride])) / lw);
-  b.push_back((j + (x[index + 1 * stride])) / lh);
-  b.push_back(exp(x[index + 2 * stride]) * biases[2 * n] / (w));
-  b.push_back(exp(x[index + 3 * stride]) * biases[2 * n + 1] / (h));
-}
-
-template void get_region_box(vector<float> &b, const float *x,
-                             vector<float> biases, int n, int index, int i,
-                             int j, int lw, int lh, int w, int h, int stride);
-template void get_region_box(vector<double> &b, const double *x,
-                             vector<double> biases, int n, int index, int i,
-                             int j, int lw, int lh, int w, int h, int stride);
-
 bool SortBBoxAscend(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2) {
   return bbox1.score() < bbox2.score();
 }
@@ -1348,7 +1291,7 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
   all_gt_bboxes->clear();
   for (int i = 0; i < num_gt; ++i) {
     int start_idx = i * 8;
-    int item_id = gt_data[start_idx];
+    int item_id = gt_data[start_idx]; // image_id
     if (item_id == -1) {
       break;
     }
@@ -1972,7 +1915,7 @@ void GetDetectionResults(
   all_detections->clear();
   for (int i = 0; i < num_det; ++i) {
     int start_idx = i * 7;
-    int item_id = det_data[start_idx];
+    int item_id = det_data[start_idx]; // image_id
     if (item_id == -1) {
       continue;
     }

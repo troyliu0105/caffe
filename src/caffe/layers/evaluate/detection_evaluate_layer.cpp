@@ -21,7 +21,7 @@ void DetectionEvaluateLayer<Dtype>::LayerSetUp(
   CHECK_GT(overlap_threshold_, 0.) << "overlap_threshold must be non negative.";
   evaluate_difficult_gt_ = detection_evaluate_param.evaluate_difficult_gt();
   if (detection_evaluate_param.has_name_size_file()) {
-    string name_size_file = detection_evaluate_param.name_size_file();
+    const string &name_size_file = detection_evaluate_param.name_size_file();
     std::ifstream infile(name_size_file.c_str());
     CHECK(infile.good()) << "Failed to open name size file: " << name_size_file;
     // The file is in the following format:
@@ -30,13 +30,13 @@ void DetectionEvaluateLayer<Dtype>::LayerSetUp(
     string name;
     int height, width;
     while (infile >> name >> height >> width) {
-      sizes_.push_back(std::make_pair(height, width));
+      sizes_.emplace_back(height, width);
     }
     infile.close();
   }
   count_ = 0;
   // If there is no name_size_file provided, use normalized bbox to evaluate.
-  use_normalized_bbox_ = sizes_.size() == 0;
+  use_normalized_bbox_ = sizes_.empty();
 
   // Retrieve resize parameter if there is any provided.
   has_resize_ = detection_evaluate_param.has_resize_param();
@@ -82,11 +82,13 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
   const Dtype *gt_data = bottom[1]->cpu_data();
 
   // Retrieve all detection results.
+  // <image_id, <label_idx, bbox>>
   map<int, LabelBBox> all_detections;
   GetDetectionResults(det_data, bottom[0]->height(), background_label_id_,
                       &all_detections);
 
   // Retrieve all ground truth (including difficult ones).
+  // <image_id, <label_idx, bbox>>
   map<int, LabelBBox> all_gt_bboxes;
   GetGroundTruth(gt_data, bottom[1]->height(), background_label_id_, true,
                  &all_gt_bboxes);
@@ -96,26 +98,25 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
   int num_det = 0;
 
   // Insert number of ground truth for each label.
+  // <label_idx, count>
   map<int, int> num_pos;
-  for (map<int, LabelBBox>::iterator it = all_gt_bboxes.begin();
-       it != all_gt_bboxes.end(); ++it) {
-    for (LabelBBox::iterator iit = it->second.begin(); iit != it->second.end();
-         ++iit) {
+  for (auto &all_gt_bbox : all_gt_bboxes) { // <image_idx, <label_idx, bbox>>
+    for (auto &iit : all_gt_bbox.second) {  // <label_idx, bbox>
       int count = 0;
       if (evaluate_difficult_gt_) {
-        count = iit->second.size();
+        count = iit.second.size();
       } else {
         // Get number of non difficult ground truth.
-        for (int i = 0; i < iit->second.size(); ++i) {
-          if (!iit->second[i].difficult()) {
+        for (auto &i : iit.second) {
+          if (!i.difficult()) {
             ++count;
           }
         }
       }
-      if (num_pos.find(iit->first) == num_pos.end()) {
-        num_pos[iit->first] = count;
+      if (num_pos.find(iit.first) == num_pos.end()) {
+        num_pos[iit.first] = count;
       } else {
-        num_pos[iit->first] += count;
+        num_pos[iit.first] += count;
       }
     }
   }
@@ -136,43 +137,40 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
   }
 
   // Insert detection evaluate status.
-  for (map<int, LabelBBox>::iterator it = all_detections.begin();
-       it != all_detections.end(); ++it) {
-    int image_id = it->first;
-    LabelBBox &detections = it->second;
+  for (auto &all_detection : all_detections) { // <image_idx, <label_idx, bbox>>
+    int image_id = all_detection.first;
+    LabelBBox &detections = all_detection.second;
     if (all_gt_bboxes.find(image_id) == all_gt_bboxes.end()) {
       // No ground truth for current image. All detections become false_pos.
-      for (LabelBBox::iterator iit = detections.begin();
-           iit != detections.end(); ++iit) {
-        int label = iit->first;
+      for (auto &detection : detections) { // <label_idx, bbox>
+        int label = detection.first;
         if (label == -1) {
           continue;
         }
-        const vector<NormalizedBBox> &bboxes = iit->second;
-        for (int i = 0; i < bboxes.size(); ++i) {
+        const vector<NormalizedBBox> &bboxes = detection.second;
+        for (const auto &bboxe : bboxes) {
           top_data[num_det * 5] = image_id;
           top_data[num_det * 5 + 1] = label;
-          top_data[num_det * 5 + 2] = bboxes[i].score();
-          top_data[num_det * 5 + 3] = 0;
-          top_data[num_det * 5 + 4] = 1;
+          top_data[num_det * 5 + 2] = bboxe.score();
+          top_data[num_det * 5 + 3] = 0; // tp
+          top_data[num_det * 5 + 4] = 1; // fp
           ++num_det;
         }
       }
     } else {
       LabelBBox &label_bboxes = all_gt_bboxes.find(image_id)->second;
-      for (LabelBBox::iterator iit = detections.begin();
-           iit != detections.end(); ++iit) {
-        int label = iit->first;
+      for (auto &detection : detections) { // <label_idx, bbox>
+        int label = detection.first;
         if (label == -1) {
           continue;
         }
-        vector<NormalizedBBox> &bboxes = iit->second;
+        vector<NormalizedBBox> &bboxes = detection.second;
         if (label_bboxes.find(label) == label_bboxes.end()) {
           // No ground truth for current label. All detections become false_pos.
-          for (int i = 0; i < bboxes.size(); ++i) {
+          for (auto &bbox : bboxes) {
             top_data[num_det * 5] = image_id;
             top_data[num_det * 5 + 1] = label;
-            top_data[num_det * 5 + 2] = bboxes[i].score();
+            top_data[num_det * 5 + 2] = bbox.score();
             top_data[num_det * 5 + 3] = 0;
             top_data[num_det * 5 + 4] = 1;
             ++num_det;
@@ -182,28 +180,28 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
           // Scale ground truth if needed.
           if (!use_normalized_bbox_) {
             CHECK_LT(count_, sizes_.size());
-            for (int i = 0; i < gt_bboxes.size(); ++i) {
-              OutputBBox(gt_bboxes[i], sizes_[count_], has_resize_,
-                         resize_param_, &(gt_bboxes[i]));
+            for (auto &gt_bboxe : gt_bboxes) {
+              OutputBBox(gt_bboxe, sizes_[count_], has_resize_, resize_param_,
+                         &gt_bboxe);
             }
           }
           vector<bool> visited(gt_bboxes.size(), false);
           // Sort detections in descend order based on scores.
-          std::sort(bboxes.begin(), bboxes.end(), SortBBoxDescend);
-          for (int i = 0; i < bboxes.size(); ++i) {
+          SORT(bboxes.begin(), bboxes.end(), SortBBoxDescend);
+          for (auto &bbox : bboxes) {
             top_data[num_det * 5] = image_id;
             top_data[num_det * 5 + 1] = label;
-            top_data[num_det * 5 + 2] = bboxes[i].score();
+            top_data[num_det * 5 + 2] = bbox.score();
             if (!use_normalized_bbox_) {
-              OutputBBox(bboxes[i], sizes_[count_], has_resize_, resize_param_,
-                         &(bboxes[i]));
+              OutputBBox(bbox, sizes_[count_], has_resize_, resize_param_,
+                         &bbox);
             }
             // Compare with each ground truth bbox.
             float overlap_max = -1;
             int jmax = -1;
             for (int j = 0; j < gt_bboxes.size(); ++j) {
               float overlap =
-                  JaccardOverlap(bboxes[i], gt_bboxes[j], use_normalized_bbox_);
+                  JaccardOverlap(bbox, gt_bboxes[j], use_normalized_bbox_);
               if (overlap > overlap_max) {
                 overlap_max = overlap;
                 jmax = j;
@@ -214,8 +212,8 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
                   (!evaluate_difficult_gt_ && !gt_bboxes[jmax].difficult())) {
                 if (!visited[jmax]) {
                   // true positive.
-                  top_data[num_det * 5 + 3] = 1;
-                  top_data[num_det * 5 + 4] = 0;
+                  top_data[num_det * 5 + 3] = 1; // tp
+                  top_data[num_det * 5 + 4] = 0; // fp
                   visited[jmax] = true;
                 } else {
                   // false positive (multiple detection).
@@ -233,7 +231,7 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
         }
       }
     }
-    if (sizes_.size() > 0) {
+    if (!sizes_.empty()) {
       ++count_;
       if (count_ == sizes_.size()) {
         // reset count after a full iterations through the DB.
