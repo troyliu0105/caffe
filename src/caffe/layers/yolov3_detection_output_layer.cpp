@@ -190,15 +190,15 @@ void Yolov3DetectionOutputLayer<Dtype>::LayerSetUp(
   confidence_threshold_ = yolov3_detection_output_param.confidence_threshold();
   nms_threshold_ = yolov3_detection_output_param.nms_threshold();
   mask_group_num_ = yolov3_detection_output_param.mask_group_num();
-  for (int c = 0; c < yolov3_detection_output_param.biases_size(); ++c) {
-    biases_.push_back(yolov3_detection_output_param.biases(c));
-  }
-  for (int c = 0; c < yolov3_detection_output_param.mask_size(); ++c) {
-    mask_.push_back(yolov3_detection_output_param.mask(c));
-  }
-  for (int c = 0; c < yolov3_detection_output_param.anchors_scale_size(); ++c) {
-    anchors_scale_.push_back(yolov3_detection_output_param.anchors_scale(c));
-  }
+  std::copy(yolov3_detection_output_param.biases().cbegin(),
+            yolov3_detection_output_param.biases().cend(),
+            std::back_inserter(biases_));
+  std::copy(yolov3_detection_output_param.mask().cbegin(),
+            yolov3_detection_output_param.mask().cend(),
+            std::back_inserter(mask_));
+  std::copy(yolov3_detection_output_param.anchors_scale().cbegin(),
+            yolov3_detection_output_param.anchors_scale().cend(),
+            std::back_inserter(anchors_scale_));
   groups_num_ = yolov3_detection_output_param.mask_size() / mask_group_num_;
   gaussian_box_ = yolov3_detection_output_param.gaussian_box();
   CHECK_EQ(bottom.size(), mask_group_num_);

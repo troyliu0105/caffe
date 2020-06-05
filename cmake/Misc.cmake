@@ -9,11 +9,13 @@ endif ()
 # --[ If user doesn't specify build type then assume release
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
     set(CMAKE_BUILD_TYPE Release)
+    add_definitions(-DNDEBUG=1)
 endif ()
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_definitions(-DDEBUG)
     add_definitions(-DDRAW)
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
 endif ()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")

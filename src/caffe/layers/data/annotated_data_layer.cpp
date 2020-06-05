@@ -18,6 +18,30 @@
 const float prob_eps = 0.01;
 namespace caffe {
 
+#if defined(DEBUG) && defined(DRAW)
+static char *CLASSES[21] = {"__background__",
+                            "aeroplane",
+                            "bicycle",
+                            "bird",
+                            "boat",
+                            "bottle",
+                            "bus",
+                            "car",
+                            "cat",
+                            "chair",
+                            "cow",
+                            "diningtable",
+                            "dog",
+                            "horse",
+                            "motorbike",
+                            "person",
+                            "pottedplant",
+                            "sheep",
+                            "sofa",
+                            "train",
+                            "tvmonitor"};
+#endif
+
 template <typename Dtype>
 AnnotatedDataLayer<Dtype>::AnnotatedDataLayer(const LayerParameter &param)
     : BasePrefetchingDataLayer<Dtype>(param), offset_() {
@@ -563,7 +587,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         // Reshape the label and store the annotation.
         if (yolo_data_type_ == 1) {
           label_shape[2] = 300;
-          DLOG(INFO) << "num_bboxes: " << num_bboxes;
+          // DLOG(INFO) << "num_bboxes: " << num_bboxes;
           batch->label_.Reshape(label_shape);
 
         } else {
@@ -578,24 +602,24 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
           if (yolo_data_type_ == 1) {
             int label_offset = batch->label_.offset(item_id);
             idx = label_offset;
-            caffe_set(300 * 5, Dtype(0), &top_label[idx]);
+            caffe_set(300 * 5, Dtype(0), top_label + idx);
           }
 
           for (const auto &anno_group : anno_vec) {
+            if (anno_group.annotation_size() > 300) {
+              LOG(INFO) << "WARNING : gt box > 300 , "
+                        << anno_group.annotation_size();
+            }
             for (int a = 0; a < anno_group.annotation_size(); ++a) {
-              if (anno_group.annotation_size() > 300) {
-                LOG(INFO) << "WARNING : gt box > 300 , "
-                          << anno_group.annotation_size();
-              }
               const Annotation &anno = anno_group.annotation(a);
               const NormalizedBBox &bbox = anno.bbox();
               if (yolo_data_type_ == 1) {
-                DLOG(INFO) << "difficult: " << bbox.difficult()
-                           << ", train_difficult: " << train_diffcult_;
+                // DLOG(INFO) << "difficult: " << bbox.difficult()
+                //          << ", train_difficult: " << train_diffcult_;
                 if (!bbox.difficult() ||
                     (train_diffcult_ && this->iter_ > this->max_iter_ / 10)) {
-                  float x = (bbox.xmin() + bbox.xmax()) / 2.0;
-                  float y = (bbox.ymin() + bbox.ymax()) / 2.0;
+                  float x = (bbox.xmin() + bbox.xmax()) / 2.0f;
+                  float y = (bbox.ymin() + bbox.ymax()) / 2.0f;
                   float w = bbox.xmax() - bbox.xmin();
                   float h = bbox.ymax() - bbox.ymin();
                   // DLOG(INFO) << anno_group.group_label();
@@ -627,7 +651,56 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       LOG(FATAL) << "Unknown annotation type.";
     }
   }
+#if defined(DEBUG) && defined(DRAW)
+  vector<cv::Mat> imgs;
+  const int rows = static_cast<int>(sqrt(batch_size));
+  const int height = batch->data_.height();
+  const int width = batch->data_.width();
+  cv::Mat grid(height * rows, width * rows, CV_8UC(batch->data_.channels()));
+  this->data_transformer_->TransformInv(&batch->data_, &imgs, false);
+  const Dtype *label_data = batch->label_.cpu_data();
+  char buf[100];
+  for (int gi = 0; gi < rows; ++gi) {   // width
+    for (int gj = 0; gj < rows; ++gj) { // height
+      int img_idx = gj + rows * gi;
+      auto cv_img = imgs[img_idx];
+      for (int t = 0; t < 300; ++t) {
+        vector<Dtype> truth;
+        Dtype c = label_data[img_idx * 300 * 5 + t * 5 + 0];
+        Dtype x = label_data[img_idx * 300 * 5 + t * 5 + 1];
+        Dtype y = label_data[img_idx * 300 * 5 + t * 5 + 2];
+        Dtype w = label_data[img_idx * 300 * 5 + t * 5 + 3];
+        Dtype h = label_data[img_idx * 300 * 5 + t * 5 + 4];
+        if (!x)
+          break;
 
+        cv::Point pt1;
+        cv::Point pt2;
+        pt1.x = (x - w / 2.) * cv_img.cols;
+        pt1.y = (y - h / 2.) * cv_img.rows;
+        pt2.x = (x + w / 2.) * cv_img.cols;
+        pt2.y = (y + h / 2.) * cv_img.rows;
+
+        cv::rectangle(cv_img, pt1, pt2, cv::Scalar(0, 255, 0), 1, 8, 0);
+        char label[100];
+        sprintf(label, "%s", CLASSES[static_cast<int>(c + 1)]);
+        int baseline;
+        cv::Size size =
+            cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 0, &baseline);
+        cv::Point pt3;
+        pt3.x = pt1.x + size.width;
+        pt3.y = pt1.y - size.height;
+        cv::rectangle(cv_img, pt1, pt3, cv::Scalar(0, 255, 0), -1);
+
+        cv::putText(cv_img, label, pt1, cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    cv::Scalar(0, 0, 0));
+      }
+      cv_img.copyTo(grid(cv::Rect(gi * width, gj * height, width, height)));
+    }
+  }
+  sprintf(buf, "input/batch_%05d.jpg", iters_);
+  cv::imwrite(buf, grid);
+#endif
   iters_++;
   timer.Stop();
   batch_timer.Stop();

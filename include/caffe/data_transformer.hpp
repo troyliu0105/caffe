@@ -241,9 +241,10 @@ public:
   void ExpandImage(const cv::Mat &img, float expand_ratio,
                    NormalizedBBox *expand_bbox, cv::Mat *expand_img);
 
-  void TransformInv(const Blob<Dtype> *blob, vector<cv::Mat> *cv_imgs);
+  void TransformInv(const Blob<Dtype> *blob, vector<cv::Mat> *cv_imgs,
+                    bool resize_back = true);
   void TransformInv(const Dtype *data, cv::Mat *cv_img, int height, int width,
-                    int channels);
+                    int channels, bool resize_back = true);
 
   /**
    * @brief Infers the shape of transformed_blob will have when

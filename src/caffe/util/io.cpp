@@ -51,7 +51,7 @@ using google::protobuf::io::ZeroCopyOutputStream;
 bool ReadProtoFromTextFile(const char *filename, Message *proto) {
   int fd = open(filename, O_RDONLY);
   CHECK_NE(fd, -1) << "File not found: " << filename;
-  FileInputStream *input = new FileInputStream(fd);
+  auto *input = new FileInputStream(fd);
   bool success = google::protobuf::TextFormat::Parse(input, proto);
   delete input;
   close(fd);
@@ -179,9 +179,7 @@ static bool matchExt(const std::string &fn, std::string en) {
   std::transform(en.begin(), en.end(), en.begin(), ::tolower);
   if (ext == en)
     return true;
-  if (en == "jpg" && ext == "jpeg")
-    return true;
-  return false;
+  return en == "jpg" && ext == "jpeg";
 }
 
 bool ReadImageToDatum(const string &filename, const int label, const int height,
@@ -191,7 +189,7 @@ bool ReadImageToDatum(const string &filename, const int label, const int height,
   cv::Mat cv_img =
       ReadImageToCVMat(filename, height, width, min_dim, max_dim, is_color);
   if (cv_img.data) {
-    if (encoding.size()) {
+    if (!encoding.empty()) {
       if ((cv_img.channels() == 3) == is_color && !height && !width &&
           !min_dim && !max_dim && matchExt(filename, encoding)) {
         datum->set_channels(cv_img.channels());
@@ -217,7 +215,7 @@ bool ReadImageToDatumSeg(const string &filename, const int label,
   cv::Mat cv_img =
       ReadImageToCVMat(filename, height, width, min_dim, max_dim, is_color);
   if (cv_img.data) {
-    if (encoding.size()) {
+    if (!encoding.empty()) {
 
       if ((cv_img.channels() == 3) == is_color && !height && !width &&
           !min_dim && !max_dim && matchExt(filename, encoding)) {
@@ -257,7 +255,7 @@ bool ReadRichImageToAnnotatedDatumWithSeg(
   bool status =
       ReadImageToDatum(filename, -1, height, width, min_dim, max_dim, is_color,
                        encoding, anno_datum->mutable_datum());
-  if (status == false) {
+  if (!status) {
     return status;
   }
   anno_datum->clear_annotation_group();
@@ -602,7 +600,7 @@ bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
     bool iscrowd = false;
     ptree object = v1.second;
     // Get category_id.
-    string name = object.get<string>("category_id");
+    auto name = object.get<string>("category_id");
     if (name_to_label.find(name) == name_to_label.end()) {
       LOG(FATAL) << "Unknown name: " << name;
     }

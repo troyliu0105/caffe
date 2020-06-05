@@ -503,11 +503,7 @@ bool ProjectBBox(const NormalizedBBox &src_bbox, const NormalizedBBox &bbox,
   proj_bbox->set_ymax((bbox.ymax() - src_bbox.ymin()) / src_height);
   proj_bbox->set_difficult(bbox.difficult());
   ClipBBox(*proj_bbox, proj_bbox);
-  if (BBoxSize(*proj_bbox) > 0) {
-    return true;
-  } else {
-    return false;
-  }
+  return BBoxSize(*proj_bbox) > 0;
 }
 
 void ExtrapolateBBox(const ResizeParameter &param, const int height,
@@ -603,12 +599,8 @@ bool MeetEmitConstraint(const NormalizedBBox &src_bbox,
   if (emit_type == EmitConstraint_EmitType_CENTER) {
     float x_center = (bbox.xmin() + bbox.xmax()) / 2;
     float y_center = (bbox.ymin() + bbox.ymax()) / 2;
-    if (x_center >= src_bbox.xmin() && x_center <= src_bbox.xmax() &&
-        y_center >= src_bbox.ymin() && y_center <= src_bbox.ymax()) {
-      return true;
-    } else {
-      return false;
-    }
+    return x_center >= src_bbox.xmin() && x_center <= src_bbox.xmax() &&
+           y_center >= src_bbox.ymin() && y_center <= src_bbox.ymax();
   } else if (emit_type == EmitConstraint_EmitType_MIN_OVERLAP) {
     float bbox_coverage = BBoxCoverage(bbox, src_bbox);
     return bbox_coverage > emit_constraint.emit_overlap();
@@ -631,8 +623,8 @@ void EncodeBBox(const NormalizedBBox &prior_bbox,
     } else {
       // Encode variance in bbox.
       CHECK_EQ(prior_variance.size(), 4);
-      for (int i = 0; i < prior_variance.size(); ++i) {
-        CHECK_GT(prior_variance[i], 0);
+      for (float i : prior_variance) {
+        CHECK_GT(i, 0);
       }
       encode_bbox->set_xmin((bbox.xmin() - prior_bbox.xmin()) /
                             prior_variance[0]);
@@ -648,15 +640,15 @@ void EncodeBBox(const NormalizedBBox &prior_bbox,
     CHECK_GT(prior_width, 0);
     float prior_height = prior_bbox.ymax() - prior_bbox.ymin();
     CHECK_GT(prior_height, 0);
-    float prior_center_x = (prior_bbox.xmin() + prior_bbox.xmax()) / 2.;
-    float prior_center_y = (prior_bbox.ymin() + prior_bbox.ymax()) / 2.;
+    float prior_center_x = (prior_bbox.xmin() + prior_bbox.xmax()) / 2.F;
+    float prior_center_y = (prior_bbox.ymin() + prior_bbox.ymax()) / 2.F;
 
     float bbox_width = bbox.xmax() - bbox.xmin();
     CHECK_GT(bbox_width, 0);
     float bbox_height = bbox.ymax() - bbox.ymin();
     CHECK_GT(bbox_height, 0);
-    float bbox_center_x = (bbox.xmin() + bbox.xmax()) / 2.;
-    float bbox_center_y = (bbox.ymin() + bbox.ymax()) / 2.;
+    float bbox_center_x = (bbox.xmin() + bbox.xmax()) / 2.F;
+    float bbox_center_y = (bbox.ymin() + bbox.ymax()) / 2.F;
 
     if (encode_variance_in_target) {
       encode_bbox->set_xmin((bbox_center_x - prior_center_x) / prior_width);
@@ -686,8 +678,8 @@ void EncodeBBox(const NormalizedBBox &prior_bbox,
     } else {
       // Encode variance in bbox.
       CHECK_EQ(prior_variance.size(), 4);
-      for (int i = 0; i < prior_variance.size(); ++i) {
-        CHECK_GT(prior_variance[i], 0);
+      for (float i : prior_variance) {
+        CHECK_GT(i, 0);
       }
       encode_bbox->set_xmin((bbox.xmin() - prior_bbox.xmin()) / prior_width /
                             prior_variance[0]);
@@ -731,8 +723,8 @@ void DecodeBBox(const NormalizedBBox &prior_bbox,
     CHECK_GT(prior_width, 0);
     float prior_height = prior_bbox.ymax() - prior_bbox.ymin();
     CHECK_GT(prior_height, 0);
-    float prior_center_x = (prior_bbox.xmin() + prior_bbox.xmax()) / 2.;
-    float prior_center_y = (prior_bbox.ymin() + prior_bbox.ymax()) / 2.;
+    float prior_center_x = (prior_bbox.xmin() + prior_bbox.xmax()) / 2.F;
+    float prior_center_y = (prior_bbox.ymin() + prior_bbox.ymax()) / 2.F;
 
     float decode_bbox_center_x, decode_bbox_center_y;
     float decode_bbox_width, decode_bbox_height;
@@ -753,10 +745,10 @@ void DecodeBBox(const NormalizedBBox &prior_bbox,
       decode_bbox_height = exp(prior_variance[3] * bbox.ymax()) * prior_height;
     }
 
-    decode_bbox->set_xmin(decode_bbox_center_x - decode_bbox_width / 2.);
-    decode_bbox->set_ymin(decode_bbox_center_y - decode_bbox_height / 2.);
-    decode_bbox->set_xmax(decode_bbox_center_x + decode_bbox_width / 2.);
-    decode_bbox->set_ymax(decode_bbox_center_y + decode_bbox_height / 2.);
+    decode_bbox->set_xmin(decode_bbox_center_x - decode_bbox_width / 2.F);
+    decode_bbox->set_ymin(decode_bbox_center_y - decode_bbox_height / 2.F);
+    decode_bbox->set_xmax(decode_bbox_center_x + decode_bbox_width / 2.F);
+    decode_bbox->set_ymax(decode_bbox_center_y + decode_bbox_height / 2.F);
   } else if (code_type == PriorBoxParameter_CodeType_CORNER_SIZE) {
     float prior_width = prior_bbox.xmax() - prior_bbox.xmin();
     CHECK_GT(prior_width, 0);
@@ -897,31 +889,29 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
   for (int i = 0; i < num_gt; ++i) {
     gt_pool.push_back(i);
   }
-  while (gt_pool.size() > 0) {
+  while (!gt_pool.empty()) {
     // Find the most overlapped gt and cooresponding predictions.
     int max_idx = -1;
     int max_gt_idx = -1;
     float max_overlap = -1;
-    for (map<int, map<int, float>>::iterator it = overlaps.begin();
-         it != overlaps.end(); ++it) {
-      int i = it->first;
+    for (auto &overlap : overlaps) {
+      int i = overlap.first;
       if ((*match_indices)[i] != -1) {
         // The prediction already has matched ground truth or is ignored.
         continue;
       }
-      for (int p = 0; p < gt_pool.size(); ++p) {
-        int j = gt_pool[p];
-        if (it->second.find(j) == it->second.end()) {
+      for (int j : gt_pool) {
+        if (overlap.second.find(j) == overlap.second.end()) {
           // No overlap between the i-th prediction and j-th ground truth.
           continue;
         }
         // Find the maximum overlapped pair.
-        if (it->second[j] > max_overlap) {
+        if (overlap.second[j] > max_overlap) {
           // If the prediction has not been matched to any ground truth,
           // and the overlap is larger than maximum overlap, update.
           max_idx = i;
           max_gt_idx = j;
-          max_overlap = it->second[j];
+          max_overlap = overlap.second[j];
         }
       }
     }
@@ -943,9 +933,8 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
     break;
   case MultiBoxLossParameter_MatchType_PER_PREDICTION:
     // Get most overlaped for the rest prediction bboxes.
-    for (map<int, map<int, float>>::iterator it = overlaps.begin();
-         it != overlaps.end(); ++it) {
-      int i = it->first;
+    for (auto &it : overlaps) {
+      int i = it.first;
       if ((*match_indices)[i] != -1) {
         // The prediction already has matched ground truth or is ignored.
         continue;
@@ -953,12 +942,12 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
       int max_gt_idx = -1;
       float max_overlap = -1;
       for (int j = 0; j < num_gt; ++j) {
-        if (it->second.find(j) == it->second.end()) {
+        if (it.second.find(j) == it.second.end()) {
           // No overlap between the i-th prediction and j-th ground truth.
           continue;
         }
         // Find the maximum overlapped pair.
-        float overlap = it->second[j];
+        float overlap = it.second[j];
         if (overlap >= overlap_threshold && overlap > max_overlap) {
           // If the prediction has not been matched to any ground truth,
           // and the overlap is larger than maximum overlap, update.
@@ -978,8 +967,6 @@ void MatchBBox(const vector<NormalizedBBox> &gt_bboxes,
     LOG(FATAL) << "Unknown matching type.";
     break;
   }
-
-  return;
 }
 
 void FindMatches(const vector<LabelBBox> &all_loc_preds,
@@ -1052,8 +1039,8 @@ void FindMatches(const vector<LabelBBox> &all_loc_preds,
       } else {
         // Get ground truth label for each ground truth bbox.
         vector<int> gt_labels;
-        for (int g = 0; g < gt_bboxes.size(); ++g) {
-          gt_labels.push_back(gt_bboxes[g].label());
+        for (const auto &gt_bboxe : gt_bboxes) {
+          gt_labels.push_back(gt_bboxe.label());
         }
         // Distribute the matching results to different loc_class.
         for (int c = 0; c < loc_classes; ++c) {
@@ -1085,11 +1072,10 @@ int CountNumMatches(const vector<map<int, vector<int>>> &all_match_indices,
   int num_matches = 0;
   for (int i = 0; i < num; ++i) {
     const map<int, vector<int>> &match_indices = all_match_indices[i];
-    for (map<int, vector<int>>::const_iterator it = match_indices.begin();
-         it != match_indices.end(); ++it) {
-      const vector<int> &match_index = it->second;
-      for (int m = 0; m < match_index.size(); ++m) {
-        if (match_index[m] > -1) {
+    for (const auto &match_indice : match_indices) {
+      const vector<int> &match_index = match_indice.second;
+      for (int m : match_index) {
+        if (m > -1) {
           ++num_matches;
         }
       }
@@ -1103,10 +1089,8 @@ inline bool IsEligibleMining(const MiningType mining_type, const int match_idx,
                              const float neg_overlap) {
   if (mining_type == MultiBoxLossParameter_MiningType_MAX_NEGATIVE) {
     return match_idx == -1 && match_overlap < neg_overlap;
-  } else if (mining_type == MultiBoxLossParameter_MiningType_HARD_EXAMPLE) {
-    return true;
   } else {
-    return false;
+    return mining_type == MultiBoxLossParameter_MiningType_HARD_EXAMPLE;
   }
 }
 
@@ -1201,8 +1185,7 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
     // Pick negatives or hard examples based on loss.
     set<int> sel_indices;
     vector<int> neg_indices;
-    for (map<int, vector<int>>::iterator it = match_indices.begin();
-         it != match_indices.end(); ++it) {
+    for (auto it = match_indices.begin(); it != match_indices.end(); ++it) {
       const int label = it->first;
       int num_sel = 0;
       // Get potential indices and loss pairs.
@@ -1211,14 +1194,14 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
         if (IsEligibleMining(mining_type, match_indices[label][m],
                              match_overlaps.find(label)->second[m],
                              neg_overlap)) {
-          loss_indices.push_back(std::make_pair(loss[m], m));
+          loss_indices.emplace_back(loss[m], m);
           ++num_sel;
         }
       }
       if (mining_type == MultiBoxLossParameter_MiningType_MAX_NEGATIVE) {
         int num_pos = 0;
-        for (int m = 0; m < match_indices[label].size(); ++m) {
-          if (match_indices[label][m] > -1) {
+        for (int m : match_indices[label]) {
+          if (m > -1) {
             ++num_pos;
           }
         }
@@ -1459,8 +1442,7 @@ void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
       multibox_loss_param.use_prior_for_matching();
   int count = 0;
   for (int i = 0; i < num; ++i) {
-    for (map<int, vector<int>>::const_iterator it =
-             all_match_indices[i].begin();
+    for (auto it = all_match_indices[i].begin();
          it != all_match_indices[i].end(); ++it) {
       const int label = it->first;
       const vector<int> &match_index = it->second;
@@ -1568,10 +1550,8 @@ void ComputeLocLoss(const Blob<Dtype> &loc_pred, const Blob<Dtype> &loc_gt,
   int count = 0;
   for (int i = 0; i < num; ++i) {
     vector<float> loc_loss(num_priors, 0.f);
-    for (map<int, vector<int>>::const_iterator it =
-             all_match_indices[i].begin();
-         it != all_match_indices[i].end(); ++it) {
-      const vector<int> &match_index = it->second;
+    for (const auto &it : all_match_indices[i]) {
+      const vector<int> &match_index = it.second;
       CHECK_EQ(num_priors, match_index.size());
       for (int j = 0; j < match_index.size(); ++j) {
         if (match_index[j] <= -1) {
@@ -1761,9 +1741,8 @@ void ComputeConfLoss(const Dtype *conf_data, const int num,
       int start_idx = p * num_classes;
       // Get the label index.
       int label = background_label_id;
-      for (map<int, vector<int>>::const_iterator it = match_indices.begin();
-           it != match_indices.end(); ++it) {
-        const vector<int> &match_index = it->second;
+      for (const auto &match_indice : match_indices) {
+        const vector<int> &match_index = match_indice.second;
         CHECK_EQ(match_index.size(), num_preds_per_class);
         if (match_index[p] > -1) {
           CHECK(all_gt_bboxes.find(i) != all_gt_bboxes.end());
@@ -1871,9 +1850,8 @@ void EncodeConfPrediction(
     if (all_gt_bboxes.find(i) != all_gt_bboxes.end()) {
       // Save matched (positive) bboxes scores and labels.
       const map<int, vector<int>> &match_indices = all_match_indices[i];
-      for (map<int, vector<int>>::const_iterator it = match_indices.begin();
-           it != match_indices.end(); ++it) {
-        const vector<int> &match_index = it->second;
+      for (const auto &match_indice : match_indices) {
+        const vector<int> &match_index = match_indice.second;
         CHECK_EQ(match_index.size(), num_priors);
         for (int j = 0; j < num_priors; ++j) {
           if (match_index[j] <= -1) {
@@ -1905,8 +1883,7 @@ void EncodeConfPrediction(
       // Go to next image.
       if (do_neg_mining) {
         // Save negative bboxes scores and labels.
-        for (int n = 0; n < all_neg_indices[i].size(); ++n) {
-          int j = all_neg_indices[i][n];
+        for (int j : all_neg_indices[i]) {
           CHECK_LT(j, num_priors);
           caffe_copy<Dtype>(num_classes, conf_data + j * num_classes,
                             conf_pred_data + count * num_classes);
@@ -2107,7 +2084,7 @@ void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
 
   // Do nms.
   indices->clear();
-  while (score_index_vec.size() != 0) {
+  while (!score_index_vec.empty()) {
     // Get the current highest score box.
     int best_idx = score_index_vec.front().second;
     const NormalizedBBox &best_bbox = bboxes[best_idx];
@@ -2127,8 +2104,7 @@ void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
 
     // Compute overlap between best_bbox and other remaining bboxes.
     // Remove a bbox if the overlap with best_bbox is larger than nms_threshold.
-    for (vector<pair<float, int>>::iterator it = score_index_vec.begin();
-         it != score_index_vec.end();) {
+    for (auto it = score_index_vec.begin(); it != score_index_vec.end();) {
       int cur_idx = it->second;
       const NormalizedBBox &cur_bbox = bboxes[cur_idx];
       if (BBoxSize(cur_bbox) < 1e-5) {
@@ -2179,14 +2155,14 @@ void ApplyNMS(const bool *overlapped, const int num, vector<int> *indices) {
                         boost::counting_iterator<int>(num));
   // Do nms.
   indices->clear();
-  while (index_vec.size() != 0) {
+  while (!index_vec.empty()) {
     // Get the current highest score box.
     int best_idx = index_vec.front();
     indices->push_back(best_idx);
     // Erase the best box.
     index_vec.erase(index_vec.begin());
 
-    for (vector<int>::iterator it = index_vec.begin(); it != index_vec.end();) {
+    for (auto it = index_vec.begin(); it != index_vec.end();) {
       int cur_idx = *it;
 
       // Remove it if necessary
@@ -2218,12 +2194,11 @@ void ApplyNMSFast(const vector<NormalizedBBox> &bboxes,
   // Do nms.
   float adaptive_threshold = nms_threshold;
   indices->clear();
-  while (score_index_vec.size() != 0) {
+  while (!score_index_vec.empty()) {
     const int idx = score_index_vec.front().second;
     bool keep = true;
-    for (int k = 0; k < indices->size(); ++k) {
+    for (int kept_idx : *indices) {
       if (keep) {
-        const int kept_idx = (*indices)[k];
         float overlap = JaccardOverlap(bboxes[idx], bboxes[kept_idx]);
         keep = overlap <= adaptive_threshold;
       } else {
@@ -2251,12 +2226,11 @@ void ApplyNMSFast(const Dtype *bboxes, const Dtype *scores, const int num,
   // Do nms.
   float adaptive_threshold = nms_threshold;
   indices->clear();
-  while (score_index_vec.size() != 0) {
+  while (!score_index_vec.empty()) {
     const int idx = score_index_vec.front().second;
     bool keep = true;
-    for (int k = 0; k < indices->size(); ++k) {
+    for (int kept_idx : *indices) {
       if (keep) {
-        const int kept_idx = (*indices)[k];
         float overlap = JaccardOverlap(bboxes + idx * 4, bboxes + kept_idx * 4);
         keep = overlap <= adaptive_threshold;
       } else {
@@ -2299,7 +2273,7 @@ void CumSum(const vector<pair<float, int>> &pairs, vector<int> *cumsum) {
 }
 
 void ComputeAP(const vector<pair<float, int>> &tp, const int num_pos,
-               const vector<pair<float, int>> &fp, const string ap_version,
+               const vector<pair<float, int>> &fp, const string &ap_version,
                vector<float> *prec, vector<float> *rec, float *ap) {
   const float eps = 1e-6;
   CHECK_EQ(tp.size(), fp.size()) << "tp must have same size as fp.";
@@ -2312,7 +2286,7 @@ void ComputeAP(const vector<pair<float, int>> &tp, const int num_pos,
   prec->clear();
   rec->clear();
   *ap = 0;
-  if (tp.size() == 0 || num_pos == 0) {
+  if (tp.empty() || num_pos == 0) {
     return;
   }
 
@@ -2513,24 +2487,22 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
     cv::putText(image, buffer, cv::Point(0, text.height + baseline / 2.),
                 fontface, scale, CV_RGB(0, 0, 0), thickness, 8);
     // Draw bboxes.
-    for (map<int, vector<NormalizedBBox>>::iterator it =
-             all_detections[i].begin();
-         it != all_detections[i].end(); ++it) {
-      int label = it->first;
+    for (auto &it : all_detections[i]) {
+      int label = it.first;
       string label_name = "Unknown";
       if (label_to_display_name.find(label) != label_to_display_name.end()) {
         label_name = label_to_display_name.find(label)->second;
       }
       CHECK_LT(label, colors.size());
       const cv::Scalar &color = colors[label];
-      const vector<NormalizedBBox> &bboxes = it->second;
-      for (int j = 0; j < bboxes.size(); ++j) {
-        cv::Point top_left_pt(bboxes[j].xmin(), bboxes[j].ymin());
-        cv::Point bottom_right_pt(bboxes[j].xmax(), bboxes[j].ymax());
+      const vector<NormalizedBBox> &bboxes = it.second;
+      for (const auto &bboxe : bboxes) {
+        cv::Point top_left_pt(bboxe.xmin(), bboxe.ymin());
+        cv::Point bottom_right_pt(bboxe.xmax(), bboxe.ymax());
         cv::rectangle(image, top_left_pt, bottom_right_pt, color, 4);
-        cv::Point bottom_left_pt(bboxes[j].xmin(), bboxes[j].ymax());
+        cv::Point bottom_left_pt(bboxe.xmin(), bboxe.ymax());
         snprintf(buffer, sizeof(buffer), "%s: %.2f", label_name.c_str(),
-                 bboxes[j].score());
+                 bboxe.score());
         cv::Size text =
             cv::getTextSize(buffer, fontface, scale, thickness, &baseline);
         cv::rectangle(image, bottom_left_pt + cv::Point(0, 0),

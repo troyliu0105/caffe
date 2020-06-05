@@ -25,13 +25,6 @@ project(Caffe LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
 
-if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-    add_definitions(-DDEBUG=1)
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
-else ()
-    add_definitions(-DNDEBUG=1)
-endif ()
-
 # ---[ Caffe version
 set(CAFFE_TARGET_VERSION "1.0.0" CACHE STRING "Caffe logical version")
 set(CAFFE_TARGET_SOVERSION "1.0.0" CACHE STRING "Caffe soname version")

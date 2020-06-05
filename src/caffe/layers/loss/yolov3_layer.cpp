@@ -28,27 +28,27 @@ int mutex;
 #endif
 
 #if defined(DEBUG) && defined(DRAW)
-char *CLASSES[21] = {"__background__",
-                     "aeroplane",
-                     "bicycle",
-                     "bird",
-                     "boat",
-                     "bottle",
-                     "bus",
-                     "car",
-                     "cat",
-                     "chair",
-                     "cow",
-                     "diningtable",
-                     "dog",
-                     "horse",
-                     "motorbike",
-                     "person",
-                     "pottedplant",
-                     "sheep",
-                     "sofa",
-                     "train",
-                     "tvmonitor"};
+static char *CLASSES[21] = {"__background__",
+                            "aeroplane",
+                            "bicycle",
+                            "bird",
+                            "boat",
+                            "bottle",
+                            "bus",
+                            "car",
+                            "cat",
+                            "chair",
+                            "cow",
+                            "diningtable",
+                            "dog",
+                            "horse",
+                            "motorbike",
+                            "person",
+                            "pottedplant",
+                            "sheep",
+                            "sofa",
+                            "train",
+                            "tvmonitor"};
 #endif
 
 using Statistic = struct {
@@ -626,53 +626,47 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   }
 #if defined(DEBUG) && defined(DRAW)
   for (int b = 0; b < bottom[0]->num(); ++b) {
-    if (b == 0) {
-      char buf[100];
-      int idx = iter_ * bottom[0]->num() + b;
-      sprintf(buf, "input/input_%05d.jpg", idx);
-      // int idx = (iter*swap.num() % 200) + b;
-      cv::Mat cv_img = cv::imread(buf);
-      for (int t = 0; t < 300; ++t) {
-        vector<Dtype> truth;
-        Dtype c = label_data[b * 300 * 5 + t * 5 + 0];
-        Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
-        Dtype y = label_data[b * 300 * 5 + t * 5 + 2];
-        Dtype w = label_data[b * 300 * 5 + t * 5 + 3];
-        Dtype h = label_data[b * 300 * 5 + t * 5 + 4];
-        if (!x)
-          break;
-        float left = (x - w / 2.);
-        float right = (x + w / 2.);
-        float top = (y - h / 2.);
-        float bot = (y + h / 2.);
+    char buf[100];
+    int idx = iter_ * bottom[0]->num() + b;
+    sprintf(buf, "input/input_%05d.jpg", idx);
+    // int idx = (iter*swap.num() % 200) + b;
+    cv::Mat cv_img = cv::imread(buf);
+    for (int t = 0; t < 300; ++t) {
+      vector<Dtype> truth;
+      Dtype c = label_data[b * 300 * 5 + t * 5 + 0];
+      Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
+      Dtype y = label_data[b * 300 * 5 + t * 5 + 2];
+      Dtype w = label_data[b * 300 * 5 + t * 5 + 3];
+      Dtype h = label_data[b * 300 * 5 + t * 5 + 4];
+      if (!x)
+        break;
 
-        cv::Point pt1;
-        cv::Point pt2;
-        pt1.x = left * cv_img.cols;
-        pt1.y = top * cv_img.rows;
-        pt2.x = right * cv_img.cols;
-        pt2.y = bot * cv_img.rows;
+      cv::Point pt1;
+      cv::Point pt2;
+      pt1.x = (x - w / 2.) * cv_img.cols;
+      pt1.y = (y - h / 2.) * cv_img.rows;
+      pt2.x = (x + w / 2.) * cv_img.cols;
+      pt2.y = (y + h / 2.) * cv_img.rows;
 
-        cv::rectangle(cv_img, pt1, pt2, cv::Scalar(0, 255, 0), 1, 8, 0);
-        char label[100];
-        sprintf(label, "%s", CLASSES[static_cast<int>(c + 1)]);
-        int baseline;
-        cv::Size size =
-            cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 0, &baseline);
-        cv::Point pt3;
-        pt3.x = pt1.x + size.width;
-        pt3.y = pt1.y - size.height;
-        cv::rectangle(cv_img, pt1, pt3, cv::Scalar(0, 255, 0), -1);
+      cv::rectangle(cv_img, pt1, pt2, cv::Scalar(0, 255, 0), 1, 8, 0);
+      char label[100];
+      sprintf(label, "%s", CLASSES[static_cast<int>(c + 1)]);
+      int baseline;
+      cv::Size size =
+          cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 0, &baseline);
+      cv::Point pt3;
+      pt3.x = pt1.x + size.width;
+      pt3.y = pt1.y - size.height;
+      cv::rectangle(cv_img, pt1, pt3, cv::Scalar(0, 255, 0), -1);
 
-        cv::putText(cv_img, label, pt1, cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                    cv::Scalar(0, 0, 0));
-        LOG(INFO) << "Truth box"
-                  << ", " << c << std::fixed << std::setprecision(2) << ", "
-                  << x << ", " << y << ", " << w << ", " << h;
-      }
-      sprintf(buf, "out/out_%05d.jpg", idx);
-      cv::imwrite(buf, cv_img);
+      cv::putText(cv_img, label, pt1, cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                  cv::Scalar(0, 0, 0));
+      LOG(INFO) << "Truth box"
+                << ", " << c << std::fixed << std::setprecision(2) << ", " << x
+                << ", " << y << ", " << w << ", " << h;
     }
+    sprintf(buf, "out/out_%05d.jpg", idx);
+    cv::imwrite(buf, cv_img);
   }
 #endif
   /*for (int i = 0; i < 81; i++) {

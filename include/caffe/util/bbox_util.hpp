@@ -153,25 +153,25 @@ void IntersectBBox(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2,
                    NormalizedBBox *intersect_bbox);
 
 // Compute bbox size.
-float BBoxSize(const NormalizedBBox &bbox, const bool normalized = true);
+float BBoxSize(const NormalizedBBox &bbox, bool normalized = true);
 
 template <typename Dtype>
-Dtype BBoxSize(const Dtype *bbox, const bool normalized = true);
+Dtype BBoxSize(const Dtype *bbox, bool normalized = true);
 
 // Clip the NormalizedBBox such that the range for each corner is [0, 1].
 void ClipBBox(const NormalizedBBox &bbox, NormalizedBBox *clip_bbox);
 
 // Clip the bbox such that the bbox is within [0, 0; width, height].
-void ClipBBox(const NormalizedBBox &bbox, const float height, const float width,
+void ClipBBox(const NormalizedBBox &bbox, float height, float width,
               NormalizedBBox *clip_bbox);
 
 // Scale the NormalizedBBox w.r.t. height and width.
-void ScaleBBox(const NormalizedBBox &bbox, const int height, const int width,
+void ScaleBBox(const NormalizedBBox &bbox, int height, int width,
                NormalizedBBox *scale_bbox);
 
 // Output predicted bbox on the actual image.
 void OutputBBox(const NormalizedBBox &bbox, const pair<int, int> &img_size,
-                const bool has_resize, const ResizeParameter &resize_param,
+                bool has_resize, const ResizeParameter &resize_param,
                 NormalizedBBox *out_bbox);
 
 // Locate bbox in the coordinate system that src_bbox sits.
@@ -184,13 +184,12 @@ bool ProjectBBox(const NormalizedBBox &src_bbox, const NormalizedBBox &bbox,
 
 // Extrapolate the transformed bbox if height_scale and width_scale is
 // explicitly provided, and it is only effective for FIT_SMALL_SIZE case.
-void ExtrapolateBBox(const ResizeParameter &param, const int height,
-                     const int width, const NormalizedBBox &crop_bbox,
-                     NormalizedBBox *bbox);
+void ExtrapolateBBox(const ResizeParameter &param, int height, int width,
+                     const NormalizedBBox &crop_bbox, NormalizedBBox *bbox);
 
 // Compute the jaccard (intersection over union IoU) overlap between two bboxes.
 float JaccardOverlap(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2,
-                     const bool normalized = true);
+                     bool normalized = true);
 
 template <typename Dtype>
 Dtype JaccardOverlap(const Dtype *bbox1, const Dtype *bbox2);
@@ -200,9 +199,9 @@ float BBoxCoverage(const NormalizedBBox &bbox1, const NormalizedBBox &bbox2);
 
 // Encode a bbox according to a prior bbox.
 void EncodeBBox(const NormalizedBBox &prior_bbox,
-                const vector<float> &prior_variance, const CodeType code_type,
-                const bool encode_variance_in_target,
-                const NormalizedBBox &bbox, NormalizedBBox *encode_bbox);
+                const vector<float> &prior_variance, CodeType code_type,
+                bool encode_variance_in_target, const NormalizedBBox &bbox,
+                NormalizedBBox *encode_bbox);
 
 // Check if a bbox meet emit constraint w.r.t. src_bbox.
 bool MeetEmitConstraint(const NormalizedBBox &src_bbox,
@@ -211,34 +210,32 @@ bool MeetEmitConstraint(const NormalizedBBox &src_bbox,
 
 // Decode a bbox according to a prior bbox.
 void DecodeBBox(const NormalizedBBox &prior_bbox,
-                const vector<float> &prior_variance, const CodeType code_type,
-                const bool variance_encoded_in_target, const bool clip_bbox,
+                const vector<float> &prior_variance, CodeType code_type,
+                bool variance_encoded_in_target, bool clip_bbox,
                 const NormalizedBBox &bbox, NormalizedBBox *decode_bbox);
 
 // Decode a set of bboxes according to a set of prior bboxes.
 void DecodeBBoxes(const vector<NormalizedBBox> &prior_bboxes,
                   const vector<vector<float>> &prior_variances,
-                  const CodeType code_type,
-                  const bool variance_encoded_in_target, const bool clip_bbox,
-                  const vector<NormalizedBBox> &bboxes,
+                  CodeType code_type, bool variance_encoded_in_target,
+                  bool clip_bbox, const vector<NormalizedBBox> &bboxes,
                   vector<NormalizedBBox> *decode_bboxes);
 
 // Decode all bboxes in a batch.
 void DecodeBBoxesAll(const vector<LabelBBox> &all_loc_pred,
                      const vector<NormalizedBBox> &prior_bboxes,
-                     const vector<vector<float>> &prior_variances,
-                     const int num, const bool share_location,
-                     const int num_loc_classes, const int background_label_id,
-                     const CodeType code_type,
-                     const bool variance_encoded_in_target, const bool clip,
+                     const vector<vector<float>> &prior_variances, int num,
+                     bool share_location, int num_loc_classes,
+                     int background_label_id, CodeType code_type,
+                     bool variance_encoded_in_target, bool clip,
                      vector<LabelBBox> *all_decode_bboxes);
 
 // Match prediction bboxes with ground truth bboxes.
 void MatchBBox(const vector<NormalizedBBox> &gt,
-               const vector<NormalizedBBox> &pred_bboxes, const int label,
-               const MatchType match_type, const float overlap_threshold,
-               const bool ignore_cross_boundary_bbox,
-               vector<int> *match_indices, vector<float> *match_overlaps);
+               const vector<NormalizedBBox> &pred_bboxes, int label,
+               MatchType match_type, float overlap_threshold,
+               bool ignore_cross_boundary_bbox, vector<int> *match_indices,
+               vector<float> *match_overlaps);
 
 // Find matches between prediction bboxes and ground truth bboxes.
 //    all_loc_preds: stores the location prediction, where each item contains
@@ -259,7 +256,7 @@ void FindMatches(const vector<LabelBBox> &all_loc_preds,
 
 // Count the number of matches from the match indices.
 int CountNumMatches(const vector<map<int, vector<int>>> &all_match_indices,
-                    const int num);
+                    int num);
 
 // Mine the hard examples from the batch.
 //    conf_blob: stores the confidence prediction.
@@ -292,14 +289,13 @@ void MineHardExamples(const Blob<Dtype> &conf_blob,
 //    all_gt_bboxes: stores ground truth for each image. Label of each bbox is
 //      stored in NormalizedBBox.
 template <typename Dtype>
-void GetGroundTruth(const Dtype *gt_data, const int num_gt,
-                    const int background_label_id, const bool use_difficult_gt,
+void GetGroundTruth(const Dtype *gt_data, int num_gt, int background_label_id,
+                    bool use_difficult_gt,
                     map<int, vector<NormalizedBBox>> *all_gt_bboxes);
 // Store ground truth bboxes of same label in a group.
 template <typename Dtype>
-void GetGroundTruth(const Dtype *gt_data, const int num_gt,
-                    const int background_label_id, const bool use_difficult_gt,
-                    map<int, LabelBBox> *all_gt_bboxes);
+void GetGroundTruth(const Dtype *gt_data, int num_gt, int background_label_id,
+                    bool use_difficult_gt, map<int, LabelBBox> *all_gt_bboxes);
 
 // Get location predictions from loc_data.
 //    loc_data: num x num_preds_per_class * num_loc_classes * 4 blob.
@@ -311,9 +307,9 @@ void GetGroundTruth(const Dtype *gt_data, const int num_gt,
 //    loc_preds: stores the location prediction, where each item contains
 //      location prediction for an image.
 template <typename Dtype>
-void GetLocPredictions(const Dtype *loc_data, const int num,
-                       const int num_preds_per_class, const int num_loc_classes,
-                       const bool share_location, vector<LabelBBox> *loc_preds);
+void GetLocPredictions(const Dtype *loc_data, int num, int num_preds_per_class,
+                       int num_loc_classes, bool share_location,
+                       vector<LabelBBox> *loc_preds);
 
 // Encode the localization prediction and ground truth for each matched prior.
 //    all_loc_preds: stores the location prediction, where each item contains
@@ -345,8 +341,7 @@ void EncodeLocPrediction(const vector<LabelBBox> &all_loc_preds,
 template <typename Dtype>
 void ComputeLocLoss(const Blob<Dtype> &loc_pred, const Blob<Dtype> &loc_gt,
                     const vector<map<int, vector<int>>> &all_match_indices,
-                    const int num, const int num_priors,
-                    const LocLossType loc_loss_type,
+                    int num, int num_priors, LocLossType loc_loss_type,
                     vector<vector<float>> *all_loc_loss);
 
 // Get confidence predictions from conf_data.
@@ -357,8 +352,8 @@ void ComputeLocLoss(const Blob<Dtype> &loc_pred, const Blob<Dtype> &loc_gt,
 //    conf_preds: stores the confidence prediction, where each item contains
 //      confidence prediction for an image.
 template <typename Dtype>
-void GetConfidenceScores(const Dtype *conf_data, const int num,
-                         const int num_preds_per_class, const int num_classes,
+void GetConfidenceScores(const Dtype *conf_data, int num,
+                         int num_preds_per_class, int num_classes,
                          vector<map<int, vector<float>>> *conf_scores);
 
 // Get confidence predictions from conf_data.
@@ -372,9 +367,9 @@ void GetConfidenceScores(const Dtype *conf_data, const int num,
 //    conf_preds: stores the confidence prediction, where each item contains
 //      confidence prediction for an image.
 template <typename Dtype>
-void GetConfidenceScores(const Dtype *conf_data, const int num,
-                         const int num_preds_per_class, const int num_classes,
-                         const bool class_major,
+void GetConfidenceScores(const Dtype *conf_data, int num,
+                         int num_preds_per_class, int num_classes,
+                         bool class_major,
                          vector<map<int, vector<float>>> *conf_scores);
 
 // Compute the confidence loss for each prior from conf_data.
@@ -389,10 +384,9 @@ void GetConfidenceScores(const Dtype *conf_data, const int num,
 //    all_gt_bboxes: stores ground truth bboxes from the batch.
 //    all_conf_loss: stores the confidence loss per location for each image.
 template <typename Dtype>
-void ComputeConfLoss(const Dtype *conf_data, const int num,
-                     const int num_preds_per_class, const int num_classes,
-                     const int background_label_id,
-                     const ConfLossType loss_type,
+void ComputeConfLoss(const Dtype *conf_data, int num, int num_preds_per_class,
+                     int num_classes, int background_label_id,
+                     ConfLossType loss_type,
                      const vector<map<int, vector<int>>> &all_match_indices,
                      const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
                      vector<vector<float>> *all_conf_loss);
@@ -407,10 +401,9 @@ void ComputeConfLoss(const Dtype *conf_data, const int num,
 //    loss_type: compute the confidence loss according to the loss type.
 //    all_conf_loss: stores the confidence loss per location for each image.
 template <typename Dtype>
-void ComputeConfLoss(const Dtype *conf_data, const int num,
-                     const int num_preds_per_class, const int num_classes,
-                     const int background_label_id,
-                     const ConfLossType loss_type,
+void ComputeConfLoss(const Dtype *conf_data, int num, int num_preds_per_class,
+                     int num_classes, int background_label_id,
+                     ConfLossType loss_type,
                      vector<vector<float>> *all_conf_loss);
 
 // Encode the confidence predictions and ground truth for each matched prior.
@@ -425,7 +418,7 @@ void ComputeConfLoss(const Dtype *conf_data, const int num,
 //    conf_gt_data: stores the confidence ground truth.
 template <typename Dtype>
 void EncodeConfPrediction(
-    const Dtype *conf_data, const int num, const int num_priors,
+    const Dtype *conf_data, int num, int num_priors,
     const MultiBoxLossParameter &multibox_loss_param,
     const vector<map<int, vector<int>>> &all_match_indices,
     const vector<vector<int>> &all_neg_indices,
@@ -438,7 +431,7 @@ void EncodeConfPrediction(
 //    prior_bboxes: stores all the prior bboxes in the format of NormalizedBBox.
 //    prior_variances: stores all the variances needed by prior bboxes.
 template <typename Dtype>
-void GetPriorBBoxes(const Dtype *prior_data, const int num_priors,
+void GetPriorBBoxes(const Dtype *prior_data, int num_priors,
                     vector<NormalizedBBox> *prior_bboxes,
                     vector<vector<float>> *prior_variances);
 
@@ -449,8 +442,8 @@ void GetPriorBBoxes(const Dtype *prior_data, const int num_priors,
 //      santity check so that no detection contains it.
 //    all_detections: stores detection results for each class from each image.
 template <typename Dtype>
-void GetDetectionResults(const Dtype *det_data, const int num_det,
-                         const int background_label_id,
+void GetDetectionResults(const Dtype *det_data, int num_det,
+                         int background_label_id,
                          map<int, LabelBBox> *all_detections);
 
 // Get top_k scores with corresponding indices.
@@ -459,16 +452,14 @@ void GetDetectionResults(const Dtype *det_data, const int num_det,
 //    top_k: if -1, keep all; otherwise, keep at most top_k.
 //    score_index_vec: store the sorted (score, index) pair.
 void GetTopKScoreIndex(const vector<float> &scores, const vector<int> &indices,
-                       const int top_k,
-                       vector<pair<float, int>> *score_index_vec);
+                       int top_k, vector<pair<float, int>> *score_index_vec);
 
 // Get max scores with corresponding indices.
 //    scores: a set of scores.
 //    threshold: only consider scores higher than the threshold.
 //    top_k: if -1, keep all; otherwise, keep at most top_k.
 //    score_index_vec: store the sorted (score, index) pair.
-void GetMaxScoreIndex(const vector<float> &scores, const float threshold,
-                      const int top_k,
+void GetMaxScoreIndex(const vector<float> &scores, float threshold, int top_k,
                       vector<pair<float, int>> *score_index_vec);
 
 // Get max scores with corresponding indices.
@@ -478,8 +469,7 @@ void GetMaxScoreIndex(const vector<float> &scores, const float threshold,
 //    top_k: if -1, keep all; otherwise, keep at most top_k.
 //    score_index_vec: store the sorted (score, index) pair.
 template <typename Dtype>
-void GetMaxScoreIndex(const Dtype *scores, const int num, const float threshold,
-                      const int top_k,
+void GetMaxScoreIndex(const Dtype *scores, int num, float threshold, int top_k,
                       vector<pair<Dtype, int>> *score_index_vec);
 
 // Get max scores with corresponding indices.
@@ -487,8 +477,7 @@ void GetMaxScoreIndex(const Dtype *scores, const int num, const float threshold,
 //    threshold: only consider scores higher than the threshold.
 //    top_k: if -1, keep all; otherwise, keep at most top_k.
 //    score_index_vec: store the sorted (score, index) pair.
-void GetMaxScoreIndex(const vector<float> &scores, const float threshold,
-                      const int top_k,
+void GetMaxScoreIndex(const vector<float> &scores, float threshold, int top_k,
                       vector<pair<float, int>> *score_index_vec);
 
 // Do non maximum suppression given bboxes and scores.
@@ -502,13 +491,13 @@ void GetMaxScoreIndex(const vector<float> &scores, const float threshold,
 //      bboxes if reuse_overlaps is true.
 //    indices: the kept indices of bboxes after nms.
 void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
-              const float threshold, const int top_k, const bool reuse_overlaps,
+              float threshold, int top_k, bool reuse_overlaps,
               map<int, map<int, float>> *overlaps, vector<int> *indices);
 
 void ApplyNMS(const vector<NormalizedBBox> &bboxes, const vector<float> &scores,
-              const float threshold, const int top_k, vector<int> *indices);
+              float threshold, int top_k, vector<int> *indices);
 
-void ApplyNMS(const bool *overlapped, const int num, vector<int> *indices);
+void ApplyNMS(const bool *overlapped, int num, vector<int> *indices);
 
 // Do non maximum suppression given bboxes and scores.
 // Inspired by Piotr Dollar's NMS implementation in EdgeBox.
@@ -521,8 +510,8 @@ void ApplyNMS(const bool *overlapped, const int num, vector<int> *indices);
 //    top_k: if not -1, keep at most top_k picked indices.
 //    indices: the kept indices of bboxes after nms.
 void ApplyNMSFast(const vector<NormalizedBBox> &bboxes,
-                  const vector<float> &scores, const float score_threshold,
-                  const float nms_threshold, const float eta, const int top_k,
+                  const vector<float> &scores, float score_threshold,
+                  float nms_threshold, float eta, int top_k,
                   vector<int> *indices);
 
 // Do non maximum suppression based on raw bboxes and scores data.
@@ -537,9 +526,9 @@ void ApplyNMSFast(const vector<NormalizedBBox> &bboxes,
 //    top_k: if not -1, keep at most top_k picked indices.
 //    indices: the kept indices of bboxes after nms.
 template <typename Dtype>
-void ApplyNMSFast(const Dtype *bboxes, const Dtype *scores, const int num,
-                  const float score_threshold, const float nms_threshold,
-                  const float eta, const int top_k, vector<int> *indices);
+void ApplyNMSFast(const Dtype *bboxes, const Dtype *scores, int num,
+                  float score_threshold, float nms_threshold, float eta,
+                  int top_k, vector<int> *indices);
 
 // Compute cumsum of a set of pairs.
 void CumSum(const vector<pair<float, int>> &pairs, vector<int> *cumsum);
@@ -556,63 +545,58 @@ void CumSum(const vector<pair<float, int>> &pairs, vector<int> *cumsum);
 //    prec: stores the computed precisions.
 //    rec: stores the computed recalls.
 //    ap: the computed Average Precision.
-void ComputeAP(const vector<pair<float, int>> &tp, const int num_pos,
-               const vector<pair<float, int>> &fp, const string ap_version,
+void ComputeAP(const vector<pair<float, int>> &tp, int num_pos,
+               const vector<pair<float, int>> &fp, const string &ap_version,
                vector<float> *prec, vector<float> *rec, float *ap);
 
 #ifndef CPU_ONLY // GPU
 template <typename Dtype>
 __host__ __device__ Dtype BBoxSizeGPU(const Dtype *bbox,
-                                      const bool normalized = true);
+                                      bool normalized = true);
 
 template <typename Dtype>
 __host__ __device__ Dtype JaccardOverlapGPU(const Dtype *bbox1,
                                             const Dtype *bbox2);
 
 template <typename Dtype>
-void DecodeBBoxesGPU(const int nthreads, const Dtype *loc_data,
-                     const Dtype *prior_data, const CodeType code_type,
-                     const bool variance_encoded_in_target,
-                     const int num_priors, const bool share_location,
-                     const int num_loc_classes, const int background_label_id,
-                     const bool clip_bbox, Dtype *bbox_data);
+void DecodeBBoxesGPU(int nthreads, const Dtype *loc_data,
+                     const Dtype *prior_data, CodeType code_type,
+                     bool variance_encoded_in_target, int num_priors,
+                     bool share_location, int num_loc_classes,
+                     int background_label_id, bool clip_bbox, Dtype *bbox_data);
 
 template <typename Dtype>
-void PermuteDataGPU(const int nthreads, const Dtype *data,
-                    const int num_classes, const int num_data,
-                    const int num_dim, Dtype *new_data);
+void PermuteDataGPU(int nthreads, const Dtype *data, int num_classes,
+                    int num_data, int num_dim, Dtype *new_data);
 
 template <typename Dtype>
-void SoftMaxGPU(const Dtype *data, const int outer_num, const int channels,
-                const int inner_num, Dtype *prob);
+void SoftMaxGPU(const Dtype *data, int outer_num, int channels, int inner_num,
+                Dtype *prob);
 
 template <typename Dtype>
-void ComputeOverlappedGPU(const int nthreads, const Dtype *bbox_data,
-                          const int num_bboxes, const int num_classes,
-                          const Dtype overlap_threshold, bool *overlapped_data);
+void ComputeOverlappedGPU(int nthreads, const Dtype *bbox_data, int num_bboxes,
+                          int num_classes, Dtype overlap_threshold,
+                          bool *overlapped_data);
 
 template <typename Dtype>
-void ComputeOverlappedByIdxGPU(const int nthreads, const Dtype *bbox_data,
-                               const Dtype overlap_threshold, const int *idx,
-                               const int num_idx, bool *overlapped_data);
+void ComputeOverlappedByIdxGPU(int nthreads, const Dtype *bbox_data,
+                               Dtype overlap_threshold, const int *idx,
+                               int num_idx, bool *overlapped_data);
 
 template <typename Dtype>
-void ApplyNMSGPU(const Dtype *bbox_data, const Dtype *conf_data,
-                 const int num_bboxes, const float confidence_threshold,
-                 const int top_k, const float nms_threshold,
+void ApplyNMSGPU(const Dtype *bbox_data, const Dtype *conf_data, int num_bboxes,
+                 float confidence_threshold, int top_k, float nms_threshold,
                  vector<int> *indices);
 
 template <typename Dtype>
 void GetDetectionsGPU(const Dtype *bbox_data, const Dtype *conf_data,
-                      const int image_id, const int label,
-                      const vector<int> &indices, const bool clip_bbox,
-                      Blob<Dtype> *detection_blob);
+                      int image_id, int label, const vector<int> &indices,
+                      bool clip_bbox, Blob<Dtype> *detection_blob);
 
 template <typename Dtype>
-void ComputeConfLossGPU(const Blob<Dtype> &conf_blob, const int num,
-                        const int num_preds_per_class, const int num_classes,
-                        const int background_label_id,
-                        const ConfLossType loss_type,
+void ComputeConfLossGPU(const Blob<Dtype> &conf_blob, int num,
+                        int num_preds_per_class, int num_classes,
+                        int background_label_id, ConfLossType loss_type,
                         const vector<map<int, vector<int>>> &all_match_indices,
                         const map<int, vector<NormalizedBBox>> &all_gt_bboxes,
                         vector<vector<float>> *all_conf_loss);
@@ -620,11 +604,11 @@ void ComputeConfLossGPU(const Blob<Dtype> &conf_blob, const int num,
 #endif // !CPU_ONLY
 
 #ifdef USE_OPENCV
-vector<cv::Scalar> GetColors(const int n);
+vector<cv::Scalar> GetColors(int n);
 
 template <typename Dtype>
 void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
-                   const float threshold, const vector<cv::Scalar> &colors,
+                   float threshold, const vector<cv::Scalar> &colors,
                    const map<int, string> &label_to_display_name,
                    const string &save_file);
 #endif // USE_OPENCV

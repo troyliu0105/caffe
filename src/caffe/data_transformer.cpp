@@ -2,6 +2,7 @@
 #include <opencv2/core/core.hpp>
 #endif // USE_OPENCV
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -830,9 +831,9 @@ void DataTransformer<Dtype>::Transform(
   RepeatedPtrField<AnnotationGroup> transformed_anno_group_all;
   Transform(anno_datum, transformed_blob, &transformed_anno_group_all,
             do_mirror, policy_num);
-  for (int g = 0; g < transformed_anno_group_all.size(); ++g) {
-    transformed_anno_vec->push_back(transformed_anno_group_all.Get(g));
-  }
+  std::copy(transformed_anno_group_all.cbegin(),
+            transformed_anno_group_all.cend(),
+            std::back_inserter(*transformed_anno_vec));
 }
 
 template <typename Dtype>
@@ -868,7 +869,7 @@ void DataTransformer<Dtype>::TransformAnnotation(
         const Annotation &anno = anno_group.annotation(a);
         const NormalizedBBox &bbox = anno.bbox();
         // Adjust bounding box annotation.
-        NormalizedBBox resize_bbox = bbox;
+        NormalizedBBox resize_bbox(bbox);
         if (do_resize && param_.resize_param_size()) {
           CHECK_GT(img_height, 0);
           CHECK_GT(img_width, 0);
@@ -1204,7 +1205,8 @@ void DataTransformer<Dtype>::NoiseImage(const Datum &datum,
 template <typename Dtype>
 void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
                                           const int height, const int width,
-                                          const int channels) {
+                                          const int channels,
+                                          bool resize_back) {
   const Dtype scale = param_.scale();
   const bool has_mean_file = param_.has_mean_file();
   const bool has_mean_values = !mean_values_.empty();
@@ -1254,7 +1256,7 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
   }
   transformed_mat.convertTo(orig_img, img_type);
 
-  if (param_.resize_param_size()) {
+  if (param_.resize_param_size() && resize_back) {
     *cv_img = ApplyResize(orig_img, param_.resize_param(0));
   } else {
     *cv_img = orig_img;
@@ -1263,7 +1265,8 @@ void DataTransformer<Dtype>::TransformInv(const Dtype *data, cv::Mat *cv_img,
 
 template <typename Dtype>
 void DataTransformer<Dtype>::TransformInv(const Blob<Dtype> *blob,
-                                          vector<cv::Mat> *cv_imgs) {
+                                          vector<cv::Mat> *cv_imgs,
+                                          bool resize_back) {
   const int channels = blob->channels();
   const int height = blob->height();
   const int width = blob->width();
@@ -1273,7 +1276,7 @@ void DataTransformer<Dtype>::TransformInv(const Blob<Dtype> *blob,
 
   for (int i = 0; i < num; ++i) {
     cv::Mat cv_img;
-    TransformInv(image_data, &cv_img, height, width, channels);
+    TransformInv(image_data, &cv_img, height, width, channels, resize_back);
     cv_imgs->push_back(cv_img);
     image_data += blob->offset(1);
   }
