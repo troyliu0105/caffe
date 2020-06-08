@@ -31,10 +31,10 @@ const float prob_eps = 0.01;
 
 int roll_weighted_die(const vector<float> &probabilities) {
   vector<float> cumulative;
-  std::partial_sum(&probabilities[0], &probabilities[0] + probabilities.size(),
+  std::partial_sum(probabilities.begin(), probabilities.end(),
                    std::back_inserter(cumulative));
   float val;
-  caffe_rng_uniform(1, static_cast<float>(0), cumulative.back(), &val);
+  caffe_rng_uniform(1, 0.F, cumulative.back(), &val);
 
   // Find the position within the sequence and add 1
   return (std::lower_bound(cumulative.begin(), cumulative.end(), val) -

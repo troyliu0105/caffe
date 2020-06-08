@@ -681,9 +681,23 @@ bool ReadTxtToAnnotatedDatum(const string &labelfile, const int height,
     LOG(INFO) << "Cannot open " << labelfile;
     return false;
   }
+  string line;
+  std::vector<float> line_data;
   int label;
   float xmin, ymin, xmax, ymax;
-  while (infile >> label >> xmin >> ymin >> xmax >> ymax) {
+  while (getline(infile, line)) {
+    std::istringstream line_is(line);
+    line_data = std::vector<float>(std::istream_iterator<float>(line_is),
+                                   std::istream_iterator<float>());
+    std::transform(line_data.begin(), line_data.end(), line_data.begin(),
+                   [](float t) -> float { return floor(t); });
+    std::sort() LOG_ASSERT(line_data.size() == 5);
+    label = static_cast<int>(line_data[0]);
+    xmin = line_data[1];
+    ymin = line_data[2];
+    xmax = line_data[3];
+    ymax = line_data[4];
+    line_data.clear();
     Annotation *anno = nullptr;
     int instance_id = 0;
     bool found_group = false;
