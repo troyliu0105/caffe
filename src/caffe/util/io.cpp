@@ -691,7 +691,7 @@ bool ReadTxtToAnnotatedDatum(const string &labelfile, const int height,
                                    std::istream_iterator<float>());
     std::transform(line_data.begin(), line_data.end(), line_data.begin(),
                    [](float t) -> float { return floor(t); });
-    std::sort() LOG_ASSERT(line_data.size() == 5);
+    LOG_ASSERT(line_data.size() == 5);
     label = static_cast<int>(line_data[0]);
     xmin = line_data[1];
     ymin = line_data[2];
