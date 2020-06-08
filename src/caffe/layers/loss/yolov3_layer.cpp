@@ -72,220 +72,63 @@ using Statistic = struct {
 
 namespace caffe {
 
-dxrep dx_box_iou(const box &pred, const box &truth, IOU_LOSS iou_loss) {
-  boxabs pred_tblr = to_tblr(pred);
-  float pred_t = fmin(pred_tblr.top, pred_tblr.bot);
-  float pred_b = fmax(pred_tblr.top, pred_tblr.bot);
-  float pred_l = fmin(pred_tblr.left, pred_tblr.right);
-  float pred_r = fmax(pred_tblr.left, pred_tblr.right);
-
-  boxabs truth_tblr = to_tblr(truth);
-#ifdef DEBUG_PRINTS
-  printf("\niou: %f, giou: %f\n", box_iou(pred, truth), box_giou(pred, truth));
-  printf("pred: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n",
-         pred.x, pred.y, pred.w, pred.h, pred_tblr.top, pred_tblr.bot,
-         pred_tblr.left, pred_tblr.right);
-  printf("truth: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n",
-         truth.x, truth.y, truth.w, truth.h, truth_tblr.top, truth_tblr.bot,
-         truth_tblr.left, truth_tblr.right);
-#endif
-  // printf("pred (t,b,l,r): (%f, %f, %f, %f)\n", pred_t, pred_b, pred_l,
-  // pred_r); printf("trut (t,b,l,r): (%f, %f, %f, %f)\n", truth_tblr.top,
-  // truth_tblr.bot, truth_tblr.left, truth_tblr.right);
-  dxrep ddx = {0};
-  float X = (pred_b - pred_t) * (pred_r - pred_l);
-  float Xhat =
-      (truth_tblr.bot - truth_tblr.top) * (truth_tblr.right - truth_tblr.left);
-  float Ih = fmin(pred_b, truth_tblr.bot) - fmax(pred_t, truth_tblr.top);
-  float Iw = fmin(pred_r, truth_tblr.right) - fmax(pred_l, truth_tblr.left);
-  float I = Iw * Ih;
-  float U = X + Xhat - I;
-  float S = powf(pred.x - truth.x, 2) + powf(pred.y - truth.y, 2);
-  float giou_Cw =
-      fmax(pred_r, truth_tblr.right) - fmin(pred_l, truth_tblr.left);
-  float giou_Ch = fmax(pred_b, truth_tblr.bot) - fmin(pred_t, truth_tblr.top);
-  float giou_C = giou_Cw * giou_Ch;
-
-  // float IoU = I / U;
-  // Partial Derivatives, derivatives
-  float dX_wrt_t = -1 * (pred_r - pred_l);
-  float dX_wrt_b = pred_r - pred_l;
-  float dX_wrt_l = -1 * (pred_b - pred_t);
-  float dX_wrt_r = pred_b - pred_t;
-
-  // gradient of I min/max in IoU calc (prediction)
-  float dI_wrt_t = pred_t > truth_tblr.top ? (-1 * Iw) : 0;
-  float dI_wrt_b = pred_b < truth_tblr.bot ? Iw : 0;
-  float dI_wrt_l = pred_l > truth_tblr.left ? (-1 * Ih) : 0;
-  float dI_wrt_r = pred_r < truth_tblr.right ? Ih : 0;
-  // derivative of U with regard to x
-  float dU_wrt_t = dX_wrt_t - dI_wrt_t;
-  float dU_wrt_b = dX_wrt_b - dI_wrt_b;
-  float dU_wrt_l = dX_wrt_l - dI_wrt_l;
-  float dU_wrt_r = dX_wrt_r - dI_wrt_r;
-  // gradient of C min/max in IoU calc (prediction)
-  float dC_wrt_t = pred_t < truth_tblr.top ? (-1 * giou_Cw) : 0;
-  float dC_wrt_b = pred_b > truth_tblr.bot ? giou_Cw : 0;
-  float dC_wrt_l = pred_l < truth_tblr.left ? (-1 * giou_Ch) : 0;
-  float dC_wrt_r = pred_r > truth_tblr.right ? giou_Ch : 0;
-
-  // Final IOU loss (prediction) (negative of IOU gradient, we want the negative
-  // loss)
-  float p_dt = 0;
-  float p_db = 0;
-  float p_dl = 0;
-  float p_dr = 0;
-  if (U > 0) {
-    p_dt = ((U * dI_wrt_t) - (I * dU_wrt_t)) / (U * U);
-    p_db = ((U * dI_wrt_b) - (I * dU_wrt_b)) / (U * U);
-    p_dl = ((U * dI_wrt_l) - (I * dU_wrt_l)) / (U * U);
-    p_dr = ((U * dI_wrt_r) - (I * dU_wrt_r)) / (U * U);
+static inline float fix_nan_inf(float val) {
+  if (isnan(val) || isinf(val))
+    val = 0;
+  return val;
+}
+static inline float clip_value(float val, const float max_val) {
+  if (val > max_val) {
+    // printf("\n val = %f > max_val = %f \n", val, max_val);
+    val = max_val;
+  } else if (val < -max_val) {
+    // printf("\n val = %f < -max_val = %f \n", val, -max_val);
+    val = -max_val;
   }
+  return val;
+}
+template <typename Dtype>
+int int_index(const vector<Dtype> &a, int val, int n) {
+  int i;
+  for (i = 0; i < n; ++i) {
+    if (a[i] == val)
+      return i;
+  }
+  return -1;
+}
 
-  // apply grad from prediction min/max for correct corner selection
-  p_dt = pred_tblr.top < pred_tblr.bot ? p_dt : p_db;
-  p_db = pred_tblr.top < pred_tblr.bot ? p_db : p_dt;
-  p_dl = pred_tblr.left < pred_tblr.right ? p_dl : p_dr;
-  p_dr = pred_tblr.left < pred_tblr.right ? p_dr : p_dl;
-
-  if (iou_loss == GIOU) {
-    if (giou_C > 0) {
-      // apply "C" term from gIOU
-      p_dt += ((giou_C * dU_wrt_t) - (U * dC_wrt_t)) / (giou_C * giou_C);
-      p_db += ((giou_C * dU_wrt_b) - (U * dC_wrt_b)) / (giou_C * giou_C);
-      p_dl += ((giou_C * dU_wrt_l) - (U * dC_wrt_l)) / (giou_C * giou_C);
-      p_dr += ((giou_C * dU_wrt_r) - (U * dC_wrt_r)) / (giou_C * giou_C);
-    }
-    if (Iw <= 0 || Ih <= 0) {
-      p_dt = ((giou_C * dU_wrt_t) - (U * dC_wrt_t)) / (giou_C * giou_C);
-      p_db = ((giou_C * dU_wrt_b) - (U * dC_wrt_b)) / (giou_C * giou_C);
-      p_dl = ((giou_C * dU_wrt_l) - (U * dC_wrt_l)) / (giou_C * giou_C);
-      p_dr = ((giou_C * dU_wrt_r) - (U * dC_wrt_r)) / (giou_C * giou_C);
+template <typename Dtype>
+bool compare_yolo_class(const Dtype *swap_data, int class_num, int class_index,
+                        int stride, float objectness, int class_id,
+                        float conf_thresh) {
+  float prob;
+  for (int j = 0; j < class_num; ++j) {
+    // float prob = objectness * output[class_index + stride*j];
+    prob = swap_data[class_index + j * stride];
+    if (prob > conf_thresh) {
+      return true;
     }
   }
+  return false;
+}
 
-  float Ct = fmin(pred.y - pred.h / 2, truth.y - truth.h / 2);
-  float Cb = fmax(pred.y + pred.h / 2, truth.y + truth.h / 2);
-  float Cl = fmin(pred.x - pred.w / 2, truth.x - truth.w / 2);
-  float Cr = fmax(pred.x + pred.w / 2, truth.x + truth.w / 2);
-  float Cw = Cr - Cl;
-  float Ch = Cb - Ct;
-  float C = Cw * Cw + Ch * Ch;
+template <typename Dtype>
+void averages_yolo_deltas(int class_index, int box_index, int stride,
+                          int classes, Dtype *delta) {
 
-  float dCt_dx = 0;
-  float dCt_dy = pred_t < truth_tblr.top ? 1 : 0;
-  float dCt_dw = 0;
-  float dCt_dh = pred_t < truth_tblr.top ? -0.5 : 0;
-
-  float dCb_dx = 0;
-  float dCb_dy = pred_b > truth_tblr.bot ? 1 : 0;
-  float dCb_dw = 0;
-  float dCb_dh = pred_b > truth_tblr.bot ? 0.5 : 0;
-
-  float dCl_dx = pred_l < truth_tblr.left ? 1 : 0;
-  float dCl_dy = 0;
-  float dCl_dw = pred_l < truth_tblr.left ? -0.5 : 0;
-  float dCl_dh = 0;
-
-  float dCr_dx = pred_r > truth_tblr.right ? 1 : 0;
-  float dCr_dy = 0;
-  float dCr_dw = pred_r > truth_tblr.right ? 0.5 : 0;
-  float dCr_dh = 0;
-
-  float dCw_dx = dCr_dx - dCl_dx;
-  float dCw_dy = dCr_dy - dCl_dy;
-  float dCw_dw = dCr_dw - dCl_dw;
-  float dCw_dh = dCr_dh - dCl_dh;
-
-  float dCh_dx = dCb_dx - dCt_dx;
-  float dCh_dy = dCb_dy - dCt_dy;
-  float dCh_dw = dCb_dw - dCt_dw;
-  float dCh_dh = dCb_dh - dCt_dh;
-
-  // UNUSED
-  //// ground truth
-  // float dI_wrt_xhat_t = pred_t < truth_tblr.top ? (-1 * Iw) : 0;
-  // float dI_wrt_xhat_b = pred_b > truth_tblr.bot ? Iw : 0;
-  // float dI_wrt_xhat_l = pred_l < truth_tblr.left ? (-1 * Ih) : 0;
-  // float dI_wrt_xhat_r = pred_r > truth_tblr.right ? Ih : 0;
-
-  // Final IOU loss (prediction) (negative of IOU gradient, we want the negative
-  // loss)
-  float p_dx = 0;
-  float p_dy = 0;
-  float p_dw = 0;
-  float p_dh = 0;
-
-  p_dx =
-      p_dl + p_dr; // p_dx, p_dy, p_dw and p_dh are the gradient of IoU or GIoU.
-  p_dy = p_dt + p_db;
-  p_dw = (p_dr - p_dl); // For dw and dh, we do not divided by 2.
-  p_dh = (p_db - p_dt);
-
-  // https://github.com/Zzh-tju/DIoU-darknet
-  // https://arxiv.org/abs/1911.08287
-  if (iou_loss == DIOU) {
-    if (C > 0) {
-      p_dx += (2 * (truth.x - pred.x) * C -
-               (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
-              (C * C);
-      p_dy += (2 * (truth.y - pred.y) * C -
-               (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
-              (C * C);
-      p_dw += (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C);
-      p_dh += (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C);
-    }
-    if (Iw <= 0 || Ih <= 0) {
-      p_dx = (2 * (truth.x - pred.x) * C -
-              (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
-             (C * C);
-      p_dy = (2 * (truth.y - pred.y) * C -
-              (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
-             (C * C);
-      p_dw = (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C);
-      p_dh = (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C);
-    }
-  }
-  // The following codes are calculating the gradient of ciou.
-
-  if (iou_loss == CIOU) {
-    float ar_gt = truth.w / truth.h;
-    float ar_pred = pred.w / pred.h;
-    float ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
-                    (atan(ar_gt) - atan(ar_pred));
-    float alpha = ar_loss / (1 - I / U + ar_loss + 0.000001);
-    float ar_dw = 8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred.h;
-    float ar_dh = -8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred.w;
-    if (C > 0) {
-      // dar*
-      p_dx += (2 * (truth.x - pred.x) * C -
-               (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
-              (C * C);
-      p_dy += (2 * (truth.h - pred.h) * C -
-               (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
-              (C * C);
-      p_dw += (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C) + alpha * ar_dw;
-      p_dh += (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C) + alpha * ar_dh;
-    }
-    if (Iw <= 0 || Ih <= 0) {
-      p_dx = (2 * (truth.x - pred.x) * C -
-              (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
-             (C * C);
-      p_dy = (2 * (truth.y - pred.y) * C -
-              (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
-             (C * C);
-      p_dw = (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C) + alpha * ar_dw;
-      p_dh = (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C) + alpha * ar_dh;
-    }
+  int classes_in_one_box = 0;
+  int c;
+  for (c = 0; c < classes; ++c) {
+    if (delta[class_index + c * stride] > 0)
+      classes_in_one_box++;
   }
 
-  ddx.dt = p_dx; // We follow the original code released from GDarknet. So in
-                 // yolo_layer.c, dt, db, dl, dr are already dx, dy, dw, dh.
-  ddx.db = p_dy;
-  ddx.dl = p_dw;
-  ddx.dr = p_dh;
-
-  return ddx;
+  if (classes_in_one_box > 0) {
+    delta[box_index + 0 * stride] /= classes_in_one_box;
+    delta[box_index + 1 * stride] /= classes_in_one_box;
+    delta[box_index + 2 * stride] /= classes_in_one_box;
+    delta[box_index + 3 * stride] /= classes_in_one_box;
+  }
 }
 
 template <typename Dtype>
@@ -296,8 +139,7 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
   if (diff[class_index + stride * class_label]) {
 
     float y_true = 1;
-    if (label_smooth_eps)
-      y_true = y_true * (1 - label_smooth_eps) + 0.5 * label_smooth_eps;
+    y_true = y_true * (1.F - label_smooth_eps) + 0.5F * label_smooth_eps;
     float result_delta =
         y_true - input_data[class_index + stride * class_label];
     if (!isnan(result_delta) && !isinf(result_delta))
@@ -306,8 +148,9 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
     // stride*class_id];
 
     if (avg_cat)
-      ATOMIC_UPDATE(mutex,
-                    *avg_cat += input_data[class_index + stride * class_label])
+      atomic_update(mutex, [&]() {
+        *avg_cat += input_data[class_index + stride * class_label];
+      });
 
     // diff[class_index + stride*class_label] = (-1.0) * (1 -
     // input_data[class_index + stride*class_label]); *avg_cat +=
@@ -337,15 +180,15 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
       diff[class_index + stride * n] *= alpha * grad;
 
       if (n == class_label) {
-        ATOMIC_UPDATE(mutex, *avg_cat += input_data[class_index + stride * n])
+        atomic_update(
+            mutex, [&]() { *avg_cat += input_data[class_index + stride * n]; });
       }
     }
 
   } else {
     for (int n = 0; n < classes; ++n) {
-      float y_true = ((n == class_label) ? 1 : 0);
-      if (label_smooth_eps)
-        y_true = y_true * (1 - label_smooth_eps) + 0.5 * label_smooth_eps;
+      float y_true = ((n == class_label) ? 1.F : 0.F);
+      y_true = y_true * (1.F - label_smooth_eps) + 0.5F * label_smooth_eps;
       float result_delta = y_true - input_data[class_index + stride * n];
       if (!isnan(result_delta) && !isinf(result_delta))
         diff[class_index + stride * n] = (-1.0) * scale * result_delta;
@@ -353,8 +196,9 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
       // stride*class_id];
 
       if (n == class_label && avg_cat)
-        ATOMIC_UPDATE(mutex, *avg_cat +=
-                             input_data[class_index + stride * class_label])
+        atomic_update(mutex, [&]() {
+          *avg_cat += input_data[class_index + stride * class_label];
+        });
       // diff[class_index + n*stride] = (-1.0) * scale * (((n == class_label) ?
       // 1 : 0)
       // - input_data[class_index + n*stride]);
@@ -369,21 +213,6 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
       //      }
     }
   }
-}
-static inline float fix_nan_inf(float val) {
-  if (isnan(val) || isinf(val))
-    val = 0;
-  return val;
-}
-static inline float clip_value(float val, const float max_val) {
-  if (val > max_val) {
-    // printf("\n val = %f > max_val = %f \n", val, max_val);
-    val = max_val;
-  } else if (val < -max_val) {
-    // printf("\n val = %f < -max_val = %f \n", val, -max_val);
-    val = -max_val;
-  }
-  return val;
 }
 
 template <typename Dtype>
@@ -509,7 +338,7 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   coord_scale_ = param.coord_scale();       // 1.0
   thresh_ = param.thresh();                 // 0.6
 
-  adversarial_ = false;
+  use_extra_matched_anchor_ = param.use_extra_matched_anchor();
   objectness_smooth_ = param.objectness_smooth();
   use_logic_gradient_ = param.use_logic_gradient();
   use_focal_loss_ = param.use_focal_loss();
@@ -544,49 +373,6 @@ void Yolov3Layer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   LossLayer<Dtype>::Reshape(bottom, top);
   diff_.ReshapeLike(*bottom[0]);
   //  real_diff_.ReshapeLike(*bottom[0]);
-}
-template <typename Dtype>
-int int_index(const vector<Dtype> &a, int val, int n) {
-  int i;
-  for (i = 0; i < n; ++i) {
-    if (a[i] == val)
-      return i;
-  }
-  return -1;
-}
-
-template <typename Dtype>
-bool compare_yolo_class(const Dtype *swap_data, int class_num, int class_index,
-                        int stride, float objectness, int class_id,
-                        float conf_thresh) {
-  float prob;
-  for (int j = 0; j < class_num; ++j) {
-    // float prob = objectness * output[class_index + stride*j];
-    prob = swap_data[class_index + j * stride];
-    if (prob > conf_thresh) {
-      return true;
-    }
-  }
-  return false;
-}
-
-template <typename Dtype>
-void averages_yolo_deltas(int class_index, int box_index, int stride,
-                          int classes, Dtype *delta) {
-
-  int classes_in_one_box = 0;
-  int c;
-  for (c = 0; c < classes; ++c) {
-    if (delta[class_index + c * stride] > 0)
-      classes_in_one_box++;
-  }
-
-  if (classes_in_one_box > 0) {
-    delta[box_index + 0 * stride] /= classes_in_one_box;
-    delta[box_index + 1 * stride] /= classes_in_one_box;
-    delta[box_index + 2 * stride] /= classes_in_one_box;
-    delta[box_index + 3 * stride] /= classes_in_one_box;
-  }
 }
 
 template <typename Dtype>
@@ -675,7 +461,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
     printf(label);
   }*/
 
-  FOR_LOOP(bottom[0]->num(), b, {
+  parallel_for(bottom[0]->num(), [&](int b) {
     // Assume that all detections are negative samples
     box pred;
     box truth;
@@ -730,7 +516,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             best_truth = truth;
           }
         }
-        ATOMIC_UPDATE(mutex, statistic.avg_anyobj += swap_data[obj_index])
+        atomic_update(mutex,
+                      [&]() { statistic.avg_anyobj += swap_data[obj_index]; });
         diff[obj_index] = (-1) * (0 - swap_data[obj_index]) * noobject_scale_;
         if (best_match_iou > thresh_) {
           // ================================================== alexeyAB version
@@ -833,7 +620,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                               &statistic.avg_cat, stride, use_focal_loss_,
                               label_smooth_eps_); // softmax_tree_
 
-        ATOMIC_UPDATE(mutex, {
+        atomic_update(mutex, [&]() {
           ++statistic.count;
           ++statistic.class_count;
           if (all_ious.iou > 0.5)
@@ -850,62 +637,65 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
           statistic.tot_diou_loss += 1 - all_ious.diou;
 
           statistic.avg_obj += swap_data[best_index + 4 * stride];
-        })
+        });
       }
 
       // if the rest anchor, which iou is larger than threshold,
       // it is also the positive sample
       // ====================================================== alexeyAB version
-      for (int n = 0; n < biases_size_; ++n) {
-        mask_n = int_index(mask_, n, num_);
-        if (mask_n >= 0 && n != best_n && iou_thresh_ < 1.0f) {
-          pred.x = 0;
-          pred.y = 0;
-          pred.w = biases_[2 * n] / (float)(side_w_ * anchors_scale_);
-          pred.h = biases_[2 * n + 1] / (float)(side_h_ * anchors_scale_);
-          iou = box_iou(pred, truth_shift, iou_loss_);
+      if (use_extra_matched_anchor_) {
+        for (int n = 0; n < biases_size_; ++n) {
+          mask_n = int_index(mask_, n, num_);
+          if (mask_n >= 0 && n != best_n && iou_thresh_ < 1.0f) {
+            pred.x = 0;
+            pred.y = 0;
+            pred.w = biases_[2 * n] / (float)(side_w_ * anchors_scale_);
+            pred.h = biases_[2 * n + 1] / (float)(side_h_ * anchors_scale_);
+            iou = box_iou(pred, truth_shift, iou_loss_);
 
-          if (iou > iou_thresh_) {
-            bool overlap = false;
-            // LOG(INFO) << best_n;
-            best_index = b * bottom[0]->count(1) + mask_n * len * stride + pos;
+            if (iou > iou_thresh_) {
+              bool overlap = false;
+              // LOG(INFO) << best_n;
+              best_index =
+                  b * bottom[0]->count(1) + mask_n * len * stride + pos;
 
-            ious all_ious = delta_region_box(
-                truth, swap_data, biases_, mask_[mask_n], best_index, i, j,
-                side_w_, side_h_, side_w_ * anchors_scale_,
-                side_h_ * anchors_scale_, diff,
-                coord_scale_ * (2 - truth.w * truth.h), stride, iou_loss_,
-                iou_normalizer_, max_delta_, accumulate_);
-            diff[best_index + 4 * stride] =
-                (-1.0) * (1 - swap_data[best_index + 4 * stride]) *
-                object_scale_;
+              ious all_ious = delta_region_box(
+                  truth, swap_data, biases_, mask_[mask_n], best_index, i, j,
+                  side_w_, side_h_, side_w_ * anchors_scale_,
+                  side_h_ * anchors_scale_, diff,
+                  coord_scale_ * (2 - truth.w * truth.h), stride, iou_loss_,
+                  iou_normalizer_, max_delta_, accumulate_);
+              diff[best_index + 4 * stride] =
+                  (-1.0) * (1 - swap_data[best_index + 4 * stride]) *
+                  object_scale_;
 
-            // diff[best_index + 4 * stride] = (-1.0) * (1 -
-            // swap_data[best_index + 4 * stride]) ;
+              // diff[best_index + 4 * stride] = (-1.0) * (1 -
+              // swap_data[best_index + 4 * stride]) ;
 
-            delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
-                                  class_label, num_class_, class_scale_,
-                                  &statistic.avg_cat, stride, use_focal_loss_,
-                                  label_smooth_eps_); // softmax_tree_
+              delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
+                                    class_label, num_class_, class_scale_,
+                                    &statistic.avg_cat, stride, use_focal_loss_,
+                                    label_smooth_eps_); // softmax_tree_
 
-            ATOMIC_UPDATE(mutex, {
-              ++statistic.count;
-              ++statistic.class_count;
-              if (all_ious.iou > 0.5)
-                statistic.recall += 1;
-              if (all_ious.iou > 0.75)
-                statistic.recall75 += 1;
-              statistic.tot_iou += all_ious.iou;
-              statistic.tot_iou_loss += 1 - all_ious.iou;
-              statistic.tot_giou += all_ious.giou;
-              statistic.tot_giou_loss += 1 - all_ious.giou;
-              statistic.tot_ciou += all_ious.ciou;
-              statistic.tot_ciou_loss += 1 - all_ious.ciou;
-              statistic.tot_diou += all_ious.diou;
-              statistic.tot_diou_loss += 1 - all_ious.diou;
+              atomic_update(mutex, [&]() {
+                ++statistic.count;
+                ++statistic.class_count;
+                if (all_ious.iou > 0.5)
+                  statistic.recall += 1;
+                if (all_ious.iou > 0.75)
+                  statistic.recall75 += 1;
+                statistic.tot_iou += all_ious.iou;
+                statistic.tot_iou_loss += 1 - all_ious.iou;
+                statistic.tot_giou += all_ious.giou;
+                statistic.tot_giou_loss += 1 - all_ious.giou;
+                statistic.tot_ciou += all_ious.ciou;
+                statistic.tot_ciou_loss += 1 - all_ious.ciou;
+                statistic.tot_diou += all_ious.diou;
+                statistic.tot_diou_loss += 1 - all_ious.diou;
 
-              statistic.avg_obj += swap_data[best_index + 4 * stride];
-            })
+                statistic.avg_obj += swap_data[best_index + 4 * stride];
+              });
+            }
           }
         }
       }
@@ -919,7 +709,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                              num_class_, diff);
       }
     }
-  }) // end for loop
+  });
   if (statistic.count == 0)
     statistic.count = 1;
   if (statistic.class_count == 0)
@@ -1028,7 +818,7 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
       int len = 4 + num_class_ + 1;
       int stride = side_w_ * side_h_;
       // LOG(INFO)<<swap.count(1);
-      FOR_LOOP(bottom[0]->num(), b, {
+      parallel_for(bottom[0]->num(), [&](int b) {
         for (int s = 0; s < stride; s++) {
           for (int n = 0; n < num_; n++) {
             int index = n * len * stride + s + b * bottom[0]->count(1);
@@ -1049,7 +839,7 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
             }
           }
         }
-      })
+      });
     } else {
       // non-logic_gradient formula
       // https://blog.csdn.net/yanzi6969/article/details/80505421

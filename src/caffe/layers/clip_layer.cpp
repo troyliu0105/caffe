@@ -29,10 +29,10 @@ void ClipLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype min = this->layer_param_.clip_param().min();
     Dtype max = this->layer_param_.clip_param().max();
 
-    FOR_LOOP(count, i, {
+    parallel_for(count, [&](int i) {
       bottom_diff[i] =
           top_diff[i] * (bottom_data[i] >= min && bottom_data[i] <= max);
-    })
+    });
   }
 }
 

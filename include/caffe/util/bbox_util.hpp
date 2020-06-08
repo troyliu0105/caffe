@@ -24,63 +24,79 @@ namespace caffe {
  * @brief yolo 中的激活模式
  * Source: ultralytics/yolov3
  */
-typedef enum {
+enum ARC {
   DEFAULT,
   BCE,
   CE,
-} ARC;
+};
 
-typedef enum { IOU, GIOU, MSE, DIOU, CIOU } IOU_LOSS;
+enum IOU_LOSS { IOU, GIOU, MSE, DIOU, CIOU };
 // box.h
 
-typedef struct dxrep {
+struct dxrep {
   float dt, db, dl, dr;
-} dxrep;
+};
 
 // box.h
-typedef struct box {
+struct box {
 public:
   explicit box() : x(0.F), y(0.F), w(0.F), h(0.F){};
   explicit box(float x, float y, float w, float h) : x(x), y(y), w(y), h(h){};
+  template <typename D>
+  box &operator=(const vector<D> &b) {
+    x = b[0];
+    y = b[1];
+    w = b[2];
+    h = b[3];
+  }
+  template <typename D>
+  vector<D> to_vector() const {
+    return {x, y, w, h};
+  }
+
   float x, y, w, h;
-} box;
-typedef struct ious {
+};
+struct ious {
   float iou, giou, diou, ciou;
   dxrep dx_iou;
   dxrep dx_giou;
-} ious;
-typedef struct boxabs {
+};
+struct boxabs {
   float left, right, top, bot;
-} boxabs;
+};
 
 template <typename Dtype>
 Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2);
 template <typename Dtype>
-Dtype box_intersection(vector<Dtype> a, vector<Dtype> b);
+Dtype box_intersection(const vector<Dtype> &a, const vector<Dtype> &b);
 float box_intersection(const box &a, const box &b);
 template <typename Dtype>
-Dtype box_union(vector<Dtype> a, vector<Dtype> b);
+Dtype box_union(const vector<Dtype> &a, const vector<Dtype> &b);
 float box_union(const box &a, const box &b);
 template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b);
+Dtype box_iou(const vector<Dtype> &a, const vector<Dtype> &b);
 float box_iou(const box &a, const box &b);
 template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type);
+Dtype box_iou(const vector<Dtype> &a, const vector<Dtype> &b, IOU_LOSS type);
 float box_iou(const box &a, const box &b, IOU_LOSS type);
 template <typename Dtype>
-boxabs box_c(vector<Dtype> a, vector<Dtype> b);
+dxrep dx_box_iou(const vector<Dtype> &pred, const vector<Dtype> &truth,
+                 IOU_LOSS iou_loss);
+dxrep dx_box_iou(const box &pred, const box &truth, IOU_LOSS iou_loss);
+template <typename Dtype>
+boxabs box_c(const vector<Dtype> &a, const vector<Dtype> &b);
 boxabs box_c(const box &a, const box &b);
 template <typename Dtype>
-boxabs to_tblr(vector<Dtype> a);
+boxabs to_tblr(const vector<Dtype> &a);
 boxabs to_tblr(const box &a);
 template <typename Dtype>
-Dtype box_giou(vector<Dtype> a, vector<Dtype> b);
+Dtype box_giou(const vector<Dtype> &a, const vector<Dtype> &b);
 float box_giou(const box &a, const box &b);
 template <typename Dtype>
-Dtype box_diou(vector<Dtype> a, vector<Dtype> b);
+Dtype box_diou(const vector<Dtype> &a, const vector<Dtype> &b);
 float box_diou(const box &a, const box &b);
 template <typename Dtype>
-Dtype box_ciou(vector<Dtype> a, vector<Dtype> b);
+Dtype box_ciou(const vector<Dtype> &a, const vector<Dtype> &b);
 float box_ciou(const box &a, const box &b);
 
 typedef EmitConstraint_EmitType EmitType;

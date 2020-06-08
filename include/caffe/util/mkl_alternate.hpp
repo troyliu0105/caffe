@@ -5,61 +5,56 @@
 #include <tbb/mutex.h>
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_sort.h>
-
-#define SORT(b, e, comp) tbb::parallel_sort(b, e, comp)
-
-#define ATOMIC_UPDATE(mutex, operation)                                        \
-  {                                                                            \
-    tbb::mutex::scoped_lock lock(mutex);                                       \
-    operation;                                                                 \
-  }
-#define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
-  tbb::parallel_for(                                                           \
-      tbb::blocked_range<int>(0, n),                                           \
-      [&](const tbb::blocked_range<int> &r) {                                  \
-        prepare;                                                               \
-        for (int iname = r.begin(); iname != r.end(); ++iname)                 \
-          operation;                                                           \
-      },                                                                       \
-      tbb::auto_partitioner());
-#define FOR_LOOP(n, iname, operation)                                          \
-  FOR_LOOP_WITH_PREPARE(n, iname, operation, )
 #elif defined(USE_OMP)
 #ifdef _MSC_VER
 #define OMP_PRAGMA_FOR __pragma(omp parallel for)
 #define OMP_PRAGMA __pragma(omp)
+#define OMP_ATOMIC __pragma(omp critical(dataupdate))
 #else
 #define OMP_PRAGMA_FOR _Pragma("omp parallel for")
 #define OMP_PRAGMA _Pragma(omp)
+#define OMP_ATOMIC _Pragma("omp critical(dataupdate)")
+#endif
 #endif
 
-#include <algorithm>
-#define SORT(b, e, comp) std::sort(b, e, comp)
-
-#define ATOMIC_UPDATE(mutex, operation)                                        \
-  _Pragma("omp critical(dataupdate)") { operation; }
-
-#define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
-  OMP_PRAGMA_FOR                                                               \
-  for (int iname = 0; iname < n; ++iname) {                                    \
-    prepare;                                                                   \
-    operation;                                                                 \
-  }
-#define FOR_LOOP(n, iname, operation)                                          \
-  FOR_LOOP_WITH_PREPARE(n, iname, operation, )
-
+template <typename Index, typename IteratorFunction>
+void parallel_for(Index b_, Index e_, Index stride_,
+                  const IteratorFunction &func_) {
+#ifdef USE_TBB
+  tbb::parallel_for(b_, e_, stride_, func_);
 #else
-#include <algorithm>
-#define SORT(b, e, comp) std::sort(b, e, comp)
-#define ATOMIC_UPDATE(mutex, operation)                                        \
-  { operation; }
-#define FOR_LOOP_WITH_PREPARE(n, iname, operation, prepare)                    \
-  prepare;                                                                     \
-  for (int iname = 0; iname < n; ++iname)                                      \
-    operation;
-#define FOR_LOOP(n, iname, operation)                                          \
-  FOR_LOOP_WITH_PREPARE(n, iname, operation, )
+#ifdef USE_OMP
+  OMP_PRAGMA_FOR
 #endif
+  for (Index i = b_; i < e_; i += stride_) {
+    func_(i);
+  }
+#endif
+}
+
+template <typename Index, typename IteratorFunction>
+void parallel_for(Index e_, const IteratorFunction &func_) {
+  parallel_for(0, e_, 1, func_);
+}
+
+template <typename It, typename Compare>
+void parallel_sort(It first, It last, Compare comp) {
+#ifdef USE_TBB
+  tbb::parallel_sort(first, last, comp);
+#else
+  std::sort(first, last, comp);
+#endif
+}
+
+template <typename Mutex, typename Function>
+void atomic_update(Mutex &mutex, const Function &func) {
+#ifdef USE_TBB
+  tbb::mutex::scoped_lock lock(mutex);
+#elif defined(USE_OMP)
+  OMP_ATOMIC
+#endif
+  func();
+}
 
 #ifdef USE_MKL
 
@@ -87,7 +82,7 @@ extern "C" {
     CHECK_GT(n, 0);                                                            \
     CHECK(a);                                                                  \
     CHECK(y);                                                                  \
-    FOR_LOOP(n, i, operation)                                                  \
+    parallel_for(0, n, 1, [&](int i) { operation; });                          \
   }                                                                            \
   inline void vs##name(const int n, const float *a, float *y) {                \
     v##name<float>(n, a, y);                                                   \
@@ -110,7 +105,7 @@ DEFINE_VSL_UNARY_FUNC(Abs, y[i] = fabs(a[i]))
     CHECK_GT(n, 0);                                                            \
     CHECK(a);                                                                  \
     CHECK(y);                                                                  \
-    FOR_LOOP(n, i, operation)                                                  \
+    parallel_for(0, n, 1, [&](int i) { operation; });                          \
   }                                                                            \
   inline void vs##name(const int n, const float *a, const float b, float *y) { \
     v##name<float>(n, a, b, y);                                                \
@@ -131,7 +126,7 @@ DEFINE_VSL_UNARY_FUNC_WITH_PARAM(Powx, y[i] = pow(a[i], b))
     CHECK(a);                                                                  \
     CHECK(b);                                                                  \
     CHECK(y);                                                                  \
-    FOR_LOOP(n, i, operation)                                                  \
+    parallel_for(0, n, 1, [&](int i) { operation; });                          \
   }                                                                            \
   inline void vs##name(const int n, const float *a, const float *b,            \
                        float *y) {                                             \

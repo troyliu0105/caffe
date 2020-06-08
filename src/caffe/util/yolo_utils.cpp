@@ -9,11 +9,11 @@ namespace caffe {
 template <typename Dtype>
 void caffe_cpu_channel_softmax(const int len, const int grid_size,
                                const Dtype *input_data, Dtype *output_data) {
-  FOR_LOOP(grid_size, s, {
+  parallel_for(grid_size, [&](int s) {
     auto *pixel = input_data + s;
     auto *out_pixel = output_data + s;
     caffe_softmax(len, pixel, grid_size, out_pixel);
-  })
+  });
 }
 
 template void caffe_cpu_channel_softmax(const int len, const int grid_size,

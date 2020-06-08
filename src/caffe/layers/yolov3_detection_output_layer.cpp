@@ -224,78 +224,76 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
                             DEFAULT, false, false);
         }
       }
-      FOR_LOOP_WITH_PREPARE(
-          bottom[t]->num(), b,
-          {
-            for (int s = 0; s < side_w_ * side_h_; s++) {
-              // LOG(INFO) << s;
-              for (int n = 0; n < num_; n++) {
-                // LOG(INFO) << bottom[t]->count(1);
-                int index = n * len * stride + s + b * bottom[t]->count(1);
+      parallel_for(bottom[t]->num(), [&](int b) {
+        box pred;
+        auto *class_score = new Dtype[num_class_];
+        for (int s = 0; s < side_w_ * side_h_; s++) {
+          // LOG(INFO) << s;
+          for (int n = 0; n < num_; n++) {
+            // LOG(INFO) << bottom[t]->count(1);
+            int index = n * len * stride + s + b * bottom[t]->count(1);
 
-                if (gaussian_box_) {
-                  for (int c = 9; c < len; ++c) {
-                    class_score[c - 9] = swap_data[index + c * stride];
-                  }
-                } else {
-                  for (int c = 5; c < len; ++c) {
-                    class_score[c - 5] = swap_data[index + c * stride];
-                  }
-                }
-                int y2 = s / side_w_;
-                int x2 = s % side_w_;
-                Dtype obj_score;
-                if (gaussian_box_) {
-                  Dtype uc_ver = 4.0 - swap_data[index + 1 * stride] -
-                                 swap_data[index + 3 * stride] -
-                                 swap_data[index + 5 * stride] -
-                                 swap_data[index + 7 * stride];
-                  obj_score = swap_data[index + 8 * stride] * uc_ver / 4.0;
-                } else {
-                  obj_score = swap_data[index + 4 * stride];
-                }
-                PredictionResult<Dtype> predict{};
-                for (int c = 0; c < num_class_; ++c) {
-                  class_score[c] *= obj_score;
-                  // LOG(INFO) << class_score[c];
-                  if (class_score[c] > confidence_threshold_) {
-                    if (gaussian_box_) {
-                      get_gaussian_yolo_box(
-                          &pred, swap_data, biases_, mask_[n + mask_offset],
-                          index, x2, y2, side_w_, side_h_, nw, nh, stride);
-                    } else {
-                      get_region_box(&pred, swap_data, biases_,
-                                     mask_[n + mask_offset], index, x2, y2,
-                                     side_w_, side_h_, nw, nh, stride);
-                    }
-
-                    predict.x = pred.x;
-                    predict.y = pred.y;
-                    predict.w = pred.w;
-                    predict.h = pred.h;
-                    predict.classType = c;
-                    predict.confidence = class_score[c];
-                    correct_yolo_boxes(predict, side_w_, side_h_, nw, nh, 1);
-                    if (is_predict_valid(predict))
-                      ATOMIC_UPDATE(mutex, predicts_.push_back(predict))
-                  }
-                }
+            if (gaussian_box_) {
+              for (int c = 9; c < len; ++c) {
+                class_score[c - 9] = swap_data[index + c * stride];
+              }
+            } else {
+              for (int c = 5; c < len; ++c) {
+                class_score[c - 5] = swap_data[index + c * stride];
               }
             }
-            delete[] class_score;
-          },
-          auto *class_score = new Dtype[num_class_];
-          box pred;)
+            int y2 = s / side_w_;
+            int x2 = s % side_w_;
+            Dtype obj_score;
+            if (gaussian_box_) {
+              Dtype uc_ver = 4.0 - swap_data[index + 1 * stride] -
+                             swap_data[index + 3 * stride] -
+                             swap_data[index + 5 * stride] -
+                             swap_data[index + 7 * stride];
+              obj_score = swap_data[index + 8 * stride] * uc_ver / 4.0;
+            } else {
+              obj_score = swap_data[index + 4 * stride];
+            }
+            PredictionResult<Dtype> predict{};
+            for (int c = 0; c < num_class_; ++c) {
+              class_score[c] *= obj_score;
+              // LOG(INFO) << class_score[c];
+              if (class_score[c] > confidence_threshold_) {
+                if (gaussian_box_) {
+                  get_gaussian_yolo_box(&pred, swap_data, biases_,
+                                        mask_[n + mask_offset], index, x2, y2,
+                                        side_w_, side_h_, nw, nh, stride);
+                } else {
+                  get_region_box(&pred, swap_data, biases_,
+                                 mask_[n + mask_offset], index, x2, y2, side_w_,
+                                 side_h_, nw, nh, stride);
+                }
+
+                predict.x = pred.x;
+                predict.y = pred.y;
+                predict.w = pred.w;
+                predict.h = pred.h;
+                predict.classType = c;
+                predict.confidence = class_score[c];
+                correct_yolo_boxes(predict, side_w_, side_h_, nw, nh, 1);
+                if (is_predict_valid(predict))
+                  atomic_update(mutex, [&]() { predicts_.push_back(predict); });
+              }
+            }
+          }
+        }
+        delete[] class_score;
+      });
       mask_offset += groups_num_;
     }
 
     //    delete[] class_score;
   }
-  SORT(predicts_.begin(), predicts_.end(),
-       [](const PredictionResult<Dtype> &box1,
-          const PredictionResult<Dtype> &box2) {
-         return box1.confidence > box2.confidence;
-       });
+  parallel_sort(predicts_.begin(), predicts_.end(),
+                [](const PredictionResult<Dtype> &box1,
+                   const PredictionResult<Dtype> &box2) {
+                  return box1.confidence > box2.confidence;
+                });
   vector<int> idxes;
   int num_kept = 0;
   if (!predicts_.empty()) {

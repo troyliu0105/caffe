@@ -64,7 +64,7 @@ protected:
   float coord_scale_;
   float thresh_;
 
-  bool adversarial_;
+  bool use_extra_matched_anchor_;
   bool objectness_smooth_;
   bool use_logic_gradient_;
   vector<Dtype> biases_;

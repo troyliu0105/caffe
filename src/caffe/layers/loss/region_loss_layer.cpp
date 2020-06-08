@@ -42,38 +42,8 @@ Dtype softmax_region(Dtype *input, int classes, int stride) {
 }
 
 template <typename Dtype>
-Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
-  float l1 = x1 - w1 / 2;
-  float l2 = x2 - w2 / 2;
-  float left = l1 > l2 ? l1 : l2;
-  float r1 = x1 + w1 / 2;
-  float r2 = x2 + w2 / 2;
-  float right = r1 < r2 ? r1 : r2;
-  return right - left;
-}
-template <typename Dtype>
-Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
-  float w = overlap(a[0], a[2], b[0], b[2]);
-  float h = overlap(a[1], a[3], b[1], b[3]);
-  if (w < 0 || h < 0)
-    return 0;
-  float area = w * h;
-  return area;
-}
-template <typename Dtype>
-Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
-  float i = box_intersection(a, b);
-  float u = a[2] * a[3] + b[2] * b[3] - i;
-  return u;
-}
-template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
-  return box_intersection(a, b) / box_union(a, b);
-}
-
-template <typename Dtype>
-void get_region_box(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n,
-                    int index, int i, int j, int w, int h, int stride) {
+void get_region_box_v2(vector<Dtype> &b, Dtype *x, vector<Dtype> biases, int n,
+                       int index, int i, int j, int w, int h, int stride) {
 
   b.clear();
   b.push_back((i + caffe_fn_sigmoid(x[index + 0 * stride])) / w);
@@ -87,7 +57,7 @@ Dtype delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases,
                        Dtype *delta, float scale, int stride) {
   vector<Dtype> pred;
   pred.clear();
-  get_region_box(pred, x, biases, n, index, i, j, w, h, stride);
+  get_region_box_v2(pred, x, biases, n, index, i, j, w, h, stride);
 
   float iou = box_iou(pred, truth);
   // LOG(INFO) << pred[0] << "," << pred[1] << "," << pred[2] << "," << pred[3]
@@ -115,9 +85,9 @@ Dtype delta_region_box(vector<Dtype> truth, Dtype *x, vector<Dtype> biases,
 }
 
 template <typename Dtype>
-void delta_region_class(Dtype *input_data, Dtype *&diff, int index,
-                        int class_label, int classes, float scale,
-                        Dtype *avg_cat, int stride) {
+void delta_region_class_v2(Dtype *input_data, Dtype *&diff, int index,
+                           int class_label, int classes, float scale,
+                           Dtype *avg_cat, int stride) {
   for (int n = 0; n < classes; ++n) {
     diff[index + n * stride] =
         (-1.0) * scale *
@@ -146,7 +116,7 @@ void RegionLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   rescore_ = param.rescore(); //
   class_map_ = param.class_map();
   iter_ = 0;
-  if (class_map_ != "") {
+  if (!class_map_.empty()) {
     string line;
     std::fstream fin(class_map_.c_str());
     if (!fin) {
@@ -182,15 +152,15 @@ void RegionLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
     } // 0.73 0.87;2.42 2.65;4.30 7.04;10.24 4.59;12.68 11.87;
   }
 
-  int input_count =
-      bottom[0]->count(1); // h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
-  int label_count = bottom[1]->count(1); // 30*5-
+  // int input_count =
+  //    bottom[0]->count(1); // h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
+  // int label_count = bottom[1]->count(1); // 30*5-
   // outputs: classes, iou, coordinates
-  int tmp_input_count =
-      side_ * side_ * num_ *
-      (coords_ + num_class_ +
-       1); // 13*13*5*(20+4+1) label: isobj, class_label, coordinates
-  int tmp_label_count = 30 * num_;
+  // int tmp_input_count =
+  //    side_ * side_ * num_ *
+  //    (coords_ + num_class_ +
+  //     1); // 13*13*5*(20+4+1) label: isobj, class_label, coordinates
+  // int tmp_label_count = 30 * num_;
   // CHECK_EQ(input_count, tmp_input_count);
   // CHECK_EQ(label_count, tmp_label_count);
 }
@@ -254,8 +224,8 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         int y2 = s / side_;
         int x2 = s % side_;
         // LOG(INFO) << side_;
-        get_region_box(pred, swap_data, biases_, n, index, x2, y2, side_, side_,
-                       stride);
+        get_region_box_v2(pred, swap_data, biases_, n, index, x2, y2, side_,
+                          side_, stride);
         for (int t = 0; t < 300; ++t) {
           vector<Dtype> truth;
           Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
@@ -270,7 +240,7 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
           truth.push_back(y);
           truth.push_back(w);
           truth.push_back(h);
-          Dtype iou = box_iou(pred, truth);
+          Dtype iou = box_iou<Dtype>(pred, truth);
           if (iou > best_iou) {
             best_class = label_data[b * 300 * 5 + t * 5];
             best_iou = iou;
@@ -333,8 +303,8 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         int index2 = n * len * stride + pos + b * bottom[0]->count(1);
         // LOG(INFO) << index2;
         vector<Dtype> pred;
-        get_region_box(pred, swap_data, biases_, n, index2, i, j, side_, side_,
-                       stride);
+        get_region_box_v2(pred, swap_data, biases_, n, index2, i, j, side_,
+                          side_, stride);
         if (bias_match_) {
           pred[2] = biases_[2 * n] / (float)side_;
           pred[3] = biases_[2 * n + 1] / (float)side_;
@@ -375,9 +345,9 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             caffe_fn_sigmoid_grad_fast(swap_data[best_index + 4 * stride]);
       }
 
-      delta_region_class(swap_data, diff, best_index + 5 * stride, class_label,
-                         num_class_, class_scale_, &avg_cat,
-                         stride); // softmax_tree_
+      delta_region_class_v2(swap_data, diff, best_index + 5 * stride,
+                            class_label, num_class_, class_scale_, &avg_cat,
+                            stride); // softmax_tree_
 
       ++count;
       ++class_count_;

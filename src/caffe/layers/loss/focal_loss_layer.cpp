@@ -192,28 +192,24 @@ void FocalLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
       // save result in scaler_.data
       Dtype *scale_diff = scale_.mutable_cpu_diff(); // origin loss
       Dtype *scale_data = scale_.mutable_cpu_data(); // scale, but useless now
-      FOR_LOOP_WITH_PREPARE(
-          count, i,
-          {
-            target = label[i];
-            expabsx = exp(input_data[i] > 0 ? -input_data[i] : input_data[i]);
-            scale_data[i] =
-                (target == 1 ? alpha_ : 1 - alpha_) * gamma_ *
-                pow(1 - (target == 1 ? prob_data[i] : (1 - prob_data[i])),
-                    gamma_ - 1) *
-                expabsx / (pow(expabsx, 2) + 2 * expabsx + 1) *
-                (target == 1 ? -1 : 1);
-          },
-          Dtype expabsx;
-          Dtype target)
+      parallel_for(count, [&](int i) {
+        Dtype target = label[i];
+        Dtype expabsx = exp(input_data[i] > 0 ? -input_data[i] : input_data[i]);
+        scale_data[i] =
+            (target == 1 ? alpha_ : 1 - alpha_) * gamma_ *
+            pow(1 - (target == 1 ? prob_data[i] : (1 - prob_data[i])),
+                gamma_ - 1) *
+            expabsx / (pow(expabsx, 2) + 2 * expabsx + 1) *
+            (target == 1 ? -1 : 1);
+      });
       caffe_mul(count, scale_data, scale_diff, scale_data);
       caffe_add(count, scale_data, bottom_diff, bottom_diff);
       if (has_ignore_label_) {
-        FOR_LOOP(count, i, {
+        parallel_for(count, [&](int i) {
           if (label[i] == ignore_label_) {
             bottom_diff[i] = 0;
           }
-        })
+        });
       }
     }
     // Scale gradient

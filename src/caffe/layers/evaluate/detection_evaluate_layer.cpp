@@ -187,7 +187,7 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
           }
           vector<bool> visited(gt_bboxes.size(), false);
           // Sort detections in descend order based on scores.
-          SORT(bboxes.begin(), bboxes.end(), SortBBoxDescend);
+          parallel_sort(bboxes.begin(), bboxes.end(), SortBBoxDescend);
           for (auto &bbox : bboxes) {
             top_data[num_det * 5] = image_id;
             top_data[num_det * 5 + 1] = label;

@@ -69,6 +69,7 @@ caffe_option(USE_TBB "Link with TBB" ON)
 caffe_option(protobuf_MODULE_COMPATIBLE "Make the protobuf-config.cmake compatible with the module mode" ON IF MSVC)
 caffe_option(COPY_PREREQUISITES "Copy the prerequisites next to each executable or shared library directory" ON IF MSVC)
 caffe_option(INSTALL_PREREQUISITES "Install the prerequisites next to each executable or shared library directory" ON IF MSVC)
+caffe_option(DRAW "Draw images when debug" OFF)
 
 if (MSVC AND BUILD_SHARED_LIBS)
     if (CMAKE_GENERATOR MATCHES "Visual Studio")
@@ -90,6 +91,10 @@ endif ()
 
 # ---[ Dependencies
 include(cmake/Dependencies.cmake)
+
+if (DRAW)
+    add_definitions(-DDRAW)
+endif ()
 
 # ---[ Flags
 if (UNIX OR APPLE)

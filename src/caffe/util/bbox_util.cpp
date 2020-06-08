@@ -28,7 +28,7 @@ template float overlap(float, float, float, float);
 template double overlap(double, double, double, double);
 
 template <typename Dtype>
-Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
+Dtype box_intersection(const vector<Dtype> &a, const vector<Dtype> &b) {
   float w = overlap(a[0], a[2], b[0], b[2]);
   float h = overlap(a[1], a[3], b[1], b[3]);
   if (w < 0 || h < 0)
@@ -36,39 +36,37 @@ Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
   float area = w * h;
   return area;
 }
-template float box_intersection(vector<float> a, vector<float> b);
-template double box_intersection(vector<double> a, vector<double> b);
+template float box_intersection(const vector<float> &a, const vector<float> &b);
+template double box_intersection(const vector<double> &a,
+                                 const vector<double> &b);
 
 float box_intersection(const box &a, const box &b) {
-  return box_intersection(vector<float>{a.x, a.y, a.w, a.h},
-                          vector<float>{b.x, b.y, b.w, b.h});
+  return box_intersection(a.to_vector<float>(), b.to_vector<float>());
 }
 
 template <typename Dtype>
-Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
+Dtype box_union(const vector<Dtype> &a, const vector<Dtype> &b) {
   float i = box_intersection(a, b);
   float u = a[2] * a[3] + b[2] * b[3] - i;
   return u;
 }
-template float box_union(vector<float> a, vector<float> b);
-template double box_union(vector<double> a, vector<double> b);
+template float box_union(const vector<float> &a, const vector<float> &b);
+template double box_union(const vector<double> &a, const vector<double> &b);
 float box_union(const box &a, const box &b) {
-  return box_union(vector<float>{a.x, a.y, a.w, a.h},
-                   vector<float>{b.x, b.y, b.w, b.h});
+  return box_union(a.to_vector<float>(), b.to_vector<float>());
 }
 template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
+Dtype box_iou(const vector<Dtype> &a, const vector<Dtype> &b) {
   return box_intersection(a, b) / box_union(a, b);
 }
-template float box_iou(vector<float> a, vector<float> b);
-template double box_iou(vector<double> a, vector<double> b);
+template float box_iou(const vector<float> &a, const vector<float> &b);
+template double box_iou(const vector<double> &a, const vector<double> &b);
 float box_iou(const box &a, const box &b) {
-  return box_iou(vector<float>{a.x, a.y, a.w, a.h},
-                 vector<float>{b.x, b.y, b.w, b.h});
+  return box_iou(a.to_vector<float>(), b.to_vector<float>());
 }
 
 template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
+Dtype box_iou(const vector<Dtype> &a, const vector<Dtype> &b, IOU_LOSS type) {
   Dtype iou;
   if (type == GIOU) {
     iou = box_giou(a, b);
@@ -81,16 +79,238 @@ Dtype box_iou(vector<Dtype> a, vector<Dtype> b, IOU_LOSS type) {
   }
   return iou;
 }
-template float box_iou(vector<float> a, vector<float> b, IOU_LOSS type);
-template double box_iou(vector<double> a, vector<double> b, IOU_LOSS type);
+template float box_iou(const vector<float> &a, const vector<float> &b,
+                       IOU_LOSS type);
+template double box_iou(const vector<double> &a, const vector<double> &b,
+                        IOU_LOSS type);
 
 float box_iou(const box &a, const box &b, IOU_LOSS type) {
-  return box_iou(vector<float>{a.x, a.y, a.w, a.h},
-                 vector<float>{b.x, b.y, b.w, b.h}, type);
+  return box_iou(a.to_vector<float>(), b.to_vector<float>(), type);
+}
+dxrep dx_box_iou(const box &pred, const box &truth, IOU_LOSS iou_loss) {
+  boxabs pred_tblr = to_tblr(pred);
+  float pred_t = fmin(pred_tblr.top, pred_tblr.bot);
+  float pred_b = fmax(pred_tblr.top, pred_tblr.bot);
+  float pred_l = fmin(pred_tblr.left, pred_tblr.right);
+  float pred_r = fmax(pred_tblr.left, pred_tblr.right);
+
+  boxabs truth_tblr = to_tblr(truth);
+#ifdef DEBUG_PRINTS
+  printf("\niou: %f, giou: %f\n", box_iou(pred, truth), box_giou(pred, truth));
+  printf("pred: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n",
+         pred.x, pred.y, pred.w, pred.h, pred_tblr.top, pred_tblr.bot,
+         pred_tblr.left, pred_tblr.right);
+  printf("truth: x,y,w,h: (%f, %f, %f, %f) -> t,b,l,r: (%f, %f, %f, %f)\n",
+         truth.x, truth.y, truth.w, truth.h, truth_tblr.top, truth_tblr.bot,
+         truth_tblr.left, truth_tblr.right);
+#endif
+  // printf("pred (t,b,l,r): (%f, %f, %f, %f)\n", pred_t, pred_b, pred_l,
+  // pred_r); printf("trut (t,b,l,r): (%f, %f, %f, %f)\n", truth_tblr.top,
+  // truth_tblr.bot, truth_tblr.left, truth_tblr.right);
+  dxrep ddx = {0};
+  float X = (pred_b - pred_t) * (pred_r - pred_l);
+  float Xhat =
+      (truth_tblr.bot - truth_tblr.top) * (truth_tblr.right - truth_tblr.left);
+  float Ih = fmin(pred_b, truth_tblr.bot) - fmax(pred_t, truth_tblr.top);
+  float Iw = fmin(pred_r, truth_tblr.right) - fmax(pred_l, truth_tblr.left);
+  float I = Iw * Ih;
+  float U = X + Xhat - I;
+  float S = powf(pred.x - truth.x, 2) + powf(pred.y - truth.y, 2);
+  float giou_Cw =
+      fmax(pred_r, truth_tblr.right) - fmin(pred_l, truth_tblr.left);
+  float giou_Ch = fmax(pred_b, truth_tblr.bot) - fmin(pred_t, truth_tblr.top);
+  float giou_C = giou_Cw * giou_Ch;
+
+  // float IoU = I / U;
+  // Partial Derivatives, derivatives
+  float dX_wrt_t = -1 * (pred_r - pred_l);
+  float dX_wrt_b = pred_r - pred_l;
+  float dX_wrt_l = -1 * (pred_b - pred_t);
+  float dX_wrt_r = pred_b - pred_t;
+
+  // gradient of I min/max in IoU calc (prediction)
+  float dI_wrt_t = pred_t > truth_tblr.top ? (-1 * Iw) : 0;
+  float dI_wrt_b = pred_b < truth_tblr.bot ? Iw : 0;
+  float dI_wrt_l = pred_l > truth_tblr.left ? (-1 * Ih) : 0;
+  float dI_wrt_r = pred_r < truth_tblr.right ? Ih : 0;
+  // derivative of U with regard to x
+  float dU_wrt_t = dX_wrt_t - dI_wrt_t;
+  float dU_wrt_b = dX_wrt_b - dI_wrt_b;
+  float dU_wrt_l = dX_wrt_l - dI_wrt_l;
+  float dU_wrt_r = dX_wrt_r - dI_wrt_r;
+  // gradient of C min/max in IoU calc (prediction)
+  float dC_wrt_t = pred_t < truth_tblr.top ? (-1 * giou_Cw) : 0;
+  float dC_wrt_b = pred_b > truth_tblr.bot ? giou_Cw : 0;
+  float dC_wrt_l = pred_l < truth_tblr.left ? (-1 * giou_Ch) : 0;
+  float dC_wrt_r = pred_r > truth_tblr.right ? giou_Ch : 0;
+
+  // Final IOU loss (prediction) (negative of IOU gradient, we want the negative
+  // loss)
+  float p_dt = 0;
+  float p_db = 0;
+  float p_dl = 0;
+  float p_dr = 0;
+  if (U > 0) {
+    p_dt = ((U * dI_wrt_t) - (I * dU_wrt_t)) / (U * U);
+    p_db = ((U * dI_wrt_b) - (I * dU_wrt_b)) / (U * U);
+    p_dl = ((U * dI_wrt_l) - (I * dU_wrt_l)) / (U * U);
+    p_dr = ((U * dI_wrt_r) - (I * dU_wrt_r)) / (U * U);
+  }
+
+  // apply grad from prediction min/max for correct corner selection
+  p_dt = pred_tblr.top < pred_tblr.bot ? p_dt : p_db;
+  p_db = pred_tblr.top < pred_tblr.bot ? p_db : p_dt;
+  p_dl = pred_tblr.left < pred_tblr.right ? p_dl : p_dr;
+  p_dr = pred_tblr.left < pred_tblr.right ? p_dr : p_dl;
+
+  if (iou_loss == GIOU) {
+    if (giou_C > 0) {
+      // apply "C" term from gIOU
+      p_dt += ((giou_C * dU_wrt_t) - (U * dC_wrt_t)) / (giou_C * giou_C);
+      p_db += ((giou_C * dU_wrt_b) - (U * dC_wrt_b)) / (giou_C * giou_C);
+      p_dl += ((giou_C * dU_wrt_l) - (U * dC_wrt_l)) / (giou_C * giou_C);
+      p_dr += ((giou_C * dU_wrt_r) - (U * dC_wrt_r)) / (giou_C * giou_C);
+    }
+    if (Iw <= 0 || Ih <= 0) {
+      p_dt = ((giou_C * dU_wrt_t) - (U * dC_wrt_t)) / (giou_C * giou_C);
+      p_db = ((giou_C * dU_wrt_b) - (U * dC_wrt_b)) / (giou_C * giou_C);
+      p_dl = ((giou_C * dU_wrt_l) - (U * dC_wrt_l)) / (giou_C * giou_C);
+      p_dr = ((giou_C * dU_wrt_r) - (U * dC_wrt_r)) / (giou_C * giou_C);
+    }
+  }
+
+  float Ct = fmin(pred.y - pred.h / 2, truth.y - truth.h / 2);
+  float Cb = fmax(pred.y + pred.h / 2, truth.y + truth.h / 2);
+  float Cl = fmin(pred.x - pred.w / 2, truth.x - truth.w / 2);
+  float Cr = fmax(pred.x + pred.w / 2, truth.x + truth.w / 2);
+  float Cw = Cr - Cl;
+  float Ch = Cb - Ct;
+  float C = Cw * Cw + Ch * Ch;
+
+  float dCt_dx = 0;
+  float dCt_dy = pred_t < truth_tblr.top ? 1 : 0;
+  float dCt_dw = 0;
+  float dCt_dh = pred_t < truth_tblr.top ? -0.5 : 0;
+
+  float dCb_dx = 0;
+  float dCb_dy = pred_b > truth_tblr.bot ? 1 : 0;
+  float dCb_dw = 0;
+  float dCb_dh = pred_b > truth_tblr.bot ? 0.5 : 0;
+
+  float dCl_dx = pred_l < truth_tblr.left ? 1 : 0;
+  float dCl_dy = 0;
+  float dCl_dw = pred_l < truth_tblr.left ? -0.5 : 0;
+  float dCl_dh = 0;
+
+  float dCr_dx = pred_r > truth_tblr.right ? 1 : 0;
+  float dCr_dy = 0;
+  float dCr_dw = pred_r > truth_tblr.right ? 0.5 : 0;
+  float dCr_dh = 0;
+
+  float dCw_dx = dCr_dx - dCl_dx;
+  float dCw_dy = dCr_dy - dCl_dy;
+  float dCw_dw = dCr_dw - dCl_dw;
+  float dCw_dh = dCr_dh - dCl_dh;
+
+  float dCh_dx = dCb_dx - dCt_dx;
+  float dCh_dy = dCb_dy - dCt_dy;
+  float dCh_dw = dCb_dw - dCt_dw;
+  float dCh_dh = dCb_dh - dCt_dh;
+
+  // UNUSED
+  //// ground truth
+  // float dI_wrt_xhat_t = pred_t < truth_tblr.top ? (-1 * Iw) : 0;
+  // float dI_wrt_xhat_b = pred_b > truth_tblr.bot ? Iw : 0;
+  // float dI_wrt_xhat_l = pred_l < truth_tblr.left ? (-1 * Ih) : 0;
+  // float dI_wrt_xhat_r = pred_r > truth_tblr.right ? Ih : 0;
+
+  // Final IOU loss (prediction) (negative of IOU gradient, we want the negative
+  // loss)
+  float p_dx = 0;
+  float p_dy = 0;
+  float p_dw = 0;
+  float p_dh = 0;
+
+  // p_dx, p_dy, p_dw and p_dh are the gradient of IoU or GIoU.
+  p_dx = p_dl + p_dr;
+  p_dy = p_dt + p_db;
+  // For dw and dh, we do not divided by 2.
+  p_dw = (p_dr - p_dl);
+  p_dh = (p_db - p_dt);
+
+  // https://github.com/Zzh-tju/DIoU-darknet
+  // https://arxiv.org/abs/1911.08287
+  if (iou_loss == DIOU) {
+    if (C > 0) {
+      p_dx += (2 * (truth.x - pred.x) * C -
+               (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
+              (C * C);
+      p_dy += (2 * (truth.y - pred.y) * C -
+               (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
+              (C * C);
+      p_dw += (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C);
+      p_dh += (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C);
+    }
+    if (Iw <= 0 || Ih <= 0) {
+      p_dx = (2 * (truth.x - pred.x) * C -
+              (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
+             (C * C);
+      p_dy = (2 * (truth.y - pred.y) * C -
+              (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
+             (C * C);
+      p_dw = (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C);
+      p_dh = (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C);
+    }
+  }
+  // The following codes are calculating the gradient of ciou.
+
+  if (iou_loss == CIOU) {
+    float ar_gt = truth.w / truth.h;
+    float ar_pred = pred.w / pred.h;
+    float ar_loss = 4 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) *
+                    (atan(ar_gt) - atan(ar_pred));
+    float alpha = ar_loss / (1 - I / U + ar_loss + 0.000001);
+    float ar_dw = 8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred.h;
+    float ar_dh = -8 / (M_PI * M_PI) * (atan(ar_gt) - atan(ar_pred)) * pred.w;
+    if (C > 0) {
+      // dar*
+      p_dx += (2 * (truth.x - pred.x) * C -
+               (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
+              (C * C);
+      p_dy += (2 * (truth.h - pred.h) * C -
+               (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
+              (C * C);
+      p_dw += (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C) + alpha * ar_dw;
+      p_dh += (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C) + alpha * ar_dh;
+    }
+    if (Iw <= 0 || Ih <= 0) {
+      p_dx = (2 * (truth.x - pred.x) * C -
+              (2 * Cw * dCw_dx + 2 * Ch * dCh_dx) * S) /
+             (C * C);
+      p_dy = (2 * (truth.y - pred.y) * C -
+              (2 * Cw * dCw_dy + 2 * Ch * dCh_dy) * S) /
+             (C * C);
+      p_dw = (2 * Cw * dCw_dw + 2 * Ch * dCh_dw) * S / (C * C) + alpha * ar_dw;
+      p_dh = (2 * Cw * dCw_dh + 2 * Ch * dCh_dh) * S / (C * C) + alpha * ar_dh;
+    }
+  }
+
+  ddx.dt = p_dx; // We follow the original code released from GDarknet. So in
+  // yolo_layer.c, dt, db, dl, dr are already dx, dy, dw, dh.
+  ddx.db = p_dy;
+  ddx.dl = p_dw;
+  ddx.dr = p_dh;
+
+  return ddx;
+}
+template <typename Dtype>
+dxrep dx_box_iou(const vector<Dtype> &pred, const vector<Dtype> &truth,
+                 IOU_LOSS iou_loss) {
+  return dx_box_iou(box(pred), box(truth), iou_loss);
 }
 
 template <typename Dtype>
-boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
+boxabs box_c(const vector<Dtype> &a, const vector<Dtype> &b) {
   boxabs ba = {0};
   ba.top = fmin(a[1] - a[3] / 2, b[1] - b[3] / 2);
   ba.bot = fmax(a[1] + a[3] / 2, b[1] + b[3] / 2);
@@ -98,17 +318,16 @@ boxabs box_c(vector<Dtype> a, vector<Dtype> b) {
   ba.right = fmax(a[0] + a[2] / 2, b[0] + b[2] / 2);
   return ba;
 }
-template boxabs box_c(vector<float> a, vector<float> b);
-template boxabs box_c(vector<double> a, vector<double> b);
+template boxabs box_c(const vector<float> &a, const vector<float> &b);
+template boxabs box_c(const vector<double> &a, const vector<double> &b);
 
 boxabs box_c(const box &a, const box &b) {
-  return box_c(vector<float>{a.x, a.y, a.w, a.h},
-               vector<float>{b.x, b.y, b.w, b.h});
+  return box_c(a.to_vector<float>(), b.to_vector<float>());
 }
 
 // representation from x, y, w, h to top, left, bottom, right
 template <typename Dtype>
-boxabs to_tblr(vector<Dtype> a) {
+boxabs to_tblr(const vector<Dtype> &a) {
   boxabs tblr = {0};
   float t = a[1] - (a[3] / 2);
   float b = a[1] + (a[3] / 2);
@@ -120,14 +339,12 @@ boxabs to_tblr(vector<Dtype> a) {
   tblr.right = r;
   return tblr;
 }
-template boxabs to_tblr(vector<float>);
-template boxabs to_tblr(vector<double>);
-boxabs to_tblr(const box &a) {
-  return to_tblr(vector<float>{a.x, a.y, a.w, a.h});
-}
+template boxabs to_tblr(const vector<float> &);
+template boxabs to_tblr(const vector<double> &);
+boxabs to_tblr(const box &a) { return to_tblr(a.to_vector<float>()); }
 
 template <typename Dtype>
-Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
+Dtype box_giou(const vector<Dtype> &a, const vector<Dtype> &b) {
   boxabs ba = box_c(a, b);
   float w = ba.right - ba.left;
   float h = ba.bot - ba.top;
@@ -141,18 +358,17 @@ Dtype box_giou(vector<Dtype> a, vector<Dtype> b) {
 
   return iou - giou_term;
 }
-template float box_giou(vector<float> a, vector<float> b);
-template double box_giou(vector<double> a, vector<double> b);
+template float box_giou(const vector<float> &a, const vector<float> &b);
+template double box_giou(const vector<double> &a, const vector<double> &b);
 
 float box_giou(const box &a, const box &b) {
-  return box_giou(vector<float>{a.x, a.y, a.w, a.h},
-                  vector<float>{b.x, b.y, b.w, b.h});
+  return box_giou(a.to_vector<float>(), b.to_vector<float>());
 }
 
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
 template <typename Dtype>
-Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
+Dtype box_diou(const vector<Dtype> &a, const vector<Dtype> &b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
   Dtype h = ba.bot - ba.top;
@@ -167,18 +383,17 @@ Dtype box_diou(vector<Dtype> a, vector<Dtype> b) {
 
   return iou - diou_term;
 }
-template float box_diou(vector<float> a, vector<float> b);
-template double box_diou(vector<double> a, vector<double> b);
+template float box_diou(const vector<float> &a, const vector<float> &b);
+template double box_diou(const vector<double> &a, const vector<double> &b);
 
 float box_diou(const box &a, const box &b) {
-  return box_giou(vector<float>{a.x, a.y, a.w, a.h},
-                  vector<float>{b.x, b.y, b.w, b.h});
+  return box_giou(a.to_vector<float>(), b.to_vector<float>());
 }
 
 // https://github.com/Zzh-tju/DIoU-darknet
 // https://arxiv.org/abs/1911.08287
 template <typename Dtype>
-Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
+Dtype box_ciou(const vector<Dtype> &a, const vector<Dtype> &b) {
   boxabs ba = box_c(a, b);
   Dtype w = ba.right - ba.left;
   Dtype h = ba.bot - ba.top;
@@ -197,12 +412,11 @@ Dtype box_ciou(vector<Dtype> a, vector<Dtype> b) {
   Dtype ciou_term = d + alpha * ar_loss; // ciou
   return iou - ciou_term;
 }
-template float box_ciou(vector<float> a, vector<float> b);
-template double box_ciou(vector<double> a, vector<double> b);
+template float box_ciou(const vector<float> &a, const vector<float> &b);
+template double box_ciou(const vector<double> &a, const vector<double> &b);
 
 float box_ciou(const box &a, const box &b) {
-  return box_giou(vector<float>{a.x, a.y, a.w, a.h},
-                  vector<float>{b.x, b.y, b.w, b.h});
+  return box_giou(a.to_vector<float>(), b.to_vector<float>());
 }
 
 float box_diounms(vector<float> a, vector<float> b, float beta1) {

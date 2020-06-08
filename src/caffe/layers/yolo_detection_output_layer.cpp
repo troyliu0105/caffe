@@ -15,35 +15,6 @@
 
 namespace caffe {
 template <typename Dtype>
-Dtype overlap(Dtype x1, Dtype w1, Dtype x2, Dtype w2) {
-  float l1 = x1 - w1 / 2;
-  float l2 = x2 - w2 / 2;
-  float left = l1 > l2 ? l1 : l2;
-  float r1 = x1 + w1 / 2;
-  float r2 = x2 + w2 / 2;
-  float right = r1 < r2 ? r1 : r2;
-  return right - left;
-}
-template <typename Dtype>
-Dtype box_intersection(vector<Dtype> a, vector<Dtype> b) {
-  float w = overlap(a[0], a[2], b[0], b[2]);
-  float h = overlap(a[1], a[3], b[1], b[3]);
-  if (w < 0 || h < 0)
-    return 0;
-  float area = w * h;
-  return area;
-}
-template <typename Dtype>
-Dtype box_union(vector<Dtype> a, vector<Dtype> b) {
-  float i = box_intersection(a, b);
-  float u = a[2] * a[3] + b[2] * b[3] - i;
-  return u;
-}
-template <typename Dtype>
-Dtype box_iou(vector<Dtype> a, vector<Dtype> b) {
-  return box_intersection(a, b) / box_union(a, b);
-}
-template <typename Dtype>
 void setNormalizedBBox(NormalizedBBox &bbox, Dtype x, Dtype y, Dtype w,
                        Dtype h) {
   Dtype xmin = x - w / 2.0;

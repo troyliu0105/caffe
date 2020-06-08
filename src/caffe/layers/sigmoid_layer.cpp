@@ -28,13 +28,10 @@ void SigmoidLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     const Dtype *top_diff = top[0]->cpu_diff();
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
     const int count = bottom[0]->count();
-    FOR_LOOP_WITH_PREPARE(
-        count, i,
-        {
-          sigmoid_x = top_data[i];
-          bottom_diff[i] = top_diff[i] * sigmoid_x * (1. - sigmoid_x);
-        },
-        Dtype sigmoid_x)
+    parallel_for(count, [&](int i) {
+      Dtype sigmoid_x = top_data[i];
+      bottom_diff[i] = top_diff[i] * sigmoid_x * (1. - sigmoid_x);
+    });
   }
 }
 

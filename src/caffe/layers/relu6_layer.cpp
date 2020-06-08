@@ -12,12 +12,12 @@ void ReLU6Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   Dtype *top_data = top[0]->mutable_cpu_data();
   const int count = bottom[0]->count();
   Dtype negative_slope = this->layer_param_.relu6_param().negative_slope();
-  FOR_LOOP(count, i, {
+  parallel_for(count, [&](int i) {
     top_data[i] =
         std::min(std::max(bottom_data[i], Dtype(0)) +
                      negative_slope * std::min(bottom_data[i], Dtype(0)),
                  Dtype(6.));
-  })
+  });
 }
 
 template <typename Dtype>
@@ -30,12 +30,12 @@ void ReLU6Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
     Dtype *bottom_diff = bottom[0]->mutable_cpu_diff();
     const int count = bottom[0]->count();
     Dtype negative_slope = this->layer_param_.relu6_param().negative_slope();
-    FOR_LOOP(count, i, {
+    parallel_for(count, [&](int i) {
       bottom_diff[i] =
           (top_diff[i] *
            ((bottom_data[i] > 0) + negative_slope * (bottom_data[i] <= 0))) *
           (bottom_data[i] < Dtype(6.));
-    })
+    });
   }
 }
 

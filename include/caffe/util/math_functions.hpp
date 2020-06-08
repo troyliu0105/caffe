@@ -152,7 +152,7 @@ inline Dtype caffe_clip(Dtype a, Dtype min, Dtype max) {
 template <typename Dtype>
 inline void caffe_clip(int N, const Dtype *src, Dtype *dst, Dtype min,
                        Dtype max) {
-  FOR_LOOP(N, i, dst[i] = caffe_clip(src[i], min, max))
+  parallel_for(N, [&](int i) { dst[i] = caffe_clip(src[i], min, max); });
 }
 
 unsigned int caffe_rng_rand();
@@ -323,15 +323,11 @@ void caffe_gpu_scale(int n, Dtype alpha, const Dtype *x, Dtype *y);
     CHECK_GT(INCY, 0);                                                         \
     CHECK(x);                                                                  \
     CHECK(y);                                                                  \
-    FOR_LOOP_WITH_PREPARE(                                                     \
-        n, i,                                                                  \
-        {                                                                      \
-          ix = i * INCX;                                                       \
-          iy = i * INCY;                                                       \
-          y[iy] = caffe_fn_##name<Dtype>(x[ix]);                               \
-        },                                                                     \
-        int ix;                                                                \
-        int iy);                                                               \
+    parallel_for(n, [&](int i) {                                               \
+      int ix = i * INCX;                                                       \
+      int iy = i * INCY;                                                       \
+      y[iy] = caffe_fn_##name<Dtype>(x[ix]);                                   \
+    });                                                                        \
   }                                                                            \
   template <typename Dtype>                                                    \
   inline void caffe_##name(const int n, const Dtype *x, Dtype *y) {            \
@@ -363,15 +359,11 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, y = std::fabs(x))
     CHECK_GT(INCY, 0);                                                         \
     CHECK(x);                                                                  \
     CHECK(y);                                                                  \
-    FOR_LOOP_WITH_PREPARE(                                                     \
-        n, i,                                                                  \
-        {                                                                      \
-          ix = i * INCX;                                                       \
-          iy = i * INCY;                                                       \
-          operation;                                                           \
-        },                                                                     \
-        int ix;                                                                \
-        int iy);                                                               \
+    parallel_for(n, [&](int i) {                                               \
+      int ix = i * INCX;                                                       \
+      int iy = i * INCY;                                                       \
+      operation;                                                               \
+    });                                                                        \
   }                                                                            \
   template <typename Dtype>                                                    \
   inline void caffe_##name##_scalar(const int n, Dtype b, Dtype *x) {          \
@@ -403,16 +395,12 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, y = std::fabs(x))
     CHECK(x1);                                                                 \
     CHECK(x2);                                                                 \
     CHECK(y);                                                                  \
-    FOR_LOOP_WITH_PREPARE(                                                     \
-        n, i,                                                                  \
-        {                                                                      \
-          ix1 = i * INCX1;                                                     \
-          ix2 = i * INCX2;                                                     \
-          iy = i * INCY;                                                       \
-          y[iy] = caffe_fn_##name<Dtype>(x1[ix1], x2[ix2]);                    \
-        },                                                                     \
-        int ix1;                                                               \
-        int ix2; int iy);                                                      \
+    parallel_for(n, [&](int i) {                                               \
+      int ix1 = i * INCX1;                                                     \
+      int ix2 = i * INCX2;                                                     \
+      int iy = i * INCY;                                                       \
+      y[iy] = caffe_fn_##name<Dtype>(x1[ix1], x2[ix2]);                        \
+    });                                                                        \
   }                                                                            \
   template <typename Dtype>                                                    \
   inline void caffe_##name(const int n, const Dtype *x1, const Dtype *x2,      \
