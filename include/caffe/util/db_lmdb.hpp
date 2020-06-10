@@ -9,8 +9,7 @@
 
 #include "caffe/util/db.hpp"
 
-namespace caffe {
-namespace db {
+namespace caffe::db {
 
 inline void MDB_CHECK(int mdb_status) {
   CHECK_EQ(mdb_status, MDB_SUCCESS) << mdb_strerror(mdb_status);
@@ -90,7 +89,6 @@ private:
   MDB_dbi mdb_dbi_;
 };
 
-} // namespace db
 } // namespace caffe
 
 #endif // CAFFE_UTIL_DB_LMDB_HPP

@@ -4,8 +4,7 @@
 
 #include <string>
 
-namespace caffe {
-namespace db {
+namespace caffe::db {
 
 DB *GetDB(DataParameter::DB backend) {
   switch (backend) {
@@ -38,5 +37,4 @@ DB *GetDB(const string &backend) {
   return nullptr;
 }
 
-} // namespace db
-} // namespace caffe
+} // namespace caffe::db

@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <fstream> // NOLINT(readability/streams)
-#include <omp.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -37,7 +36,8 @@ DEFINE_string(backend, "lmdb",
               "The backend {lmdb, leveldb} for storing the result");
 DEFINE_int32(resize_width, 0, "Width images are resized to");
 DEFINE_int32(resize_height, 0, "Height images are resized to");
-DEFINE_int32(resize_max_to, 0, "min side is resized to");
+DEFINE_int32(resize_max_to, 0, "max side is resized to");
+DEFINE_int32(resize_min_to, 0, "min side is resized to");
 DEFINE_bool(
     check_size, false,
     "When this option is on, check that all the datum have the same size");
@@ -99,6 +99,8 @@ int main(int argc, char **argv) {
   int resize_height = std::max<int>(0, FLAGS_resize_height);
   int resize_width = std::max<int>(0, FLAGS_resize_width);
   int max_side = std::max<int>(0, FLAGS_resize_max_to);
+  int min_side = std::max<int>(0, FLAGS_resize_min_to);
+  CHECK(!(max_side > 0 && min_side > 0));
 
   // Create new DB
   scoped_ptr<db::DB> db(db::GetDB(FLAGS_backend));
@@ -111,7 +113,6 @@ int main(int argc, char **argv) {
   int count = 0;
   int data_size = 0;
   bool data_size_initialized = false;
-#pragma omp parallel for
   for (int line_id = 0; line_id < lines.size(); ++line_id) {
     bool status;
     std::string enc = encode_type;
@@ -127,6 +128,10 @@ int main(int argc, char **argv) {
     if (max_side > 0) {
       status = ReadImageToDatum(root_folder + lines[line_id].first,
                                 lines[line_id].second, 0, 0, 0, max_side,
+                                is_color, enc, &datum);
+    } else if (min_side > 0) {
+      status = ReadImageToDatum(root_folder + lines[line_id].first,
+                                lines[line_id].second, 0, 0, min_side, 0,
                                 is_color, enc, &datum);
     } else {
       status = ReadImageToDatum(root_folder + lines[line_id].first,
@@ -152,16 +157,13 @@ int main(int argc, char **argv) {
     // Put in db
     string out;
     CHECK(datum.SerializeToString(&out));
-#pragma omp critical(dataupdate)
-    {
-      txn->Put(key_str, out);
+    txn->Put(key_str, out);
 
-      if (++count % 1000 == 0) {
-        // Commit db
-        txn->Commit();
-        txn.reset(db->NewTransaction());
-        LOG(INFO) << "Processed " << count << " files.";
-      }
+    if (++count % 1000 == 0) {
+      // Commit db
+      txn->Commit();
+      txn.reset(db->NewTransaction());
+      LOG(INFO) << "Processed " << count << " files.";
     }
   }
   // write the last batch

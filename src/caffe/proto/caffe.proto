@@ -276,6 +276,7 @@ message SolverParameter {
     repeated NetState test_state = 27;
 
     // Evaluation type.
+    // classification, detection, detection_segmentation
     optional string eval_type = 52 [default = "classification"];
     // ap_version: different ways of computing Average Precision.
     //    Check https://sanchom.wordpress.com/tag/average-precision/ for details.

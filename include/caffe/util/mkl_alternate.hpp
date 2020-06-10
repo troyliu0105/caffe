@@ -34,7 +34,7 @@ void parallel_for(Index b_, Index e_, Index stride_,
 
 template <typename Index, typename IteratorFunction>
 void parallel_for(Index e_, const IteratorFunction &func_) {
-  parallel_for(0, e_, 1, func_);
+  parallel_for(static_cast<Index>(0), e_, static_cast<Index>(1), func_);
 }
 
 template <typename It, typename Compare>

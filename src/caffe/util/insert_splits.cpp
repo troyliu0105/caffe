@@ -19,10 +19,10 @@ void InsertSplits(const NetParameter &param, NetParameter *param_split) {
   map<pair<int, int>, float> top_idx_to_loss_weight;
   map<pair<int, int>, int> top_idx_to_bottom_split_idx;
   map<int, string> layer_idx_to_layer_name;
-  for (int i = 0; i < param.layer_size(); ++i) {
+  for (int i = 0; i < param.layer_size(); ++i) { // layer
     const LayerParameter &layer_param = param.layer(i);
     layer_idx_to_layer_name[i] = layer_param.name();
-    for (int j = 0; j < layer_param.bottom_size(); ++j) {
+    for (int j = 0; j < layer_param.bottom_size(); ++j) { // layer used bottom
       const string &blob_name = layer_param.bottom(j);
       if (blob_name_to_last_top_idx.find(blob_name) ==
           blob_name_to_last_top_idx.end()) {

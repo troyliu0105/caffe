@@ -326,6 +326,8 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   LossLayer<Dtype>::LayerSetUp(bottom, top);
   Yolov3Parameter param = this->layer_param_.yolov3_param();
   iter_ = 0;
+  time_count_ = 0;
+  class_count_ = 0;
   display_ = param.display();
   num_class_ = param.num_class(); // 20
   num_ = param.num();             // 5
@@ -762,7 +764,8 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
   // LOG(INFO) << "iter: " << iter <<" loss: " << loss;
   if (!(iter_ % display_) && time_count_ > 0) {
     LOG(INFO) << std::fixed << std::setprecision(4)
-              << "anyobj: " << score_.avg_anyobj / time_count_
+              << "[scale:" << anchors_scale_ << "]:"
+              << " anyobj: " << score_.avg_anyobj / time_count_
               << " obj: " << score_.avg_obj / time_count_
               << " iou: " << score_.avg_iou / time_count_
               << " cat: " << score_.avg_cat / time_count_

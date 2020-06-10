@@ -17,13 +17,13 @@
 #endif
 #endif // USE_OPENCV
 
-#include "caffe/util/rng.hpp"
 #include <algorithm>
 #include <numeric>
 #include <vector>
 
 #include "caffe/util/im_transforms.hpp"
 #include "caffe/util/math_functions.hpp"
+#include "caffe/util/rng.hpp"
 
 namespace caffe {
 
@@ -109,7 +109,6 @@ void InferNewSize(const ResizeParameter &resize_param, const int old_width,
 
   switch (resize_param.resize_mode()) {
   case ResizeParameter_Resize_mode_WARP:
-    break;
   case ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD:
     break;
   case ResizeParameter_Resize_mode_FIT_SMALL_SIZE:
@@ -144,10 +143,10 @@ cv::Rect CropMask(const cv::Mat &src, T point, int padding) {
   cv::Rect win(0, 0, src.cols, src.rows);
 
   vector<cv::Rect> edges;
-  edges.push_back(cv::Rect(0, 0, src.cols, 1));
-  edges.push_back(cv::Rect(src.cols - 2, 0, 1, src.rows));
-  edges.push_back(cv::Rect(0, src.rows - 2, src.cols, 1));
-  edges.push_back(cv::Rect(0, 0, 1, src.rows));
+  edges.emplace_back(0, 0, src.cols, 1);
+  edges.emplace_back(src.cols - 2, 0, 1, src.rows);
+  edges.emplace_back(0, src.rows - 2, src.cols, 1);
+  edges.emplace_back(0, 0, 1, src.rows);
 
   cv::Mat edge;
   int nborder = 0;
@@ -318,14 +317,14 @@ void constantNoise(const int n, const vector<uchar> &val, cv::Mat *image) {
     for (int k = 0; k < n; ++k) {
       const int i = caffe_rng_rand() % cols;
       const int j = caffe_rng_rand() % rows;
-      uchar *ptr = image->ptr<uchar>(j);
+      auto *ptr = image->ptr<uchar>(j);
       ptr[i] = val[0];
     }
   } else if (image->channels() == 3) { // color image
     for (int k = 0; k < n; ++k) {
       const int i = caffe_rng_rand() % cols;
       const int j = caffe_rng_rand() % rows;
-      cv::Vec3b *ptr = image->ptr<cv::Vec3b>(j);
+      auto *ptr = image->ptr<cv::Vec3b>(j);
       (ptr[i])[0] = val[0];
       (ptr[i])[1] = val[1];
       (ptr[i])[2] = val[2];
@@ -691,14 +690,14 @@ void RandomOrderChannels(const cv::Mat &in_img, cv::Mat *out_img,
     *out_img = in_img;
   }
 }
-using RandomDistortFunction = void (*)(const cv::Mat &, cv::Mat *, const float,
-                                       const float);
+
 cv::Mat ApplyDistort(const cv::Mat &in_img, const DistortionParameter &param) {
   cv::Mat out_img = in_img;
   float prob;
   caffe_rng_uniform(1, 0.f, 1.f, &prob);
 
   std::vector<std::function<void(void)>> distort_functions;
+  distort_functions.reserve(5);
   distort_functions.emplace_back([&]() -> void {
     // Do random brightness distortion.
     RandomBrightness(out_img, &out_img, param.brightness_prob(),

@@ -10,8 +10,7 @@
 
 #include <string>
 
-namespace caffe {
-namespace db {
+namespace caffe::db {
 
 void LMDB::Open(const string &source, Mode mode) {
   MDB_CHECK(mdb_env_create(&mdb_env_));
@@ -114,6 +113,5 @@ void LMDBTransaction::DoubleMapSize() {
   MDB_CHECK(mdb_env_set_mapsize(mdb_env_, new_size));
 }
 
-} // namespace db
-} // namespace caffe
+} // namespace caffe::db
 #endif // USE_LMDB
