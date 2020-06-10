@@ -117,7 +117,7 @@ layer {
   bottom: "conv1"
   top: "conv1"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -191,7 +191,7 @@ layer {
   bottom: "conv2"
   top: "conv2"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -233,7 +233,7 @@ layer {
   bottom: "conv3"
   top: "conv3"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -279,7 +279,7 @@ layer {
   bottom: "conv4"
   top: "conv4"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -321,7 +321,7 @@ layer {
   bottom: "conv5"
   top: "conv5"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -363,7 +363,7 @@ layer {
   bottom: "conv6"
   top: "conv6"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -399,7 +399,7 @@ layer {
   bottom: "conv7"
   top: "conv7"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -441,7 +441,7 @@ layer {
   bottom: "conv8"
   top: "conv8"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -483,7 +483,7 @@ layer {
   bottom: "conv9"
   top: "conv9"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -529,7 +529,7 @@ layer {
   bottom: "conv10"
   top: "conv10"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -571,7 +571,7 @@ layer {
   bottom: "conv11"
   top: "conv11"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -711,7 +711,7 @@ layer {
   bottom: "conv12"
   top: "conv12"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -747,7 +747,7 @@ layer {
   bottom: "conv13"
   top: "conv13"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -789,7 +789,7 @@ layer {
   bottom: "conv14"
   top: "conv14"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -929,7 +929,7 @@ layer {
   bottom: "conv15"
   top: "conv15"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -975,7 +975,7 @@ layer {
   bottom: "conv16"
   top: "conv16"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1017,7 +1017,7 @@ layer {
   bottom: "conv17"
   top: "conv17"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1157,7 +1157,7 @@ layer {
   bottom: "conv18"
   top: "conv18"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1203,7 +1203,7 @@ layer {
   bottom: "conv19"
   top: "conv19"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1277,7 +1277,7 @@ layer {
   bottom: "conv20"
   top: "conv20"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1351,7 +1351,7 @@ layer {
   bottom: "conv21"
   top: "conv21"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1387,7 +1387,7 @@ layer {
   bottom: "conv22"
   top: "conv22"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1461,7 +1461,7 @@ layer {
   bottom: "conv23"
   top: "conv23"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1535,7 +1535,7 @@ layer {
   bottom: "conv24"
   top: "conv24"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1581,7 +1581,7 @@ layer {
   bottom: "conv25"
   top: "conv25"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1655,7 +1655,7 @@ layer {
   bottom: "conv26"
   top: "conv26"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1729,7 +1729,7 @@ layer {
   bottom: "conv27"
   top: "conv27"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1775,7 +1775,7 @@ layer {
   bottom: "conv28"
   top: "conv28"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1849,7 +1849,7 @@ layer {
   bottom: "conv29"
   top: "conv29"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1923,7 +1923,7 @@ layer {
   bottom: "conv30"
   top: "conv30"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -1969,7 +1969,7 @@ layer {
   bottom: "conv31"
   top: "conv31"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2043,7 +2043,7 @@ layer {
   bottom: "conv32"
   top: "conv32"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2215,7 +2215,7 @@ layer {
   bottom: "conv33"
   top: "conv33"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2251,7 +2251,7 @@ layer {
   bottom: "conv34"
   top: "conv34"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2325,7 +2325,7 @@ layer {
   bottom: "conv35"
   top: "conv35"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2497,7 +2497,7 @@ layer {
   bottom: "conv36"
   top: "conv36"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2543,7 +2543,7 @@ layer {
   bottom: "conv37"
   top: "conv37"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2617,7 +2617,7 @@ layer {
   bottom: "conv38"
   top: "conv38"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2789,7 +2789,7 @@ layer {
   bottom: "conv39"
   top: "conv39"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2825,7 +2825,7 @@ layer {
   bottom: "conv40"
   top: "conv40"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -2899,7 +2899,7 @@ layer {
   bottom: "conv41"
   top: "conv41"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -3071,7 +3071,7 @@ layer {
   bottom: "conv42"
   top: "conv42"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -3107,7 +3107,7 @@ layer {
   bottom: "conv43"
   top: "conv43"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -3181,7 +3181,7 @@ layer {
   bottom: "conv44"
   top: "conv44"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -3353,7 +3353,7 @@ layer {
   bottom: "conv45"
   top: "conv45"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {
@@ -3399,7 +3399,7 @@ layer {
   bottom: "conv46"
   top: "conv46"
   batch_norm_param {
-    eps: 9.999999747378752e-06
+    moving_average_fraction: 0.5
   }
 }
 layer {

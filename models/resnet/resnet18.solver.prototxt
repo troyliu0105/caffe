@@ -1,18 +1,37 @@
+#=============== net
 net: "models/resnet/resnet18.train.test.prototxt"
-test_iter: 5000
-#test_interval: 5000
+weights: "models/resnet/resnet18.caffemodel"
+
+#=============== iter
+# ilsvrc12_val_lmdb has 50000 images
+test_iter: 2000
 test_interval: 10000
-base_lr: 0.015
-display: 50
-lr_policy: "poly"
-#max_iter: 650000
-max_iter: 1300000
-power: 1
-momentum: 0.9
+max_iter: 650000
+iter_size: 1
+
+#=============== optimizer
+solver_mode: CPU
+type: "SGD"
+base_lr: 0.05
 weight_decay: 0.0005
-snapshot: 10000
+lr_policy: "poly"
+power: 1
+#burn_in: 1000
+#burn_in_power: 4
+#stepvalue: 40000
+#stepvalue: 45000
+
+#=============== snapshot
+snapshot: 50000
 snapshot_prefix: "models/resnet/resnet18"
-random_seed: 0
-test_initialization: true
-solver_mode: GPU
-device_id: 0
+snapshot_after_train: true
+
+#=============== evaluate
+eval_type: "classification"
+
+#=============== misc
+display: 100
+debug_info: false
+test_initialization: false
+average_loss: 25
+random_seed: 3355411
