@@ -1996,10 +1996,11 @@ layer {
     thresh: 0.5
     use_logic_gradient : false
     iou_loss: GIOU
-    label_smooth_eps: 0.1
+    label_smooth_eps: 0.0
     #[[[23, 29],   [48, 65],   [117, 81]],
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
+# anchor mark1
     biases: 23
     biases: 29
     biases: 48
@@ -2018,6 +2019,25 @@ layer {
     biases: 188
     biases: 338
     biases: 298
+# anchor mark1
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
     mask: 6
     mask: 7
     mask: 8
@@ -2047,10 +2067,11 @@ layer {
     thresh: 0.5
     use_logic_gradient : false
     iou_loss: GIOU
-    label_smooth_eps: 0.1
+    label_smooth_eps: 0.0
     #[[[23, 29],   [48, 65],   [117, 81]],
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
+# anchor mark1
     biases: 23
     biases: 29
     biases: 48
@@ -2069,6 +2090,25 @@ layer {
     biases: 188
     biases: 338
     biases: 298
+# anchor mark2
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
     mask: 3
     mask: 4
     mask: 5
@@ -2098,10 +2138,11 @@ layer {
     thresh: 0.5
     use_logic_gradient : false
     iou_loss: GIOU
-    label_smooth_eps: 0.1
+    label_smooth_eps: 0.0
     #[[[23, 29],   [48, 65],   [117, 81]],
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
+# anchor mark1
     biases: 23
     biases: 29
     biases: 48
@@ -2120,6 +2161,25 @@ layer {
     biases: 188
     biases: 338
     biases: 298
+# anchor mark2
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
     mask: 0
     mask: 1
     mask: 2
@@ -2137,9 +2197,10 @@ layer {
     phase: TEST
   }
   yolov3_detection_output_param {
-    confidence_threshold: 0.005
+    confidence_threshold: 0.01
     nms_threshold: 0.45
     num_classes: 20
+# anchor mark1
     biases: 23
     biases: 29
     biases: 48
@@ -2158,6 +2219,25 @@ layer {
     biases: 188
     biases: 338
     biases: 298
+# anchor mark2
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
     mask: 0
     mask: 1
     mask: 2
