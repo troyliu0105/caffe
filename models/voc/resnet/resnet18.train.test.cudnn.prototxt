@@ -9,6 +9,7 @@ layer {
   }
   transform_param {
     mirror: true
+    scale: 0.007843
     mean_value: 104
     mean_value: 117
     mean_value: 123
@@ -157,6 +158,7 @@ layer {
   }
   transform_param {
     mirror: true
+    scale: 0.007843
     mean_value: 104
     mean_value: 117
     mean_value: 123
@@ -185,10 +187,6 @@ layer {
   top: "conv1"
   name: "conv1"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 64
     kernel_size: 7
@@ -198,6 +196,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -226,6 +225,7 @@ layer {
   top: "conv1"
   name: "conv1_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -236,60 +236,19 @@ layer {
   pooling_param {
     kernel_size: 3
     stride: 2
+    #pad: 1
+    #round_mode: FLOOR
     pool: MAX
+    engine: CUDNN
   }
 }
 
-layer {
-  bottom: "pool1"
-  top: "res2a_branch1"
-  name: "res2a_branch1"
-  type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 64
-    kernel_size: 1
-    pad: 0
-    stride: 1
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res2a_branch1"
-  top: "res2a_branch1"
-  name: "bn2a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res2a_branch1"
-  top: "res2a_branch1"
-  name: "scale2a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
-
+# layer 1
 layer {
   bottom: "pool1"
   top: "res2a_branch2a"
   name: "res2a_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -299,6 +258,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -327,6 +287,7 @@ layer {
   top: "res2a_branch2a"
   name: "res2a_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -334,10 +295,6 @@ layer {
   top: "res2a_branch2b"
   name: "res2a_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -347,6 +304,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -371,7 +329,7 @@ layer {
 }
 
 layer {
-  bottom: "res2a_branch1"
+  bottom: "pool1"
   bottom: "res2a_branch2b"
   top: "res2a"
   name: "res2a"
@@ -386,6 +344,7 @@ layer {
   top: "res2a"
   name: "res2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -393,10 +352,6 @@ layer {
   top: "res2b_branch2a"
   name: "res2b_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -406,6 +361,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -434,6 +390,7 @@ layer {
   top: "res2b_branch2a"
   name: "res2b_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -441,10 +398,6 @@ layer {
   top: "res2b_branch2b"
   name: "res2b_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -454,6 +407,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -493,58 +447,15 @@ layer {
   top: "res2b"
   name: "res2b_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
-layer {
-  bottom: "res2b"
-  top: "res3a_branch1"
-  name: "res3a_branch1"
-  type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 128
-    kernel_size: 1
-    pad: 0
-    stride: 2
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res3a_branch1"
-  top: "res3a_branch1"
-  name: "bn3a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res3a_branch1"
-  top: "res3a_branch1"
-  name: "scale3a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
-
+# layer 2
 layer {
   bottom: "res2b"
   top: "res3a_branch2a"
   name: "res3a_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -554,6 +465,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -582,6 +494,7 @@ layer {
   top: "res3a_branch2a"
   name: "res3a_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -589,10 +502,6 @@ layer {
   top: "res3a_branch2b"
   name: "res3a_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -602,6 +511,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -626,6 +536,44 @@ layer {
 }
 
 layer {
+  bottom: "res2b"
+  top: "res3a_branch1"
+  name: "res3a_branch1"
+  type: "Convolution"
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    pad: 0
+    stride: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "res3a_branch1"
+  top: "res3a_branch1"
+  name: "bn3a_branch1"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "res3a_branch1"
+  top: "res3a_branch1"
+  name: "scale3a_branch1"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
   bottom: "res3a_branch1"
   bottom: "res3a_branch2b"
   top: "res3a"
@@ -641,6 +589,7 @@ layer {
   top: "res3a"
   name: "res3a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -648,10 +597,6 @@ layer {
   top: "res3b_branch2a"
   name: "res3b_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -661,6 +606,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -689,6 +635,7 @@ layer {
   top: "res3b_branch2a"
   name: "res3b_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -696,10 +643,6 @@ layer {
   top: "res3b_branch2b"
   name: "res3b_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -709,6 +652,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -748,49 +692,10 @@ layer {
   top: "res3b"
   name: "res3b_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
-layer {
-  bottom: "res3b"
-  top: "res4a_branch1"
-  name: "res4a_branch1"
-  type: "Convolution"
-  param {
-    lr_mult: 0
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 256
-    kernel_size: 1
-    pad: 0
-    stride: 2
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res4a_branch1"
-  top: "res4a_branch1"
-  name: "bn4a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res4a_branch1"
-  top: "res4a_branch1"
-  name: "scale4a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
-
+# layer3
 layer {
   bottom: "res3b"
   top: "res4a_branch2a"
@@ -805,6 +710,7 @@ layer {
         type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -833,6 +739,7 @@ layer {
   top: "res4a_branch2a"
   name: "res4a_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -849,6 +756,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -873,6 +781,44 @@ layer {
 }
 
 layer {
+  bottom: "res3b"
+  top: "res4a_branch1"
+  name: "res4a_branch1"
+  type: "Convolution"
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    pad: 0
+    stride: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "res4a_branch1"
+  top: "res4a_branch1"
+  name: "bn4a_branch1"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "res4a_branch1"
+  top: "res4a_branch1"
+  name: "scale4a_branch1"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
   bottom: "res4a_branch1"
   bottom: "res4a_branch2b"
   top: "res4a"
@@ -888,6 +834,7 @@ layer {
   top: "res4a"
   name: "res4a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -904,6 +851,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -932,6 +880,7 @@ layer {
   top: "res4b_branch2a"
   name: "res4b_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -948,6 +897,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -987,45 +937,10 @@ layer {
   top: "res4b"
   name: "res4b_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
-layer {
-  bottom: "res4b"
-  top: "res5a_branch1"
-  name: "res5a_branch1"
-  type: "Convolution"
-  convolution_param {
-    num_output: 512
-    kernel_size: 1
-    pad: 0
-    stride: 2
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res5a_branch1"
-  top: "res5a_branch1"
-  name: "bn5a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res5a_branch1"
-  top: "res5a_branch1"
-  name: "scale5a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
-
+# layer 4
 layer {
   bottom: "res4b"
   top: "res5a_branch2a"
@@ -1040,6 +955,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -1068,6 +984,7 @@ layer {
   top: "res5a_branch2a"
   name: "res5a_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -1084,6 +1001,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -1108,6 +1026,44 @@ layer {
 }
 
 layer {
+  bottom: "res4b"
+  top: "res5a_branch1"
+  name: "res5a_branch1"
+  type: "Convolution"
+  convolution_param {
+    num_output: 512
+    kernel_size: 1
+    pad: 0
+    stride: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "res5a_branch1"
+  top: "res5a_branch1"
+  name: "bn5a_branch1"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "res5a_branch1"
+  top: "res5a_branch1"
+  name: "scale5a_branch1"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
   bottom: "res5a_branch1"
   bottom: "res5a_branch2b"
   top: "res5a"
@@ -1123,6 +1079,7 @@ layer {
   top: "res5a"
   name: "res5a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -1139,6 +1096,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -1167,6 +1125,7 @@ layer {
   top: "res5b_branch2a"
   name: "res5b_branch2a_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
@@ -1183,6 +1142,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -1222,259 +1182,756 @@ layer {
   top: "res5b"
   name: "res5b_relu"
   type: "ReLU"
+  engine: CUDNN
 }
 
 layer {
-  name: "block6-conv2"
-  type: "Convolution"
   bottom: "res5b"
-  top: "block6-conv2"
+  top: "conv22"
+  name: "conv22"
+  type: "Convolution"
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv22"
+  top: "conv22"
+  name: "conv22/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv22"
+  top: "conv22"
+  name: "conv22/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv22"
+  top: "conv22"
+  name: "conv22/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv22"
+  top: "conv23"
+  name: "conv23"
+  type: "Convolution"
   convolution_param {
     num_output: 512
     kernel_size: 3
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
     pad: 1
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
     bias_term: false
+    engine: CUDNN
   }
 }
+
 layer {
-  name: "block6-bn2"
+  bottom: "conv23"
+  top: "conv23"
+  name: "conv23/bn"
   type: "BatchNorm"
-  bottom: "block6-conv2"
-  top: "block6-conv2"
   batch_norm_param {
     moving_average_fraction: 0.1
   }
 }
+
 layer {
-  name: "block6-scale2"
+  bottom: "conv23"
+  top: "conv23"
+  name: "conv23/scale"
   type: "Scale"
-  bottom: "block6-conv2"
-  top: "block6-conv2"
   scale_param {
-    bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
-  }
-}
-layer {
-  name: "block6-relu2"
-  type: "ReLU"
-  bottom: "block6-conv2"
-  top: "block6-conv2"
-}
-layer {
-  name: "yolo-out-m"
-  type: "Convolution"
-  bottom: "block6-conv2"
-  top: "yolo-out-m"
-  convolution_param {
-    num_output: 75
-    kernel_size: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
-    pad: 0
-    stride: 1
     bias_term: true
   }
 }
 
 layer {
-  name: "upsampler_conv"
+  bottom: "conv23"
+  top: "conv23"
+  name: "conv23/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv23"
+  top: "conv24"
+  name: "conv24"
   type: "Convolution"
-  bottom: "res5b"
-  top: "upsampler"
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv24"
+  top: "conv24"
+  name: "conv24/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv24"
+  top: "conv24"
+  name: "conv24/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv24"
+  top: "conv24"
+  name: "conv24/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv24"
+  top: "conv25"
+  name: "conv25"
+  type: "Convolution"
+  convolution_param {
+    num_output: 512
+    kernel_size: 3
+    pad: 1
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv25"
+  top: "conv25"
+  name: "conv25/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv25"
+  top: "conv25"
+  name: "conv25/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv25"
+  top: "conv25"
+  name: "conv25/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+#################
+layer{
+  name: "yolo_large"
+  type: "Convolution"
+  bottom: "conv25"
+  top: "yolo_large"
+  convolution_param {
+    num_output: 75
+    kernel_size: 1
+    stride: 1
+    pad: 0
+    bias_term: true
+    weight_filler {
+      type: "xavier"
+    }
+    engine: CUDNN
+  }
+}
+#################
+
+layer {
+  bottom: "conv24"
+  top: "conv26"
+  name: "conv26"
+  type: "Convolution"
   convolution_param {
     num_output: 128
     kernel_size: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
     pad: 0
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
     bias_term: false
+    engine: CUDNN
   }
 }
+
 layer {
-  name: "upsampler_bn"
+  bottom: "conv26"
+  top: "conv26"
+  name: "conv26/bn"
   type: "BatchNorm"
-  bottom: "upsampler"
-  top: "upsampler"
   batch_norm_param {
     moving_average_fraction: 0.1
   }
 }
+
 layer {
-  name: "upsampler-scale"
+  bottom: "conv26"
+  top: "conv26"
+  name: "conv26/scale"
   type: "Scale"
-  bottom: "upsampler"
-  top: "upsampler"
   scale_param {
     bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
   }
 }
+
 layer {
-  name: "upsampler-relu"
+  bottom: "conv26"
+  top: "conv26"
+  name: "conv26/relu"
   type: "ReLU"
-  bottom: "upsampler"
-  top: "upsampler"
 }
+
 layer {
-  name: "upsampler-up"
+  bottom: "conv26"
+  top: "conv26-upsample"
+  name: "conv26-upsample"
   type: "Upsample"
-  bottom: "upsampler"
-  top: "upsampler_up"
-  upsample_param: {
+  upsample_param {
     scale: 2
   }
 }
+
 layer {
-  name: "concat_upsampler"
-  type: "Concat"
-  bottom: "upsampler_up"
+  bottom: "conv26-upsample"
   bottom: "res4b"
-  top: "concat_upsampler"
+  top: "conv26-route"
+  name: "conv26-route"
+  type: "Concat"
 }
+
 layer {
-  name: "block7-conv0"
+  bottom: "conv26-route"
+  top: "conv27"
+  name: "conv27"
   type: "Convolution"
-  bottom: "concat_upsampler"
-  top: "block7-conv0"
   convolution_param {
-    num_output: 256
-    kernel_size: 3
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
-    pad: 1
+    num_output: 128
+    kernel_size: 1
+    pad: 0
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
     bias_term: false
+    engine: CUDNN
   }
 }
+
 layer {
-  bottom: "block7-conv0"
-  top: "block7-conv0"
-  name: "block7-bn0"
+  bottom: "conv27"
+  top: "conv27"
+  name: "conv27/bn"
   type: "BatchNorm"
   batch_norm_param {
     moving_average_fraction: 0.1
   }
 }
+
 layer {
-  bottom: "block7-conv0"
-  top: "block7-conv0"
-  name: "block7-scale0"
+  bottom: "conv27"
+  top: "conv27"
+  name: "conv27/scale"
   type: "Scale"
   scale_param {
     bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
   }
 }
+
 layer {
-  name: "block7-relu0"
+  bottom: "conv27"
+  top: "conv27"
+  name: "conv27/relu"
   type: "ReLU"
-  bottom: "block7-conv0"
-  top: "block7-conv0"
+  engine: CUDNN
 }
+
 layer {
-  name: "yolo-out-s"
+  bottom: "conv27"
+  top: "conv28"
+  name: "conv28"
   type: "Convolution"
-  bottom: "block7-conv0"
-  top: "yolo-out-s"
   convolution_param {
-    num_output: 75
-    kernel_size: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
-    pad: 0
+    num_output: 256
+    kernel_size: 3
+    pad: 1
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv28"
+  top: "conv28"
+  name: "conv28/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv28"
+  top: "conv28"
+  name: "conv28/scale"
+  type: "Scale"
+  scale_param {
     bias_term: true
   }
 }
 
 layer {
-  name: "loss-s"
-  type: "Yolov3"
-  bottom: "yolo-out-s"
-  bottom: "label"
-  top: "loss-s"
-  loss_weight: 1
-  include {
-    phase: TRAIN
-  }
-  yolov3_param {
-    display: 800
-    side: 26
-    num_class: 20
-    num: 3
-    object_scale: 5.0
-    noobject_scale: 1.0
-    class_scale: 1.0
-    coord_scale: 1.0
-    thresh: 0.5
-    anchors_scale : 16
-    use_logic_gradient : false
-    iou_loss: GIOU
-    label_smooth_eps: 0.0
-    biases: 23
-    biases: 29
-    biases: 48
-    biases: 65
-    biases: 68
-    biases: 144
-    biases: 126
-    biases: 203
-    biases: 204
-    biases: 265
-    biases: 326
-    biases: 188
-    mask:0
-    mask:1
-    mask:2
+  bottom: "conv28"
+  top: "conv28"
+  name: "conv28/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv28"
+  top: "conv29"
+  name: "conv29"
+  type: "Convolution"
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
   }
 }
 
 layer {
-  name: "loss-m"
+  bottom: "conv29"
+  top: "conv29"
+  name: "conv29/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv29"
+  top: "conv29"
+  name: "conv29/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv29"
+  top: "conv29"
+  name: "conv29/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv29"
+  top: "conv30"
+  name: "conv30"
+  type: "Convolution"
+  convolution_param {
+    num_output: 256
+    kernel_size: 3
+    pad: 1
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv30"
+  top: "conv30"
+  name: "conv30/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv30"
+  top: "conv30"
+  name: "conv30/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv30"
+  top: "conv30"
+  name: "conv30/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+#################
+layer{
+  name: "yolo_middle"
+  type: "Convolution"
+  bottom: "conv30"
+  top: "yolo_middle"
+  convolution_param {
+    num_output: 75
+    kernel_size: 1
+    stride: 1
+    pad: 0
+    bias_term: true
+    weight_filler {
+      type: "xavier"
+    }
+    engine: CUDNN
+  }
+}
+#################
+
+layer {
+  bottom: "conv29"
+  top: "conv31"
+  name: "conv31"
+  type: "Convolution"
+  convolution_param {
+    num_output: 64
+    kernel_size: 1
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv31"
+  top: "conv31"
+  name: "conv31/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv31"
+  top: "conv31"
+  name: "conv31/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv31"
+  top: "conv31"
+  name: "conv31/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv31"
+  top: "conv31-upsample"
+  name: "conv31-upsample"
+  type: "Upsample"
+  upsample_param {
+    scale: 2
+  }
+}
+
+layer {
+  bottom: "conv31-upsample"
+  bottom: "res3b"
+  top: "conv31-route"
+  name: "conv31-route"
+  type: "Concat"
+}
+
+layer {
+  bottom: "conv31-route"
+  top: "conv32"
+  name: "conv32"
+  type: "Convolution"
+  convolution_param {
+    num_output: 64
+    kernel_size: 1
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv32"
+  top: "conv32"
+  name: "conv32/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv32"
+  top: "conv32"
+  name: "conv32/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv32"
+  top: "conv32"
+  name: "conv32/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv32"
+  top: "conv33"
+  name: "conv33"
+  type: "Convolution"
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    pad: 1
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv33"
+  top: "conv33"
+  name: "conv33/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv33"
+  top: "conv33"
+  name: "conv33/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv33"
+  top: "conv33"
+  name: "conv33/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv33"
+  top: "conv34"
+  name: "conv34"
+  type: "Convolution"
+  convolution_param {
+    num_output: 64
+    kernel_size: 1
+    pad: 0
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv34"
+  top: "conv34"
+  name: "conv34/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv34"
+  top: "conv34"
+  name: "conv34/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv34"
+  top: "conv34"
+  name: "conv34/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+layer {
+  bottom: "conv34"
+  top: "conv35"
+  name: "conv35"
+  type: "Convolution"
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    pad: 1
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+    engine: CUDNN
+  }
+}
+
+layer {
+  bottom: "conv35"
+  top: "conv35"
+  name: "conv35/bn"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "conv35"
+  top: "conv35"
+  name: "conv35/scale"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  bottom: "conv35"
+  top: "conv35"
+  name: "conv35/relu"
+  type: "ReLU"
+  engine: CUDNN
+}
+
+#################
+layer{
+  name: "yolo_small"
+  type: "Convolution"
+  bottom: "conv35"
+  top: "yolo_small"
+  convolution_param {
+    num_output: 75
+    kernel_size: 1
+    stride: 1
+    pad: 0
+    bias_term: true
+    weight_filler {
+      type: "xavier"
+    }
+    engine: CUDNN
+  }
+}
+#################
+
+######################################################################
+
+
+layer {
+  name: "yolo_large_loss"
   type: "Yolov3"
-  bottom: "yolo-out-m"
+  bottom: "yolo_large"
   bottom: "label"
-  top: "loss-m"
+  top: "yolo_large_loss"
   loss_weight: 1
   include {
     phase: TRAIN
@@ -1482,6 +1939,7 @@ layer {
   yolov3_param {
     display: 800
     side: 13
+    anchors_scale: 32
     num_class: 20
     num: 3
     object_scale: 5.0
@@ -1489,70 +1947,272 @@ layer {
     class_scale: 1.0
     coord_scale: 1.0
     thresh: 0.5
-    anchors_scale : 32
     use_logic_gradient : false
     iou_loss: GIOU
     label_smooth_eps: 0.0
+    #[[[23, 29],   [48, 65],   [117, 81]],
+    #[[68, 144],  [126, 203], [240, 118]],
+    #[[204, 265], [326, 188], [338, 298]]]
+# anchor mark1
     biases: 23
     biases: 29
     biases: 48
     biases: 65
+    biases: 117
+    biases: 81
     biases: 68
     biases: 144
     biases: 126
     biases: 203
+    biases: 240
+    biases: 118
     biases: 204
     biases: 265
     biases: 326
     biases: 188
-    mask:3
-    mask:4
-    mask:5
+    biases: 338
+    biases: 298
+# anchor mark1
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
+    mask: 6
+    mask: 7
+    mask: 8
   }
 }
 
 layer {
-  name: "yolo_detection"
-  type: "Yolov3DetectionOutput"
-  bottom: "yolo-out-s"
-  bottom: "yolo-out-m"
-  top: "yolo_detection"
+  name: "yolo_middle_loss"
+  type: "Yolov3"
+  bottom: "yolo_middle"
+  bottom: "label"
+  top: "yolo_middle_loss"
+  loss_weight: 1
   include {
-    phase: TEST
+    phase: TRAIN
   }
-  yolov3_detection_output_param {
-    nms_threshold: 0.45
-    num_classes: 20
-    confidence_threshold: 0.01
+  yolov3_param {
+    display: 800
+    side: 26
+    anchors_scale: 16
+    num_class: 20
+    num: 3
+    object_scale: 5.0
+    noobject_scale: 1.0
+    class_scale: 1.0
+    coord_scale: 1.0
+    thresh: 0.5
+    use_logic_gradient : false
+    iou_loss: GIOU
+    label_smooth_eps: 0.0
+    #[[[23, 29],   [48, 65],   [117, 81]],
+    #[[68, 144],  [126, 203], [240, 118]],
+    #[[204, 265], [326, 188], [338, 298]]]
+# anchor mark1
     biases: 23
     biases: 29
     biases: 48
     biases: 65
+    biases: 117
+    biases: 81
     biases: 68
     biases: 144
     biases: 126
     biases: 203
+    biases: 240
+    biases: 118
     biases: 204
     biases: 265
     biases: 326
     biases: 188
+    biases: 338
+    biases: 298
+# anchor mark2
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
+    mask: 3
+    mask: 4
+    mask: 5
+  }
+}
+
+layer {
+  name: "yolo_small_loss"
+  type: "Yolov3"
+  bottom: "yolo_small"
+  bottom: "label"
+  top: "yolo_small_loss"
+  loss_weight: 1
+  include {
+    phase: TRAIN
+  }
+  yolov3_param {
+    display: 800
+    side: 52
+    anchors_scale: 8
+    num_class: 20
+    num: 3
+    object_scale: 5.0
+    noobject_scale: 1.0
+    class_scale: 1.0
+    coord_scale: 1.0
+    thresh: 0.5
+    use_logic_gradient : false
+    iou_loss: GIOU
+    label_smooth_eps: 0.0
+    #[[[23, 29],   [48, 65],   [117, 81]],
+    #[[68, 144],  [126, 203], [240, 118]],
+    #[[204, 265], [326, 188], [338, 298]]]
+# anchor mark1
+    biases: 23
+    biases: 29
+    biases: 48
+    biases: 65
+    biases: 117
+    biases: 81
+    biases: 68
+    biases: 144
+    biases: 126
+    biases: 203
+    biases: 240
+    biases: 118
+    biases: 204
+    biases: 265
+    biases: 326
+    biases: 188
+    biases: 338
+    biases: 298
+# anchor mark2
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
+    mask: 0
+    mask: 1
+    mask: 2
+  }
+}
+
+layer {
+  name: "detection_out"
+  type: "Yolov3DetectionOutput"
+  bottom: "yolo_small"
+  bottom: "yolo_middle"
+  bottom: "yolo_large"
+  top: "detection"
+  include {
+    phase: TEST
+  }
+  yolov3_detection_output_param {
+    confidence_threshold: 0.01
+    nms_threshold: 0.45
+    num_classes: 20
+# anchor mark1
+    biases: 23
+    biases: 29
+    biases: 48
+    biases: 65
+    biases: 117
+    biases: 81
+    biases: 68
+    biases: 144
+    biases: 126
+    biases: 203
+    biases: 240
+    biases: 118
+    biases: 204
+    biases: 265
+    biases: 326
+    biases: 188
+    biases: 338
+    biases: 298
+# anchor mark2
+#    biases: 33
+#    biases: 48
+#    biases: 50
+#    biases: 108
+#    biases: 127
+#    biases: 96
+#    biases: 78
+#    biases: 202
+#    biases: 178
+#    biases: 179
+#    biases: 130
+#    biases: 295
+#    biases: 332
+#    biases: 195
+#    biases: 228
+#    biases: 326
+#    biases: 365
+#    biases: 359
     mask: 0
     mask: 1
     mask: 2
     mask: 3
     mask: 4
     mask: 5
-    mask_group_num: 2
+    mask: 6
+    mask: 7
+    mask: 8
+    mask_group_num: 3
+    anchors_scale: 8
     anchors_scale: 16
     anchors_scale: 32
   }
 }
+
 layer {
   name: "yolo_eval"
   type: "DetectionEvaluate"
-  bottom: "yolo_detection"
+  bottom: "detection"
   bottom: "label"
-  top: "detection_eval"
+  top: "eval"
   include {
     phase: TEST
   }
