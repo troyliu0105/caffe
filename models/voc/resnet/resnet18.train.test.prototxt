@@ -187,10 +187,6 @@ layer {
   top: "conv1"
   name: "conv1"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 64
     kernel_size: 7
@@ -238,60 +234,18 @@ layer {
   pooling_param {
     kernel_size: 3
     stride: 2
+    #pad: 1
+    #round_mode: FLOOR
     pool: MAX
   }
 }
 
-layer {
-  bottom: "pool1"
-  top: "res2a_branch1"
-  name: "res2a_branch1"
-  type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
-  convolution_param {
-    num_output: 64
-    kernel_size: 1
-    pad: 0
-    stride: 1
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res2a_branch1"
-  top: "res2a_branch1"
-  name: "bn2a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res2a_branch1"
-  top: "res2a_branch1"
-  name: "scale2a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
-
+# layer 1
 layer {
   bottom: "pool1"
   top: "res2a_branch2a"
   name: "res2a_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -336,10 +290,6 @@ layer {
   top: "res2a_branch2b"
   name: "res2a_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -373,7 +323,7 @@ layer {
 }
 
 layer {
-  bottom: "res2a_branch1"
+  bottom: "pool1"
   bottom: "res2a_branch2b"
   top: "res2a"
   name: "res2a"
@@ -395,10 +345,6 @@ layer {
   top: "res2b_branch2a"
   name: "res2b_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -443,10 +389,6 @@ layer {
   top: "res2b_branch2b"
   name: "res2b_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 64
     kernel_size: 3
@@ -497,56 +439,12 @@ layer {
   type: "ReLU"
 }
 
-layer {
-  bottom: "res2b"
-  top: "res3a_branch1"
-  name: "res3a_branch1"
-  type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
-  convolution_param {
-    num_output: 128
-    kernel_size: 1
-    pad: 0
-    stride: 2
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res3a_branch1"
-  top: "res3a_branch1"
-  name: "bn3a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res3a_branch1"
-  top: "res3a_branch1"
-  name: "scale3a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
-
+# layer 2
 layer {
   bottom: "res2b"
   top: "res3a_branch2a"
   name: "res3a_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -591,10 +489,6 @@ layer {
   top: "res3a_branch2b"
   name: "res3a_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -628,6 +522,43 @@ layer {
 }
 
 layer {
+  bottom: "res2b"
+  top: "res3a_branch1"
+  name: "res3a_branch1"
+  type: "Convolution"
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    pad: 0
+    stride: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+  }
+}
+
+layer {
+  bottom: "res3a_branch1"
+  top: "res3a_branch1"
+  name: "bn3a_branch1"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "res3a_branch1"
+  top: "res3a_branch1"
+  name: "scale3a_branch1"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
   bottom: "res3a_branch1"
   bottom: "res3a_branch2b"
   top: "res3a"
@@ -650,10 +581,6 @@ layer {
   top: "res3b_branch2a"
   name: "res3b_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -698,10 +625,6 @@ layer {
   top: "res3b_branch2b"
   name: "res3b_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 128
     kernel_size: 3
@@ -752,56 +675,12 @@ layer {
   type: "ReLU"
 }
 
-layer {
-  bottom: "res3b"
-  top: "res4a_branch1"
-  name: "res4a_branch1"
-  type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
-  convolution_param {
-    num_output: 256
-    kernel_size: 1
-    pad: 0
-    stride: 2
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res4a_branch1"
-  top: "res4a_branch1"
-  name: "bn4a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res4a_branch1"
-  top: "res4a_branch1"
-  name: "scale4a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
-
+# layer3
 layer {
   bottom: "res3b"
   top: "res4a_branch2a"
   name: "res4a_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 256
     kernel_size: 3
@@ -846,10 +725,6 @@ layer {
   top: "res4a_branch2b"
   name: "res4a_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 256
     kernel_size: 3
@@ -883,6 +758,43 @@ layer {
 }
 
 layer {
+  bottom: "res3b"
+  top: "res4a_branch1"
+  name: "res4a_branch1"
+  type: "Convolution"
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    pad: 0
+    stride: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+  }
+}
+
+layer {
+  bottom: "res4a_branch1"
+  top: "res4a_branch1"
+  name: "bn4a_branch1"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "res4a_branch1"
+  top: "res4a_branch1"
+  name: "scale4a_branch1"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
   bottom: "res4a_branch1"
   bottom: "res4a_branch2b"
   top: "res4a"
@@ -905,10 +817,6 @@ layer {
   top: "res4b_branch2a"
   name: "res4b_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 256
     kernel_size: 3
@@ -953,10 +861,6 @@ layer {
   top: "res4b_branch2b"
   name: "res4b_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 256
     kernel_size: 3
@@ -1007,56 +911,13 @@ layer {
   type: "ReLU"
 }
 
-layer {
-  bottom: "res4b"
-  top: "res5a_branch1"
-  name: "res5a_branch1"
-  type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
-  convolution_param {
-    num_output: 512
-    kernel_size: 1
-    pad: 0
-    stride: 2
-    weight_filler {
-      type: "msra"
-    }
-    bias_term: false
-  }
-}
-
-layer {
-  bottom: "res5a_branch1"
-  top: "res5a_branch1"
-  name: "bn5a_branch1"
-  type: "BatchNorm"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-
-layer {
-  bottom: "res5a_branch1"
-  top: "res5a_branch1"
-  name: "scale5a_branch1"
-  type: "Scale"
-  scale_param {
-    bias_term: true
-  }
-}
+# layer 4
 
 layer {
   bottom: "res4b"
   top: "res5a_branch2a"
   name: "res5a_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 512
     kernel_size: 3
@@ -1101,10 +962,6 @@ layer {
   top: "res5a_branch2b"
   name: "res5a_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 512
     kernel_size: 3
@@ -1138,6 +995,43 @@ layer {
 }
 
 layer {
+  bottom: "res4b"
+  top: "res5a_branch1"
+  name: "res5a_branch1"
+  type: "Convolution"
+  convolution_param {
+    num_output: 512
+    kernel_size: 1
+    pad: 0
+    stride: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_term: false
+  }
+}
+
+layer {
+  bottom: "res5a_branch1"
+  top: "res5a_branch1"
+  name: "bn5a_branch1"
+  type: "BatchNorm"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+
+layer {
+  bottom: "res5a_branch1"
+  top: "res5a_branch1"
+  name: "scale5a_branch1"
+  type: "Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
   bottom: "res5a_branch1"
   bottom: "res5a_branch2b"
   top: "res5a"
@@ -1160,10 +1054,6 @@ layer {
   top: "res5b_branch2a"
   name: "res5b_branch2a"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 512
     kernel_size: 3
@@ -1208,10 +1098,6 @@ layer {
   top: "res5b_branch2b"
   name: "res5b_branch2b"
   type: "Convolution"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
   convolution_param {
     num_output: 512
     kernel_size: 3

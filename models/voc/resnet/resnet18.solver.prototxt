@@ -1,7 +1,7 @@
 #=============== net
 #net: "models/voc/resnet/resnet18.train.test.prototxt"
 train_net: "models/voc/resnet/resnet18.train.test.prototxt"
-weights: "models/voc/resnet/resnet18.caffemodel"
+weights: "models/resnet/resnet18.caffemodel"
 
 #=============== iter
 # voc07 test has 4952 images

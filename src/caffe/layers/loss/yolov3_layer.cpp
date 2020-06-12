@@ -23,7 +23,8 @@
 
 #ifdef USE_TBB
 static tbb::mutex mutex;
-#elif defined(USE_OMP)
+#else
+// for openmp or none, use dummy mutex
 int mutex;
 #endif
 

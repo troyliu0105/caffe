@@ -204,6 +204,8 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
   if (Caffe::mode() == Caffe::CPU) {
 #ifdef USE_TBB
     tbb::mutex mutex;
+#else
+    int mutex;
 #endif
     int mask_offset = 0;
     predicts_.clear();

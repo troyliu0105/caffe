@@ -995,7 +995,7 @@ void CVMatToDatum(const cv::Mat &cv_img, Datum *datum) {
 cv::Mat DatumToCVMat(const Datum &datum) {
   CHECK(datum.has_data() || datum.float_data_size() > 0)
       << "Datum must have data or float_data";
-  CHECK_EQ(datum.channels(), 3);
+  // CHECK_EQ(datum.channels(), 3);
   if (datum.encoded()) {
     return DecodeDatumToCVMatNative(datum);
   }
