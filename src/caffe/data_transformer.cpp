@@ -831,8 +831,8 @@ void DataTransformer<Dtype>::Transform(
   RepeatedPtrField<AnnotationGroup> transformed_anno_group_all;
   Transform(anno_datum, transformed_blob, &transformed_anno_group_all,
             do_mirror, policy_num);
-  std::copy(transformed_anno_group_all.cbegin(),
-            transformed_anno_group_all.cend(),
+  std::move(transformed_anno_group_all.begin(),
+            transformed_anno_group_all.end(),
             std::back_inserter(*transformed_anno_vec));
 }
 
@@ -904,7 +904,8 @@ void DataTransformer<Dtype>::TransformAnnotation(
       // Save for output.
       if (has_valid_annotation) {
         transformed_anno_group.set_group_label(anno_group.group_label());
-        transformed_anno_group_all->Add()->CopyFrom(transformed_anno_group);
+        *(transformed_anno_group_all->Add()) =
+            std::move(transformed_anno_group);
       }
     }
   } else {

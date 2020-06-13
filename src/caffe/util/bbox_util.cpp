@@ -542,10 +542,10 @@ template float BBoxSize(const float *bbox, const bool normalized);
 template double BBoxSize(const double *bbox, const bool normalized);
 
 void ClipBBox(const NormalizedBBox &bbox, NormalizedBBox *clip_bbox) {
-  clip_bbox->set_xmin(std::max(std::min(bbox.xmin(), 1.f), 0.f));
-  clip_bbox->set_ymin(std::max(std::min(bbox.ymin(), 1.f), 0.f));
-  clip_bbox->set_xmax(std::max(std::min(bbox.xmax(), 1.f), 0.f));
-  clip_bbox->set_ymax(std::max(std::min(bbox.ymax(), 1.f), 0.f));
+  clip_bbox->set_xmin(caffe_clip(bbox.xmin(), 0.f, 1.f));
+  clip_bbox->set_ymin(caffe_clip(bbox.ymin(), 0.f, 1.f));
+  clip_bbox->set_xmax(caffe_clip(bbox.xmax(), 0.f, 1.f));
+  clip_bbox->set_ymax(caffe_clip(bbox.ymax(), 0.f, 1.f));
   clip_bbox->clear_size();
   clip_bbox->set_size(BBoxSize(*clip_bbox));
   clip_bbox->set_difficult(bbox.difficult());
@@ -553,10 +553,10 @@ void ClipBBox(const NormalizedBBox &bbox, NormalizedBBox *clip_bbox) {
 
 void ClipBBox(const NormalizedBBox &bbox, const float height, const float width,
               NormalizedBBox *clip_bbox) {
-  clip_bbox->set_xmin(std::max(std::min(bbox.xmin(), width), 0.f));
-  clip_bbox->set_ymin(std::max(std::min(bbox.ymin(), height), 0.f));
-  clip_bbox->set_xmax(std::max(std::min(bbox.xmax(), width), 0.f));
-  clip_bbox->set_ymax(std::max(std::min(bbox.ymax(), height), 0.f));
+  clip_bbox->set_xmin(caffe_clip(bbox.xmin(), 0.f, width));
+  clip_bbox->set_ymin(caffe_clip(bbox.ymin(), 0.f, height));
+  clip_bbox->set_xmax(caffe_clip(bbox.xmax(), 0.f, width));
+  clip_bbox->set_ymax(caffe_clip(bbox.ymax(), 0.f, height));
   clip_bbox->clear_size();
   clip_bbox->set_size(BBoxSize(*clip_bbox));
   clip_bbox->set_difficult(bbox.difficult());
