@@ -54,7 +54,7 @@ DEFINE_string(sighup_effect, "snapshot",
               "Optional; action to take when a SIGHUP signal is received: "
               "snapshot, stop or none.");
 DEFINE_string(ap_version, "11point",
-              "use ap version"
+              "use ap version: "
               "11point, MaxIntegral, Integral");
 
 // A simple registry for caffe commands.
