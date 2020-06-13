@@ -593,6 +593,12 @@ void VisualizeBBox(const vector<cv::Mat> &images, const Blob<Dtype> *detections,
                    float threshold, const vector<cv::Scalar> &colors,
                    const map<int, string> &label_to_display_name,
                    const string &save_file);
+
+void MakeMosaic(
+    const vector<
+        pair<cv::Mat, google::protobuf::RepeatedPtrField<AnnotationGroup>>>
+        &raw,
+    int s, int channels, AnnotatedDatum *anno_datum);
 #endif // USE_OPENCV
 
 } // namespace caffe
