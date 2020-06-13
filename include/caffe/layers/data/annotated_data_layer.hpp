@@ -41,7 +41,7 @@ protected:
   AnnotatedDatum_AnnotationType anno_type_;
   vector<BatchSampler> batch_samplers_;
   string label_map_file_;
-  int yolo_data_type_;
+  bool yolo_data_type_;
   float yolo_data_jitter_;
   bool train_diffcult_;
   int iters_;
@@ -52,6 +52,7 @@ protected:
   int seg_scales_;
   int seg_resize_width_;
   int seg_resize_height_;
+  bool mosaic_;
 };
 
 } // namespace caffe
