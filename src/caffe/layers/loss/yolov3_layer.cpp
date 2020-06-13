@@ -21,11 +21,45 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #endif // USE_OPENCV
 
-#ifdef USE_TBB
-static tbb::mutex mutex;
+#if defined(USE_TBB) || defined(USE_OMP)
+#include <boost/atomic.hpp>
+using Statistic = struct {
+  boost::atomic_float_t tot_iou = 0.F;
+  boost::atomic_float_t tot_giou = 0.F;
+  boost::atomic_float_t tot_diou = 0.F;
+  boost::atomic_float_t tot_ciou = 0.F;
+  boost::atomic_float_t tot_iou_loss = 0.F;
+  boost::atomic_float_t tot_giou_loss = 0.F;
+  boost::atomic_float_t tot_diou_loss = 0.F;
+  boost::atomic_float_t tot_ciou_loss = 0.F;
+
+  boost::atomic_float_t recall = 0.F;
+  boost::atomic_float_t recall75 = 0.F;
+  boost::atomic_float_t avg_cat = 0.F;
+  boost::atomic_float_t avg_obj = 0.F;
+  boost::atomic_float_t avg_anyobj = 0.F;
+  boost::atomic_int32_t count = 0;
+  boost::atomic_int32_t class_count = 0;
+};
 #else
-// for openmp or none, use dummy mutex
-int mutex;
+using Statistic = struct {
+  float tot_iou = 0.F;
+  float tot_giou = 0.F;
+  float tot_diou = 0.F;
+  float tot_ciou = 0.F;
+  float tot_iou_loss = 0.F;
+  float tot_giou_loss = 0.F;
+  float tot_diou_loss = 0.F;
+  float tot_ciou_loss = 0.F;
+
+  float recall = 0.F;
+  float recall75 = 0.F;
+  float avg_cat = 0.F;
+  float avg_obj = 0.F;
+  float avg_anyobj = 0.F;
+  int count = 0;
+  int class_count = 0;
+};
 #endif
 
 #if defined(DEBUG) && defined(DRAW)
@@ -52,25 +86,6 @@ static char *CLASSES[21] = {"__background__",
                             "tvmonitor"};
 #endif
 
-using Statistic = struct {
-  float tot_iou = 0.F;
-  float tot_giou = 0.F;
-  float tot_diou = 0.F;
-  float tot_ciou = 0.F;
-  float tot_iou_loss = 0.F;
-  float tot_giou_loss = 0.F;
-  float tot_diou_loss = 0.F;
-  float tot_ciou_loss = 0.F;
-
-  float recall = 0.F;
-  float recall75 = 0.F;
-  float avg_cat = 0.F;
-  float avg_obj = 0.F;
-  float avg_anyobj = 0.F;
-  int count = 0;
-  int class_count = 0;
-};
-
 namespace caffe {
 
 static inline float fix_nan_inf(float val) {
@@ -78,18 +93,9 @@ static inline float fix_nan_inf(float val) {
     val = 0;
   return val;
 }
-static inline float clip_value(float val, const float max_val) {
-  if (val > max_val) {
-    // printf("\n val = %f > max_val = %f \n", val, max_val);
-    val = max_val;
-  } else if (val < -max_val) {
-    // printf("\n val = %f < -max_val = %f \n", val, -max_val);
-    val = -max_val;
-  }
-  return val;
-}
+
 template <typename Dtype>
-int int_index(const vector<Dtype> &a, int val, int n) {
+static int int_index(const vector<Dtype> &a, int val, int n) {
   int i;
   for (i = 0; i < n; ++i) {
     if (a[i] == val)
@@ -99,9 +105,9 @@ int int_index(const vector<Dtype> &a, int val, int n) {
 }
 
 template <typename Dtype>
-bool compare_yolo_class(const Dtype *swap_data, int class_num, int class_index,
-                        int stride, float objectness, int class_id,
-                        float conf_thresh) {
+static bool compare_yolo_class(const Dtype *swap_data, int class_num,
+                               int class_index, int stride, float objectness,
+                               int class_id, float conf_thresh) {
   float prob;
   for (int j = 0; j < class_num; ++j) {
     // float prob = objectness * output[class_index + stride*j];
@@ -114,8 +120,8 @@ bool compare_yolo_class(const Dtype *swap_data, int class_num, int class_index,
 }
 
 template <typename Dtype>
-void averages_yolo_deltas(int class_index, int box_index, int stride,
-                          int classes, Dtype *delta) {
+static void averages_yolo_deltas(int class_index, int box_index, int stride,
+                                 int classes, Dtype *delta) {
 
   int classes_in_one_box = 0;
   int c;
@@ -133,10 +139,10 @@ void averages_yolo_deltas(int class_index, int box_index, int stride,
 }
 
 template <typename Dtype>
-void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
-                           int class_label, int classes, float scale,
-                           float *avg_cat, int stride, bool use_focal_loss,
-                           float label_smooth_eps) {
+static void delta_region_class_v3(Dtype *input_data, Dtype *&diff,
+                                  int class_index, int class_label, int classes,
+                                  float scale, Statistic *statistic, int stride,
+                                  bool use_focal_loss, float label_smooth_eps) {
   if (diff[class_index + stride * class_label]) {
 
     float y_true = 1;
@@ -148,10 +154,8 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
     // delta[class_index + stride*class_id] = 1 - output[class_index +
     // stride*class_id];
 
-    if (avg_cat)
-      atomic_update(mutex, [&]() {
-        *avg_cat += input_data[class_index + stride * class_label];
-      });
+    if (statistic)
+      statistic->avg_cat += input_data[class_index + stride * class_label];
 
     // diff[class_index + stride*class_label] = (-1.0) * (1 -
     // input_data[class_index + stride*class_label]); *avg_cat +=
@@ -181,8 +185,8 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
       diff[class_index + stride * n] *= alpha * grad;
 
       if (n == class_label) {
-        atomic_update(
-            mutex, [&]() { *avg_cat += input_data[class_index + stride * n]; });
+        if (statistic)
+          statistic->avg_cat += input_data[class_index + stride * n];
       }
     }
 
@@ -196,10 +200,8 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
       // delta[class_index + stride*class_id] = 1 - output[class_index +
       // stride*class_id];
 
-      if (n == class_label && avg_cat)
-        atomic_update(mutex, [&]() {
-          *avg_cat += input_data[class_index + stride * class_label];
-        });
+      if (n == class_label && statistic)
+        statistic->avg_cat += input_data[class_index + stride * class_label];
       // diff[class_index + n*stride] = (-1.0) * scale * (((n == class_label) ?
       // 1 : 0)
       // - input_data[class_index + n*stride]);
@@ -217,19 +219,13 @@ void delta_region_class_v3(Dtype *input_data, Dtype *&diff, int class_index,
 }
 
 template <typename Dtype>
-ious delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
-                      int index, int i, int j, int lw, int lh, int w, int h,
-                      Dtype *delta, float scale, int stride, IOU_LOSS iou_loss,
-                      float iou_normalizer, float max_delta, bool accumulate) {
+static ious
+delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
+                 int index, int i, int j, int lw, int lh, int w, int h,
+                 Dtype *delta, float scale, int stride, IOU_LOSS iou_loss,
+                 float iou_normalizer, float max_delta, bool accumulate) {
   box pred;
   get_region_box(&pred, x, biases, n, index, i, j, lw, lh, w, h, stride);
-
-  if (!accumulate) {
-    delta[index + 0 * stride] = 0;
-    delta[index + 1 * stride] = 0;
-    delta[index + 2 * stride] = 0;
-    delta[index + 3 * stride] = 0;
-  }
 
   ious all_ious = {0};
   all_ious.iou = box_iou(pred, truth);
@@ -307,10 +303,10 @@ ious delta_region_box(const box &truth, Dtype *x, vector<Dtype> biases, int n,
     dh = fix_nan_inf(dh);
 
     if (max_delta != FLT_MAX) {
-      dx = clip_value(dx, max_delta);
-      dy = clip_value(dy, max_delta);
-      dw = clip_value(dw, max_delta);
-      dh = clip_value(dh, max_delta);
+      dx = caffe_clip(dx, -max_delta, max_delta);
+      dy = caffe_clip(dy, -max_delta, max_delta);
+      dw = caffe_clip(dw, -max_delta, max_delta);
+      dh = caffe_clip(dh, -max_delta, max_delta);
     }
 
     // accumulate delta
@@ -352,9 +348,9 @@ void Yolov3Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
   max_delta_ = param.max_delta();
   accumulate_ = param.accumulate();
   label_smooth_eps_ = param.label_smooth_eps();
-  std::copy(param.biases().begin(), param.biases().end(),
+  std::move(param.biases().begin(), param.biases().end(),
             std::back_inserter(biases_));
-  std::copy(param.mask().begin(), param.mask().end(),
+  std::move(param.mask().begin(), param.mask().end(),
             std::back_inserter(mask_));
   biases_size_ = param.biases_size() / 2;
   int input_count =
@@ -519,8 +515,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             best_truth = truth;
           }
         }
-        atomic_update(mutex,
-                      [&]() { statistic.avg_anyobj += swap_data[obj_index]; });
+        statistic.avg_anyobj += swap_data[obj_index];
         diff[obj_index] = (-1) * (0 - swap_data[obj_index]) * noobject_scale_;
         if (best_match_iou > thresh_) {
           // ================================================== alexeyAB version
@@ -619,11 +614,11 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
             (-1.0) * (1 - swap_data[best_index + 4 * stride]) * object_scale_;
 
         delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
-                              class_label, num_class_, class_scale_,
-                              &statistic.avg_cat, stride, use_focal_loss_,
+                              class_label, num_class_, class_scale_, &statistic,
+                              stride, use_focal_loss_,
                               label_smooth_eps_); // softmax_tree_
 
-        atomic_update(mutex, [&]() {
+        {
           ++statistic.count;
           ++statistic.class_count;
           if (all_ious.iou > 0.5)
@@ -640,7 +635,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
           statistic.tot_diou_loss += 1 - all_ious.diou;
 
           statistic.avg_obj += swap_data[best_index + 4 * stride];
-        });
+        }
       }
 
       // if the rest anchor, which iou is larger than threshold,
@@ -677,10 +672,10 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 
               delta_region_class_v3(swap_data, diff, best_index + 5 * stride,
                                     class_label, num_class_, class_scale_,
-                                    &statistic.avg_cat, stride, use_focal_loss_,
+                                    &statistic, stride, use_focal_loss_,
                                     label_smooth_eps_); // softmax_tree_
 
-              atomic_update(mutex, [&]() {
+              {
                 ++statistic.count;
                 ++statistic.class_count;
                 if (all_ious.iou > 0.5)
@@ -697,7 +692,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                 statistic.tot_diou_loss += 1 - all_ious.diou;
 
                 statistic.avg_obj += swap_data[best_index + 4 * stride];
-              });
+              }
             }
           }
         }
