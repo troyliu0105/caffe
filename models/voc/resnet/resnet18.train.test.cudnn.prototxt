@@ -143,9 +143,9 @@ layer {
     backend: LMDB
   }
   annotated_data_param {
-	  yolo_data_type : 1
-	  yolo_data_jitter : 0.3
-    label_map_file:  "data/VOC0712/labelmap_voc.prototxt"
+	  yolo_data_type: true
+	  yolo_data_jitter: 0.3
+    label_map_file: "data/VOC0712/labelmap_voc.prototxt"
   }
 }
 layer {
@@ -178,6 +178,7 @@ layer {
   }
   annotated_data_param {
     batch_sampler {}
+    yolo_data_type: true
     label_map_file:  "data/VOC0712/labelmap_voc.prototxt"
   }
 }
@@ -225,7 +226,9 @@ layer {
   top: "conv1"
   name: "conv1_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -287,7 +290,9 @@ layer {
   top: "res2a_branch2a"
   name: "res2a_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -344,7 +349,9 @@ layer {
   top: "res2a"
   name: "res2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -390,7 +397,9 @@ layer {
   top: "res2b_branch2a"
   name: "res2b_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -447,7 +456,9 @@ layer {
   top: "res2b"
   name: "res2b_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 # layer 2
@@ -494,7 +505,9 @@ layer {
   top: "res3a_branch2a"
   name: "res3a_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -589,7 +602,9 @@ layer {
   top: "res3a"
   name: "res3a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -635,7 +650,9 @@ layer {
   top: "res3b_branch2a"
   name: "res3b_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -692,7 +709,9 @@ layer {
   top: "res3b"
   name: "res3b_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 # layer3
@@ -739,7 +758,9 @@ layer {
   top: "res4a_branch2a"
   name: "res4a_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -834,7 +855,9 @@ layer {
   top: "res4a"
   name: "res4a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -880,7 +903,9 @@ layer {
   top: "res4b_branch2a"
   name: "res4b_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -937,7 +962,9 @@ layer {
   top: "res4b"
   name: "res4b_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 # layer 4
@@ -984,7 +1011,9 @@ layer {
   top: "res5a_branch2a"
   name: "res5a_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1079,7 +1108,9 @@ layer {
   top: "res5a"
   name: "res5a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1125,7 +1156,9 @@ layer {
   top: "res5b_branch2a"
   name: "res5b_branch2a_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1182,7 +1215,9 @@ layer {
   top: "res5b"
   name: "res5b_relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1228,7 +1263,9 @@ layer {
   top: "conv22"
   name: "conv22/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1274,7 +1311,9 @@ layer {
   top: "conv23"
   name: "conv23/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1320,7 +1359,9 @@ layer {
   top: "conv24"
   name: "conv24/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1366,7 +1407,9 @@ layer {
   top: "conv25"
   name: "conv25/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 #################
 layer{
@@ -1494,7 +1537,9 @@ layer {
   top: "conv27"
   name: "conv27/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1540,7 +1585,9 @@ layer {
   top: "conv28"
   name: "conv28/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1586,7 +1633,9 @@ layer {
   top: "conv29"
   name: "conv29/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1632,7 +1681,9 @@ layer {
   top: "conv30"
   name: "conv30/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 #################
@@ -1698,7 +1749,9 @@ layer {
   top: "conv31"
   name: "conv31/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1762,7 +1815,9 @@ layer {
   top: "conv32"
   name: "conv32/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1808,7 +1863,9 @@ layer {
   top: "conv33"
   name: "conv33/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1854,7 +1911,9 @@ layer {
   top: "conv34"
   name: "conv34/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1900,7 +1959,9 @@ layer {
   top: "conv35"
   name: "conv35/relu"
   type: "ReLU"
-  engine: CUDNN
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 #################
@@ -1954,43 +2015,43 @@ layer {
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
 # anchor mark1
-    biases: 23
-    biases: 29
-    biases: 48
-    biases: 65
-    biases: 117
-    biases: 81
-    biases: 68
-    biases: 144
-    biases: 126
-    biases: 203
-    biases: 240
-    biases: 118
-    biases: 204
-    biases: 265
-    biases: 326
-    biases: 188
-    biases: 338
-    biases: 298
-# anchor mark1
-#    biases: 33
+#    biases: 23
+#    biases: 29
 #    biases: 48
-#    biases: 50
-#    biases: 108
-#    biases: 127
-#    biases: 96
-#    biases: 78
-#    biases: 202
-#    biases: 178
-#    biases: 179
-#    biases: 130
-#    biases: 295
-#    biases: 332
-#    biases: 195
-#    biases: 228
+#    biases: 65
+#    biases: 117
+#    biases: 81
+#    biases: 68
+#    biases: 144
+#    biases: 126
+#    biases: 203
+#    biases: 240
+#    biases: 118
+#    biases: 204
+#    biases: 265
 #    biases: 326
-#    biases: 365
-#    biases: 359
+#    biases: 188
+#    biases: 338
+#    biases: 298
+# anchor mark2
+    biases: 33
+    biases: 48
+    biases: 50
+    biases: 108
+    biases: 127
+    biases: 96
+    biases: 78
+    biases: 202
+    biases: 178
+    biases: 179
+    biases: 130
+    biases: 295
+    biases: 332
+    biases: 195
+    biases: 228
+    biases: 326
+    biases: 365
+    biases: 359
     mask: 6
     mask: 7
     mask: 8
@@ -2025,43 +2086,43 @@ layer {
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
 # anchor mark1
-    biases: 23
-    biases: 29
-    biases: 48
-    biases: 65
-    biases: 117
-    biases: 81
-    biases: 68
-    biases: 144
-    biases: 126
-    biases: 203
-    biases: 240
-    biases: 118
-    biases: 204
-    biases: 265
-    biases: 326
-    biases: 188
-    biases: 338
-    biases: 298
-# anchor mark2
-#    biases: 33
+#    biases: 23
+#    biases: 29
 #    biases: 48
-#    biases: 50
-#    biases: 108
-#    biases: 127
-#    biases: 96
-#    biases: 78
-#    biases: 202
-#    biases: 178
-#    biases: 179
-#    biases: 130
-#    biases: 295
-#    biases: 332
-#    biases: 195
-#    biases: 228
+#    biases: 65
+#    biases: 117
+#    biases: 81
+#    biases: 68
+#    biases: 144
+#    biases: 126
+#    biases: 203
+#    biases: 240
+#    biases: 118
+#    biases: 204
+#    biases: 265
 #    biases: 326
-#    biases: 365
-#    biases: 359
+#    biases: 188
+#    biases: 338
+#    biases: 298
+# anchor mark2
+    biases: 33
+    biases: 48
+    biases: 50
+    biases: 108
+    biases: 127
+    biases: 96
+    biases: 78
+    biases: 202
+    biases: 178
+    biases: 179
+    biases: 130
+    biases: 295
+    biases: 332
+    biases: 195
+    biases: 228
+    biases: 326
+    biases: 365
+    biases: 359
     mask: 3
     mask: 4
     mask: 5
@@ -2096,43 +2157,43 @@ layer {
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
 # anchor mark1
-    biases: 23
-    biases: 29
-    biases: 48
-    biases: 65
-    biases: 117
-    biases: 81
-    biases: 68
-    biases: 144
-    biases: 126
-    biases: 203
-    biases: 240
-    biases: 118
-    biases: 204
-    biases: 265
-    biases: 326
-    biases: 188
-    biases: 338
-    biases: 298
-# anchor mark2
-#    biases: 33
+#    biases: 23
+#    biases: 29
 #    biases: 48
-#    biases: 50
-#    biases: 108
-#    biases: 127
-#    biases: 96
-#    biases: 78
-#    biases: 202
-#    biases: 178
-#    biases: 179
-#    biases: 130
-#    biases: 295
-#    biases: 332
-#    biases: 195
-#    biases: 228
+#    biases: 65
+#    biases: 117
+#    biases: 81
+#    biases: 68
+#    biases: 144
+#    biases: 126
+#    biases: 203
+#    biases: 240
+#    biases: 118
+#    biases: 204
+#    biases: 265
 #    biases: 326
-#    biases: 365
-#    biases: 359
+#    biases: 188
+#    biases: 338
+#    biases: 298
+# anchor mark2
+    biases: 33
+    biases: 48
+    biases: 50
+    biases: 108
+    biases: 127
+    biases: 96
+    biases: 78
+    biases: 202
+    biases: 178
+    biases: 179
+    biases: 130
+    biases: 295
+    biases: 332
+    biases: 195
+    biases: 228
+    biases: 326
+    biases: 365
+    biases: 359
     mask: 0
     mask: 1
     mask: 2
@@ -2154,43 +2215,43 @@ layer {
     nms_threshold: 0.45
     num_classes: 20
 # anchor mark1
-    biases: 23
-    biases: 29
-    biases: 48
-    biases: 65
-    biases: 117
-    biases: 81
-    biases: 68
-    biases: 144
-    biases: 126
-    biases: 203
-    biases: 240
-    biases: 118
-    biases: 204
-    biases: 265
-    biases: 326
-    biases: 188
-    biases: 338
-    biases: 298
-# anchor mark2
-#    biases: 33
+#    biases: 23
+#    biases: 29
 #    biases: 48
-#    biases: 50
-#    biases: 108
-#    biases: 127
-#    biases: 96
-#    biases: 78
-#    biases: 202
-#    biases: 178
-#    biases: 179
-#    biases: 130
-#    biases: 295
-#    biases: 332
-#    biases: 195
-#    biases: 228
+#    biases: 65
+#    biases: 117
+#    biases: 81
+#    biases: 68
+#    biases: 144
+#    biases: 126
+#    biases: 203
+#    biases: 240
+#    biases: 118
+#    biases: 204
+#    biases: 265
 #    biases: 326
-#    biases: 365
-#    biases: 359
+#    biases: 188
+#    biases: 338
+#    biases: 298
+# anchor mark2
+    biases: 33
+    biases: 48
+    biases: 50
+    biases: 108
+    biases: 127
+    biases: 96
+    biases: 78
+    biases: 202
+    biases: 178
+    biases: 179
+    biases: 130
+    biases: 295
+    biases: 332
+    biases: 195
+    biases: 228
+    biases: 326
+    biases: 365
+    biases: 359
     mask: 0
     mask: 1
     mask: 2

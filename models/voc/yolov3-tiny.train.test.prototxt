@@ -142,9 +142,9 @@ layer {
     backend: LMDB
   }
   annotated_data_param {
-	  yolo_data_type : 1
-	  yolo_data_jitter : 0.3
-    label_map_file:  "data/VOC0712/labelmap_voc.prototxt"
+	  yolo_data_type: true
+	  yolo_data_jitter: 0.3
+    label_map_file: "data/VOC0712/labelmap_voc.prototxt"
   }
 }
 layer {
@@ -176,6 +176,7 @@ layer {
   }
   annotated_data_param {
     batch_sampler {}
+    yolo_data_type: true
     label_map_file:  "data/VOC0712/labelmap_voc.prototxt"
   }
 }
