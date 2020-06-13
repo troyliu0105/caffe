@@ -1,6 +1,6 @@
 #=============== net
 #net: "models/voc/resnet/resnet18.train.test.prototxt"
-train_net: "models/voc/resnet/resnet18.train.test.cudnn.prototxt"
+train_net: "models/voc/resnet/resnet18.train.test.prototxt"
 weights: "models/resnet/resnet18.caffemodel"
 
 #=============== iter
