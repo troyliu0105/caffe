@@ -1142,6 +1142,8 @@ message DataParameter {
     // Prefetch queue (Increase if data feeding bandwidth varies, within the
     // limit of device memory for GPU training)
     optional uint32 prefetch = 10 [default = 4];
+    optional bool multi_label = 11 [default = false];
+    optional uint32 class_num = 12 [default = 0];
 }
 
 // Message that store parameters used by DetectionEvaluateLayer

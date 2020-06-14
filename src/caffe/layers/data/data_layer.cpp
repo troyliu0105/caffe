@@ -17,6 +17,9 @@ DataLayer<Dtype>::DataLayer(const LayerParameter &param)
   db_.reset(db::GetDB(param.data_param().backend()));
   db_->Open(param.data_param().source(), db::READ);
   cursor_.reset(db_->NewCursor());
+  multi_label_ = param.data_param().multi_label();
+  class_num_ = param.data_param().class_num();
+  CHECK(!(multi_label_ ^ (class_num_ > 0)));
 }
 
 template <typename Dtype>
@@ -47,6 +50,9 @@ void DataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
   // label
   if (this->output_labels_) {
     vector<int> label_shape(1, batch_size);
+    if (multi_label_) {
+      label_shape.push_back(class_num_);
+    }
     top[1]->Reshape(label_shape);
     for (int i = 0; i < this->prefetch_.size(); ++i) {
       this->prefetch_[i]->label_.Reshape(label_shape);
@@ -116,7 +122,15 @@ void DataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     // Copy label.
     if (this->output_labels_) {
       Dtype *top_label = batch->label_.mutable_cpu_data();
-      top_label[item_id] = datum.label();
+      if (multi_label_) {
+        top_label += batch->label_.offset(item_id);
+        CHECK(datum.float_data_size() > 0);
+        for (auto l : datum.float_data()) {
+          top_label[static_cast<int>(l)] = 1;
+        }
+      } else {
+        top_label[item_id] = datum.label();
+      }
     }
     trans_time += timer.MicroSeconds();
     Next();

@@ -33,6 +33,10 @@ protected:
   shared_ptr<db::DB> db_;
   shared_ptr<db::Cursor> cursor_;
   uint64_t offset_;
+
+private:
+  bool multi_label_;
+  int class_num_;
 };
 
 } // namespace caffe
