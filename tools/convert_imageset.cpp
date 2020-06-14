@@ -17,6 +17,8 @@
 #include "boost/scoped_ptr.hpp"
 #include "gflags/gflags.h"
 #include "glog/logging.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include "caffe/proto/caffe.pb.h"
 #include "caffe/util/db.hpp"
@@ -46,6 +48,7 @@ DEFINE_bool(encoded, false,
 DEFINE_string(
     encode_type, "",
     "Optional: What type should we encode the image as ('png','jpg',...).");
+DEFINE_bool(multi_label, false, "");
 
 int main(int argc, char **argv) {
 #ifdef USE_OPENCV
@@ -75,16 +78,22 @@ int main(int argc, char **argv) {
   const bool check_size = FLAGS_check_size;
   const bool encoded = FLAGS_encoded;
   const string encode_type = FLAGS_encode_type;
+  const bool is_multi_label = FLAGS_multi_label;
 
   std::ifstream infile(argv[2]);
-  std::vector<std::pair<std::string, int>> lines;
+  std::vector<std::pair<std::string, std::vector<float>>> lines;
   std::string line;
-  size_t pos;
-  int label;
+  std::vector<std::string> line_data;
+  std::vector<float> labels;
   while (std::getline(infile, line)) {
-    pos = line.find_last_of(' ');
-    label = atoi(line.substr(pos + 1).c_str());
-    lines.emplace_back(line.substr(0, pos), label);
+    boost::algorithm::split(line_data, line, boost::is_any_of(" "),
+                            boost::token_compress_on);
+    std::transform(line_data.begin() + 1, line_data.end(),
+                   std::back_inserter(labels),
+                   [](auto v) -> float { return std::stof(v); });
+    lines.emplace_back(std::move(line_data[0]), std::move(labels));
+    line_data.clear();
+    labels.clear();
   }
   if (FLAGS_shuffle) {
     // randomly shuffle data
@@ -127,18 +136,24 @@ int main(int argc, char **argv) {
     }
     if (max_side > 0) {
       status = ReadImageToDatum(root_folder + lines[line_id].first,
-                                lines[line_id].second, 0, 0, 0, max_side,
+                                lines[line_id].second[0], 0, 0, 0, max_side,
                                 is_color, enc, &datum);
     } else if (min_side > 0) {
       status = ReadImageToDatum(root_folder + lines[line_id].first,
-                                lines[line_id].second, 0, 0, min_side, 0,
+                                lines[line_id].second[0], 0, 0, min_side, 0,
                                 is_color, enc, &datum);
     } else {
       status = ReadImageToDatum(root_folder + lines[line_id].first,
-                                lines[line_id].second, resize_height,
+                                lines[line_id].second[0], resize_height,
                                 resize_width, is_color, enc, &datum);
     }
-
+    // add multi_label data
+    if (is_multi_label) {
+      datum.set_label(-1);
+      for (auto l : lines[line_id].second) {
+        datum.add_float_data(l);
+      }
+    }
     if (!status)
       continue;
     if (check_size) {
