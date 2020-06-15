@@ -485,7 +485,7 @@ void Yolov3Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                        side_h_ * anchors_scale_, stride);
         // find best respond gt box in image
         for (int t = 0; t < 300; ++t) {
-          int class_id = label_data[b * 300 * 5 + t * 0];
+          int class_id = label_data[b * 300 * 5 + t * 5 + 0];
           Dtype x = label_data[b * 300 * 5 + t * 5 + 1];
           Dtype y = label_data[b * 300 * 5 + t * 5 + 2];
           Dtype w = label_data[b * 300 * 5 + t * 5 + 3];
