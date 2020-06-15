@@ -138,10 +138,10 @@ Caffe::Caffe()
     LOG(ERROR) << "Cannot create Curand generator. Curand won't be available.";
   }
   int nt = 1;
-  char *num_threads = nullptr;
-  if (num_threads = std::getenv("OMP_NUM_THREADS")) {
-  } else if (num_threads = std::getenv("TBB_NUM_THREADS")) {
-  } else if (num_threads = std::getenv("OPENBLAS_NUM_THREADS")) {
+  char *num_threads;
+  if ((num_threads = std::getenv("OMP_NUM_THREADS"))) {
+  } else if ((num_threads = std::getenv("TBB_NUM_THREADS"))) {
+  } else if ((num_threads = std::getenv("OPENBLAS_NUM_THREADS"))) {
   }
   if (num_threads) {
     nt = std::atoi(num_threads);

@@ -934,6 +934,9 @@ void Net<Dtype>::ToHDF5(const string &filename, bool write_diff) const {
 template <typename Dtype>
 void Net<Dtype>::Update() {
   for (int i = 0; i < learnable_params_.size(); ++i) {
+    // skip weight updating when lr equals zero
+    if (!params_lr_[i])
+      continue;
     learnable_params_[i]->Update();
   }
 }

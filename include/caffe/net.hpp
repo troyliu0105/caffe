@@ -24,8 +24,8 @@ template <typename Dtype>
 class Net {
 public:
   explicit Net(const NetParameter &param);
-  explicit Net(const string &param_file, Phase phase, const int level = 0,
-               const vector<string> *stages = NULL);
+  explicit Net(const string &param_file, Phase phase, int level = 0,
+               const vector<string> *stages = nullptr);
   virtual ~Net() {}
 
   /// @brief Initialize a network with a NetParameter.
@@ -324,16 +324,16 @@ protected:
   vector<float> params_weight_decay_;
   vector<bool> has_params_decay_;
   /// The bytes of memory used by this net
-  size_t memory_used_;
+  size_t memory_used_ = 0;
   /// Whether to compute and display debug info for the net.
-  bool debug_info_;
+  bool debug_info_ = 0;
   // Callbacks
   vector<Callback *> before_forward_;
   vector<Callback *> after_forward_;
   vector<Callback *> before_backward_;
   vector<Callback *> after_backward_;
-  int iter_;
-  int max_iter_;
+  int iter_ = 0;
+  int max_iter_ = 0;
 
   DISABLE_COPY_AND_ASSIGN(Net);
 };

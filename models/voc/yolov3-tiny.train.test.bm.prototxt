@@ -198,6 +198,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -243,6 +244,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: CUDNN
   }
 }
 layer {
@@ -262,6 +264,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -307,6 +310,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: CUDNN
   }
 }
 layer {
@@ -371,6 +375,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: CUDNN
   }
 }
 layer {
@@ -390,6 +395,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -435,6 +441,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: CUDNN
   }
 }
 layer {
@@ -454,6 +461,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -508,6 +516,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -546,7 +555,7 @@ layer {
 
 layer {
   name: "mask0-conv0"
-  type: "Convolution"
+  type: "DepthwiseConvolution"
   bottom: "mask0-reduce"
   top: "mask0-conv0"
   convolution_param {
@@ -601,7 +610,7 @@ layer {
 
 layer {
   name: "mask0-conv1"
-  type: "Convolution"
+  type: "DepthwiseConvolution"
   bottom: "mask0-reduce"
   top: "mask0-conv1"
   convolution_param {
@@ -656,7 +665,7 @@ layer {
 
 layer {
   name: "mask0-conv2"
-  type: "Convolution"
+  type: "DepthwiseConvolution"
   bottom: "mask0-reduce"
   top: "mask0-conv2"
   convolution_param {
@@ -735,6 +744,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -798,6 +808,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -835,7 +846,7 @@ layer {
 }
 
 layer {
-  name: "mask0-scaled"
+  name: "masked0"
   type: "Scale"
   bottom: "mask0-passthrough"
   bottom: "mask0-scaled"
@@ -876,8 +887,10 @@ layer {
   type: "SigmoidCrossEntropyLoss"
   bottom: "mask0"
   bottom: "mask_label"
+  propagate_down: true
+  propagate_down: false
   top: "mask_loss"
-  loss_weight: 0.1
+  loss_weight: 0.01
   include {
     phase: TRAIN
   }
@@ -915,6 +928,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -960,6 +974,7 @@ layer {
     stride: 1
     pool: MAX
     pad: 0
+    engine: CUDNN
   }
 }
 layer {
@@ -979,6 +994,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -1031,6 +1047,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -1083,6 +1100,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -1135,6 +1153,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: true
+    engine: CUDNN
   }
 }
 layer {
@@ -1154,6 +1173,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -1222,6 +1242,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: CUDNN
   }
 }
 layer {
@@ -1274,6 +1295,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: true
+    engine: CUDNN
   }
 }
 

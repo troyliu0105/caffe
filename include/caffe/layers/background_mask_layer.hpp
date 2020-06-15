@@ -27,7 +27,9 @@ protected:
   void Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                    const vector<Blob<Dtype> *> &top) override;
   void Forward_gpu(const vector<Blob<Dtype> *> &bottom,
-                   const vector<Blob<Dtype> *> &top) override{};
+                   const vector<Blob<Dtype> *> &top) override {
+    Forward_cpu(bottom, top);
+  };
   void Backward_cpu(const vector<Blob<Dtype> *> &top,
                     const vector<bool> &propagate_down,
                     const vector<Blob<Dtype> *> &bottom) override {

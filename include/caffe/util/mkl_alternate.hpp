@@ -21,7 +21,7 @@ template <typename Index, typename IteratorFunction>
 void parallel_for(Index b_, Index e_, Index stride_,
                   const IteratorFunction &func_) {
 #ifdef USE_TBB
-  tbb::parallel_for(b_, e_, stride_, func_);
+  tbb::parallel_for(b_, e_, stride_, func_, tbb::auto_partitioner());
 #else
 #ifdef USE_OMP
   OMP_PRAGMA_FOR

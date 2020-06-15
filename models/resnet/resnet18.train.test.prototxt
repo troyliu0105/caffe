@@ -36,6 +36,7 @@ layer {
         fraction: 0.01
       }
       convert_to_hsv: true
+      convert_to_hsv_prob: 0.05
     }
     distort_param {
       brightness_prob: 0.2
@@ -52,7 +53,7 @@ layer {
     }
   }
   data_param {
-    source: "E:/ilsvrc12_train_lmdb"
+    source: "D:/ImageNet/ilsvrc12_train_lmdb"
     batch_size: 32
     backend: LMDB
   }
@@ -81,8 +82,8 @@ layer {
     }
   }
   data_param {
-    source: "E:/ilsvrc12_val_lmdb"
-    batch_size: 50
+    source: "D:/ImageNet/ilsvrc12_val_lmdb"
+    batch_size: 25
     backend: LMDB
   }
 }
@@ -101,6 +102,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -110,7 +112,7 @@ layer {
   name: "bn_conv1"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -129,6 +131,9 @@ layer {
   top: "conv1"
   name: "conv1_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -142,6 +147,7 @@ layer {
     #pad: 1
     #round_mode: FLOOR
     pool: MAX
+    engine: CUDNN
   }
 }
 
@@ -160,6 +166,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -169,7 +176,7 @@ layer {
   name: "bn2a_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -188,6 +195,9 @@ layer {
   top: "res2a_branch2a"
   name: "res2a_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -204,6 +214,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -213,7 +224,7 @@ layer {
   name: "bn2a_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -243,6 +254,9 @@ layer {
   top: "res2a"
   name: "res2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -259,6 +273,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -268,7 +283,7 @@ layer {
   name: "bn2b_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -287,6 +302,9 @@ layer {
   top: "res2b_branch2a"
   name: "res2b_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -303,6 +321,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -312,7 +331,7 @@ layer {
   name: "bn2b_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -342,6 +361,9 @@ layer {
   top: "res2b"
   name: "res2b_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 # layer 2
@@ -359,6 +381,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -368,7 +391,7 @@ layer {
   name: "bn3a_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -387,6 +410,9 @@ layer {
   top: "res3a_branch2a"
   name: "res3a_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -403,6 +429,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -412,7 +439,7 @@ layer {
   name: "bn3a_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -440,6 +467,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -449,7 +477,7 @@ layer {
   name: "bn3a_branch1"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -479,6 +507,9 @@ layer {
   top: "res3a"
   name: "res3a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -495,6 +526,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -504,7 +536,7 @@ layer {
   name: "bn3b_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -523,6 +555,9 @@ layer {
   top: "res3b_branch2a"
   name: "res3b_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -539,6 +574,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -548,7 +584,7 @@ layer {
   name: "bn3b_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -578,6 +614,9 @@ layer {
   top: "res3b"
   name: "res3b_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 # layer3
@@ -595,6 +634,7 @@ layer {
         type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -604,7 +644,7 @@ layer {
   name: "bn4a_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -623,6 +663,9 @@ layer {
   top: "res4a_branch2a"
   name: "res4a_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -639,6 +682,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -648,7 +692,7 @@ layer {
   name: "bn4a_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -676,6 +720,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -685,7 +730,7 @@ layer {
   name: "bn4a_branch1"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -715,6 +760,9 @@ layer {
   top: "res4a"
   name: "res4a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -731,6 +779,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -740,7 +789,7 @@ layer {
   name: "bn4b_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -759,6 +808,9 @@ layer {
   top: "res4b_branch2a"
   name: "res4b_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -775,6 +827,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -784,7 +837,7 @@ layer {
   name: "bn4b_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -814,10 +867,12 @@ layer {
   top: "res4b"
   name: "res4b_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 # layer 4
-
 layer {
   bottom: "res4b"
   top: "res5a_branch2a"
@@ -832,6 +887,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -841,7 +897,7 @@ layer {
   name: "bn5a_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -860,6 +916,9 @@ layer {
   top: "res5a_branch2a"
   name: "res5a_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -876,6 +935,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -885,7 +945,7 @@ layer {
   name: "bn5a_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -913,6 +973,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -922,7 +983,7 @@ layer {
   name: "bn5a_branch1"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -952,6 +1013,9 @@ layer {
   top: "res5a"
   name: "res5a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -968,6 +1032,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -977,7 +1042,7 @@ layer {
   name: "bn5b_branch2a"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -996,6 +1061,9 @@ layer {
   top: "res5b_branch2a"
   name: "res5b_branch2a_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1012,6 +1080,7 @@ layer {
       type: "msra"
     }
     bias_term: false
+    engine: CUDNN
   }
 }
 
@@ -1021,7 +1090,7 @@ layer {
   name: "bn5b_branch2b"
   type: "BatchNorm"
   batch_norm_param {
-    moving_average_fraction: 0.9
+    moving_average_fraction: 0.1
   }
 }
 
@@ -1051,6 +1120,9 @@ layer {
   top: "res5b"
   name: "res5b_relu"
   type: "ReLU"
+  relu_param {
+    engine: CUDNN
+  }
 }
 
 layer {
@@ -1062,6 +1134,7 @@ layer {
     kernel_size: 7
     stride: 1
     pool: AVE
+    engine: CUDNN
   }
 }
 
