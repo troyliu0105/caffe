@@ -1,5 +1,5 @@
 #=============== net
-net: "models/voc/yolov3-tiny.train.test.bm.prototxt"
+net: "models/voc/yolov3-tiny.train.test.bm2.1.prototxt"
 
 #=============== iter
 # voc07 test has 4952 images
@@ -25,7 +25,7 @@ stepvalue: 45000
 
 #=============== snapshot
 snapshot: 5000
-snapshot_prefix: "models/voc/checkpoints/yolov3-tiny.bm"
+snapshot_prefix: "models/voc/checkpoints/yolov3-tiny.bm2.1"
 snapshot_after_train: true
 
 #=============== evaluate
@@ -36,6 +36,6 @@ show_per_class_result: true
 #=============== misc
 display: 100
 debug_info: false
-test_initialization: true
+test_initialization: false
 average_loss: 25
 random_seed: 3355411

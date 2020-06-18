@@ -48,6 +48,7 @@ public:
     y = b[1];
     w = b[2];
     h = b[3];
+    return *this;
   }
   template <typename D>
   vector<D> to_vector() const {
