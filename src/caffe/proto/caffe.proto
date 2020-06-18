@@ -678,6 +678,7 @@ message LayerParameter {
     optional CenterLossParameter center_loss_param = 154;
     optional MultiBoxCenterLossParameter multibox_center_loss_param = 155;
     optional OneHotParameter one_hot_param = 156;
+    optional BackgroundMaskParameter background_mask_param = 157;
 }
 
 // Message that stores parameters used to apply transformation
@@ -2230,4 +2231,9 @@ message MultiBoxCenterLossParameter {
 message OneHotParameter {
     optional uint32 axis = 1 [default = 1];
     required uint32 num_class = 2;
+}
+
+message BackgroundMaskParameter {
+    optional float scale = 1 [default = 1];
+    optional float sigma_scale = 2 [default = 2];
 }

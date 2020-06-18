@@ -10,7 +10,8 @@ template <typename Dtype>
 void BackgroundMaskLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom,
                                             const vector<Blob<Dtype> *> &top) {
   Layer<Dtype>::LayerSetUp(bottom, top);
-  temp_scale_ = 2;
+  scale_ = this->layer_param_.background_mask_param().scale();
+  sigma_scale_ = this->layer_param_.background_mask_param().sigma_scale();
 }
 template <typename Dtype>
 void BackgroundMaskLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
@@ -18,10 +19,10 @@ void BackgroundMaskLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   Blob<Dtype> *input_blob = bottom[0];
   Blob<Dtype> *mask_blob = top[0];
 
-  // auto shape = input_blob->shape();
-  // shape[1] = 1;
-  mask_blob->ReshapeLike(*input_blob);
-  // mask_blob->Reshape(shape);
+  auto shape = input_blob->shape();
+  shape[1] = 1;
+  // mask_blob->ReshapeLike(*input_blob);
+  mask_blob->Reshape(shape);
 }
 template <typename Dtype>
 void BackgroundMaskLayer<Dtype>::Forward_cpu(
@@ -33,16 +34,15 @@ void BackgroundMaskLayer<Dtype>::Forward_cpu(
   const int height = input_blob->height();
   const int width = input_blob->width();
 
-  const int scaled_height = height / temp_scale_;
-  const int scaled_width = width / temp_scale_;
+  const int scaled_height = height / scale_;
+  const int scaled_width = width / scale_;
 
-  double min, max;
   const Dtype *label_data = label_blob->cpu_data();
   Dtype *mask_data = mask_blob->mutable_cpu_data();
-  cv::Mat bbox_mask = cv::Mat::zeros(scaled_height, scaled_width, CV_32FC1);
-  auto scaled_size = cv::Size(scaled_width, scaled_height);
-  auto size = cv::Size(width, height);
-  for (int b = 0; b < input_blob->num(); ++b) {
+  const auto scaled_size = cv::Size(scaled_width, scaled_height);
+  const auto size = cv::Size(width, height);
+  parallel_for(input_blob->num(), [&](int b) {
+    cv::Mat bbox_mask = cv::Mat::zeros(scaled_height, scaled_width, CV_32FC1);
     Dtype *batch_data = mask_data + mask_blob->offset(b);
     cv::Mat batch_mask(height, width, CV_32FC1, batch_data);
     for (int t = 0; t < 300; ++t) {
@@ -53,33 +53,24 @@ void BackgroundMaskLayer<Dtype>::Forward_cpu(
       Dtype h = label_data[b * 300 * 5 + t * 5 + 4];
       if (!x)
         break;
+      // resize to smaller data to reduce time
       cv::resize(bbox_mask, bbox_mask, scaled_size);
       bbox_mask.setTo(cv::Scalar(0.));
       *(reinterpret_cast<float *>(
           bbox_mask.ptr(static_cast<int>(y * scaled_height),
                         static_cast<int>(x * scaled_width)))) = 1.0F;
-      float kw = w * scaled_width / 4;
-      float kh = h * scaled_height / 4;
+      float kw = w * scaled_width / sigma_scale_;
+      float kh = h * scaled_height / sigma_scale_;
       cv::GaussianBlur(bbox_mask, bbox_mask, {0, 0}, kw, kh);
       cv::resize(bbox_mask, bbox_mask, size);
-      cv::minMaxLoc(bbox_mask, &min, &max);
-      bbox_mask -= min;
-      auto range = max - min;
-      if (range <= 0)
-        range = 1;
-      bbox_mask *= 1 / range;
+      cv::normalize(bbox_mask, bbox_mask, 1.0, 0.0, cv::NORM_MINMAX);
       batch_mask += bbox_mask;
     }
-    cv::minMaxLoc(batch_mask, &min, &max);
-    batch_mask -= min;
-    auto range = max - min;
-    if (range <= 0)
-      range = 1;
-    batch_mask *= 1 / range;
+    cv::normalize(batch_mask, batch_mask, 1.0, 0.0, cv::NORM_MINMAX);
     for (int i = 1; i < channel; ++i) {
       caffe_copy(height * width, batch_data, batch_data + i * height * width);
     }
-  }
+  });
 }
 
 INSTANTIATE_CLASS(BackgroundMaskLayer);

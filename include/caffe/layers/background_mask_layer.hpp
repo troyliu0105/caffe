@@ -50,7 +50,8 @@ protected:
   }
 
 private:
-  int temp_scale_;
+  float scale_;
+  float sigma_scale_;
 };
 } // namespace caffe
 
