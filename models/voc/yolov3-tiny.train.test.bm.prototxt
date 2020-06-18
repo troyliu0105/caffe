@@ -9,9 +9,7 @@ layer {
   }
   transform_param {
     mirror: true
-    mean_value: 104
-    mean_value: 117
-    mean_value: 123
+    scale: 0.003921
 	  force_color: true
 	  resize_param {
       prob: 0.1
@@ -157,9 +155,7 @@ layer {
   }
   transform_param {
     mirror: true
-    mean_value: 104
-    mean_value: 117
-    mean_value: 123
+    scale: 0.003921
 	  force_color: true
     resize_param {
       prob: 1.0

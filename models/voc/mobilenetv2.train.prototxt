@@ -9,12 +9,8 @@ layer {
   }
   
   transform_param {
-    scale: 0.007843
+    scale: 0.003921
     mirror: true
-    mean_value: 127.5
-    mean_value: 127.5
-    mean_value: 127.5
-
     resize_param {
       prob: 0.2
       resize_mode: WARP
