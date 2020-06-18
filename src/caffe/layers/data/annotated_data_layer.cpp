@@ -324,8 +324,8 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   if (this->output_seg_labels_) {
     top_seg_label = batch->seg_label_.mutable_cpu_data();
   }
+  timer.Start();
   for (int item_id = 0; item_id < batch_size; ++item_id) {
-    timer.Start();
     AnnotatedDatum *anno_datum = this->read_data_arr_[item_id];
     anno_datum->Clear();
     if (mosaic_) {
@@ -350,10 +350,12 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       while (Skip()) {
         Next();
       }
+      anno_datum->Clear();
       anno_datum->ParseFromString(cursor_->value());
+      Next();
     }
-    read_time += timer.MicroSeconds();
   }
+  read_time += timer.MicroSeconds();
   // Store transformed annotation.
   map<int, vector<AnnotationGroup>> all_anno;
   // int num_bboxes = 0;
