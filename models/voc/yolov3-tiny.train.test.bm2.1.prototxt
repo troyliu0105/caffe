@@ -194,7 +194,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -240,7 +240,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -260,7 +260,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -306,7 +306,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -371,7 +371,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -391,7 +391,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -438,7 +438,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -458,7 +458,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -524,7 +524,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -570,7 +570,7 @@ layer {
     stride: 1
     pool: MAX
     pad: 0
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -590,7 +590,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -643,7 +643,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -696,7 +696,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -807,31 +807,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
-    engine: CUDNN
-  }
-}
-layer {
-  name: "mask0/bn"
-  type: "BatchNorm"
-  bottom: "mask0"
-  top: "mask0"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-layer {
-  name: "mask0/scale"
-  type: "Scale"
-  bottom: "mask0"
-  top: "mask0"
-  scale_param {
-    bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
+    engine: DEFAULT
   }
 }
 layer {
@@ -839,6 +815,9 @@ layer {
   type: "Sigmoid"
   bottom: "mask0"
   top: "mask0/sigmoid"
+  sigmoid_param {
+    engine: DEFAULT
+  }
 }
 
 #layer {
@@ -848,7 +827,7 @@ layer {
 #  top: "mask0/scaled"
 #  param {
 #    lr_mult: 2.0
-#    decay_mult: 0.0
+#    decay_mult: 0.5
 #  }
 #  scale_param {
 #    bias_term: false
@@ -890,7 +869,7 @@ layer {
   top: "mask0/label"
   background_mask_param {
     scale: 1
-    sigma_scale: 1.5
+    sigma_scale: 3
   }
   include {
     phase: TRAIN
@@ -900,7 +879,7 @@ layer {
 layer {
   name: "mask0/loss"
   type: "EuclideanLoss"
-  bottom: "mask0"
+  bottom: "mask0/sigmoid"
   bottom: "mask0/label"
   propagate_down: true
   propagate_down: false
@@ -913,10 +892,10 @@ layer {
 ###############################################################################################
 
 layer {
-  name: "yolo-out-m"
+  name: "yolo-out-l"
   type: "Convolution"
   bottom: "masked0"
-  top: "yolo-out-m"
+  top: "yolo-out-l"
   convolution_param {
     num_output: 75
     kernel_size: 1
@@ -929,7 +908,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: true
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -949,7 +928,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -1018,7 +997,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 layer {
@@ -1248,31 +1227,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
-    engine: CUDNN
-  }
-}
-layer {
-  name: "mask1/bn"
-  type: "BatchNorm"
-  bottom: "mask1"
-  top: "mask1"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-layer {
-  name: "mask1/scale"
-  type: "Scale"
-  bottom: "mask1"
-  top: "mask1"
-  scale_param {
-    bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
+    engine: DEFAULT
   }
 }
 layer {
@@ -1280,6 +1235,9 @@ layer {
   type: "Sigmoid"
   bottom: "mask1"
   top: "mask1/sigmoid"
+  sigmoid_param {
+    engine: DEFAULT
+  }
 }
 
 #layer {
@@ -1289,7 +1247,7 @@ layer {
 #  top: "mask1/scaled"
 #  param {
 #    lr_mult: 2.0
-#    decay_mult: 0.0
+#    decay_mult: 0.5
 #  }
 #  scale_param {
 #    bias_term: false
@@ -1330,7 +1288,7 @@ layer {
   top: "mask1/label"
   background_mask_param {
     scale: 1
-    sigma_scale: 2
+    sigma_scale: 3
   }
   include {
     phase: TRAIN
@@ -1340,7 +1298,7 @@ layer {
 layer {
   name: "mask1/loss"
   type: "EuclideanLoss"
-  bottom: "mask1"
+  bottom: "mask1/sigmoid"
   bottom: "mask1/label"
   propagate_down: true
   propagate_down: false
@@ -1353,10 +1311,10 @@ layer {
 ###############################################################################################
 
 layer {
-  name: "yolo-out-s"
+  name: "yolo-out-m"
   type: "Convolution"
   bottom: "masked1"
-  top: "yolo-out-s"
+  top: "yolo-out-m"
   convolution_param {
     num_output: 75
     kernel_size: 1
@@ -1369,16 +1327,16 @@ layer {
     pad: 0
     stride: 1
     bias_term: true
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
 layer {
-  name: "loss-s"
+  name: "loss-m"
   type: "Yolov3"
-  bottom: "yolo-out-s"
+  bottom: "yolo-out-m"
   bottom: "label"
-  top: "loss-s"
+  top: "loss-m"
   loss_weight: 1
   include {
     phase: TRAIN
@@ -1416,11 +1374,11 @@ layer {
 }
 
 layer {
-  name: "loss-m"
+  name: "loss-l"
   type: "Yolov3"
-  bottom: "yolo-out-m"
+  bottom: "yolo-out-l"
   bottom: "label"
-  top: "loss-m"
+  top: "loss-l"
   loss_weight: 1
   include {
     phase: TRAIN
@@ -1460,8 +1418,8 @@ layer {
 layer {
   name: "yolo_detection"
   type: "Yolov3DetectionOutput"
-  bottom: "yolo-out-s"
   bottom: "yolo-out-m"
+  bottom: "yolo-out-l"
   top: "yolo_detection"
   include {
     phase: TEST
