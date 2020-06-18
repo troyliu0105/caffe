@@ -6,8 +6,8 @@
 #include <cstdint>
 
 #include <algorithm>
+#include <boost/atomic.hpp>
 #include <map>
-#include <vector>
 
 #include "caffe/data_transformer.hpp"
 #include "caffe/layers/data/annotated_data_layer.hpp"
@@ -15,8 +15,9 @@
 #include "caffe/util/benchmark.hpp"
 #include "caffe/util/im_transforms.hpp"
 #include "caffe/util/sampler.hpp"
+#include <vector>
+
 const float prob_eps = 0.01;
-namespace caffe {
 
 #if defined(DEBUG) && defined(DRAW)
 static char *CLASSES[21] = {"__background__",
@@ -42,6 +43,14 @@ static char *CLASSES[21] = {"__background__",
                             "tvmonitor"};
 #endif
 
+#ifdef USE_TBB
+static tbb::mutex mutex;
+#else
+static int mutex;
+#endif
+
+namespace caffe {
+
 template <typename Dtype>
 AnnotatedDataLayer<Dtype>::AnnotatedDataLayer(const LayerParameter &param)
     : BasePrefetchingDataLayer<Dtype>(param), offset_() {
@@ -53,6 +62,18 @@ AnnotatedDataLayer<Dtype>::AnnotatedDataLayer(const LayerParameter &param)
 template <typename Dtype>
 AnnotatedDataLayer<Dtype>::~AnnotatedDataLayer() {
   this->StopInternalThread();
+  for (int i = 0; i < transformed_data_arr_.size(); ++i) {
+    if (transformed_data_arr_[i]) {
+      delete transformed_data_arr_[i];
+      transformed_data_arr_[i] = nullptr;
+    }
+  }
+  for (int i = 0; i < read_data_arr_.size(); ++i) {
+    if (read_data_arr_[i]) {
+      delete read_data_arr_[i];
+      read_data_arr_[i] = nullptr;
+    }
+  }
 }
 
 template <typename Dtype>
@@ -87,6 +108,12 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
   mosaic_ = anno_data_param.mosaic();
   iters_ = 0;
   policy_num_ = 0;
+  for (int i = 0; i < batch_size; ++i) {
+    this->transformed_data_arr_.push_back(new Blob<Dtype>());
+  }
+  for (int i = 0; i < batch_size; ++i) {
+    this->read_data_arr_.push_back(new AnnotatedDatum());
+  }
   // Read a data point, and use it to initialize the top blob.
   AnnotatedDatum anno_datum;
   anno_datum.ParseFromString(cursor_->value());
@@ -279,6 +306,9 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   }
   vector<int> top_shape = this->data_transformer_->InferBlobShape(
       anno_datum_peek.datum(), policy_num_);
+  for (int i = 0; i < batch_size; ++i) {
+    this->transformed_data_arr_[i]->Reshape(top_shape);
+  }
   // Reshape batch according to the batch_size.
   this->transformed_data_.Reshape(top_shape);
   top_shape[0] = batch_size;
@@ -294,13 +324,10 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   if (this->output_seg_labels_) {
     top_seg_label = batch->seg_label_.mutable_cpu_data();
   }
-  // Store transformed annotation.
-  map<int, vector<AnnotationGroup>> all_anno;
-  int num_bboxes = 0;
-  NormalizedBBox crop_box;
-  AnnotatedDatum anno_datum;
   for (int item_id = 0; item_id < batch_size; ++item_id) {
     timer.Start();
+    AnnotatedDatum *anno_datum = this->read_data_arr_[item_id];
+    anno_datum->Clear();
     if (mosaic_) {
       // from
       // https://github.com/ultralytics/yolov3/blob/c4b0f986d195412e3a057aff1be3cb0da7e7d317/utils/datasets.py#L560
@@ -310,27 +337,39 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         while (Skip()) {
           Next();
         }
-        anno_datum.Clear();
-        anno_datum.ParseFromString(cursor_->value());
-        raw.emplace_back(DatumToCVMat(anno_datum.datum()),
-                         std::move(*(anno_datum.mutable_annotation_group())));
+        anno_datum->Clear();
+        anno_datum->ParseFromString(cursor_->value());
+        raw.emplace_back(DatumToCVMat(anno_datum->datum()),
+                         std::move(*(anno_datum->mutable_annotation_group())));
         Next();
       }
-      MakeMosaic(raw, s, top_shape[1], &anno_datum);
+      MakeMosaic(raw, s, top_shape[1], anno_datum);
+      EncodeCVMatToDatum(DatumToCVMat(anno_datum->datum()), "jpg",
+                         anno_datum->mutable_datum());
     } else {
       while (Skip()) {
         Next();
       }
-      anno_datum.ParseFromString(cursor_->value());
-      DecodeDatum(anno_datum.mutable_datum(),
-                  this->transform_param_.force_color());
+      anno_datum->ParseFromString(cursor_->value());
     }
     read_time += timer.MicroSeconds();
-    timer.Start();
+  }
+  // Store transformed annotation.
+  map<int, vector<AnnotationGroup>> all_anno;
+  // int num_bboxes = 0;
+  boost::atomic_int num_bboxes = 0;
+  parallel_for(batch_size, [&](int item_id) {
+    // timer.Start();
+    // read_time += timer.MicroSeconds();
+    // timer.Start();
+    NormalizedBBox crop_box;
+    AnnotatedDatum *anno_datum = this->read_data_arr_[item_id];
+    Blob<Dtype> *transformed_data = this->transformed_data_arr_[item_id];
     // -------------------------------------------------------- distort & expand
-    AnnotatedDatum distort_datum(anno_datum);
+    AnnotatedDatum distort_datum(*anno_datum);
+
     AnnotatedDatum *expand_datum;
-    this->data_transformer_->DistortImage(anno_datum.datum(),
+    this->data_transformer_->DistortImage(anno_datum->datum(),
                                           distort_datum.mutable_datum());
     // Noise is used in Transform
     //    this->data_transformer_->NoiseImage(distort_datum.datum(),
@@ -341,6 +380,15 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     } else {
       expand_datum = &distort_datum;
     }
+
+    AnnotatedDatum *geometry_datum = nullptr;
+    if (transform_param.has_geometry_param() &&
+        transform_param.geometry_param().prob() > 0.0) {
+      geometry_datum = new AnnotatedDatum();
+      this->data_transformer_->GeometryImage(*expand_datum, geometry_datum);
+    } else {
+      geometry_datum = expand_datum;
+    }
     // ------------------------------------------------------------------ sample
     AnnotatedDatum *sampled_datum;
     bool has_sampled = false;
@@ -348,7 +396,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
       // Generate sampled bboxes from expand_datum.
       vector<NormalizedBBox> sampled_bboxes;
       if (!batch_samplers_.empty()) {
-        GenerateBatchSamples(*expand_datum, batch_samplers_, &sampled_bboxes);
+        GenerateBatchSamples(*geometry_datum, batch_samplers_, &sampled_bboxes);
       } else {
         bool keep = transform_param.resize_param(policy_num_).resize_mode() ==
                     ResizeParameter_Resize_mode_FIT_LARGE_SIZE_AND_PAD;
@@ -360,7 +408,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         sampled_datum = new AnnotatedDatum();
         crop_box = sampled_bboxes[rand_idx];
         this->data_transformer_->CropImage(
-            *expand_datum, sampled_bboxes[rand_idx], sampled_datum);
+            *geometry_datum, sampled_bboxes[rand_idx], sampled_datum);
         has_sampled = true;
       } else {
         sampled_datum = expand_datum;
@@ -394,7 +442,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     // --------------------------------------------------------- anno transforms
     // Apply data transformations (mirror, scale, crop...)
     int offset = batch->data_.offset(item_id);
-    this->transformed_data_.set_cpu_data(top_data + offset);
+    transformed_data->set_cpu_data(top_data + offset);
     vector<AnnotationGroup> transformed_anno_vec;
     if (this->output_labels_) {
       if (has_anno_type_) {
@@ -409,8 +457,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         // Transform datum and annotation_group at the same time
         transformed_anno_vec.clear();
 
-        this->data_transformer_->Transform(*sampled_datum,
-                                           &(this->transformed_data_),
+        this->data_transformer_->Transform(*sampled_datum, transformed_data,
                                            &transformed_anno_vec, policy_num_);
         if (anno_type_ == AnnotatedDatum_AnnotationType_BBOX ||
             anno_type_ == AnnotatedDatum_AnnotationType_BBOXandSeg) {
@@ -421,20 +468,24 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         } else {
           LOG(FATAL) << "Unknown annotation type.";
         }
-        all_anno[item_id] = transformed_anno_vec;
+        atomic_update(mutex,
+                      [&]() { all_anno[item_id] = transformed_anno_vec; });
       } else {
         this->data_transformer_->Transform(sampled_datum->datum(),
-                                           &(this->transformed_data_));
+                                           transformed_data);
         // Otherwise, store the label from datum.
         CHECK(sampled_datum->datum().has_label()) << "Cannot find any label.";
-        top_label[item_id] = sampled_datum->datum().label();
+        atomic_update(mutex, [&]() {
+          top_label[item_id] = sampled_datum->datum().label();
+        });
       }
     } else {
       this->data_transformer_->Transform(sampled_datum->datum(),
-                                         &(this->transformed_data_));
+                                         transformed_data);
     }
+    // TODO concurrent
     if (this->output_seg_labels_) {
-      cv::Mat cv_lab = DecodeDatumToCVMatSeg(anno_datum.datum(), false);
+      cv::Mat cv_lab = DecodeDatumToCVMatSeg(anno_datum->datum(), false);
       DLOG(INFO) << iters_ * batch_size + item_id;
       vector<int> seg_label_shape(4);
       seg_label_shape[0] = batch_size;
@@ -566,12 +617,11 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     if (transform_param.has_expand_param()) {
       delete expand_datum;
     }
-    trans_time += timer.MicroSeconds();
-
-    if (!mosaic_) {
-      Next();
+    if (transform_param.has_geometry_param()) {
+      delete geometry_datum;
     }
-  } // end load batch
+    // trans_time += timer.MicroSeconds();
+  });
 
   // Store "rich" annotation if needed.
   if (this->output_labels_ && has_anno_type_) {
@@ -721,7 +771,7 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
   batch_timer.Stop();
   DLOG(INFO) << "Prefetch batch: " << batch_timer.MilliSeconds() << " ms.";
   DLOG(INFO) << "     Read time: " << read_time / 1000 << " ms.";
-  DLOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
+  // DLOG(INFO) << "Transform time: " << trans_time / 1000 << " ms.";
 }
 template <typename Dtype>
 void AnnotatedDataLayer<Dtype>::Next() {

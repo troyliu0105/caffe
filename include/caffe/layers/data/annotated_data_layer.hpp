@@ -53,6 +53,8 @@ protected:
   int seg_resize_width_;
   int seg_resize_height_;
   bool mosaic_;
+  vector<AnnotatedDatum *> read_data_arr_;
+  vector<Blob<Dtype> *> transformed_data_arr_;
 };
 
 } // namespace caffe

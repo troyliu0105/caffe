@@ -225,7 +225,7 @@ void LaneDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
         sampled_datum = new AnnotatedDatum();
         crop_box = sampled_bboxes[rand_idx];
         this->data_transformer_->CropImage(
-            *expand_datum, sampled_bboxes[rand_idx], sampled_datum, false);
+            *expand_datum, sampled_bboxes[rand_idx], sampled_datum);
         has_sampled = true;
       } else {
         sampled_datum = expand_datum;

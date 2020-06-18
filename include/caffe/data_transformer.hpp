@@ -62,11 +62,14 @@ public:
    * @param policy_num          resize policy index
    */
   void Transform(const Datum &datum, Blob<Dtype> *transformed_blob,
-                 NormalizedBBox *crop_bbox, bool *do_mirror,
-                 int policy_num = 0);
+                 NormalizedBBox *crop_bbox, bool *do_mirror, int policy_num = 0,
+                 const bool preserve_pixel_vals = false,
+                 const bool preserve_annotations = false,
+                 const bool use_previous_mirror_value = false);
 
   void Transform(const Datum &datum, Blob<Dtype> *transformed_blob,
-                 int policy_num = 0);
+                 int policy_num = 0, const bool preserve_pixel_vals = false,
+                 const bool preserve_annotations = false);
 
   /**
    * @brief Applies the transformation defined in the data layer's
@@ -102,10 +105,6 @@ public:
                  Blob<Dtype> *transformed_blob);
 
   /**
-   *@brief For classfication task data augmentation
-   */
-  void Transform3(const cv::Mat &cv_img, Blob<Dtype> *transformed_blob);
-  /**
    * @brief Applies the transformation defined in the data layer's
    * transform_param block to a cv::Mat
    *
@@ -123,8 +122,10 @@ public:
                   bool preserve_pixel_vals = false);
 
   void Transform(const cv::Mat &cv_img, Blob<Dtype> *transformed_blob,
-                 NormalizedBBox *crop_bbox, bool *do_mirror,
-                 int policy_num = 0);
+                 NormalizedBBox *crop_bbox, bool *do_mirror, int policy_num = 0,
+                 const bool preserve_pixel_vals = false,
+                 const bool preserve_annotations = false,
+                 const bool use_previous_mirror_value = false);
   void Transform(const cv::Mat &cv_img, Blob<Dtype> *transformed_blob);
   //////////////////////////////////////////////////////////////////////////////
 #pragma endregion
@@ -191,36 +192,44 @@ public:
    *    Stores all transformed AnnotationGroup.
    */
   void TransformAnnotation(
-      const AnnotatedDatum &anno_datum, bool do_resize,
-      const NormalizedBBox &crop_bbox, bool do_mirror,
+      const AnnotatedDatum &anno_datum, const bool do_resize,
+      const NormalizedBBox &crop_bbox, const bool do_mirror, const bool do_crop,
       RepeatedPtrField<AnnotationGroup> *transformed_anno_group_all,
-      int policy_num = 0);
-
-  /**
-   * @brief Crops the datum and AnnotationGroup according to bbox.
-   */
-  void CropImage(const AnnotatedDatum &anno_datum, const NormalizedBBox &bbox,
-                 AnnotatedDatum *cropped_anno_datum, bool has_anno = true);
-
-  /**
-   * @brief Expand the datum and adjust AnnotationGroup.
-   */
-  void ExpandImage(const AnnotatedDatum &anno_datum,
-                   AnnotatedDatum *expanded_anno_datum);
+      int policy_num = 0, const int rangle = 0);
 
   //////////////////////////////////////////////////////////////////////////////
 #pragma endregion
+  /**
+   * @brief Crops img according to bbox.
+   */
+  void CropImage(const cv::Mat &img, const NormalizedBBox &bbox,
+                 cv::Mat *crop_img);
   /**
    * @brief Crops the datum according to bbox.
    */
   void CropImage(const Datum &datum, const NormalizedBBox &bbox,
                  Datum *crop_datum);
+  /**
+   * @brief Crops the datum and AnnotationGroup according to bbox.
+   */
+  void CropImage(const AnnotatedDatum &anno_datum, const NormalizedBBox &bbox,
+                 AnnotatedDatum *cropped_anno_datum);
 
+  /**
+   * @brief Expand img to include mean value as background.
+   */
+  void ExpandImage(const cv::Mat &img, float expand_ratio,
+                   NormalizedBBox *expand_bbox, cv::Mat *expand_img);
   /**
    * @brief Expand the datum.
    */
   void ExpandImage(const Datum &datum, float expand_ratio,
                    NormalizedBBox *expand_bbox, Datum *expanded_datum);
+  /**
+   * @brief Expand the datum and adjust AnnotationGroup.
+   */
+  void ExpandImage(const AnnotatedDatum &anno_datum,
+                   AnnotatedDatum *expanded_anno_datum);
 
   /**
    * @brief Apply distortion to the datum.
@@ -229,17 +238,8 @@ public:
 
   void NoiseImage(const Datum &datum, Datum *noise_datum);
 
-  /**
-   * @brief Crops img according to bbox.
-   */
-  void CropImage(const cv::Mat &img, const NormalizedBBox &bbox,
-                 cv::Mat *crop_img);
-
-  /**
-   * @brief Expand img to include mean value as background.
-   */
-  void ExpandImage(const cv::Mat &img, float expand_ratio,
-                   NormalizedBBox *expand_bbox, cv::Mat *expand_img);
+  void GeometryImage(const AnnotatedDatum &anno_datum,
+                     AnnotatedDatum *geometry_anno_datum);
 
   void TransformInv(const Blob<Dtype> *blob, vector<cv::Mat> *cv_imgs,
                     bool resize_back = true);
@@ -297,14 +297,13 @@ protected:
    */
   virtual int Rand(int n);
 
-  // Tranformation parameters
+  // Transformation parameters
   TransformationParameter param_;
 
   shared_ptr<Caffe::RNG> rng_;
   Phase phase_;
   Blob<Dtype> data_mean_;
   vector<Dtype> mean_values_;
-  shared_ptr<cv::Mat> cv_mean_;
 };
 
 } // namespace caffe
