@@ -6,11 +6,6 @@
 namespace caffe {
 
 template <typename Dtype>
-inline Dtype sigmoid(Dtype x) {
-  return 0.5 * tanh(0.5 * x) + 0.5;
-}
-
-template <typename Dtype>
 void SigmoidLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
                                       const vector<Blob<Dtype> *> &top) {
   const Dtype *bottom_data = bottom[0]->cpu_data();

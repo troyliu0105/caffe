@@ -19,10 +19,10 @@ void BackgroundMaskLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
   Blob<Dtype> *input_blob = bottom[0];
   Blob<Dtype> *mask_blob = top[0];
 
-  auto shape = input_blob->shape();
-  shape[1] = 1;
-  // mask_blob->ReshapeLike(*input_blob);
-  mask_blob->Reshape(shape);
+  // auto shape = input_blob->shape();
+  // shape[1] = 1;
+  mask_blob->ReshapeLike(*input_blob);
+  // mask_blob->Reshape(shape);
 }
 template <typename Dtype>
 void BackgroundMaskLayer<Dtype>::Forward_cpu(
@@ -30,9 +30,9 @@ void BackgroundMaskLayer<Dtype>::Forward_cpu(
   Blob<Dtype> *input_blob = bottom[0];
   Blob<Dtype> *label_blob = bottom[1];
   Blob<Dtype> *mask_blob = top[0];
-  const int channel = input_blob->channels();
-  const int height = input_blob->height();
-  const int width = input_blob->width();
+  const int channel = mask_blob->channels();
+  const int height = mask_blob->height();
+  const int width = mask_blob->width();
 
   const int scaled_height = height / scale_;
   const int scaled_width = width / scale_;
