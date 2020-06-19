@@ -172,7 +172,7 @@ layer {
   }
   annotated_data_param {
     batch_sampler {}
-    yolo_data_type: true
+    yolo_data_type: false
     label_map_file:  "data/VOC0712/labelmap_voc.prototxt"
   }
 }
@@ -194,6 +194,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -239,6 +240,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: DEFAULT
   }
 }
 layer {
@@ -258,6 +260,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -303,6 +306,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: DEFAULT
   }
 }
 layer {
@@ -367,6 +371,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: DEFAULT
   }
 }
 layer {
@@ -386,6 +391,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -421,6 +427,7 @@ layer {
     negative_slope: 0.1
   }
 }
+
 layer {
   name: "block3-pool"
   type: "Pooling"
@@ -431,6 +438,7 @@ layer {
     stride: 2
     pool: MAX
     pad: 0
+    engine: DEFAULT
   }
 }
 layer {
@@ -450,6 +458,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -485,6 +494,7 @@ layer {
     negative_slope: 0.1
   }
 }
+
 layer {
   name: "block4-pool"
   type: "Pooling"
@@ -514,6 +524,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -559,6 +570,7 @@ layer {
     stride: 1
     pool: MAX
     pad: 0
+    engine: DEFAULT
   }
 }
 layer {
@@ -578,6 +590,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -630,6 +643,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -682,6 +696,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -717,11 +732,16 @@ layer {
     negative_slope: 0.1
   }
 }
+# mask0
+###############################################################################################
+
+###############################################################################################
+
 layer {
-  name: "yolo-out-m"
+  name: "yolo-out-l"
   type: "Convolution"
   bottom: "block6-conv2"
-  top: "yolo-out-m"
+  top: "yolo-out-l"
   convolution_param {
     num_output: 75
     kernel_size: 1
@@ -734,6 +754,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: true
+    engine: DEFAULT
   }
 }
 layer {
@@ -753,6 +774,7 @@ layer {
     pad: 0
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -821,6 +843,7 @@ layer {
     pad: 1
     stride: 1
     bias_term: false
+    engine: DEFAULT
   }
 }
 layer {
@@ -856,11 +879,16 @@ layer {
     negative_slope: 0.1
   }
 }
+
+# mask1
+###############################################################################################
+###############################################################################################
+
 layer {
-  name: "yolo-out-s"
+  name: "yolo-out-m"
   type: "Convolution"
   bottom: "block7-conv0"
-  top: "yolo-out-s"
+  top: "yolo-out-m"
   convolution_param {
     num_output: 75
     kernel_size: 1
@@ -873,15 +901,16 @@ layer {
     pad: 0
     stride: 1
     bias_term: true
+    engine: DEFAULT
   }
 }
 
 layer {
-  name: "loss-s"
+  name: "loss-m"
   type: "Yolov3"
-  bottom: "yolo-out-s"
+  bottom: "yolo-out-m"
   bottom: "label"
-  top: "loss-s"
+  top: "loss-m"
   loss_weight: 1
   include {
     phase: TRAIN
@@ -900,6 +929,7 @@ layer {
     use_logic_gradient : false
     iou_loss: MSE
     label_smooth_eps: 0.0
+    use_extra_matched_anchor: true
     biases: 23
     biases: 29
     biases: 48
@@ -919,11 +949,11 @@ layer {
 }
 
 layer {
-  name: "loss-m"
+  name: "loss-l"
   type: "Yolov3"
-  bottom: "yolo-out-m"
+  bottom: "yolo-out-l"
   bottom: "label"
-  top: "loss-m"
+  top: "loss-l"
   loss_weight: 1
   include {
     phase: TRAIN
@@ -942,6 +972,7 @@ layer {
     use_logic_gradient : false
     iou_loss: MSE
     label_smooth_eps: 0.0
+    use_extra_matched_anchor: true
     biases: 23
     biases: 29
     biases: 48
@@ -963,8 +994,8 @@ layer {
 layer {
   name: "yolo_detection"
   type: "Yolov3DetectionOutput"
-  bottom: "yolo-out-s"
   bottom: "yolo-out-m"
+  bottom: "yolo-out-l"
   top: "yolo_detection"
   include {
     phase: TEST

@@ -3,6 +3,8 @@
 
 #include "caffe/layers/loss/yolov3_layer.hpp"
 #include "caffe/util/math_functions.hpp"
+#include "caffe/util/yolo_utils.hpp"
+
 namespace caffe {
 template <typename Dtype>
 void Yolov3Layer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
@@ -20,14 +22,9 @@ void Yolov3Layer<Dtype>::Forward_gpu(const vector<Blob<Dtype> *> &bottom,
   // caffe_copy(count, input_data, swap_data);
   for (int b = 0; b < bottom[0]->num(); ++b) {
     for (int n = 0; n < num_; ++n) {
-      int index = n * len * stride + b * bottom[0]->count(1);
-      caffe_gpu_logistic_activate(2 * side_w_ * side_h_, input_data + index,
-                                  swap_data + index);
-      index = n * len * stride + b * bottom[0]->count(1) + 2 * stride;
-      caffe_copy(2 * side_w_ * side_h_, input_data + index, swap_data + index);
-      index = n * len * stride + b * bottom[0]->count(1) + 4 * stride;
-      caffe_gpu_logistic_activate((num_class_ + 1) * side_w_ * side_h_,
-                                  input_data + index, swap_data + index);
+      int index = b * bottom[0]->count(1) + n * len * stride;
+      activate_yolo_gpu(stride, index, num_class_, input_data, swap_data,
+                        DEFAULT, false, true, 1.0);
     }
   }
 

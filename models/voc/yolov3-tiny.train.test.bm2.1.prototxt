@@ -1355,6 +1355,7 @@ layer {
     use_logic_gradient : false
     iou_loss: MSE
     label_smooth_eps: 0.0
+    use_extra_matched_anchor: true
     biases: 23
     biases: 29
     biases: 48
@@ -1397,6 +1398,7 @@ layer {
     use_logic_gradient : false
     iou_loss: MSE
     label_smooth_eps: 0.0
+    use_extra_matched_anchor: true
     biases: 23
     biases: 29
     biases: 48
