@@ -38,8 +38,8 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 
   // initialize size arrays
   workspace_fwd_sizes_ = new size_t[bottom.size()];
-  workspace_bwd_filter_sizes_ = new size_t[bottom.size()];
   workspace_bwd_data_sizes_ = new size_t[bottom.size()];
+  workspace_bwd_filter_sizes_ = new size_t[bottom.size()];
 
   // workspace data
   workspaceSizeInBytes = 0;
@@ -52,9 +52,9 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
 
   for (size_t i = 0; i < bottom.size(); ++i) {
     // initialize all to default algorithms
-    fwd_algo_[i] = (cudnnConvolutionFwdAlgo_t)0;
-    bwd_filter_algo_[i] = (cudnnConvolutionBwdFilterAlgo_t)0;
-    bwd_data_algo_[i] = (cudnnConvolutionBwdDataAlgo_t)0;
+    fwd_algo_[i] = CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM;
+    bwd_filter_algo_[i] = CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0;
+    bwd_data_algo_[i] = CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
     // default algorithms don't require workspace
     workspace_fwd_sizes_[i] = 0;
     workspace_bwd_data_sizes_[i] = 0;
@@ -172,7 +172,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
 
     CUDNN_CHECK(cudnnGetConvolutionForwardAlgorithm(
         handle_[0], bottom_descs_[i], filter_desc_, conv_descs_[i],
-        top_descs_[i], CUDNN_CONVOLUTION_FWD_SPECIFY_WORKSPACE_LIMIT,
+        top_descs_[i], CUDNN_CONVOLUTION_FWD_PREFER_FASTEST,
         workspace_limit_bytes, &fwd_algo_[i]));
 
     CUDNN_CHECK(cudnnGetConvolutionForwardWorkspaceSize(
@@ -182,7 +182,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
     // choose backward algorithm for filter
     CUDNN_CHECK(cudnnGetConvolutionBackwardFilterAlgorithm(
         handle_[0], bottom_descs_[i], top_descs_[i], conv_descs_[i],
-        filter_desc_, CUDNN_CONVOLUTION_BWD_FILTER_SPECIFY_WORKSPACE_LIMIT,
+        filter_desc_, CUDNN_CONVOLUTION_BWD_FILTER_PREFER_FASTEST,
         workspace_limit_bytes, &bwd_filter_algo_[i]));
 
     // get workspace for backwards filter algorithm
@@ -193,7 +193,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(const vector<Blob<Dtype> *> &bottom,
     // choose backward algo for data
     CUDNN_CHECK(cudnnGetConvolutionBackwardDataAlgorithm(
         handle_[0], filter_desc_, top_descs_[i], conv_descs_[i],
-        bottom_descs_[i], CUDNN_CONVOLUTION_BWD_DATA_SPECIFY_WORKSPACE_LIMIT,
+        bottom_descs_[i], CUDNN_CONVOLUTION_BWD_DATA_PREFER_FASTEST,
         workspace_limit_bytes, &bwd_data_algo_[i]));
 
     // get workspace size
