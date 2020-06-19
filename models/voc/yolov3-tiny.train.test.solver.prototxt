@@ -1,5 +1,5 @@
 #=============== net
-net: "models/voc/yolov3-tiny.train.test.bm2.1.prototxt"
+net: "models/voc/yolov3-tiny.train.test.bm2.2.prototxt"
 
 #=============== iter
 # voc07 test has 4952 images
