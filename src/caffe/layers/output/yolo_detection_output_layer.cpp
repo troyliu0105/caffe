@@ -8,8 +8,8 @@
 #include "boost/filesystem.hpp"
 #include "boost/foreach.hpp"
 
+#include "caffe/layers/output/yolo_detection_output_layer.hpp"
 #include "caffe/layers/region_loss_layer.hpp"
-#include "caffe/layers/yolo_detection_output_layer.hpp"
 #include "caffe/util/bbox_util.hpp"
 #include "caffe/util/io.hpp"
 

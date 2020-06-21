@@ -13,7 +13,7 @@
 #include <vector>
 
 //#include "caffe/layers/region_loss_layer.hpp"
-#include "caffe/layers/yolov3_detection_output_layer.hpp"
+#include "caffe/layers/output/yolov3_detection_output_layer.hpp"
 #include "caffe/util/io.hpp"
 #include "caffe/util/yolo_utils.hpp"
 

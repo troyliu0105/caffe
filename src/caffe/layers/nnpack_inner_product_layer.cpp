@@ -32,10 +32,10 @@ void NNPackInnerProductLayer<float>::Forward_cpu(
     CHECK_EQ(status, nnp_status_success);
   }
   if (bias_term_) {
-    caffe_cpu_gemm<float>(CblasNoTrans, CblasNoTrans, M_, N_, 1, (float)1.,
-                          bias_multiplier_.cpu_data(),
-                          this->blobs_[1]->cpu_data(), (float)1.,
-                          top[0]->mutable_cpu_data());
+    caffe_blas_gemm<float>(CblasNoTrans, CblasNoTrans, M_, N_, 1, (float)1.,
+                           bias_multiplier_.cpu_data(),
+                           this->blobs_[1]->cpu_data(), (float)1.,
+                           top[0]->mutable_cpu_data());
   }
 }
 

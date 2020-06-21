@@ -19,8 +19,8 @@ void NNPackReLULayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
 template <>
 void NNPackReLULayer<float>::Forward_cpu(const vector<Blob<float> *> &bottom,
                                          const vector<Blob<float> *> &top) {
-  const size_t batch_size = static_cast<size_t>(bottom[0]->num());
-  const size_t count = static_cast<size_t>(bottom[0]->count());
+  const auto batch_size = static_cast<size_t>(bottom[0]->num());
+  const auto count = static_cast<size_t>(bottom[0]->count());
   float negative_slope = this->layer_param_.relu_param().negative_slope();
   const nnp_status status = nnp_relu_output(
       batch_size, count / batch_size, bottom[0]->cpu_data(),
@@ -39,8 +39,8 @@ template <>
 void NNPackReLULayer<float>::Backward_cpu(const vector<Blob<float> *> &top,
                                           const vector<bool> &propagate_down,
                                           const vector<Blob<float> *> &bottom) {
-  const size_t batch_size = static_cast<size_t>(bottom[0]->num());
-  const size_t count = static_cast<size_t>(bottom[0]->count());
+  const auto batch_size = static_cast<size_t>(bottom[0]->num());
+  const auto count = static_cast<size_t>(bottom[0]->count());
   float negative_slope = this->layer_param_.relu_param().negative_slope();
   if (propagate_down[0]) {
     const nnp_status status = nnp_relu_input_gradient(

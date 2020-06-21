@@ -4,7 +4,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#include "caffe/layers/hdf5_output_layer.hpp"
+#include "caffe/layers/output/hdf5_output_layer.hpp"
 #include "caffe/util/hdf5.hpp"
 
 namespace caffe {
@@ -63,7 +63,6 @@ template <typename Dtype>
 void HDF5OutputLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                                           const vector<bool> &propagate_down,
                                           const vector<Blob<Dtype> *> &bottom) {
-  return;
 }
 
 #ifdef CPU_ONLY
