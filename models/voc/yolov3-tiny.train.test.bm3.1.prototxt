@@ -1,3 +1,4 @@
+# 修复了 3.0 中，梯度回传的问题
 name: "TinyVOC"
 layer {
   name: "data"
@@ -837,9 +838,10 @@ layer {
   #bottom: "mask0/sigmoid"
   bottom: "mask0/tiled"
   top: "mask0/scaled"
+  propagate_down: false
   param {
-    lr_mult: 2.0
-    decay_mult: 0.5
+    lr_mult: 1.0
+    decay_mult: 0.0
   }
   scale_param {
     bias_term: false
@@ -1256,9 +1258,10 @@ layer {
   #bottom: "mask1/sigmoid"
   bottom: "mask1/tiled"
   top: "mask1/scaled"
+  propagate_down: false
   param {
-    lr_mult: 2.0
-    decay_mult: 0.5
+    lr_mult: 1.0
+    decay_mult: 0.0
   }
   scale_param {
     bias_term: false
