@@ -498,175 +498,6 @@ layer {
 # mask0
 ###############################################################################################
 # branch 0
-layer {
-  name: "mask0/bottle0/conv0"
-  type: "Convolution"
-  bottom: "block4-conv0"
-  top: "mask0/bottle0/conv0"
-  convolution_param {
-    num_output: 64
-    kernel_size: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
-    stride: 1
-    pad: 0
-    bias_term: false
-    group: 1
-    dilation: 1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv0/bn"
-  type: "BatchNorm"
-  bottom: "mask0/bottle0/conv0"
-  top: "mask0/bottle0/conv0"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv0/scale"
-  type: "Scale"
-  bottom: "mask0/bottle0/conv0"
-  top: "mask0/bottle0/conv0"
-  scale_param {
-    bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
-  }
-}
-layer {
-  name: "mask0/bottle0/conv0/relu"
-  type: "ReLU"
-  bottom: "mask0/bottle0/conv0"
-  top: "mask0/bottle0/conv0"
-  relu_param {
-    negative_slope: 0.1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv1"
-  type: "Convolution"
-  bottom: "mask0/bottle0/conv0"
-  top: "mask0/bottle0/conv1"
-  convolution_param {
-    num_output: 64
-    kernel_size: 3
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
-    stride: 1
-    pad: 1
-    bias_term: false
-    group: 1
-    dilation: 1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv1/bn"
-  type: "BatchNorm"
-  bottom: "mask0/bottle0/conv1"
-  top: "mask0/bottle0/conv1"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv1/scale"
-  type: "Scale"
-  bottom: "mask0/bottle0/conv1"
-  top: "mask0/bottle0/conv1"
-  scale_param {
-    bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
-  }
-}
-layer {
-  name: "mask0/bottle0/conv1/relu"
-  type: "ReLU"
-  bottom: "mask0/bottle0/conv1"
-  top: "mask0/bottle0/conv1"
-  relu_param {
-    negative_slope: 0.1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv2"
-  type: "Convolution"
-  bottom: "mask0/bottle0/conv1"
-  top: "mask0/bottle0/conv2"
-  convolution_param {
-    num_output: 256
-    kernel_size: 1
-    weight_filler {
-      type: "xavier"
-    }
-    bias_filler {
-      type: "constant"
-    }
-    stride: 1
-    pad: 0
-    bias_term: false
-    group: 1
-    dilation: 1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv2/bn"
-  type: "BatchNorm"
-  bottom: "mask0/bottle0/conv2"
-  top: "mask0/bottle0/conv2"
-  batch_norm_param {
-    moving_average_fraction: 0.1
-  }
-}
-layer {
-  name: "mask0/bottle0/conv2/scale"
-  type: "Scale"
-  bottom: "mask0/bottle0/conv2"
-  top: "mask0/bottle0/conv2"
-  scale_param {
-    bias_term: true
-    filler {
-      value: 1.0
-    }
-    bias_filler {
-      value: 0.0
-    }
-  }
-}
-layer {
-  name: "mask0/bottle0/res"
-  type: "Eltwise"
-  bottom: "block4-conv0"
-  bottom: "mask0/bottle0/conv2"
-  top: "mask0/bottle0/res"
-}
-layer {
-  name: "mask0/bottle0/res/relu"
-  type: "ReLU"
-  bottom: "mask0/bottle0/res"
-  top: "mask0/bottle0/res"
-  relu_param {
-    negative_slope: 0.1
-  }
-}
 
 # branch 1
 layer {
@@ -1280,17 +1111,9 @@ layer {
 }
 
 layer {
-  name: "mask0/concat"
-  type: "Concat"
-  bottom: "mask0/bottle0/res"
-  bottom: "mask0/bottle3/res"
-  top: "mask0/concat"
-}
-
-layer {
   name: "mask0"
   type: "Convolution"
-  bottom: "mask0/concat"
+  bottom: "mask0/bottle3/res"
   top: "mask0"
   convolution_param {
     num_output: 1
@@ -1305,6 +1128,30 @@ layer {
     stride: 1
     bias_term: false
     engine: DEFAULT
+  }
+}
+layer {
+  name: "mask0/bn"
+  type: "BatchNorm"
+  bottom: "mask0"
+  top: "mask0"
+  batch_norm_param {
+    moving_average_fraction: 0.1
+  }
+}
+layer {
+  name: "mask0/scale"
+  type: "Scale"
+  bottom: "mask0"
+  top: "mask0"
+  scale_param {
+    bias_term: true
+    filler {
+      value: 1.0
+    }
+    bias_filler {
+      value: 0.0
+    }
   }
 }
 layer {

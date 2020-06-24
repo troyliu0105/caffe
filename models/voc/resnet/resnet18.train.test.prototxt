@@ -193,7 +193,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -223,7 +223,7 @@ layer {
   name: "conv1_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -238,7 +238,7 @@ layer {
     #pad: 1
     #round_mode: FLOOR
     pool: MAX
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -257,7 +257,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -287,7 +287,7 @@ layer {
   name: "res2a_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -305,7 +305,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -346,7 +346,7 @@ layer {
   name: "res2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -364,7 +364,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -394,7 +394,7 @@ layer {
   name: "res2b_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -412,7 +412,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -453,7 +453,7 @@ layer {
   name: "res2b_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -472,7 +472,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -502,7 +502,7 @@ layer {
   name: "res3a_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -520,7 +520,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -558,7 +558,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -599,7 +599,7 @@ layer {
   name: "res3a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -617,7 +617,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -647,7 +647,7 @@ layer {
   name: "res3b_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -665,7 +665,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -706,7 +706,7 @@ layer {
   name: "res3b_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -725,7 +725,7 @@ layer {
         type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -755,7 +755,7 @@ layer {
   name: "res4a_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -773,7 +773,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -811,7 +811,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -852,7 +852,7 @@ layer {
   name: "res4a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -870,7 +870,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -900,7 +900,7 @@ layer {
   name: "res4b_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -918,7 +918,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -959,7 +959,7 @@ layer {
   name: "res4b_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -978,7 +978,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1008,7 +1008,7 @@ layer {
   name: "res5a_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1026,7 +1026,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1064,7 +1064,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1105,7 +1105,7 @@ layer {
   name: "res5a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1123,7 +1123,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1153,7 +1153,7 @@ layer {
   name: "res5b_branch2a_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1171,7 +1171,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1212,7 +1212,7 @@ layer {
   name: "res5b_relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1230,7 +1230,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1260,7 +1260,7 @@ layer {
   name: "conv22/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1278,7 +1278,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1308,7 +1308,7 @@ layer {
   name: "conv23/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1326,7 +1326,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1356,7 +1356,7 @@ layer {
   name: "conv24/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1374,7 +1374,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1404,7 +1404,7 @@ layer {
   name: "conv25/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 #################
@@ -1422,7 +1422,7 @@ layer{
     weight_filler {
       type: "xavier"
     }
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 #################
@@ -1441,7 +1441,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1504,7 +1504,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1534,7 +1534,7 @@ layer {
   name: "conv27/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1552,7 +1552,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1582,7 +1582,7 @@ layer {
   name: "conv28/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1600,7 +1600,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1630,7 +1630,7 @@ layer {
   name: "conv29/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1648,7 +1648,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1678,7 +1678,7 @@ layer {
   name: "conv30/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1697,7 +1697,7 @@ layer{
     weight_filler {
       type: "xavier"
     }
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 #################
@@ -1716,7 +1716,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1746,7 +1746,7 @@ layer {
   name: "conv31/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1782,7 +1782,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1812,7 +1812,7 @@ layer {
   name: "conv32/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1830,7 +1830,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1860,7 +1860,7 @@ layer {
   name: "conv33/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1878,7 +1878,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1908,7 +1908,7 @@ layer {
   name: "conv34/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1926,7 +1926,7 @@ layer {
       type: "msra"
     }
     bias_term: false
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1956,7 +1956,7 @@ layer {
   name: "conv35/relu"
   type: "ReLU"
   relu_param {
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 
@@ -1975,7 +1975,7 @@ layer{
     weight_filler {
       type: "xavier"
     }
-    engine: CUDNN
+    engine: DEFAULT
   }
 }
 #################
@@ -1999,59 +1999,33 @@ layer {
     anchors_scale: 32
     num_class: 20
     num: 3
-    object_scale: 1.0
+    object_scale: 5.0
     noobject_scale: 1.0
     class_scale: 1.0
-    coord_scale: 0.75
+    coord_scale: 1.0
     use_extra_matched_anchor: true
     thresh: 0.5
     use_logic_gradient : false
-    iou_loss: GIOU
+    iou_loss: MSE
     label_smooth_eps: 0.0
     #[[[23, 29],   [48, 65],   [117, 81]],
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
-# anchor mark1
-#    biases: 23
-#    biases: 29
-#    biases: 48
-#    biases: 65
-#    biases: 117
-#    biases: 81
-#    biases: 68
-#    biases: 144
-#    biases: 126
-#    biases: 203
-#    biases: 240
-#    biases: 118
-#    biases: 204
-#    biases: 265
-#    biases: 326
-#    biases: 188
-#    biases: 338
-#    biases: 298
-# anchor mark2
-    biases: 33
-    biases: 48
-    biases: 50
-    biases: 108
-    biases: 127
-    biases: 96
-    biases: 78
-    biases: 202
-    biases: 178
+    biases: 34
+    biases: 62
+    biases: 87
+    biases: 110
+    biases: 93
+    biases: 227
+    biases: 246
+    biases: 163
     biases: 179
-    biases: 130
-    biases: 295
-    biases: 332
-    biases: 195
-    biases: 228
-    biases: 326
-    biases: 365
-    biases: 359
-    mask: 6
-    mask: 7
-    mask: 8
+    biases: 307
+    biases: 345
+    biases: 337
+    mask: 3
+    mask: 4
+    mask: 5
   }
 }
 
@@ -2083,44 +2057,18 @@ layer {
     #[[[23, 29],   [48, 65],   [117, 81]],
     #[[68, 144],  [126, 203], [240, 118]],
     #[[204, 265], [326, 188], [338, 298]]]
-# anchor mark1
-#    biases: 23
-#    biases: 29
-#    biases: 48
-#    biases: 65
-#    biases: 117
-#    biases: 81
-#    biases: 68
-#    biases: 144
-#    biases: 126
-#    biases: 203
-#    biases: 240
-#    biases: 118
-#    biases: 204
-#    biases: 265
-#    biases: 326
-#    biases: 188
-#    biases: 338
-#    biases: 298
-# anchor mark2
-    biases: 33
-    biases: 48
-    biases: 50
-    biases: 108
-    biases: 127
-    biases: 96
-    biases: 78
-    biases: 202
-    biases: 178
+    biases: 34
+    biases: 62
+    biases: 87
+    biases: 110
+    biases: 93
+    biases: 227
+    biases: 246
+    biases: 163
     biases: 179
-    biases: 130
-    biases: 295
-    biases: 332
-    biases: 195
-    biases: 228
-    biases: 326
-    biases: 365
-    biases: 359
+    biases: 307
+    biases: 345
+    biases: 337
     mask: 3
     mask: 4
     mask: 5
@@ -2128,81 +2076,8 @@ layer {
 }
 
 layer {
-  name: "yolo_small_loss"
-  type: "Yolov3"
-  bottom: "yolo_small"
-  bottom: "label"
-  top: "yolo_small_loss"
-  loss_weight: 1
-  include {
-    phase: TRAIN
-  }
-  yolov3_param {
-    display: 800
-    side: 52
-    anchors_scale: 8
-    num_class: 20
-    num: 3
-    object_scale: 1.0
-    noobject_scale: 1.0
-    class_scale: 1.0
-    coord_scale: 0.75
-    use_extra_matched_anchor: true
-    thresh: 0.5
-    use_logic_gradient : false
-    iou_loss: GIOU
-    label_smooth_eps: 0.0
-    #[[[23, 29],   [48, 65],   [117, 81]],
-    #[[68, 144],  [126, 203], [240, 118]],
-    #[[204, 265], [326, 188], [338, 298]]]
-# anchor mark1
-#    biases: 23
-#    biases: 29
-#    biases: 48
-#    biases: 65
-#    biases: 117
-#    biases: 81
-#    biases: 68
-#    biases: 144
-#    biases: 126
-#    biases: 203
-#    biases: 240
-#    biases: 118
-#    biases: 204
-#    biases: 265
-#    biases: 326
-#    biases: 188
-#    biases: 338
-#    biases: 298
-# anchor mark2
-    biases: 33
-    biases: 48
-    biases: 50
-    biases: 108
-    biases: 127
-    biases: 96
-    biases: 78
-    biases: 202
-    biases: 178
-    biases: 179
-    biases: 130
-    biases: 295
-    biases: 332
-    biases: 195
-    biases: 228
-    biases: 326
-    biases: 365
-    biases: 359
-    mask: 0
-    mask: 1
-    mask: 2
-  }
-}
-
-layer {
   name: "detection_out"
   type: "Yolov3DetectionOutput"
-  bottom: "yolo_small"
   bottom: "yolo_middle"
   bottom: "yolo_large"
   top: "detection"
@@ -2213,53 +2088,24 @@ layer {
     confidence_threshold: 0.01
     nms_threshold: 0.45
     num_classes: 20
-# anchor mark1
-#    biases: 23
-#    biases: 29
-#    biases: 48
-#    biases: 65
-#    biases: 117
-#    biases: 81
-#    biases: 68
-#    biases: 144
-#    biases: 126
-#    biases: 203
-#    biases: 240
-#    biases: 118
-#    biases: 204
-#    biases: 265
-#    biases: 326
-#    biases: 188
-#    biases: 338
-#    biases: 298
-# anchor mark2
-    biases: 33
-    biases: 48
-    biases: 50
-    biases: 108
-    biases: 127
-    biases: 96
-    biases: 78
-    biases: 202
-    biases: 178
+    biases: 34
+    biases: 62
+    biases: 87
+    biases: 110
+    biases: 93
+    biases: 227
+    biases: 246
+    biases: 163
     biases: 179
-    biases: 130
-    biases: 295
-    biases: 332
-    biases: 195
-    biases: 228
-    biases: 326
-    biases: 365
-    biases: 359
+    biases: 307
+    biases: 345
+    biases: 337
     mask: 0
     mask: 1
     mask: 2
     mask: 3
     mask: 4
     mask: 5
-    mask: 6
-    mask: 7
-    mask: 8
     mask_group_num: 3
     anchors_scale: 8
     anchors_scale: 16
