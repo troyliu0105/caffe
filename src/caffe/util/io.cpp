@@ -19,7 +19,12 @@
 #include <opencv2/highgui/highgui_c.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #endif // USE_OPENCV
-#include <stdint.h>
+#ifndef O_BINARY
+#define O_BINARY 0
+#define O_TEXT 0
+#endif
+
+#include <cstdint>
 
 #include <algorithm>
 #include <fstream> // NOLINT(readability/streams)
@@ -524,7 +529,8 @@ bool ReadJSONToAnnotatedDatum(const string &labelfile, const int img_height,
       << labelfile << " no valid image width/height.";
   int instance_id = 0;
   std::vector<int> h_samples;
-  BOOST_FOREACH (ptree::value_type &v1, pt.get_child("h_samples")) { // h_samples
+  BOOST_FOREACH (ptree::value_type &v1,
+                 pt.get_child("h_samples")) { // h_samples
     Annotation *anno = NULL;
     ptree object = v1.second;
     h_samples.push_back(object.get_value<int>());

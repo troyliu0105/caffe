@@ -56,8 +56,8 @@ endif ()
 
 add_library(caffe ${srcs})
 caffe_default_properties(caffe)
-message("Caffe_LINKER_LIBS===>" ${Caffe_LINKER_LIBS})
-message("Caffe_INCLUDE_DIRS===>" ${Caffe_INCLUDE_DIRS})
+#message("Caffe_LINKER_LIBS===>" ${Caffe_LINKER_LIBS})
+#message("Caffe_INCLUDE_DIRS===>" ${Caffe_INCLUDE_DIRS})
 target_link_libraries(caffe ${Caffe_LINKER_LIBS})
 target_include_directories(caffe ${Caffe_INCLUDE_DIRS}
         PUBLIC
