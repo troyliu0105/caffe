@@ -61,6 +61,10 @@ if(@USE_LEVELDB@ AND @LEVELDB_IMPORTED@)
   endif()
 endif()
 
+if(@USE_TBB@ AND @TBB_IMPORTED@)
+  find_package(tbb COMPONENTS tbb)
+endif()
+
 # Compute paths
 get_filename_component(Caffe_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
