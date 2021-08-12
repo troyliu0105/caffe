@@ -121,6 +121,8 @@ public:
                   Blob<Dtype> *transformed_blob,
                   bool preserve_pixel_vals = false);
 
+  void Transform3(const cv::Mat &img, Blob<Dtype> *transformed_blob);
+
   void Transform(const cv::Mat &cv_img, Blob<Dtype> *transformed_blob,
                  NormalizedBBox *crop_bbox, bool *do_mirror, int policy_num = 0,
                  const bool preserve_pixel_vals = false,
