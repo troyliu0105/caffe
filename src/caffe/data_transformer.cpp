@@ -1035,9 +1035,9 @@ void DataTransformer<Dtype>::Transform3(const cv::Mat &img,
     for (int w = 0; w < width; ++w) {
       for (int c = 0; c < img_channels; ++c) {
         if (do_mirror) {
-          top_index = (c * height + h) * width + (width - 1 - w);
+          top_index = c * height * width + h * width + (width - 1 - w);
         } else {
-          top_index = (c * height + h) * width + w;
+          top_index = c * height * width + h * width + w;
         }
         // int top_index = (c * height + h) * width + w;
         Dtype pixel = static_cast<Dtype>(ptr[img_index++]);
@@ -1184,14 +1184,6 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
   //  RotateImage(cv_cropped_image, r);
   //}
 
-#if defined(DEBUG) && defined(DRAW)
-  cv::Mat debug_mat;
-  cv_cropped_image.convertTo(debug_mat, CV_8UC(channels));
-  char buf[1000];
-  static int iter_count = 0;
-  sprintf(buf, "input/input_%05d.jpg", iter_count++);
-  cv::imwrite(buf, debug_mat);
-#endif
   Dtype *transformed_data = transformed_blob->mutable_cpu_data();
   int top_index;
   for (int h = 0; h < height; ++h) {
@@ -1206,7 +1198,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat &cv_img,
       int h_idx_real = h_idx;
       int w_idx_real = w_idx;
       for (int c = 0; c < img_channels; ++c) {
-        top_index = (c * height + h_idx_real) * width + w_idx_real;
+        top_index = c * height * width + h_idx_real * width + w_idx_real;
         Dtype pixel = static_cast<Dtype>(ptr[img_index++]);
         if (has_mean_file && !preserve_pixel_vals) {
           int mean_index = (c * img_height + h_off + h_idx_real) * img_width +

@@ -1,5 +1,6 @@
 #ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
 #endif // USE_OPENCV
 #include <stdint.h>
 
@@ -119,6 +120,17 @@ void DataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
     Dtype *top_data = batch->data_.mutable_cpu_data();
     this->transformed_data_.set_cpu_data(top_data + offset);
     this->data_transformer_->Transform(datum, &(this->transformed_data_));
+#if defined(DEBUG) && defined(DRAW) && defined(USE_OPENCV)
+    cv::Mat debug_mat;
+    this->data_transformer_->TransformInv(
+        this->transformed_data_.cpu_data(), &debug_mat,
+        this->transformed_data_.height(), this->transformed_data_.width(),
+        this->transformed_data_.channels());
+    char buf[1000];
+    static int iter_count = 0;
+    sprintf(buf, "input/input_%05d.jpg", iter_count++);
+    cv::imwrite(buf, debug_mat);
+#endif
     // Copy label.
     if (this->output_labels_) {
       Dtype *top_label = batch->label_.mutable_cpu_data();
