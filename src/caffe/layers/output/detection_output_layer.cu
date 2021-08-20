@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "caffe/layers/detection_output_layer.hpp"
+#include "caffe/layers/output/detection_output_layer.hpp"
 
 namespace caffe {
 

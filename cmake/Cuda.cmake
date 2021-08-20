@@ -4,7 +4,7 @@ endif ()
 
 # Known NVIDIA GPU achitectures Caffe can be compiled for.
 # This list will be used for CUDA_ARCH_NAME = All option
-set(Caffe_known_gpu_archs "20 21(20) 30 35 50 60 61 70 75")
+set(Caffe_known_gpu_archs "20 21(20) 30 35 50 60 61 70 72 75 80")
 
 ################################################################################################
 # A function for automatic detection of GPUs installed  (if autodetection is enabled)
@@ -60,7 +60,7 @@ endfunction()
 #   caffe_select_nvcc_arch_flags(out_variable)
 function(caffe_select_nvcc_arch_flags out_variable)
     # List of arch names
-    set(__archs_names "Fermi" "Kepler" "Maxwell" "Pascal" "Turing" "All" "Manual")
+    set(__archs_names "Fermi" "Kepler" "Maxwell" "Pascal" "Volta" "Turing" "Ampere" "All" "Manual")
     set(__archs_name_default "All")
     if (NOT CMAKE_CROSSCOMPILING)
         list(APPEND __archs_names "Auto")
@@ -95,8 +95,12 @@ function(caffe_select_nvcc_arch_flags out_variable)
         set(__cuda_arch_bin "50")
     elseif (${CUDA_ARCH_NAME} STREQUAL "Pascal")
         set(__cuda_arch_bin "60 61")
+    elseif (${CUDA_ARCH_NAME} STREQUAL "Volta")
+        set(__cuda_arch_bin "70 72")
     elseif (${CUDA_ARCH_NAME} STREQUAL "Turing")
-        set(__cuda_arch_bin "70 75")
+        set(__cuda_arch_bin "75")
+    elseif (${CUDA_ARCH_NAME} STREQUAL "Ampere")
+        set(__cuda_arch_bin "80")
     elseif (${CUDA_ARCH_NAME} STREQUAL "All")
         set(__cuda_arch_bin ${Caffe_known_gpu_archs})
     elseif (${CUDA_ARCH_NAME} STREQUAL "Auto")
@@ -214,7 +218,7 @@ function(detect_cuDNN)
         set(HAVE_CUDNN TRUE PARENT_SCOPE)
         set(CUDNN_FOUND TRUE PARENT_SCOPE)
 
-        file(READ ${CUDNN_INCLUDE}/cudnn.h CUDNN_VERSION_FILE_CONTENTS)
+        file(READ ${CUDNN_INCLUDE}/cudnn_version.h CUDNN_VERSION_FILE_CONTENTS)
 
         # cuDNN v3 and beyond
         string(REGEX MATCH "define CUDNN_MAJOR * +([0-9]+)"
@@ -253,7 +257,7 @@ endfunction()
 ###  Non macro section
 ################################################################################################
 
-find_package(CUDA 5.5 QUIET)
+find_package(Cuda 5.5 QUIET)
 find_cuda_helper_libs(curand)  # cmake 2.8.7 compartibility which doesn't search for curand
 
 if (NOT CUDA_FOUND)

@@ -31,8 +31,8 @@ __global__ void MishBackward(const int n, const Dtype *in_diff,
     Dtype x = in_data[index];
     Dtype w = 4 * (x + 1) + (4 * std::exp(2 * x)) + std::exp(3 * x) +
               std::exp(x) * (4 * x + 6);
-    Dtype sigma = 2 * std::exp(x) + std::exp(2 * x) + 2;
-    out_diff[index] = (std::exp(x) * w / std::pow(sigma, 2)) * in_diff[index];
+    Dtype sigma = 2 * exp(x) + exp(2 * x) + 2;
+    out_diff[index] = (exp(x) * w / powf(sigma, 2)) * in_diff[index];
   }
 }
 

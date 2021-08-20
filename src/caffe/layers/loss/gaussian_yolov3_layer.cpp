@@ -669,7 +669,7 @@ void GaussianYolov3Layer<Dtype>::Backward_cpu(
                 diff[index2] = diff[index2 + 0];
               } else {
                 diff[index2] = diff[index2 + 0] *
-                               caffe_fn_sigmoid_grad_fast(top_data[index2 + 0]);
+                               caffe_fn_sigmoid_grad_y(top_data[index2 + 0]);
               }
             }
           }

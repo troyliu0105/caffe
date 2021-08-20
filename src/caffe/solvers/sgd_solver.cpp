@@ -272,9 +272,9 @@ void SGDSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
   Dtype momentum = this->param_.momentum();
   Dtype local_rate = rate * net_params_lr[param_id];
   // skip weight scaling when lr equals zero
-  if (!local_rate) {
-    return;
-  }
+  //  if (!local_rate) {
+  //    return;
+  //  }
   // Compute the update to history, then copy it to the parameter diff.
   switch (Caffe::mode()) {
   case Caffe::CPU: {

@@ -4,7 +4,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#include "caffe/layers/hdf5_output_layer.hpp"
+#include "caffe/layers/output/hdf5_output_layer.hpp"
 
 namespace caffe {
 

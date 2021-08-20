@@ -251,7 +251,7 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         // diff[index + 4] = (-1) * noobject_scale_* (0 - swap_data[index + 4]);
         diff[index + 4 * stride] =
             (-1) * noobject_scale_ * (0 - swap_data[index + 4 * stride]) *
-            caffe_fn_sigmoid_grad_fast(swap_data[index + 4 * stride]);
+            caffe_fn_sigmoid_grad_y(swap_data[index + 4 * stride]);
         if (best_iou > thresh_) {
           diff[index + 4 * stride] = 0;
         }
@@ -337,12 +337,12 @@ void RegionLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype> *> &bottom,
         diff[best_index + 4 * stride] =
             (-1.0) * object_scale_ *
             (iou - swap_data[best_index + 4 * stride]) *
-            caffe_fn_sigmoid_grad_fast(swap_data[best_index + 4 * stride]);
+            caffe_fn_sigmoid_grad_y(swap_data[best_index + 4 * stride]);
       } else {
         // LOG(INFO)<<"test";
         diff[best_index + 4 * stride] =
             (-1.0) * object_scale_ * (1 - swap_data[best_index + 4 * stride]) *
-            caffe_fn_sigmoid_grad_fast(swap_data[best_index + 4 * stride]);
+            caffe_fn_sigmoid_grad_y(swap_data[best_index + 4 * stride]);
       }
 
       delta_region_class_v2(swap_data, diff, best_index + 5 * stride,

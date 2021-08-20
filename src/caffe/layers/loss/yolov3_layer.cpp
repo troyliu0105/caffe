@@ -833,7 +833,7 @@ void Yolov3Layer<Dtype>::Backward_cpu(const vector<Blob<Dtype> *> &top,
                 diff[index2] = diff[index2];
               } else {
                 diff[index2] =
-                    diff[index2] * caffe_fn_sigmoid_grad_fast(top_data[index2]);
+                    diff[index2] * caffe_fn_sigmoid_grad_y(top_data[index2]);
               }
             }
           }

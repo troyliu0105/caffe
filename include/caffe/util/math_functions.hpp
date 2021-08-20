@@ -432,7 +432,7 @@ DEFINE_CAFFE_CPU_BINARY_FUNC(mod, y = x1 % x2)
 DEFINE_CAFFE_CPU_UNARY_FUNC(tanh, y = tanh(x))
 DEFINE_CAFFE_CPU_UNARY_FUNC(tanh_grad, y = 1 - pow(tanh(x), 2))
 DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid, y = 1. / (1. + exp(-x)))
-DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid_grad_fast, y = (1 - x) * x)
+DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid_grad_y, y = (1 - x) * x)
 DEFINE_CAFFE_CPU_UNARY_FUNC(sigmoid_grad,
                             y = (1 - caffe_fn_sigmoid(x)) * caffe_fn_sigmoid(x))
 DEFINE_CAFFE_CPU_UNARY_FUNC(hard_sigmoid,
